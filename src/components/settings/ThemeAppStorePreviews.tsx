@@ -48,7 +48,7 @@ const SECTION_DATA: Record<SectionType, ScreenshotData> = {
     sectionBadge: 'Section 1 · Full Sidebar & Cockpit',
     tagline: 'All Sidebar Sections, Slabs & Workspace Wallpaper',
     description:
-      'Preview every sidebar section (Cockpit, Read, Create note, Calendar, Shelf, Mnemonics, Ach1evers Hub, Leisure, Talk to Developer, Settings & Trash) and study slabs in both Light and Dark mode.',
+      "Preview every sidebar section (Cockpit, Read, Create note, Calendar, Shelf, Mnemonics, Ach1ever's Hub, Leisure, Talk to Developer, Settings & Trash) and study slabs in both Light and Dark mode.",
     features: [
       'Complete sidebar rail preview across all 5 themes',
       'Blurred theme wallpaper & custom watermarks in Themes 2–5',

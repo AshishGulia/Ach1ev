@@ -51,7 +51,7 @@ const EN_BASE: Record<string, string> = {
   'nav.calendar': 'Calendar',
   'nav.myShelf': 'Shelf',
   'nav.mnemonics': 'Mnemonics',
-  'nav.community': 'Ach1evers Hub',
+  'nav.community': "Ach1ever's Hub",
   'nav.leisure': 'Leisure',
   'nav.talkToDev': 'Talk to Developer',
   'nav.settings': 'Settings',

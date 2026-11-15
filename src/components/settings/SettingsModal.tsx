@@ -460,7 +460,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     { id: 'roster', key: 'showCalendar', label: 'Calendar' },
     { id: 'library', key: 'showLibrary', label: 'Shelf' },
     { id: 'mnemonics', key: 'showMnemonics', label: 'Mnemonics' },
-    { id: 'community', key: 'showCommunity', label: 'Ach1evers Hub' },
+    { id: 'community', key: 'showCommunity', label: "Ach1ever's Hub" },
     { id: 'leisure', key: 'showLeisure', label: 'Leisure' },
     { id: 'talk-to-dev', key: 'showTalkToDev', label: 'Talk to Developer' },
   ];
@@ -2272,7 +2272,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       Profile Photo
                     </div>
                     <p className="text-[11px] text-stone-500 dark:text-stone-400">
-                      Displayed across Ach1evers Hub, chat &amp; your sidebar badge
+                      Displayed across Ach1ever's Hub, chat &amp; your sidebar badge
                     </p>
                   </div>
                 </div>
@@ -2320,7 +2320,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 {/* Username Slab for Peer Search */}
                 <div>
                   <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
-                    Username (searchable by friends in Ach1evers Hub):
+                    Username (searchable by friends in Ach1ever's Hub):
                   </label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-mono font-bold text-amber-700 dark:text-amber-400">

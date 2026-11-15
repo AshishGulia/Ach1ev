@@ -110,7 +110,7 @@ export const COMPETITOR_BENCHMARKS: CompetitorAppBenchmark[] = [
     ach1evPriceMonthlyInr: 150,
     ach1evPriceAnnualInr: 1499,
     keyMatchedFeatures: 'Mnemonics flashcards, inline AI explanations, PDF annotation',
-    ach1evAdvantage: '77% cheaper with Ach1evers Hub social study feed & groups',
+    ach1evAdvantage: "77% cheaper with Ach1ever's Hub social study feed & groups",
   },
   {
     app: 'Notion Plus + AI',

@@ -327,28 +327,28 @@ const THEME_LOOK_OVERRIDES: Record<Exclude<ShelfThemeId, '1'>, Record<string, Th
     'Creamy Caramel': { frame: '#8f7451', dark: '#634d33', back: '#3b3325', plank: '#a3865f', face: '#8f7451', handle: '#f3ecd8' },
     'Vanilla White': { frame: '#eae7dc', dark: '#c5c2b2', back: '#dee0d4', plank: '#dbd8cb', face: '#f2f0e8', handle: '#526050' },
     'Mocha Espresso': { frame: '#2d3a33', dark: '#18211c', back: '#101713', plank: '#3d4d44', face: '#27332c', handle: '#d7cdb6' },
-    Vault: { frame: '#141b16', dark: '#090e0b', back: '#050806', plank: '#1c261f', face: '#101612', handle: '#b99c58' },
+    Vault: { frame: '#0b0e0c', dark: '#040605', back: '#020302', plank: '#111613', face: '#080a09', handle: '#b99c58' },
   },
   '3': {
     'Dark Chocolate': { frame: '#594230', dark: '#38281c', back: '#22282d', plank: '#6d533d', face: '#594230', handle: '#e6c88a' },
     'Creamy Caramel': { frame: '#c9b18e', dark: '#937c5d', back: '#5d5342', plank: '#d6c1a2', face: '#c9b18e', handle: '#fdf9ee' },
     'Vanilla White': { frame: '#f5f2eb', dark: '#d8d2c6', back: '#ece9e2', plank: '#e7e3da', face: '#faf8f3', handle: '#4e6f7a' },
     'Mocha Espresso': { frame: '#2d3f4c', dark: '#19252e', back: '#111a21', plank: '#3c5363', face: '#263642', handle: '#e8dec8' },
-    Vault: { frame: '#141c24', dark: '#090e12', back: '#06090c', plank: '#1c2732', face: '#10171e', handle: '#d4b46a' },
+    Vault: { frame: '#0a0e12', dark: '#040608', back: '#020305', plank: '#11171d', face: '#070a0d', handle: '#d4b46a' },
   },
   '4': {
     'Dark Chocolate': { frame: '#362620', dark: '#1e1410', back: '#151921', plank: '#47332b', face: '#362620', handle: '#d5a865' },
     'Creamy Caramel': { frame: '#b38862', dark: '#7c593c', back: '#44352a', plank: '#c29973', face: '#b38862', handle: '#f6ead8' },
     'Vanilla White': { frame: '#eceae6', dark: '#c8c6c0', back: '#dfe1e2', plank: '#dbd9d4', face: '#f2f1ed', handle: '#526273' },
     'Mocha Espresso': { frame: '#2d3440', dark: '#191e26', back: '#11151b', plank: '#3d4654', face: '#262c36', handle: '#e2cfb4' },
-    Vault: { frame: '#14171e', dark: '#080a0e', back: '#050609', plank: '#1c202a', face: '#101218', handle: '#c99f52' },
+    Vault: { frame: '#0b0d11', dark: '#040507', back: '#020204', plank: '#11141a', face: '#08090c', handle: '#c99f52' },
   },
   '5': {
     'Dark Chocolate': { frame: '#181a18', dark: '#0c0d0c', back: '#060706', plank: '#242923', face: '#181a18', handle: '#a8d98b' },
     'Creamy Caramel': { frame: '#9ab088', dark: '#6d825d', back: '#3e4d33', plank: '#b0c49e', face: '#9ab088', handle: '#f4faee' },
     'Vanilla White': { frame: '#edf6e4', dark: '#c7dcba', back: '#e2efd7', plank: '#d7e8ca', face: '#f5fbf0', handle: '#4a8235' },
     'Mocha Espresso': { frame: '#121316', dark: '#070809', back: '#030304', plank: '#1d1f23', face: '#0e0f12', handle: '#c7e8b0' },
-    Vault: { frame: '#0b0c0e', dark: '#040405', back: '#020203', plank: '#141518', face: '#08090b', handle: '#a8d98b' },
+    Vault: { frame: '#070809', dark: '#020203', back: '#010102', plank: '#0d0e11', face: '#050607', handle: '#a8d98b' },
   },
 };
 

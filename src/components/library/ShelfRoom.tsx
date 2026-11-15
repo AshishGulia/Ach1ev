@@ -238,21 +238,21 @@ const LOOK_MOCHA_ESPRESSO: Look = {
 
 const LOOK_VAULT: Look = {
   name: 'Vault',
-  frame: '#262b33',
-  dark: '#101318',
-  back: '#0b0e13',
-  plank: '#2e343e',
+  frame: '#101217',
+  dark: '#050608',
+  back: '#030406',
+  plank: '#161920',
   door: 'vault',
   upperDoorType: 'vault-dial',
   lowerDoorType: 'bunker-slide',
-  face: '#1c2026',
+  face: '#0b0d11',
   handle: '#d4af37',
   knob: true,
   light: false,
   grain: 0.0,
   wallType: 'classic-oak',
   legs: 'block-base',
-  accentDesc: 'Brushed gunmetal steel bank vault · Spoked combination dial vault door (upper) & riveted armor bunker panels (lower)',
+  accentDesc: 'Deep obsidian forged black steel bank vault · Combination dial vault door (upper) & armored bunker panels (lower)',
   hasUpperDoor: true,
   isVault: true,
   opaque: true,
@@ -378,6 +378,7 @@ function migrateAlmirah(a: AlmirahT): AlmirahT {
     id: a.id === 'alm-smoked-onyx' ? 'alm-vault' : a.id,
     name: a.name === 'Smoked Onyx' ? 'Vault' : a.name,
     design: isLegacyOnyx ? 'Vault' : a.design,
+    hasUpperDoor: a.hasUpperDoor !== undefined ? a.hasUpperDoor : true,
     shelves: (a.shelves || []).map((s, idx) => {
       const legacyNames = new Set([
         'Lower Vault Section',
@@ -485,7 +486,7 @@ export function getWoodSurfaceStyle(
     if (variant === 'back') {
       return {
         backgroundColor: look.back,
-        backgroundImage: `linear-gradient(180deg, rgba(6,8,12,0.72) 0%, rgba(18,22,30,0.44) 40%, rgba(4,6,9,0.78) 100%), ${steelUrl}`,
+        backgroundImage: `linear-gradient(180deg, rgba(2,3,5,0.88) 0%, rgba(8,10,14,0.72) 45%, rgba(1,2,3,0.92) 100%), ${steelUrl}`,
         backgroundSize: '100% 100%, 420px auto',
         backgroundRepeat: 'no-repeat, repeat',
         backgroundPosition: 'center, center top',
@@ -495,7 +496,7 @@ export function getWoodSurfaceStyle(
     if (variant === 'plank') {
       return {
         backgroundColor: look.plank,
-        backgroundImage: `linear-gradient(180deg, rgba(226,232,240,0.24) 0%, rgba(48,54,66,0.34) 26%, rgba(10,12,16,0.62) 100%), ${steelUrl}`,
+        backgroundImage: `linear-gradient(180deg, rgba(148,163,184,0.12) 0%, rgba(14,17,22,0.78) 24%, rgba(3,4,6,0.92) 100%), ${steelUrl}`,
         backgroundSize: '100% 100%, 420px 100%',
         backgroundRepeat: 'no-repeat, repeat-x',
         backgroundPosition: 'center, left center',
@@ -504,8 +505,10 @@ export function getWoodSurfaceStyle(
 
     const metalSheen =
       orientation === 'v'
-        ? `linear-gradient(${gradDir}, rgba(226,232,240,0.14) 0%, rgba(30,36,46,0.28) 46%, rgba(8,10,14,0.62) 100%)`
-        : `linear-gradient(${gradDir}, rgba(226,232,240,0.16) 0%, rgba(32,38,48,0.28) 48%, rgba(8,10,14,0.62) 100%)`;
+        ? `linear-gradient(${gradDir}, rgba(148,163,184,0.08) 0%, rgba(12,14,18,0.74) 42%, rgba(3,4,6,0.9) 100%)`
+        : variant === 'door'
+          ? `linear-gradient(${gradDir}, rgba(148,163,184,0.09) 0%, rgba(10,12,16,0.72) 46%, rgba(2,3,5,0.9) 100%)`
+          : `linear-gradient(${gradDir}, rgba(148,163,184,0.09) 0%, rgba(12,14,19,0.76) 46%, rgba(3,4,6,0.92) 100%)`;
 
     return {
       backgroundColor: look.frame,
@@ -640,7 +643,7 @@ export const CSS = `
   z-index: 24;
   cursor: pointer;
   user-select: none;
-  transition: left 4.8s cubic-bezier(0.25, 0.08, 0.25, 1), transform 0.45s ease;
+  transition: left 9.2s cubic-bezier(0.22, 0.1, 0.25, 1), transform 0.55s ease;
 }
 .sh-cat:hover {
   filter: drop-shadow(0 6px 12px rgba(217, 119, 6, 0.42));
@@ -1135,7 +1138,7 @@ function createRandomJugnooSpot(id: number): JugnooSpec {
 }
 
 function generateJugnooBatch(): JugnooSpec[] {
-  return Array.from({ length: 8 }, (_, idx) => createRandomJugnooSpot(idx));
+  return Array.from({ length: 4 }, (_, idx) => createRandomJugnooSpot(idx));
 }
 
 function NightJugnoos({ bayIdx, themeId }: { bayIdx: number; themeId: ShelfThemeId }) {
@@ -1178,7 +1181,7 @@ function NightJugnoos({ bayIdx, themeId }: { bayIdx: number; themeId: ShelfTheme
               height: j.size,
               borderRadius: '50%',
               background: '#fef08a',
-              boxShadow: `0 0 ${j.size * 1.8}px ${Math.round(j.size * 0.75)}px rgba(250, 204, 21, 0.92), 0 0 ${j.size * 3.4}px ${j.size + 4}px rgba(234, 179, 8, 0.45)`,
+              boxShadow: `0 0 ${Math.round(j.size * 1.25)}px ${Math.max(2, Math.round(j.size * 0.52))}px rgba(250, 204, 21, 0.64), 0 0 ${Math.round(j.size * 2.38)}px ${Math.round((j.size + 4) * 0.7)}px rgba(234, 179, 8, 0.31)`,
               transition: 'top 5.5s ease-in-out, left 5.5s ease-in-out',
               animation: `jugnooFloat ${j.floatDur}s ease-in-out infinite alternate, jugnooGlow ${j.glowDur}s ease-in-out infinite alternate`,
               animationDelay: `${j.delay}s`,
@@ -1310,11 +1313,11 @@ export function Cat({ dim }: { dim: boolean }) {
         setPosX(nextX);
         setBubble('meow meow');
 
-        timerId = window.setTimeout(runCadenceLoop, 5200);
-      }, 2400);
+        timerId = window.setTimeout(runCadenceLoop, 9600);
+      }, 3000);
     };
 
-    timerId = window.setTimeout(runCadenceLoop, 5000);
+    timerId = window.setTimeout(runCadenceLoop, 9400);
 
     return () => {
       cancelled = true;
@@ -1379,8 +1382,8 @@ export function Cat({ dim }: { dim: boolean }) {
         transform: `scaleX(${direction})`,
         filter: dim ? 'brightness(0.55)' : 'none',
         transition: isRoaming
-          ? 'left 4.8s cubic-bezier(0.25, 0.08, 0.25, 1), transform 0.45s ease'
-          : 'transform 0.45s ease',
+          ? 'left 9.2s cubic-bezier(0.22, 0.1, 0.25, 1), transform 0.55s ease'
+          : 'transform 0.55s ease',
       }}
     >
       {/* Floating Affectionate Hearts when Petted Right Here */}
@@ -2464,9 +2467,9 @@ export function BankVaultDoor({
             position: 'absolute',
             inset: 0,
             ...steelSurface,
-            border: '7px solid #2c313a',
+            border: '7px solid #121418',
             boxShadow:
-              'inset 0 0 34px rgba(0,0,0,0.82), inset 2px 2px 0 rgba(226,232,240,0.22), inset -2px -2px 0 rgba(0,0,0,0.72), 0 6px 18px rgba(0,0,0,0.6)',
+              'inset 0 0 42px rgba(0,0,0,0.92), inset 2px 2px 0 rgba(148,163,184,0.14), inset -2px -2px 0 rgba(0,0,0,0.85), 0 8px 22px rgba(0,0,0,0.75)',
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
@@ -2479,8 +2482,8 @@ export function BankVaultDoor({
             style={{
               position: 'absolute',
               inset: 12,
-              border: '2px solid rgba(203, 213, 225, 0.2)',
-              boxShadow: 'inset 0 0 0 2px rgba(0,0,0,0.65), 0 1px 0 rgba(255,255,255,0.12)',
+              border: '2px solid rgba(148, 163, 184, 0.14)',
+              boxShadow: 'inset 0 0 0 2px rgba(0,0,0,0.82), 0 1px 0 rgba(255,255,255,0.06)',
               borderRadius: 4,
               pointerEvents: 'none',
             }}
@@ -2498,15 +2501,15 @@ export function BankVaultDoor({
                 width: 10,
                 height: 28,
                 borderRadius: 3,
-                background: 'linear-gradient(90deg, #94a3b8 0%, #475569 50%, #1e293b 100%)',
-                border: '1px solid #0f172a',
-                boxShadow: '0 2px 6px rgba(0,0,0,0.75)',
+                background: 'linear-gradient(90deg, #475569 0%, #1e242c 50%, #090b0e 100%)',
+                border: '1px solid #050608',
+                boxShadow: '0 2px 6px rgba(0,0,0,0.85)',
                 pointerEvents: 'none',
               }}
             />
           ))}
 
-          {/* Solid Stainless Steel Locking Bolts Along Right Edge */}
+          {/* Solid Dark Steel Locking Bolts Along Right Edge */}
           {[24, 42, 58, 76].map((topPct) => (
             <div
               key={topPct}
@@ -2518,8 +2521,8 @@ export function BankVaultDoor({
                 width: 10,
                 height: 16,
                 borderRadius: '3px 0 0 3px',
-                background: 'linear-gradient(180deg, #e2e8f0 0%, #94a3b8 55%, #475569 100%)',
-                boxShadow: 'inset 0 1px 1px #ffffff, -2px 2px 5px rgba(0,0,0,0.75)',
+                background: 'linear-gradient(180deg, #94a3b8 0%, #475569 55%, #1e242c 100%)',
+                boxShadow: 'inset 0 1px 1px rgba(255,255,255,0.5), -2px 2px 5px rgba(0,0,0,0.85)',
                 pointerEvents: 'none',
               }}
             />
@@ -2542,8 +2545,8 @@ export function BankVaultDoor({
                 width: 7,
                 height: 7,
                 borderRadius: '50%',
-                background: 'radial-gradient(circle at 30% 30%, #e2e8f0 0%, #64748b 65%, #1e293b 100%)',
-                boxShadow: '0 1px 3px rgba(0,0,0,0.85)',
+                background: 'radial-gradient(circle at 30% 30%, #94a3b8 0%, #334155 65%, #090b0f 100%)',
+                boxShadow: '0 1px 3px rgba(0,0,0,0.9)',
                 pointerEvents: 'none',
               }}
             />
@@ -2557,10 +2560,10 @@ export function BankVaultDoor({
               height: 112,
               borderRadius: '50%',
               background:
-                'radial-gradient(circle at 35% 30%, #475569 0%, #1e293b 58%, #0f172a 100%)',
-              border: '4px solid #64748b',
+                'radial-gradient(circle at 35% 30%, #262b34 0%, #0e1015 58%, #040507 100%)',
+              border: '4px solid #333944',
               boxShadow:
-                '0 12px 28px rgba(0,0,0,0.85), inset 0 2px 5px rgba(255,255,255,0.28), inset 0 -4px 8px rgba(0,0,0,0.8)',
+                '0 12px 28px rgba(0,0,0,0.92), inset 0 2px 4px rgba(255,255,255,0.16), inset 0 -4px 8px rgba(0,0,0,0.9)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -2575,7 +2578,7 @@ export function BankVaultDoor({
                 inset: 5,
                 borderRadius: '50%',
                 background:
-                  'repeating-conic-gradient(from 0deg, rgba(226,232,240,0.55) 0deg 2deg, transparent 2deg 15deg)',
+                  'repeating-conic-gradient(from 0deg, rgba(203,213,225,0.42) 0deg 2deg, transparent 2deg 15deg)',
                 WebkitMaskImage: 'radial-gradient(circle, transparent 66%, black 67%)',
                 maskImage: 'radial-gradient(circle, transparent 66%, black 67%)',
               }}
@@ -2585,9 +2588,9 @@ export function BankVaultDoor({
                 position: 'absolute',
                 inset: 14,
                 borderRadius: '50%',
-                border: '1.5px solid rgba(212, 175, 55, 0.45)',
-                boxShadow: 'inset 0 4px 12px rgba(0,0,0,0.85)',
-                background: 'radial-gradient(circle at 40% 35%, #272d37, #0b0e13)',
+                border: '1.5px solid rgba(212, 175, 55, 0.42)',
+                boxShadow: 'inset 0 4px 12px rgba(0,0,0,0.92)',
+                background: 'radial-gradient(circle at 40% 35%, #161920, #040507)',
               }}
             />
             {/* Three-Spoke Bank Vault Capstan Handwheel */}
@@ -2689,7 +2692,7 @@ export function CabinetDoors({
   const glassSheen =
     'linear-gradient(125deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.03) 36%, rgba(255,255,255,0.14) 55%, rgba(255,255,255,0.02) 78%, rgba(255,255,255,0.12) 100%)';
   const clearTransparentGlassSheen =
-    'linear-gradient(128deg, rgba(255,255,255,0.12) 0%, rgba(255,255,255,0) 14%, rgba(255,255,255,0) 47%, rgba(255,255,255,0.07) 50%, rgba(255,255,255,0) 53%, rgba(255,255,255,0) 88%, rgba(255,255,255,0.08) 100%)';
+    'linear-gradient(126deg, rgba(255,255,255,0.28) 0%, rgba(255,255,255,0.03) 22%, rgba(255,255,255,0.22) 45%, rgba(255,255,255,0.02) 52%, rgba(255,255,255,0.16) 76%, rgba(255,255,255,0.04) 92%, rgba(255,255,255,0.18) 100%)';
   const bevel = `inset 0 0 0 1.5px ${look.dark}, inset 2px 2px 0 2px rgba(255,255,255,0.16), inset -2px -2px 0 2px rgba(0,0,0,0.22)`;
 
   // Unified Lock / Unlock pill at exact bottom-center across ALL 5 Almirahs
@@ -2785,9 +2788,9 @@ export function CabinetDoors({
                     width: '100%',
                     height: '100%',
                     backgroundImage: isUpperClearWood ? clearTransparentGlassSheen : glassSheen,
-                    backgroundColor: isUpperClearWood ? 'rgba(255, 255, 255, 0.005)' : 'rgba(255, 255, 255, 0.04)',
+                    backgroundColor: isUpperClearWood ? 'rgba(218, 238, 255, 0.08)' : 'rgba(255, 255, 255, 0.06)',
                     boxShadow: isUpperClearWood
-                      ? 'inset 0 0 0 1px rgba(255,255,255,0.22), inset 1px 1px 0 rgba(255,255,255,0.16), inset 0 0 0 2px rgba(0,0,0,0.22)'
+                      ? 'inset 0 0 0 1.5px rgba(255,255,255,0.38), inset 2px 2px 10px rgba(255,255,255,0.14), inset 0 0 0 3px rgba(0,0,0,0.28)'
                       : 'inset 0 0 0 1px rgba(0,0,0,0.52), inset 0 2px 8px rgba(0,0,0,0.32)',
                   }}
                 />
@@ -2896,11 +2899,11 @@ export function CabinetDoors({
                     backgroundColor: isFluted
                       ? 'rgba(255, 248, 235, 0.18)'
                       : isUpperClearWood
-                        ? 'rgba(255, 255, 255, 0.005)'
+                        ? 'rgba(218, 238, 255, 0.09)'
                         : 'rgba(255, 255, 255, 0.05)',
                     backdropFilter: isFluted ? 'blur(1.5px)' : 'none',
                     boxShadow: isUpperClearWood
-                      ? 'inset 0 0 0 1px rgba(255,255,255,0.24), inset 1px 1px 0 rgba(255,255,255,0.16), inset 0 0 0 2px rgba(92,52,18,0.25)'
+                      ? 'inset 0 0 0 1.5px rgba(255,255,255,0.4), inset 2px 2px 10px rgba(255,255,255,0.14), inset 0 0 0 3px rgba(92,52,18,0.28)'
                       : 'inset 0 0 0 1px rgba(92,52,18,0.45), inset 0 2px 6px rgba(0,0,0,0.22)',
                   }}
                 />
@@ -3098,10 +3101,10 @@ export function CabinetDoors({
               pointerEvents: 'auto',
               transform: open ? `translateX(${left ? '-100%' : '100%'})` : 'translateX(0%)',
               transition: 'transform 0.9s cubic-bezier(0.22, 1, 0.36, 1)',
-              border: '5px solid #2b303a',
+              border: '5px solid #121418',
               ...bunkerSteel,
               boxShadow:
-                'inset 0 0 24px rgba(0,0,0,0.82), inset 1px 1px 0 rgba(226,232,240,0.22), inset -1px -1px 0 rgba(0,0,0,0.7)',
+                'inset 0 0 32px rgba(0,0,0,0.92), inset 1px 1px 0 rgba(148,163,184,0.14), inset -1px -1px 0 rgba(0,0,0,0.85)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -4638,8 +4641,8 @@ export function Mini({ design, themeId = '1' }: { design: string; themeId?: Shel
               ? getWoodSurfaceStyle(l, 'panel', 'door', '135deg')
               : {
                   background:
-                    l.door === 'glass' || l.door === 'split-glass'
-                      ? 'linear-gradient(115deg, rgba(255,255,255,.35), rgba(255,255,255,.06))'
+                    l.door === 'glass' || l.door === 'split-glass' || l.door === 'translucent-glass'
+                      ? 'linear-gradient(115deg, rgba(255,255,255,.36), rgba(255,255,255,.07))'
                       : l.face,
                 }),
             boxShadow: `inset 0 0 0 1px ${l.dark}`,

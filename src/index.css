@@ -1009,16 +1009,16 @@ button[class*="border"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-bt
 
 @keyframes jugnooGlow {
   0% {
-    opacity: 0.25;
-    filter: drop-shadow(0 0 6px rgba(250, 204, 21, 0.4));
+    opacity: 0.18;
+    filter: drop-shadow(0 0 4px rgba(250, 204, 21, 0.28));
   }
   50% {
-    opacity: 1;
-    filter: drop-shadow(0 0 16px rgba(250, 204, 21, 0.95)) drop-shadow(0 0 28px rgba(234, 179, 8, 0.6));
+    opacity: 0.7;
+    filter: drop-shadow(0 0 11px rgba(250, 204, 21, 0.66)) drop-shadow(0 0 19px rgba(234, 179, 8, 0.42));
   }
   100% {
-    opacity: 0.35;
-    filter: drop-shadow(0 0 8px rgba(250, 204, 21, 0.5));
+    opacity: 0.24;
+    filter: drop-shadow(0 0 5px rgba(250, 204, 21, 0.35));
   }
 }
 
@@ -1158,11 +1158,11 @@ html[data-design]:not([data-design="1"]) button:not([data-swatch]):not([role="sw
   65%      { transform: translateX(-1.3px); }
 }
 
-.sh-cat-sneak-a { transform-box: fill-box; transform-origin: 50% 10%; animation: sneakStepA 1.35s ease-in-out infinite; }
-.sh-cat-sneak-b { transform-box: fill-box; transform-origin: 50% 10%; animation: sneakStepB 1.35s ease-in-out infinite; }
-.sh-cat-tail    { transform-box: fill-box; transform-origin: 12% 55%; animation: sneakTailTwitch 1.9s ease-in-out infinite; }
-.sh-cat-ear     { transform-box: fill-box; transform-origin: 50% 90%; animation: sneakEarRadar 2.4s ease-in-out infinite; }
-.sh-cat-pupil   { animation: sneakEyeScan 2.2s ease-in-out infinite; }
+.sh-cat-sneak-a { transform-box: fill-box; transform-origin: 50% 10%; animation: sneakStepA 2.2s ease-in-out infinite; }
+.sh-cat-sneak-b { transform-box: fill-box; transform-origin: 50% 10%; animation: sneakStepB 2.2s ease-in-out infinite; }
+.sh-cat-tail    { transform-box: fill-box; transform-origin: 12% 55%; animation: sneakTailTwitch 2.8s ease-in-out infinite; }
+.sh-cat-ear     { transform-box: fill-box; transform-origin: 50% 90%; animation: sneakEarRadar 3.2s ease-in-out infinite; }
+.sh-cat-pupil   { animation: sneakEyeScan 2.8s ease-in-out infinite; }
 
 /* Leisure Dashboard:
    Crisp Calacatta White-Cream Gold-Vein Marble in Theme 1 Light Leisure,

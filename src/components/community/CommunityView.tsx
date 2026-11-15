@@ -541,7 +541,7 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
       onSnipToNote({
         id: `snip-comm-${Date.now()}`,
         dataUrl: '',
-        sourceBookTitle: `Ach1evers Hub: ${p.title}`,
+        sourceBookTitle: `Ach1ever's Hub: ${p.title}`,
         pageNumber: 1,
         caption: `[${p.type.toUpperCase()}] ${p.title} (@${p.author.username}): ${p.content.slice(0, 180)}`,
         timestamp: new Date().toLocaleTimeString(),
@@ -591,7 +591,7 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
             }`}
           >
             <Newspaper className="w-3.5 h-3.5 text-[#A47C43]" />
-            <span>Ach1evers Hub</span>
+            <span>Ach1ever's Hub</span>
           </button>
 
           <button

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useAuth, SocialProviderId } from '../../contexts/AuthContext';
 import { getSupabaseConfig, saveRuntimeSupabaseConfig } from '../../lib/supabaseClient';
 import {
@@ -23,7 +23,12 @@ import {
   Phone,
   ShieldCheck,
   RotateCcw,
+  Film,
 } from 'lucide-react';
+
+const FeatureVideoSeriesShowcase = React.lazy(
+  () => import('../landing/FeatureVideoSeriesShowcase')
+);
 
 interface AuthPortalProps {
   isModal?: boolean;
@@ -120,12 +125,12 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
-  // Luxury Dark-Chocolate Opening Intro Animation (3 seconds total, no Skip button)
+  // Fast Brand Opening Intro Animation (<= 2 seconds total for crisp PageSpeed LCP)
   const [showIntro, setShowIntro] = useState<boolean>(!isModal);
 
   useEffect(() => {
     if (!showIntro) return;
-    const tEnd = window.setTimeout(() => setShowIntro(false), 3000);
+    const tEnd = window.setTimeout(() => setShowIntro(false), 1850);
     return () => {
       window.clearTimeout(tEnd);
     };
@@ -269,27 +274,27 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
       className={`${
         isModal
           ? 'fixed inset-0 z-50 bg-black/55 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto'
-          : 'min-h-screen w-full relative overflow-y-auto flex items-center justify-center p-4 sm:p-8'
+          : 'min-h-screen w-full relative overflow-y-auto flex flex-col items-center p-4 sm:p-8'
       } transition-colors duration-300 text-[#efe4d4]`}
       style={{
         background:
           'radial-gradient(ellipse 85% 75% at 22% 24%, #261209 0%, #150904 52%, #0c0402 100%)',
       }}
     >
-      {/* 3-SECOND BRAND REVEAL INTRO (Always Dark, No Skip Button) */}
+      {/* FAST <= 2-SECOND BRAND REVEAL INTRO */}
       {showIntro && (
         <div
           className="fixed inset-0 z-[70] flex flex-col items-center justify-center overflow-hidden"
           style={{
             background:
               'radial-gradient(ellipse 85% 78% at 50% 50%, #1c0c05 0%, #100502 50%, #090301 100%)',
-            animation: 'loginIntroFadeOut 0.45s ease-in 2.55s both',
+            animation: 'loginIntroFadeOut 0.35s ease-in 1.5s both',
           }}
         >
           {/* Crisp Gold Lockup centered at identical hero scale on Espresso Background */}
           <div
             className="relative flex items-center justify-center w-[min(78vw,630px)] select-none"
-            style={{ animation: 'loginFinalReveal 0.65s cubic-bezier(0.22, 1, 0.36, 1) both' }}
+            style={{ animation: 'loginFinalReveal 0.4s cubic-bezier(0.22, 1, 0.36, 1) both' }}
           >
             <span
               className="relative inline-block w-full"
@@ -299,6 +304,8 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                 src={ACHIEV_LOCKUP_URL}
                 alt="Ach1ev — Settle Ideas"
                 draggable={false}
+                fetchPriority="high"
+                decoding="sync"
                 className="w-full h-auto object-contain select-none pointer-events-none"
                 style={{
                   filter:
@@ -371,6 +378,16 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
             >
               A quiet space to settle thoughts, write clinical notes, and carry your study desk everywhere.
             </p>
+
+            {!isModal && (
+              <a
+                href="#medical-student-seo-guide"
+                className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-400/25 text-[11px] font-semibold text-amber-200 transition-colors"
+              >
+                <Film className="w-3.5 h-3.5 text-amber-300" />
+                <span>Cheapest Medical Note App · Watch 9-Part Tour ↓</span>
+              </a>
+            )}
           </div>
         </div>
 
@@ -868,6 +885,12 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
           </div>
         </div>
       </div>
+
+      {!isModal && (
+        <Suspense fallback={<div className="w-full max-w-6xl mx-auto mt-12 h-48 rounded-3xl bg-white/[0.03] animate-pulse" />}>
+          <FeatureVideoSeriesShowcase />
+        </Suspense>
+      )}
     </div>
   );
 };

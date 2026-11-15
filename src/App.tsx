@@ -3,7 +3,7 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, Suspense, lazy } from 'react';
 import {
   SubjectCourse,
   OptionSlab,
@@ -27,24 +27,27 @@ import {
 } from './data/mockData';
 import { Sidebar } from './components/common/Sidebar';
 import { WindowsHeader } from './components/common/WindowsHeader';
-import { MyDenHome } from './components/home/MyDenHome';
-import { NotebookShelfView } from './components/notebook/NotebookShelfView';
-import { RosterCalendarModal } from './components/roster/RosterCalendarModal';
-import { EyeBreakModal } from './components/common/EyeBreakModal';
-import { SettingsModal, SettingsTabId } from './components/settings/SettingsModal';
-import { RichNoteEditor } from './components/notebook/RichNoteEditor';
-import { RecycleBinView, DeletedItem } from './components/recycle/RecycleBinView';
-import { LibraryView } from './components/library/LibraryView';
-import { CommunityView } from './components/community/CommunityView';
-import { MnemonicDashboard } from './components/mnemonics/MnemonicDashboard';
-import { LeisureDashboard } from './components/leisure/LeisureDashboard';
-import { AskGeminiModal } from './components/common/AskGeminiModal';
-import { ReadStudioView } from './components/reader/ReadStudioView';
-import { TalkToDeveloperModal } from './components/developer/TalkToDeveloperModal';
-import { SubscriptionModal } from './components/subscription/SubscriptionModal';
-import { ShareToAIStudioModal } from './components/common/ShareToAIStudioModal';
 import { AuthPortal } from './components/auth/AuthPortal';
+import type { SettingsTabId } from './components/settings/SettingsModal';
+import type { DeletedItem } from './components/recycle/RecycleBinView';
 import { ACHIEV_LOCKUP_URL } from './components/common/AchievBrand';
+
+const MyDenHome = lazy(() => import('./components/home/MyDenHome').then((m) => ({ default: m.MyDenHome })));
+const NotebookShelfView = lazy(() => import('./components/notebook/NotebookShelfView').then((m) => ({ default: m.NotebookShelfView })));
+const RosterCalendarModal = lazy(() => import('./components/roster/RosterCalendarModal').then((m) => ({ default: m.RosterCalendarModal })));
+const EyeBreakModal = lazy(() => import('./components/common/EyeBreakModal').then((m) => ({ default: m.EyeBreakModal })));
+const SettingsModal = lazy(() => import('./components/settings/SettingsModal').then((m) => ({ default: m.SettingsModal })));
+const RichNoteEditor = lazy(() => import('./components/notebook/RichNoteEditor').then((m) => ({ default: m.RichNoteEditor })));
+const RecycleBinView = lazy(() => import('./components/recycle/RecycleBinView').then((m) => ({ default: m.RecycleBinView })));
+const LibraryView = lazy(() => import('./components/library/LibraryView').then((m) => ({ default: m.LibraryView })));
+const CommunityView = lazy(() => import('./components/community/CommunityView').then((m) => ({ default: m.CommunityView })));
+const MnemonicDashboard = lazy(() => import('./components/mnemonics/MnemonicDashboard').then((m) => ({ default: m.MnemonicDashboard })));
+const LeisureDashboard = lazy(() => import('./components/leisure/LeisureDashboard').then((m) => ({ default: m.LeisureDashboard })));
+const AskGeminiModal = lazy(() => import('./components/common/AskGeminiModal').then((m) => ({ default: m.AskGeminiModal })));
+const ReadStudioView = lazy(() => import('./components/reader/ReadStudioView').then((m) => ({ default: m.ReadStudioView })));
+const TalkToDeveloperModal = lazy(() => import('./components/developer/TalkToDeveloperModal').then((m) => ({ default: m.TalkToDeveloperModal })));
+const SubscriptionModal = lazy(() => import('./components/subscription/SubscriptionModal').then((m) => ({ default: m.SubscriptionModal })));
+const ShareToAIStudioModal = lazy(() => import('./components/common/ShareToAIStudioModal').then((m) => ({ default: m.ShareToAIStudioModal })));
 import { getThemeMeta } from './data/themeMeta';
 import { useAuth } from './contexts/AuthContext';
 import {
@@ -1075,6 +1078,7 @@ export default function App() {
 
         {/* Viewport Content */}
         <main className="flex-1 overflow-hidden flex pb-14 md:pb-0">
+          <Suspense fallback={<div className="flex-1 flex items-center justify-center text-xs font-mono opacity-60">Loading workspace...</div>}>
           {activeView === 'home' && (
             <MyDenHome
               userProfile={userProfile}
@@ -1275,6 +1279,7 @@ export default function App() {
               />
             </div>
           )}
+          </Suspense>
         </main>
 
         {/* Mobile Bottom Navigation Bar (Phone & Tablet-portrait view) */}
@@ -1361,132 +1366,146 @@ export default function App() {
         </nav>
       </div>
 
-      {/* Subscription & Membership Modal */}
-      <SubscriptionModal
-        isOpen={isSubscriptionModalOpen}
-        onClose={() => setIsSubscriptionModalOpen(false)}
-      />
+      <Suspense fallback={null}>
+        {/* Subscription & Membership Modal */}
+        {isSubscriptionModalOpen && (
+          <SubscriptionModal
+            isOpen={isSubscriptionModalOpen}
+            onClose={() => setIsSubscriptionModalOpen(false)}
+          />
+        )}
 
-      {/* Roster Calendar & AI Scanner Modal */}
-      <RosterCalendarModal
-        isOpen={isRosterModalOpen}
-        onClose={() => setIsRosterModalOpen(false)}
-        events={rosterEvents}
-        onAddEvents={(newEvents) => setRosterEvents([...newEvents, ...rosterEvents])}
-        onAddTasks={(newTasks) => setTasks([...newTasks, ...tasks])}
-        currentSubject={currentSubject}
-      />
+        {/* Roster Calendar & AI Scanner Modal */}
+        {isRosterModalOpen && (
+          <RosterCalendarModal
+            isOpen={isRosterModalOpen}
+            onClose={() => setIsRosterModalOpen(false)}
+            events={rosterEvents}
+            onAddEvents={(newEvents) => setRosterEvents([...newEvents, ...rosterEvents])}
+            onAddTasks={(newTasks) => setTasks([...newTasks, ...tasks])}
+            currentSubject={currentSubject}
+          />
+        )}
 
-      {/* Eye Break 20-20-20 Rest Modal */}
-      <EyeBreakModal
-        isOpen={isEyeBreakModalOpen}
-        onClose={() => {
-          setIsEyeBreakModalOpen(false);
-          setSecondsUntilBreak(breakConfig.intervalMinutes * 60);
-        }}
-        config={breakConfig}
-        onUpdateConfig={setBreakConfig}
-        onSnooze={handleSnoozeBreak}
-      />
+        {/* Eye Break 20-20-20 Rest Modal */}
+        {isEyeBreakModalOpen && (
+          <EyeBreakModal
+            isOpen={isEyeBreakModalOpen}
+            onClose={() => {
+              setIsEyeBreakModalOpen(false);
+              setSecondsUntilBreak(breakConfig.intervalMinutes * 60);
+            }}
+            config={breakConfig}
+            onUpdateConfig={setBreakConfig}
+            onSnooze={handleSnoozeBreak}
+          />
+        )}
 
-      {/* Settings & Student Profile Modal */}
-      <SettingsModal
-        isOpen={isSettingsOpen}
-        initialTab={settingsInitialTab}
-        onSyncNow={handleSyncAllNow}
-        onLogout={signOut}
-        onClose={() => setIsSettingsOpen(false)}
-        userProfile={userProfile}
-        onUpdateProfile={setUserProfile}
-        breakTimerConfig={breakConfig}
-        onUpdateBreakConfig={setBreakConfig}
-        onExportNotes={handleExportNotes}
-        onResetSession={handleResetSession}
-        activeDesign={activeDesign}
-        onSelectDesign={handleSelectDesign}
-        onOpenAIStudioModal={() => setIsAIStudioModalOpen(true)}
-      />
+        {/* Settings & Student Profile Modal */}
+        {isSettingsOpen && (
+          <SettingsModal
+            isOpen={isSettingsOpen}
+            initialTab={settingsInitialTab}
+            onSyncNow={handleSyncAllNow}
+            onLogout={signOut}
+            onClose={() => setIsSettingsOpen(false)}
+            userProfile={userProfile}
+            onUpdateProfile={setUserProfile}
+            breakTimerConfig={breakConfig}
+            onUpdateBreakConfig={setBreakConfig}
+            onExportNotes={handleExportNotes}
+            onResetSession={handleResetSession}
+            activeDesign={activeDesign}
+            onSelectDesign={handleSelectDesign}
+            onOpenAIStudioModal={() => setIsAIStudioModalOpen(true)}
+          />
+        )}
 
-      {/* Auth Modal Overlay when user triggers Sign In from Local Mode */}
-      {isAuthModalOpen && (
-        <AuthPortal
-          isModal={true}
-          isDarkMode={isDarkMode}
-          onToggleDarkMode={() => setIsDarkMode((prev) => !prev)}
-          onClose={closeAuthModal}
-        />
-      )}
+        {/* Auth Modal Overlay when user triggers Sign In from Local Mode */}
+        {isAuthModalOpen && (
+          <AuthPortal
+            isModal={true}
+            isDarkMode={isDarkMode}
+            onToggleDarkMode={() => setIsDarkMode((prev) => !prev)}
+            onClose={closeAuthModal}
+          />
+        )}
 
-      {/* Universal Ask Gemini Modal */}
-      <AskGeminiModal
-        isOpen={isGlobalGeminiOpen}
-        onClose={() => setIsGlobalGeminiOpen(false)}
-        currentSubject={currentSubject}
-        onInsertToNote={(contentHtml) => {
-          if (activeNotebook) {
-            const pages: NotePage[] = (activeNotebook.pages && activeNotebook.pages.length > 0)
-              ? activeNotebook.pages
-              : [{
-                  id: 'p-default',
-                  title: 'Page 1',
-                  contentHtml: '',
-                  date: new Date().toISOString().split('T')[0],
-                  updatedAt: new Date().toISOString(),
-                  screenshots: [],
-                  inkStrokes: [],
-                }];
-            const currentPageIdx = Math.min(activeNotebook.activePageIndex || 0, pages.length - 1);
-            const currentPage = pages[currentPageIdx] || pages[0];
-            const updatedPages = [...pages];
-            updatedPages[currentPageIdx] = {
-              ...currentPage,
-              contentHtml: (currentPage.contentHtml || '') + contentHtml,
-            };
-            handleUpdateNotebook({
-              ...activeNotebook,
-              pages: updatedPages,
-            });
-            setActiveView('notebooks');
-            setIsEditingNote(true);
-          } else {
-            const today = new Date().toISOString().split('T')[0];
-            const nowIso = new Date().toISOString();
-            const newNb: Notebook = {
-              id: `nb-${Date.now()}`,
-              title: 'Study Note',
-              subject: currentSubject,
-              coverTheme: 'botany',
-              coverTitle: 'STUDY NOTE',
-              coverSubtitle: 'Personal Study Notes',
-              coverColor: '#A47C43',
-              paperType: 'ruled-thin',
-              paperColor: 'beige',
-              activePageIndex: 0,
-              createdAt: today,
-              updatedAt: nowIso,
-              pages: [
-                {
-                  id: `p-${Date.now()}`,
-                  title: 'Page 1',
-                  contentHtml,
-                  date: today,
+        {/* Universal Ask Gemini Modal */}
+        {isGlobalGeminiOpen && (
+          <AskGeminiModal
+            isOpen={isGlobalGeminiOpen}
+            onClose={() => setIsGlobalGeminiOpen(false)}
+            currentSubject={currentSubject}
+            onInsertToNote={(contentHtml) => {
+              if (activeNotebook) {
+                const pages: NotePage[] = (activeNotebook.pages && activeNotebook.pages.length > 0)
+                  ? activeNotebook.pages
+                  : [{
+                      id: 'p-default',
+                      title: 'Page 1',
+                      contentHtml: '',
+                      date: new Date().toISOString().split('T')[0],
+                      updatedAt: new Date().toISOString(),
+                      screenshots: [],
+                      inkStrokes: [],
+                    }];
+                const currentPageIdx = Math.min(activeNotebook.activePageIndex || 0, pages.length - 1);
+                const currentPage = pages[currentPageIdx] || pages[0];
+                const updatedPages = [...pages];
+                updatedPages[currentPageIdx] = {
+                  ...currentPage,
+                  contentHtml: (currentPage.contentHtml || '') + contentHtml,
+                };
+                handleUpdateNotebook({
+                  ...activeNotebook,
+                  pages: updatedPages,
+                });
+                setActiveView('notebooks');
+                setIsEditingNote(true);
+              } else {
+                const today = new Date().toISOString().split('T')[0];
+                const nowIso = new Date().toISOString();
+                const newNb: Notebook = {
+                  id: `nb-${Date.now()}`,
+                  title: 'Study Note',
+                  subject: currentSubject,
+                  coverTheme: 'botany',
+                  coverTitle: 'STUDY NOTE',
+                  coverSubtitle: 'Personal Study Notes',
+                  coverColor: '#A47C43',
+                  paperType: 'ruled-thin',
+                  paperColor: 'beige',
+                  activePageIndex: 0,
+                  createdAt: today,
                   updatedAt: nowIso,
-                  screenshots: [],
-                  inkStrokes: [],
-                },
-              ],
-            };
-            handleCreateNotebook(newNb);
-            setActiveView('notebooks');
-          }
-        }}
-      />
+                  pages: [
+                    {
+                      id: `p-${Date.now()}`,
+                      title: 'Page 1',
+                      contentHtml,
+                      date: today,
+                      updatedAt: nowIso,
+                      screenshots: [],
+                      inkStrokes: [],
+                    },
+                  ],
+                };
+                handleCreateNotebook(newNb);
+                setActiveView('notebooks');
+              }
+            }}
+          />
+        )}
 
-      {/* Share to Google AI Studio Modal */}
-      <ShareToAIStudioModal
-        isOpen={isAIStudioModalOpen}
-        onClose={() => setIsAIStudioModalOpen(false)}
-      />
+        {/* Share to Google AI Studio Modal */}
+        {isAIStudioModalOpen && (
+          <ShareToAIStudioModal
+            isOpen={isAIStudioModalOpen}
+            onClose={() => setIsAIStudioModalOpen(false)}
+          />
+        )}
+      </Suspense>
 
       {/* Revert Changes Toast Notification */}
       {toastMessage && (
