@@ -101,7 +101,7 @@ export const Design3NightDesk: React.FC<Design3Props> = ({
             <p className="text-xs italic text-slate-300">
               "Discipline today treats possibilities tomorrow."
             </p>
-            <span className="text-[10px] text-slate-500 font-mono">— Ach1ev · Settle Ideas</span>
+            <span className="text-[10px] text-slate-500 font-mono">— Achiev · Settle Ideas</span>
           </div>
         </div>
       </div>

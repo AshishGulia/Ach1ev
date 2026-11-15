@@ -1,6 +1,6 @@
 import { GoogleDriveAccount } from '../types';
 
-export const DRIVE_APP_FOLDER_NAME = 'Ach1ev Clinical Library';
+export const DRIVE_APP_FOLDER_NAME = 'Achiev Clinical Library';
 const GOOGLE_DRIVE_SCOPE =
   'https://www.googleapis.com/auth/drive.file https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile';
 const GOOGLE_IDENTITY_SCOPE =
@@ -256,7 +256,7 @@ export async function fetchGoogleUserInfo(
 }
 
 function getCurrentOriginLabel(): string {
-  return typeof window !== 'undefined' ? window.location.origin : 'https://ach1ev.com';
+  return typeof window !== 'undefined' ? window.location.origin : 'https://achiev.com';
 }
 
 function formatGisPopupError(err: any, contextLabel: string): Error {
@@ -402,7 +402,7 @@ export async function signInWithGoogleIdentity(
 
 /**
  * Connects a user's personal Google Drive via Google Identity Services OAuth2 Token Flow.
- * Requests `drive.file` scope so Ach1ev only accesses the folder and PDFs it creates.
+ * Requests `drive.file` scope so Achiev only accesses the folder and PDFs it creates.
  * Calls `requestAccessToken()` synchronously inside the user gesture whenever clientId & GIS are ready.
  */
 export async function connectPersonalGoogleDrive(userId: string): Promise<DriveTokenRecord> {
@@ -480,7 +480,7 @@ export async function disconnectPersonalGoogleDrive(userId: string): Promise<voi
 }
 
 /**
- * Finds or creates the dedicated `Ach1ev Clinical Library` folder inside the user's personal Google Drive.
+ * Finds or creates the dedicated `Achiev Clinical Library` folder inside the user's personal Google Drive.
  */
 export async function ensureAchievDriveFolder(accessToken: string): Promise<string> {
   const query = encodeURIComponent(
@@ -518,7 +518,7 @@ export async function ensureAchievDriveFolder(accessToken: string): Promise<stri
     body: JSON.stringify({
       name: DRIVE_APP_FOLDER_NAME,
       mimeType: 'application/vnd.google-apps.folder',
-      description: 'Dedicated textbooks, handouts & PDF vault for Ach1ev (Settle Ideas).',
+      description: 'Dedicated textbooks, handouts & PDF vault for Achiev (Settle Ideas).',
     }),
   });
 
@@ -571,7 +571,7 @@ export async function uploadPdfToPersonalDrive(
           name: file.name,
           mimeType,
           parents: [targetFolderId],
-          description: 'Uploaded from Ach1ev — Settle Ideas Study Workspace',
+          description: 'Uploaded from Achiev — Settle Ideas Study Workspace',
         }),
       }
     );

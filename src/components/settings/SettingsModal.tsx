@@ -230,6 +230,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const {
     user,
     googleUser,
+    phoneUser,
     syncStatus,
     lastSyncedAt,
     driveAccount,
@@ -258,7 +259,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   }
   const [connectedDrives, setConnectedDrives] = useState<ConnectedDriveItem[]>(() => {
     try {
-      const saved = localStorage.getItem('ach1ev_connected_drives_v1');
+      const saved =
+        localStorage.getItem('achiev_connected_drives_v1') ??
+        localStorage.getItem('ach1ev_connected_drives_v1');
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -284,7 +287,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const persistConnectedDrives = (next: ConnectedDriveItem[]) => {
     setConnectedDrives(next);
     try {
-      localStorage.setItem('ach1ev_connected_drives_v1', JSON.stringify(next));
+      localStorage.setItem('achiev_connected_drives_v1', JSON.stringify(next));
     } catch {}
   };
 
@@ -331,7 +334,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     setCustomDriveUrl('');
     setCustomDriveAccount('');
     setDriveOpError(null);
-    setDriveOpSuccess(`Connected "${item.name}" to your Ach1ev Drive vault.`);
+    setDriveOpSuccess(`Connected "${item.name}" to your Achiev Drive vault.`);
   };
 
   const handleAvatarUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -460,7 +463,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     { id: 'roster', key: 'showCalendar', label: 'Calendar' },
     { id: 'library', key: 'showLibrary', label: 'Shelf' },
     { id: 'mnemonics', key: 'showMnemonics', label: 'Mnemonics' },
-    { id: 'community', key: 'showCommunity', label: "Ach1ever's Hub" },
+    { id: 'community', key: 'showCommunity', label: "Achiever's Hub" },
     { id: 'leisure', key: 'showLeisure', label: 'Leisure' },
     { id: 'talk-to-dev', key: 'showTalkToDev', label: 'Talk to Developer' },
   ];
@@ -1081,6 +1084,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           ? googleUser.name
                             ? `${googleUser.name} (${googleUser.email})`
                             : googleUser.email
+                          : phoneUser
+                          ? `Mobile Scholar (${phoneUser.phone})`
                           : 'Not Signed In (Offline Browser Cache)'}
                       </h5>
                       <p className="text-[11px] text-stone-500 dark:text-stone-400">
@@ -1090,13 +1095,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             }`
                           : googleUser
                           ? 'Provider: GOOGLE OAUTH2 · Signed in & Drive-ready'
+                          : phoneUser
+                          ? 'Provider: MOBILE OTP VERIFIED · Instant Study Session'
                           : 'Sign in with Email, Phone OTP, or Google to sync across devices.'}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    {user || googleUser ? (
+                    {user || googleUser || phoneUser ? (
                       <>
                         {user && onSyncNow && (
                           <button
@@ -2032,7 +2039,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       Note-Making Apps Benchmark Pricing &amp; Feature Criteria
                     </h5>
                     <p className="text-[11px] text-stone-500 dark:text-stone-400">
-                      Calibrated Ach1ev pricing criteria compared against popular note apps
+                      Calibrated Achiev pricing criteria compared against popular note apps
                     </p>
                   </div>
                 </div>
@@ -2043,7 +2050,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         <th className="py-2 px-3">App</th>
                         <th className="py-2 px-3">Other App Price</th>
                         <th className="py-2 px-3">Matched Feature Criteria</th>
-                        <th className="py-2 px-3">Ach1ev Price &amp; Plan</th>
+                        <th className="py-2 px-3">Achiev Price &amp; Plan</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-stone-100 dark:divide-[#2e1e14]">
@@ -2060,7 +2067,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           </td>
                           <td className="py-2 px-3 whitespace-nowrap">
                             <span className="font-bold text-amber-700 dark:text-amber-300">
-                              {row.matchedAch1evTier} · ₹{row.ach1evPriceMonthlyInr}/mo
+                              {row.matchedAchievTier} · ₹{row.achievPriceMonthlyInr}/mo
                             </span>
                           </td>
                         </tr>
@@ -2272,7 +2279,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       Profile Photo
                     </div>
                     <p className="text-[11px] text-stone-500 dark:text-stone-400">
-                      Displayed across Ach1ever's Hub, chat &amp; your sidebar badge
+                      Displayed across Achiever's Hub, chat &amp; your sidebar badge
                     </p>
                   </div>
                 </div>
@@ -2320,7 +2327,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 {/* Username Slab for Peer Search */}
                 <div>
                   <label className="block text-xs font-semibold text-stone-700 dark:text-stone-300 mb-1">
-                    Username (searchable by friends in Ach1ever's Hub):
+                    Username (searchable by friends in Achiever's Hub):
                   </label>
                   <div className="relative">
                     <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-mono font-bold text-amber-700 dark:text-amber-400">

@@ -27,6 +27,21 @@ import {
   ZoomIn,
   ZoomOut,
   RotateCcw,
+  Settings,
+  Share2,
+  Folder,
+  Stethoscope,
+  HeartPulse,
+  Brain,
+  Microscope,
+  Pill,
+  Syringe,
+  Dna,
+  FlaskConical,
+  Bookmark,
+  Star,
+  GraduationCap,
+  Shield,
 } from 'lucide-react';
 import type { BookThumbnailConfig, Notebook, MedicalBook, DesignId } from '../../types';
 import { BookLogoBadge } from './BookLogoBadge';
@@ -61,35 +76,59 @@ export type Book = {
   thumbnail?: BookThumbnailConfig;
 };
 
-export type KeepsakeType =
-  | 'vase-gold'
-  | 'clock-brass'
-  | 'succulent-pot'
-  | 'book-stack'
-  | 'rattan-basket'
-  | 'starfish-sculpt'
-  | 'bottles-apothecary'
-  | 'modern-ring'
-  | 'flower-vase'
-  | 'forest-lantern'
-  | 'moss-terrarium'
-  | 'conch-shell'
-  | 'coral-sculpt'
-  | 'chai-kulhad'
-  | 'paper-boat';
-
-export type KeepsakeItem = {
+export type ShelfFolder = {
   id: string;
-  type: KeepsakeType;
-  label: string;
+  name: string;
+  color: string;
+  logoId: string;
+  books: Book[];
+  createdAt: string;
 };
 
 export type ShelfT = {
   id: string;
   name: string;
   books: Book[];
-  keepsakes?: KeepsakeItem[];
+  folders?: ShelfFolder[];
 };
+
+export const FOLDER_COLORS = [
+  '#9a3412',
+  '#b45309',
+  '#991b1b',
+  '#1e3a8a',
+  '#065f46',
+  '#0f766e',
+  '#6d28d9',
+  '#be185d',
+  '#334155',
+  '#7c2d12',
+  '#1d4ed8',
+  '#18181b',
+] as const;
+
+export const FOLDER_LOGOS = [
+  { id: 'folder', label: 'Folder', Icon: Folder },
+  { id: 'book', label: 'Textbook', Icon: BookOpen },
+  { id: 'stethoscope', label: 'Clinical', Icon: Stethoscope },
+  { id: 'heart', label: 'Cardiology', Icon: HeartPulse },
+  { id: 'brain', label: 'Neuro', Icon: Brain },
+  { id: 'microscope', label: 'Pathology', Icon: Microscope },
+  { id: 'pill', label: 'Pharma', Icon: Pill },
+  { id: 'syringe', label: 'Surgery', Icon: Syringe },
+  { id: 'dna', label: 'Genetics', Icon: Dna },
+  { id: 'flask', label: 'Biochem', Icon: FlaskConical },
+  { id: 'notes', label: 'Notes', Icon: FileText },
+  { id: 'bookmark', label: 'Bookmark', Icon: Bookmark },
+  { id: 'star', label: 'High-Yield', Icon: Star },
+  { id: 'grad', label: 'MBBS', Icon: GraduationCap },
+  { id: 'shield', label: 'Vault', Icon: Shield },
+  { id: 'sparkles', label: 'Custom', Icon: Sparkles },
+] as const;
+
+export function getFolderLogoMeta(logoId: string) {
+  return FOLDER_LOGOS.find((item) => item.id === logoId) || FOLDER_LOGOS[0]!;
+}
 
 export type AlmirahT = {
   id: string;
@@ -123,8 +162,23 @@ export const COVERS = [
   'Obsidian',
 ] as const;
 
-export type UpperDoorType = 'french-swing' | 'bypass-slide' | 'bifold-fold' | 'flip-up' | 'vault-dial';
-export type LowerDoorType = 'diamond-swing' | 'pocket-fluted' | 'classified-shutter' | 'drop-down' | 'bunker-slide';
+export type UpperDoorType =
+  | 'fancy-walnut-glass'
+  | 'fancy-caramel-glass'
+  | 'frameless-glass'
+  | 'french-swing'
+  | 'bypass-slide'
+  | 'bifold-fold'
+  | 'flip-up'
+  | 'vault-dial';
+export type LowerDoorType =
+  | 'solid-wood-door'
+  | 'none'
+  | 'diamond-swing'
+  | 'pocket-fluted'
+  | 'classified-shutter'
+  | 'drop-down'
+  | 'bunker-slide';
 
 export type Look = {
   name: string;
@@ -153,42 +207,42 @@ export type Look = {
 
 const LOOK_DARK_CHOCOLATE: Look = {
   name: 'Classic Walnut',
-  frame: '#3b2114',
-  dark: '#221109',
-  back: '#190c06',
-  plank: '#4d2b1a',
+  frame: '#432515',
+  dark: '#251208',
+  back: '#1c0e06',
+  plank: '#59311c',
   door: 'glass',
-  upperDoorType: 'french-swing',
-  lowerDoorType: 'diamond-swing',
-  face: '#3b2114',
+  upperDoorType: 'fancy-walnut-glass',
+  lowerDoorType: 'solid-wood-door',
+  face: '#432515',
   handle: '#d4af37',
   knob: false,
   light: false,
-  grain: 0.42,
+  grain: 0.44,
   wallType: 'dark-taupe',
   legs: 'peg-walnut',
-  accentDesc: 'Deep cocoa mahogany · French clear-glass swing doors (upper) & full clear glass double doors (lower)',
+  accentDesc: 'Polished Royal Walnut · Fancy arched glass doors (upper) & solid carved walnut wood doors (lower)',
   hasUpperDoor: true,
   hasSlideBars: true,
 };
 
 const LOOK_CREAMY_CARAMEL: Look = {
   name: 'Creamy Caramel',
-  frame: '#c98e54',
-  dark: '#915f2f',
-  back: '#5d3c1e',
-  plank: '#d69f68',
-  door: 'translucent-glass',
-  upperDoorType: 'bypass-slide',
-  lowerDoorType: 'pocket-fluted',
-  face: '#c98e54',
+  frame: '#c88b4e',
+  dark: '#8a5828',
+  back: '#5c3b1c',
+  plank: '#d69c60',
+  door: 'glass',
+  upperDoorType: 'fancy-caramel-glass',
+  lowerDoorType: 'solid-wood-door',
+  face: '#c88b4e',
   handle: '#fef3c7',
   knob: true,
   light: false,
-  grain: 0.3,
+  grain: 0.32,
   wallType: 'charcoal-slats',
   legs: 'tapered-wood',
-  accentDesc: 'Golden caramel wood · Horizontal bypass sliding glass panes (upper) & pocket fluted glass (lower)',
+  accentDesc: 'Polished Honey Oak · Fancy filigree lattice glass doors (upper) & solid carved caramel wood doors (lower)',
   hasUpperDoor: true,
   hasSlideBars: true,
 };
@@ -298,12 +352,12 @@ export const uid = () => `${Date.now().toString(36)}${(counter += 1)}`;
 export const mk = (
   name: string,
   titles: Array<[string, string]>,
-  keepsakes?: KeepsakeItem[]
+  folders?: ShelfFolder[]
 ): ShelfT => ({
   id: uid(),
   name,
   books: titles.map(([title, cover]) => ({ id: uid(), title, cover })),
-  keepsakes: keepsakes ?? [],
+  folders: folders ?? [],
 });
 
 export const seed = (): AlmirahT[] => [
@@ -389,13 +443,21 @@ function migrateAlmirah(a: AlmirahT): AlmirahT {
         'Vault Chamber 2',
         'Vault Chamber 3',
       ]);
+      const folderList = Array.isArray(s.folders) ? s.folders : [];
       if (legacyNames.has(s.name)) {
         return {
-          ...s,
+          id: s.id,
           name: s.name.startsWith('Lower') ? 'Lower Section' : `Section ${idx + 1}`,
+          books: s.books || [],
+          folders: folderList,
         };
       }
-      return s;
+      return {
+        id: s.id,
+        name: s.name,
+        books: s.books || [],
+        folders: folderList,
+      };
     }),
   };
 }
@@ -552,53 +614,62 @@ export function getWoodSurfaceStyle(
   const photoUrl = resolveShelfAssetCssUrl(imgFile);
 
   if (variant === 'back') {
-    const topShade = hexAlpha(look.back, isCaramelOak ? 0.56 : 0.62);
-    const edgeShade = hexAlpha(look.dark, isCaramelOak ? 0.68 : 0.78);
+    const topShade = hexAlpha(look.back, isCaramelOak ? 0.38 : 0.46);
+    const edgeShade = hexAlpha(look.dark, isCaramelOak ? 0.52 : 0.68);
+    const innerGloss = isCaramelOak ? 'rgba(255, 240, 212, 0.14)' : 'rgba(255, 224, 180, 0.10)';
     return {
       backgroundColor: look.back,
-      backgroundImage: `linear-gradient(180deg, ${edgeShade} 0%, ${topShade} 35%, ${edgeShade} 100%), ${photoUrl}`,
-      backgroundSize: '100% 100%, 420px auto',
-      backgroundRepeat: 'no-repeat, repeat',
-      backgroundPosition: 'center, center top',
+      backgroundImage: `linear-gradient(135deg, ${innerGloss} 0%, transparent 38%, rgba(0,0,0,0.22) 100%), linear-gradient(180deg, ${edgeShade} 0%, ${topShade} 36%, ${edgeShade} 100%), ${photoUrl}`,
+      backgroundSize: '100% 100%, 100% 100%, 420px auto',
+      backgroundRepeat: 'no-repeat, no-repeat, repeat',
+      backgroundPosition: 'center, center, center top',
+      filter: 'contrast(1.06) saturate(1.1)',
     };
   }
 
   if (variant === 'plank') {
-    const topHighlight = 'rgba(255, 240, 214, 0.16)';
-    const tintTop = hexAlpha(look.plank, isCaramelOak ? 0.24 : 0.28);
-    const tintBot = hexAlpha(look.dark, isCaramelOak ? 0.42 : 0.48);
+    const lacquerHighlight = isCaramelOak
+      ? 'linear-gradient(180deg, rgba(255,248,232,0.44) 0%, rgba(255,235,200,0.16) 18%, transparent 45%, rgba(0,0,0,0.28) 100%)'
+      : 'linear-gradient(180deg, rgba(255,238,210,0.34) 0%, rgba(255,220,175,0.12) 18%, transparent 46%, rgba(0,0,0,0.36) 100%)';
+    const sheenSweep =
+      'linear-gradient(105deg, transparent 15%, rgba(255,250,235,0.16) 36%, rgba(255,250,235,0.03) 54%, transparent 78%)';
+    const tintTop = hexAlpha(look.plank, isCaramelOak ? 0.14 : 0.18);
+    const tintBot = hexAlpha(look.dark, isCaramelOak ? 0.28 : 0.36);
     return {
       backgroundColor: look.plank,
-      backgroundImage: `linear-gradient(180deg, ${topHighlight} 0%, ${tintTop} 28%, ${tintBot} 100%), ${photoUrl}`,
-      backgroundSize: '100% 100%, 420px 100%',
-      backgroundRepeat: 'no-repeat, repeat-x',
-      backgroundPosition: 'center, left center',
+      backgroundImage: `${lacquerHighlight}, ${sheenSweep}, linear-gradient(180deg, ${tintTop} 0%, ${tintBot} 100%), ${photoUrl}`,
+      backgroundSize: '100% 100%, 100% 100%, 100% 100%, 440px 100%',
+      backgroundRepeat: 'no-repeat, no-repeat, no-repeat, repeat-x',
+      backgroundPosition: 'center, center, center, left center',
+      filter: 'contrast(1.09) saturate(1.15)',
     };
   }
 
-  const tintA = hexAlpha(look.frame, isCaramelOak ? 0.28 : 0.34);
-  const tintB = hexAlpha(look.dark, isCaramelOak ? 0.42 : 0.52);
-  const sheen =
+  const tintA = hexAlpha(look.frame, isCaramelOak ? 0.16 : 0.22);
+  const tintB = hexAlpha(look.dark, isCaramelOak ? 0.30 : 0.42);
+  const satinPolish =
     orientation === 'v'
-      ? `linear-gradient(${gradDir}, rgba(255,240,214,0.12) 0%, ${tintA} 45%, ${tintB} 100%)`
-      : `linear-gradient(${gradDir}, rgba(255,240,214,0.14) 0%, ${tintA} 48%, ${tintB} 100%)`;
+      ? `linear-gradient(${gradDir}, rgba(255,246,228,0.26) 0%, rgba(255,236,204,0.07) 26%, transparent 52%, rgba(0,0,0,0.28) 100%)`
+      : `linear-gradient(${gradDir}, rgba(255,246,228,0.28) 0%, rgba(255,236,204,0.09) 28%, transparent 54%, rgba(0,0,0,0.3) 100%)`;
+  const glaze = `linear-gradient(${gradDir}, ${tintA} 0%, ${tintB} 100%)`;
 
   return {
     backgroundColor: look.frame,
-    backgroundImage: `${sheen}, ${photoUrl}`,
+    backgroundImage: `${satinPolish}, ${glaze}, ${photoUrl}`,
     backgroundSize:
       orientation === 'v'
-        ? '100% 100%, 100% 340px'
+        ? '100% 100%, 100% 100%, 100% 340px'
         : variant === 'door'
-          ? '100% 100%, 340px 220px'
-          : '100% 100%, 480px 100%',
+          ? '100% 100%, 100% 100%, 340px 220px'
+          : '100% 100%, 100% 100%, 480px 100%',
     backgroundRepeat:
       orientation === 'v'
-        ? 'no-repeat, repeat-y'
+        ? 'no-repeat, no-repeat, repeat-y'
         : variant === 'door'
-          ? 'no-repeat, repeat'
-          : 'no-repeat, repeat-x',
-    backgroundPosition: 'center, center center',
+          ? 'no-repeat, no-repeat, repeat'
+          : 'no-repeat, no-repeat, repeat-x',
+    backgroundPosition: 'center, center, center center',
+    filter: 'contrast(1.08) saturate(1.14)',
   };
 }
 
@@ -686,12 +757,13 @@ export const CSS = `
   z-index: 15;
 }
 
-.sh-keepsake-item {
-  transition: transform 0.2s cubic-bezier(0.2, 0.9, 0.3, 1), filter 0.2s;
+.sh-folder-item {
+  transition: transform 0.22s cubic-bezier(0.2, 0.9, 0.3, 1), filter 0.22s;
 }
-.sh-keepsake-item:hover {
-  transform: translateY(-4px) scale(1.08);
-  filter: drop-shadow(0 8px 10px rgba(0,0,0,0.5));
+.sh-folder-item:hover {
+  transform: translateY(-6px) scale(1.03);
+  filter: drop-shadow(0 10px 14px rgba(0,0,0,0.48));
+  z-index: 16;
 }
 
 .sh-zoom-stage {
@@ -1840,397 +1912,193 @@ export function Cat({ dim }: { dim: boolean }) {
   );
 }
 
-/* ───────────── REALISTIC KEEPSAKES / EXTRA SAMAN ───────────── */
+/* ───────────── INTERACTIVE SHELF FOLDERS (SETTINGS GEAR ON TOP) ───────────── */
 
-export function Keepsake({
-  item,
-  shelfIndex,
-  onRemove,
-  onMoveToShelf,
-  totalShelves,
+export function ShelfFolderTile({
+  folder,
+  accessible,
+  onOpenFolder,
+  onOpenFolderSettings,
+  onDropBookIntoFolder,
 }: {
-  item: KeepsakeItem;
-  shelfIndex: number;
-  onRemove: () => void;
-  onMoveToShelf: (targetIndex: number) => void;
-  totalShelves: number;
+  folder: ShelfFolder;
+  accessible: boolean;
+  onOpenFolder: () => void;
+  onOpenFolderSettings: () => void;
+  onDropBookIntoFolder?: (explicitSource?: { fromShelfId: string; bookId: string }) => void;
 }) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const sh = '0 6px 12px rgba(0,0,0,0.55)';
-
-  const renderGraphic = () => {
-    switch (item.type) {
-      case 'vase-gold':
-        return (
-          <div
-            title={`${item.label} · Click to manage keepsake`}
-            style={{
-              width: 32,
-              height: 48,
-              borderRadius: '45% 45% 35% 35%',
-              background: 'linear-gradient(135deg, #fdfbf7 0%, #f5eedc 60%, #e2d3b5 100%)',
-              borderTop: '3px solid #d4af37',
-              boxShadow: sh,
-              position: 'relative',
-            }}
-          >
-            <div
-              style={{
-                position: 'absolute',
-                top: 8,
-                left: '20%',
-                right: '20%',
-                height: 1.5,
-                background: '#d4af37',
-              }}
-            />
-          </div>
-        );
-
-      case 'clock-brass':
-        return (
-          <div
-            title={`${item.label} · Click to manage keepsake`}
-            style={{
-              width: 40,
-              height: 40,
-              borderRadius: '50%',
-              border: '3.5px solid #d4af37',
-              background: 'radial-gradient(circle, #fcfbf9, #f4efe6)',
-              boxShadow: sh,
-              position: 'relative',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <div style={{ position: 'absolute', width: 2, height: 12, background: '#1c1917', top: 8 }} />
-            <div style={{ position: 'absolute', width: 10, height: 2, background: '#1c1917', right: 8 }} />
-            <div style={{ width: 4, height: 4, borderRadius: '50%', background: '#b45309' }} />
-          </div>
-        );
-
-      case 'succulent-pot':
-        return (
-          <div
-            title={`${item.label} · Click to manage keepsake`}
-            style={{ width: 34, height: 44, display: 'flex', flexDirection: 'column', alignItems: 'center' }}
-          >
-            {/* Succulent Leaves */}
-            <div style={{ display: 'flex', gap: 1, marginBottom: -2 }}>
-              <span style={{ width: 9, height: 16, borderRadius: '50% 50% 0 0', background: '#15803d' }} />
-              <span style={{ width: 10, height: 20, borderRadius: '50% 50% 0 0', background: '#16a34a' }} />
-              <span style={{ width: 9, height: 16, borderRadius: '50% 50% 0 0', background: '#15803d' }} />
-            </div>
-            {/* Terracotta Pot */}
-            <div
-              style={{
-                width: 26,
-                height: 22,
-                borderRadius: '2px 2px 6px 6px',
-                background: 'linear-gradient(90deg, #c2410c, #9a3412)',
-                boxShadow: sh,
-              }}
-            />
-          </div>
-        );
-
-      case 'book-stack':
-        return (
-          <div
-            title={`${item.label} · Click to manage keepsake`}
-            style={{
-              display: 'flex',
-              flexDirection: 'column-reverse',
-              gap: 1.5,
-              boxShadow: sh,
-            }}
-          >
-            <div style={{ height: 11, width: 52, borderRadius: 2, background: '#881337', borderLeft: '4px solid #4c0519' }} />
-            <div style={{ height: 10, width: 46, borderRadius: 2, background: '#1e3a8a', borderLeft: '4px solid #0f172a' }} />
-            <div style={{ height: 9, width: 40, borderRadius: 2, background: '#b45309', borderLeft: '4px solid #78350f' }} />
-          </div>
-        );
-
-      case 'rattan-basket':
-        return (
-          <div
-            title={`${item.label} · Click to manage keepsake`}
-            style={{
-              width: 42,
-              height: 32,
-              borderRadius: 3,
-              background: '#b48a58',
-              backgroundImage:
-                'repeating-linear-gradient(45deg, rgba(0,0,0,0.3) 0 2px, transparent 2px 6px), repeating-linear-gradient(-45deg, rgba(0,0,0,0.3) 0 2px, transparent 2px 6px)',
-              boxShadow: sh,
-              position: 'relative',
-            }}
-          >
-            {/* Basket Handle */}
-            <div
-              style={{
-                position: 'absolute',
-                top: 6,
-                left: '25%',
-                right: '25%',
-                height: 6,
-                borderRadius: 3,
-                background: '#451a03',
-              }}
-            />
-          </div>
-        );
-
-      case 'starfish-sculpt':
-        return (
-          <div
-            title={`${item.label} · Click to manage keepsake`}
-            style={{ width: 34, height: 42, display: 'flex', flexDirection: 'column', alignItems: 'center' }}
-          >
-            <svg viewBox="0 0 32 32" width="30" height="30">
-              <polygon
-                points="16,2 20,12 30,12 22,18 25,28 16,22 7,28 10,18 2,12 12,12"
-                fill="#d4af37"
-                stroke="#92400e"
-                strokeWidth="1.5"
-              />
-            </svg>
-            <div style={{ width: 2, height: 10, background: '#1c1917' }} />
-            <div style={{ width: 18, height: 4, background: '#44403c', borderRadius: 2 }} />
-          </div>
-        );
-
-      case 'bottles-apothecary':
-        return (
-          <div
-            title={`${item.label} · Click to manage keepsake`}
-            style={{ display: 'flex', gap: 3, alignItems: 'flex-end', boxShadow: sh }}
-          >
-            <div
-              style={{
-                width: 14,
-                height: 36,
-                borderRadius: '3px 3px 2px 2px',
-                background: 'linear-gradient(135deg, rgba(255,255,255,0.7), rgba(180,220,250,0.4))',
-                border: '1px solid rgba(255,255,255,0.6)',
-              }}
-            />
-            <div
-              style={{
-                width: 16,
-                height: 44,
-                borderRadius: '3px 3px 2px 2px',
-                background: 'linear-gradient(135deg, rgba(160,110,60,0.8), rgba(90,50,20,0.85))',
-                border: '1px solid rgba(212,175,55,0.4)',
-              }}
-            />
-          </div>
-        );
-
-      case 'modern-ring':
-        return (
-          <div
-            title={`${item.label} · Click to manage keepsake`}
-            style={{
-              width: 38,
-              height: 44,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-            }}
-          >
-            <div
-              style={{
-                width: 32,
-                height: 32,
-                borderRadius: '50%',
-                border: '5px solid #1c1917',
-                boxShadow: sh,
-              }}
-            />
-            <div style={{ width: 20, height: 4, background: '#d4af37', borderRadius: 1 }} />
-          </div>
-        );
-
-      case 'forest-lantern':
-        return (
-          <div
-            title={`${item.label} · Click to manage keepsake`}
-            style={{ width: 32, height: 46, display: 'flex', flexDirection: 'column', alignItems: 'center', filter: `drop-shadow(0 5px 8px rgba(0,0,0,0.45))` }}
-          >
-            <div style={{ width: 14, height: 6, borderRadius: '6px 6px 0 0', border: '2px solid #8c6a38', borderBottom: 0 }} />
-            <div style={{ width: 24, height: 32, borderRadius: 4, border: '2px solid #574124', background: 'linear-gradient(180deg, rgba(254,240,138,0.85), rgba(217,119,6,0.55))', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <div style={{ width: 8, height: 12, borderRadius: '50%', background: '#fffbeb', boxShadow: '0 0 10px #fde047' }} />
-            </div>
-            <div style={{ width: 28, height: 4, borderRadius: 2, background: '#3a2b18' }} />
-          </div>
-        );
-
-      case 'moss-terrarium':
-        return (
-          <div
-            title={`${item.label} · Click to manage keepsake`}
-            style={{ width: 38, height: 42, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end' }}
-          >
-            <div style={{ width: 34, height: 34, borderRadius: '50% 50% 42% 42%', border: '2px solid rgba(226,242,231,0.72)', background: 'linear-gradient(180deg, rgba(220,252,231,0.22), rgba(21,128,61,0.45) 65%, #3a2b1c 75%)', boxShadow: sh, position: 'relative', overflow: 'hidden' }}>
-              <div style={{ position: 'absolute', bottom: 8, left: 6, width: 10, height: 12, borderRadius: '50% 50% 0 0', background: '#4ade80' }} />
-              <div style={{ position: 'absolute', bottom: 8, right: 6, width: 12, height: 15, borderRadius: '50% 50% 0 0', background: '#22c55e' }} />
-            </div>
-          </div>
-        );
-
-      case 'conch-shell':
-        return (
-          <div
-            title={`${item.label} · Click to manage keepsake`}
-            style={{ width: 42, height: 32, display: 'flex', alignItems: 'center', justifyContent: 'center', filter: 'drop-shadow(0 5px 8px rgba(0,0,0,0.4))' }}
-          >
-            <svg viewBox="0 0 44 30" width="40" height="28">
-              <path d="M4 22 C8 10, 22 4, 34 10 C40 13, 42 20, 34 24 C24 28, 10 26, 4 22 Z" fill="#fef3e2" stroke="#c29275" strokeWidth="1.5" />
-              <path d="M16 10 Q20 18 16 25 M24 8 Q28 18 25 26 M31 11 Q34 18 32 24" fill="none" stroke="#d4a382" strokeWidth="1.2" />
-            </svg>
-          </div>
-        );
-
-      case 'coral-sculpt':
-        return (
-          <div
-            title={`${item.label} · Click to manage keepsake`}
-            style={{ width: 38, height: 44, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', filter: 'drop-shadow(0 5px 8px rgba(0,0,0,0.42))' }}
-          >
-            <svg viewBox="0 0 38 36" width="36" height="34">
-              <path d="M19 34 L19 20 M19 24 L11 14 M11 14 L8 6 M11 14 L15 8 M19 20 L27 12 M27 12 L24 4 M27 12 L32 8" stroke="#e07a5f" strokeWidth="3.5" strokeLinecap="round" fill="none" />
-            </svg>
-            <div style={{ width: 22, height: 6, borderRadius: 2, background: '#e7decb' }} />
-          </div>
-        );
-
-      case 'chai-kulhad':
-        return (
-          <div
-            title={`${item.label} · Click to manage keepsake`}
-            style={{ width: 34, height: 42, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', position: 'relative' }}
-          >
-            <div style={{ position: 'absolute', top: 0, width: 12, height: 14, borderRadius: '50%', borderLeft: '2px solid rgba(255,250,240,0.65)', animation: 'chaiSteamFloat 2.4s ease-in-out infinite' }} />
-            <div style={{ width: 24, height: 22, clipPath: 'polygon(0% 0%, 100% 0%, 84% 100%, 16% 100%)', background: 'linear-gradient(135deg, #c9723d, #8a4319)', boxShadow: sh, borderRadius: 2 }} />
-          </div>
-        );
-
-      case 'paper-boat':
-        return (
-          <div
-            title={`${item.label} · Click to manage keepsake`}
-            style={{ width: 44, height: 30, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', filter: 'drop-shadow(0 5px 8px rgba(0,0,0,0.4))' }}
-          >
-            <svg viewBox="0 0 48 30" width="42" height="26">
-              <polygon points="4,20 44,20 36,28 12,28" fill="#f5efe4" stroke="#cbd5e1" strokeWidth="1" />
-              <polygon points="12,20 24,5 36,20" fill="#fffdf9" stroke="#cbd5e1" strokeWidth="1" />
-              <line x1="24" y1="5" x2="24" y2="20" stroke="#94a3b8" strokeWidth="1" />
-            </svg>
-          </div>
-        );
-
-      case 'flower-vase':
-      default:
-        return (
-          <div
-            title={`${item.label} · Click to manage keepsake`}
-            style={{
-              width: 32,
-              height: 46,
-              borderRadius: '40% 40% 30% 30%',
-              background: 'linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%)',
-              borderTop: '4px solid #4338ca',
-              boxShadow: sh,
-            }}
-          />
-        );
-    }
-  };
+  const [isDragOver, setIsDragOver] = useState(false);
+  const { Icon } = getFolderLogoMeta(folder.logoId);
 
   return (
-    <div style={{ position: 'relative', flex: 'none' }} className="sh-keepsake-item">
+    <div
+      className={`sh-folder-item relative flex-none select-none ${isDragOver ? 'scale-105 ring-2 ring-amber-400 rounded-lg' : ''}`}
+      style={{ width: 88, paddingTop: 14 }}
+      onDragOver={(e) => {
+        if (!accessible) return;
+        e.preventDefault();
+        e.stopPropagation();
+        if (!isDragOver) setIsDragOver(true);
+      }}
+      onDragLeave={(e) => {
+        e.stopPropagation();
+        if (isDragOver) setIsDragOver(false);
+      }}
+      onDrop={(e) => {
+        if (!accessible) return;
+        e.preventDefault();
+        e.stopPropagation();
+        setIsDragOver(false);
+        try {
+          const raw = e.dataTransfer.getData('application/json');
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (parsed?.fromShelfId && parsed?.bookId) {
+              onDropBookIntoFolder?.(parsed);
+              return;
+            }
+          }
+        } catch {}
+        onDropBookIntoFolder?.();
+      }}
+    >
+      {/* SETTINGS BUTTON PLACED DIRECTLY ON TOP OF THE FOLDER */}
+      {accessible && (
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            onOpenFolderSettings();
+          }}
+          title="Folder Settings (Trash Delete, Share, Rename, Colour, Logo)"
+          aria-label={`Settings for ${folder.name}`}
+          style={{
+            position: 'absolute',
+            top: -1,
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 28,
+            boxShadow: '0 3px 8px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.28)',
+          }}
+          className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-stone-950 hover:bg-amber-600 text-amber-200 hover:text-stone-950 border border-amber-400/75 text-[9.5px] font-bold transition cursor-pointer whitespace-nowrap"
+        >
+          <Settings className="w-2.5 h-2.5 shrink-0" />
+          <span>Settings</span>
+        </button>
+      )}
+
+      {/* TACTILE FOLDER BODY */}
       <div
         role="button"
         tabIndex={0}
-        onClick={() => setMenuOpen(!menuOpen)}
-        onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setMenuOpen(!menuOpen)}
-        style={{ cursor: 'pointer', padding: '0 4px' }}
+        onClick={() => accessible && onOpenFolder()}
+        onKeyDown={(e) => {
+          if ((e.key === 'Enter' || e.key === ' ') && accessible) {
+            e.preventDefault();
+            onOpenFolder();
+          }
+        }}
+        title={`${folder.name} (${folder.books.length} items) · Click to open folder`}
+        style={{
+          position: 'relative',
+          width: '100%',
+          height: 100,
+          cursor: accessible ? 'pointer' : 'default',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'flex-end',
+        }}
       >
-        {renderGraphic()}
-      </div>
-
-      {/* Keepsake Quick Action Popover */}
-      {menuOpen && (
+        {/* Top Manila-Style Back Folder Tab */}
         <div
           style={{
             position: 'absolute',
-            bottom: '100%',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            marginBottom: 8,
-            width: 154,
-            padding: 8,
-            borderRadius: 8,
-            background: '#1a120d',
-            border: '1px solid #382518',
-            boxShadow: '0 12px 24px rgba(0,0,0,0.85)',
-            zIndex: 50,
-            color: '#efe4d4',
-            font: '500 11px system-ui',
+            top: 2,
+            left: 4,
+            width: 38,
+            height: 12,
+            borderRadius: '5px 6px 0 0',
+            backgroundColor: folder.color,
+            filter: 'brightness(0.84)',
+            border: '1px solid rgba(255,255,255,0.24)',
+            borderBottom: 'none',
+            boxShadow: '0 -1px 3px rgba(0,0,0,0.3)',
+          }}
+        />
+        {/* Back Folder Sheet */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 9,
+            left: 2,
+            right: 2,
+            bottom: 4,
+            borderRadius: '3px 6px 5px 5px',
+            backgroundColor: folder.color,
+            filter: 'brightness(0.76)',
+            border: '1px solid rgba(255,255,255,0.18)',
+          }}
+        />
+        {/* Inner White Document Peek */}
+        <div
+          style={{
+            position: 'absolute',
+            top: 12,
+            left: 7,
+            right: 7,
+            height: 16,
+            borderRadius: '2px 2px 0 0',
+            background: 'linear-gradient(180deg, #fffdf9, #e7decb)',
+            boxShadow: '0 -1px 2px rgba(0,0,0,0.2)',
+            opacity: folder.books.length > 0 ? 0.96 : 0.45,
+          }}
+        />
+        {/* Front Folder Cover Plate */}
+        <div
+          style={{
+            position: 'relative',
+            zIndex: 5,
+            height: 82,
+            borderRadius: '4px 6px 6px 6px',
+            background: `linear-gradient(145deg, ${folder.color} 0%, rgba(12, 10, 9, 0.48) 100%)`,
+            backgroundColor: folder.color,
+            border: '1.5px solid rgba(254, 243, 199, 0.34)',
+            boxShadow: '4px 6px 12px rgba(0,0,0,0.52), inset 0 1.5px 0 rgba(255,255,255,0.28)',
+            padding: '7px 6px 6px',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            color: '#fffbeb',
           }}
         >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-            <span style={{ fontWeight: 700, color: '#e5ce95', fontSize: 10 }}>{item.label}</span>
-            <button
-              type="button"
-              onClick={() => setMenuOpen(false)}
-              style={{ all: 'unset', cursor: 'pointer', color: '#a69079' }}
-            >
-              <X className="w-3 h-3" />
-            </button>
+          {/* Logo Medallion */}
+          <div
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: '50%',
+              background: 'rgba(15, 11, 8, 0.36)',
+              border: '1px solid rgba(254, 240, 138, 0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.45)',
+            }}
+          >
+            <Icon className="w-4 h-4 text-amber-100" />
           </div>
 
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-            {/* Remove Button */}
-            <button
-              type="button"
-              onClick={() => {
-                onRemove();
-                setMenuOpen(false);
-              }}
-              className="flex items-center gap-1.5 px-2 py-1 rounded bg-[#6e171b]/35 hover:bg-[#6e171b]/55 border border-[#962d32]/45 text-[#d97074] text-[10px] w-full text-left transition"
-            >
-              <Trash2 className="w-3 h-3 text-[#b0363b]" />
-              <span>Remove from shelf</span>
-            </button>
-
-            {/* Move to another shelf */}
-            <div style={{ marginTop: 2, fontSize: 9.5, color: '#a8a29e', textTransform: 'uppercase' }}>
-              Move to Shelf:
+          <div className="w-full text-center">
+            <div className="text-[10px] font-bold leading-tight truncate px-0.5 drop-shadow">
+              {folder.name}
             </div>
-            <div className="flex flex-wrap gap-1">
-              {Array.from({ length: totalShelves }).map((_, idx) => {
-                if (idx === shelfIndex) return null;
-                return (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => {
-                      onMoveToShelf(idx);
-                      setMenuOpen(false);
-                    }}
-                    className="px-2 py-0.5 rounded bg-stone-800 hover:bg-amber-600 hover:text-stone-950 text-stone-300 text-[9.5px] transition"
-                  >
-                    Shelf {idx + 1}
-                  </button>
-                );
-              })}
+            <div className="text-[8.5px] font-mono opacity-85 mt-0.5">
+              {folder.books.length} {folder.books.length === 1 ? 'doc' : 'docs'}
             </div>
           </div>
         </div>
-      )}
+      </div>
     </div>
   );
 }
@@ -2682,6 +2550,51 @@ export function CabinetDoors({
   open: boolean;
   onToggle: () => void;
 }) {
+  if (doorKind === 'none') {
+    return null;
+  }
+  if (doorKind === 'frameless-glass') {
+    // Architectural frameless tempered crystal glass pane over upper shelves ONLY (zero door frames/handles/locks)
+    const clampTint = look.name === 'Creamy Caramel' ? '#fef3c7' : '#e5c158';
+    return (
+      <div
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 22,
+          pointerEvents: 'none',
+          backgroundImage:
+            'linear-gradient(124deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.03) 20%, rgba(226,248,255,0.16) 42%, rgba(255,255,255,0.01) 50%, rgba(255,255,255,0.13) 74%, rgba(226,248,255,0.04) 90%, rgba(255,255,255,0.16) 100%)',
+          backgroundColor: 'rgba(220, 242, 255, 0.045)',
+          boxShadow:
+            'inset 0 0 0 1px rgba(220, 245, 255, 0.32), inset 0 2px 0 rgba(255,255,255,0.42), inset 0 -1.5px 0 rgba(190, 232, 245, 0.24), inset 3px 0 10px rgba(255,255,255,0.06), inset -3px 0 10px rgba(255,255,255,0.06)',
+        }}
+      >
+        {/* Minimalist precision brass/gold corner glass standoffs */}
+        {[
+          { top: 6, left: 6 },
+          { top: 6, right: 6 },
+          { bottom: 6, left: 6 },
+          { bottom: 6, right: 6 },
+        ].map((pos, idx) => (
+          <span
+            key={idx}
+            style={{
+              position: 'absolute',
+              ...pos,
+              width: 6,
+              height: 6,
+              borderRadius: '50%',
+              background: `radial-gradient(circle at 30% 30%, #fffbeb, ${clampTint} 65%, #78350f)`,
+              boxShadow: '0 1px 3px rgba(0,0,0,0.55)',
+              opacity: 0.85,
+            }}
+          />
+        ))}
+      </div>
+    );
+  }
   if (doorKind === 'classified-shutter') {
     return <DukaanRollingShutter look={look} open={open} onToggle={onToggle} />;
   }
@@ -2726,6 +2639,239 @@ export function CabinetDoors({
       <span>{open ? 'Lock' : 'Unlock'}</span>
     </button>
   );
+
+  // 0A. FANCY DESIGNER WOOD-FRAMED GLASS DOORS (Almirah 1 Cathedral Walnut & Almirah 2 Filigree Caramel Lattice Upper)
+  if (doorKind === 'fancy-walnut-glass' || doorKind === 'fancy-caramel-glass') {
+    const isCaramel = doorKind === 'fancy-caramel-glass';
+    const doorWoodStyle = getWoodSurfaceStyle(look, 'v', 'door', '135deg');
+    const goldTrim = isCaramel ? '#fef08a' : '#e5c158';
+    const brassDeep = isCaramel ? '#92400e' : '#78350f';
+
+    return (
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: open ? 35 : 25,
+          perspective: 1950,
+          overflow: 'visible',
+          pointerEvents: open ? 'none' : 'auto',
+        }}
+      >
+        {(['left', 'right'] as const).map((side) => {
+          const left = side === 'left';
+          return (
+            <div
+              key={side}
+              role="button"
+              tabIndex={0}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggle();
+              }}
+              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onToggle())}
+              title={open ? 'Click ornate glass door to close & lock' : 'Click fancy glass door to open'}
+              style={{
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                width: '50%',
+                [left ? 'left' : 'right']: 0,
+                cursor: 'pointer',
+                pointerEvents: 'auto',
+                transformOrigin: left ? 'left center' : 'right center',
+                transform: `translateX(${open ? (left ? -26 : 26) : 0}px) rotateY(${open ? (left ? -148 : 148) : 0}deg)`,
+                transition: 'transform 0.92s cubic-bezier(0.28, 0.75, 0.25, 1)',
+                padding: 9,
+                ...doorWoodStyle,
+                boxShadow: `${bevel}, inset 0 0 0 1px rgba(254, 240, 138, 0.22), 0 8px 18px rgba(0,0,0,0.46)`,
+              }}
+            >
+              {/* Inner Carved Beveled Brass Inlay Lip Around Crystal Pane */}
+              <div
+                style={{
+                  position: 'relative',
+                  width: '100%',
+                  height: '100%',
+                  backgroundImage: clearTransparentGlassSheen,
+                  backgroundColor: isCaramel ? 'rgba(248, 250, 255, 0.085)' : 'rgba(218, 238, 255, 0.075)',
+                  borderRadius: 3,
+                  overflow: 'hidden',
+                  boxShadow:
+                    'inset 0 0 0 1.5px rgba(255,255,255,0.42), inset 0 0 0 3px rgba(212,175,55,0.28), inset 0 3px 12px rgba(0,0,0,0.34)',
+                }}
+              >
+                {/* Fancy Architectural Cathedral Arch (Almirah 1) or Diamond Filigree Lattice (Almirah 2) */}
+                {isCaramel ? (
+                  <svg
+                    viewBox="0 0 160 320"
+                    preserveAspectRatio="none"
+                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
+                  >
+                    <rect x="4" y="4" width="152" height="312" rx="18" fill="none" stroke={goldTrim} strokeOpacity="0.48" strokeWidth="1.6" />
+                    <path d="M10 44 Q80 6 150 44" fill="none" stroke={look.frame} strokeWidth="5" strokeOpacity="0.88" />
+                    <path d="M10 44 Q80 6 150 44" fill="none" stroke={goldTrim} strokeWidth="1.2" strokeOpacity="0.6" />
+                    <path d="M10 276 Q80 314 150 276" fill="none" stroke={look.frame} strokeWidth="4" strokeOpacity="0.82" />
+                    {/* Delicate Diamond Mullion Ribs Along Edges */}
+                    <path
+                      d="M4 110 L32 160 L4 210 M156 110 L128 160 L156 210 M80 12 L94 28 L80 44 L66 28 Z"
+                      fill="none"
+                      stroke={goldTrim}
+                      strokeOpacity="0.46"
+                      strokeWidth="1.4"
+                    />
+                  </svg>
+                ) : (
+                  <svg
+                    viewBox="0 0 160 320"
+                    preserveAspectRatio="none"
+                    style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
+                  >
+                    {/* Ornate Gothic/Cathedral Walnut Arch Crown Inside Glass */}
+                    <path d="M6 58 Q80 -6 154 58" fill="none" stroke={look.frame} strokeWidth="7" strokeOpacity="0.95" />
+                    <path d="M6 58 Q80 -6 154 58" fill="none" stroke={goldTrim} strokeWidth="1.4" strokeOpacity="0.65" />
+                    <rect x="5" y="5" width="150" height="310" rx="8" fill="none" stroke={goldTrim} strokeOpacity="0.4" strokeWidth="1.4" />
+                    {/* Corner Carved Filigree Rosettes */}
+                    <circle cx="16" cy="16" r="6" fill="none" stroke={goldTrim} strokeOpacity="0.55" strokeWidth="1.3" />
+                    <circle cx="144" cy="16" r="6" fill="none" stroke={goldTrim} strokeOpacity="0.55" strokeWidth="1.3" />
+                    <circle cx="16" cy="304" r="6" fill="none" stroke={goldTrim} strokeOpacity="0.55" strokeWidth="1.3" />
+                    <circle cx="144" cy="304" r="6" fill="none" stroke={goldTrim} strokeOpacity="0.55" strokeWidth="1.3" />
+                  </svg>
+                )}
+
+                {/* Polished Beveled Brass Hinges on Outer Stile */}
+                {[14, 50, 86].map((topPct) => (
+                  <span
+                    key={topPct}
+                    style={{
+                      position: 'absolute',
+                      top: `${topPct}%`,
+                      [left ? 'left' : 'right']: 0,
+                      width: 5,
+                      height: 18,
+                      borderRadius: 2,
+                      background: `linear-gradient(180deg, ${goldTrim}, ${brassDeep})`,
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.65)',
+                      opacity: 0.9,
+                    }}
+                  />
+                ))}
+              </div>
+
+              {/* Sculpted Vintage Curved Brass Door Pull */}
+              <span
+                style={{
+                  position: 'absolute',
+                  top: '43%',
+                  [left ? 'right' : 'left']: 4,
+                  width: 6,
+                  height: 44,
+                  borderRadius: 6,
+                  background: `linear-gradient(180deg, ${goldTrim} 0%, #d4af37 52%, ${brassDeep} 100%)`,
+                  border: '1px solid rgba(0,0,0,0.45)',
+                  boxShadow: '0 3px 6px rgba(0,0,0,0.62), inset 0 1px 1px rgba(255,255,255,0.65)',
+                }}
+              />
+            </div>
+          );
+        })}
+        {lockToggleBtn}
+      </div>
+    );
+  }
+
+  // 0B. SOLID CARVED POLISHED WOOD DOUBLE DOORS (Lower Section of Almirah 1 & Almirah 2 — ZERO GLASS)
+  if (doorKind === 'solid-wood-door') {
+    const doorWoodStyle = getWoodSurfaceStyle(look, 'v', 'door', '135deg');
+    const isCaramel = look.name === 'Creamy Caramel';
+    const trimGold = isCaramel ? '#fef08a' : '#e5c158';
+    return (
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: open ? 35 : 25,
+          perspective: 1900,
+          overflow: 'visible',
+          pointerEvents: open ? 'none' : 'auto',
+        }}
+      >
+        {(['left', 'right'] as const).map((side) => {
+          const left = side === 'left';
+          return (
+            <div
+              key={side}
+              role="button"
+              tabIndex={0}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggle();
+              }}
+              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onToggle())}
+              title={open ? 'Click solid wood door to close & lock' : 'Click solid wood door to unlock'}
+              style={{
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                width: '50%',
+                [left ? 'left' : 'right']: 0,
+                cursor: 'pointer',
+                pointerEvents: 'auto',
+                transformOrigin: left ? 'left center' : 'right center',
+                transform: `translateX(${open ? (left ? -24 : 24) : 0}px) rotateY(${open ? (left ? -146 : 146) : 0}deg)`,
+                transition: 'transform 0.9s cubic-bezier(0.28, 0.75, 0.25, 1)',
+                padding: 10,
+                ...doorWoodStyle,
+                boxShadow: `${bevel}, inset 0 0 0 1px ${look.dark}, 0 8px 18px rgba(0,0,0,0.48)`,
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 6,
+              }}
+            >
+              {/* Raised Solid Wood Carving Panels (Zero Glass) */}
+              <div
+                style={{
+                  flex: 1,
+                  borderRadius: 3,
+                  ...getWoodSurfaceStyle(look, 'panel', 'door', '150deg'),
+                  border: `1.5px solid ${look.dark}`,
+                  boxShadow:
+                    'inset 2px 2px 0 rgba(255,244,218,0.22), inset -2px -2px 0 rgba(0,0,0,0.45), 0 2px 6px rgba(0,0,0,0.38)',
+                  position: 'relative',
+                }}
+              >
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 8,
+                    border: `1px solid ${isCaramel ? 'rgba(254,240,138,0.34)' : 'rgba(212,175,55,0.26)'}`,
+                    borderRadius: 2,
+                    pointerEvents: 'none',
+                  }}
+                />
+              </div>
+
+              {/* Brass Pull / Turned Wood Knob */}
+              <span
+                style={{
+                  position: 'absolute',
+                  top: '44%',
+                  [left ? 'right' : 'left']: 5,
+                  width: isCaramel ? 11 : 6,
+                  height: isCaramel ? 11 : 34,
+                  borderRadius: isCaramel ? '50%' : 5,
+                  background: `radial-gradient(circle at 35% 30%, ${trimGold} 0%, #d4af37 58%, #78350f 100%)`,
+                  border: '1px solid rgba(0,0,0,0.48)',
+                  boxShadow: '0 2px 6px rgba(0,0,0,0.65)',
+                }}
+              />
+            </div>
+          );
+        })}
+        {lockToggleBtn}
+      </div>
+    );
+  }
 
   // 1. FRENCH CLEAR-GLASS SWING (Dark Chocolate Upper) & FULL CLEAR DOUBLE GLASS (Dark Chocolate Lower)
   if (doorKind === 'french-swing' || doorKind === 'diamond-swing') {
@@ -3170,8 +3316,8 @@ export function CabinetDoors({
 function ShelfRow({
   shelf,
   shelfIdx,
-  bayIdx,
-  totalShelves,
+  bayIdx: _bayIdx,
+  totalShelves: _totalShelves,
   look,
   ink,
   night,
@@ -3187,9 +3333,10 @@ function ShelfRow({
   pickedBook,
   onPickBook,
   onDropBook,
-  onRemoveKeepsake,
-  onMoveKeepsake,
-  onAddKeepsake,
+  onCreateFolder,
+  onOpenFolder,
+  onOpenFolderSettings,
+  onDropBookToFolder,
 }: {
   shelf: ShelfT;
   shelfIdx: number;
@@ -3210,9 +3357,10 @@ function ShelfRow({
   pickedBook?: { fromShelfId: string; book: Book } | null;
   onPickBook?: (shelfId: string, book: Book) => void;
   onDropBook?: (targetShelfId: string, explicitSource?: { fromShelfId: string; bookId: string }) => void;
-  onRemoveKeepsake: (shelfId: string, keepsakeId: string) => void;
-  onMoveKeepsake: (fromShelfId: string, keepsakeId: string, targetShelfIndex: number) => void;
-  onAddKeepsake: (shelfId: string) => void;
+  onCreateFolder: (shelfId: string) => void;
+  onOpenFolder: (shelfId: string, folder: ShelfFolder) => void;
+  onOpenFolderSettings: (shelfId: string, folder: ShelfFolder) => void;
+  onDropBookToFolder?: (targetShelfId: string, folderId: string, explicitSource?: { fromShelfId: string; bookId: string }) => void;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const [slidePct, setSlidePct] = useState(0);
@@ -3405,18 +3553,19 @@ function ShelfRow({
           >
             <button
               type="button"
-              onClick={() => onAddKeepsake(shelf.id)}
-              className="px-1.5 py-0.5 rounded text-[10px] hover:brightness-110 active:translate-y-px transition cursor-pointer"
+              onClick={() => onCreateFolder(shelf.id)}
+              className="px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1 hover:brightness-110 active:translate-y-px transition cursor-pointer"
               style={{
-                background: look.light ? 'rgba(245,158,11,0.22)' : 'rgba(245,158,11,0.2)',
-                color: look.light ? '#78350f' : '#fcd34d',
-                border: look.light ? '1px solid rgba(180,83,9,0.28)' : '1px solid rgba(251,191,36,0.35)',
+                background: look.light ? 'rgba(180,83,9,0.16)' : 'rgba(245,158,11,0.22)',
+                color: look.light ? '#78350f' : '#fde68a',
+                border: look.light ? '1px solid rgba(180,83,9,0.32)' : '1px solid rgba(251,191,36,0.4)',
                 boxShadow:
                   '0 2px 5px rgba(0,0,0,0.42), 0 1px 2px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.22)',
               }}
-              title="Add keepsake ornament"
+              title="Create a custom folder inside this section"
             >
-              🏺+
+              <FolderPlus className="w-3 h-3" />
+              <span>Create Folder</span>
             </button>
             <button
               type="button"
@@ -3436,7 +3585,7 @@ function ShelfRow({
             </button>
             <button
               type="button"
-              disabled={shelfIdx === totalShelves - 1}
+              disabled={shelfIdx === _totalShelves - 1}
               onClick={() => onMoveShelf(shelfIdx, 1)}
               className="px-1.5 py-0.5 rounded text-[10px] font-bold hover:brightness-110 active:translate-y-px transition disabled:opacity-30 cursor-pointer"
               style={{
@@ -3465,7 +3614,7 @@ function ShelfRow({
           pointerEvents: accessible ? 'auto' : 'none',
         }}
       >
-        {/* Scrollable Books & Keepsakes Row */}
+        {/* Scrollable Books & Folders Row */}
         <div
           ref={scrollRef}
           onScroll={handleTrackScroll}
@@ -3482,7 +3631,7 @@ function ShelfRow({
           }}
         >
           {/* Empty Shelf Visual Guide */}
-          {shelf.books.length === 0 && (shelf.keepsakes?.length ?? 0) === 0 && (
+          {shelf.books.length === 0 && (shelf.folders?.length ?? 0) === 0 && (
             <div
               style={{
                 flex: 1,
@@ -3499,7 +3648,7 @@ function ShelfRow({
                 textAlign: 'center',
               }}
             >
-              {accessible ? 'Empty compartment · Click + Add to place books' : 'Empty shelf'}
+              {accessible ? 'Empty compartment · Upload Document or Create Folder' : 'Empty shelf'}
             </div>
           )}
 
@@ -3646,28 +3795,28 @@ function ShelfRow({
             );
           })}
 
-          {/* Keepsakes */}
-          {shelf.keepsakes?.map((kItem) => (
-            <Keepsake
-              key={kItem.id}
-              item={kItem}
-              shelfIndex={shelfIdx}
-              totalShelves={totalShelves}
-              onRemove={() => onRemoveKeepsake(shelf.id, kItem.id)}
-              onMoveToShelf={(targetIdx) => onMoveKeepsake(shelf.id, kItem.id, targetIdx)}
+          {/* Folders on this Shelf (Settings button right ON TOP of each folder) */}
+          {shelf.folders?.map((fld) => (
+            <ShelfFolderTile
+              key={fld.id}
+              folder={fld}
+              accessible={accessible}
+              onOpenFolder={() => onOpenFolder(shelf.id, fld)}
+              onOpenFolderSettings={() => onOpenFolderSettings(shelf.id, fld)}
+              onDropBookIntoFolder={(explicit) => onDropBookToFolder?.(shelf.id, fld.id, explicit)}
             />
           ))}
         </div>
 
-        {/* ALWAYS-VISIBLE Pinned + Add Book Button */}
+        {/* ALWAYS-VISIBLE Pinned Upload Document Button */}
         <button
           type="button"
           onClick={() => onAddBook(shelf.id)}
-          aria-label="Add a book to this shelf"
-          title="Add a book (MBBS Textbooks, Upload PDF, Notes, Drive)"
+          aria-label="Upload document to this shelf"
+          title="Upload Document (PDF, Word, EPUB, Notes, Drive)"
           style={{
             flex: 'none',
-            width: 62,
+            width: 66,
             height: 108,
             marginBottom: 8,
             borderRadius: 5,
@@ -3681,13 +3830,14 @@ function ShelfRow({
             alignItems: 'center',
             justifyContent: 'center',
             gap: 4,
+            padding: '0 4px',
             cursor: 'pointer',
           }}
           className="hover:scale-105 hover:bg-amber-500/15 transition shrink-0"
         >
-          <Plus className="w-4 h-4" />
-          <span style={{ fontSize: 9, fontWeight: 700, textAlign: 'center', lineHeight: 1.15 }}>
-            Add Book
+          <Upload className="w-4 h-4" />
+          <span style={{ fontSize: 8.5, fontWeight: 700, textAlign: 'center', lineHeight: 1.15 }}>
+            Upload Document
           </span>
         </button>
       </div>
@@ -3747,16 +3897,16 @@ function ShelfRow({
         </button>
       </div>
 
-      {/* Real Photographic Wood / Steel Vault / Honed Basalt Shelf Plank */}
+      {/* Real Photographic Polished Wood / Steel Vault / Honed Basalt Shelf Plank */}
       <div
         style={{
           margin: '0 -12px',
-          height: look.grain > 0 || look.isVault ? 14 : 13,
+          height: look.grain > 0 || look.isVault ? 15 : 13,
           ...getWoodSurfaceStyle(look, 'h', 'plank', '180deg'),
           boxShadow: look.isVault
             ? '0 6px 10px rgba(0,0,0,0.68), inset 0 1.5px 0 rgba(226,232,240,0.38), inset 0 -2px 3px rgba(0,0,0,0.72)'
             : look.grain > 0
-              ? '0 5px 8px rgba(0,0,0,0.48), inset 0 1.5px 0 rgba(255,238,210,0.34), inset 0 -2px 3px rgba(0,0,0,0.42)'
+              ? '0 7px 12px rgba(0,0,0,0.52), inset 0 2px 0 rgba(255,244,218,0.46), inset 0 -2px 4px rgba(0,0,0,0.48)'
               : '0 4px 7px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.32)',
         }}
       />
@@ -3784,9 +3934,10 @@ export function Compartment({
   pickedBook,
   onPickBook,
   onDropBook,
-  onRemoveKeepsake,
-  onMoveKeepsake,
-  onAddKeepsake,
+  onCreateFolder,
+  onOpenFolder,
+  onOpenFolderSettings,
+  onDropBookToFolder,
   isBottomShutter = false,
   renderDoors = true,
 }: {
@@ -3807,14 +3958,18 @@ export function Compartment({
   pickedBook?: { fromShelfId: string; book: Book } | null;
   onPickBook?: (shelfId: string, book: Book) => void;
   onDropBook?: (targetShelfId: string, explicitSource?: { fromShelfId: string; bookId: string }) => void;
-  onRemoveKeepsake: (shelfId: string, keepsakeId: string) => void;
-  onMoveKeepsake: (fromShelfId: string, keepsakeId: string, targetShelfIndex: number) => void;
-  onAddKeepsake: (shelfId: string) => void;
+  onCreateFolder: (shelfId: string) => void;
+  onOpenFolder: (shelfId: string, folder: ShelfFolder) => void;
+  onOpenFolderSettings: (shelfId: string, folder: ShelfFolder) => void;
+  onDropBookToFolder?: (targetShelfId: string, folderId: string, explicitSource?: { fromShelfId: string; bookId: string }) => void;
   isBottomShutter?: boolean;
   renderDoors?: boolean;
 }) {
   const ink = look.light ? '#382214' : '#f5ede0';
   const doorKind = isBottomShutter ? look.lowerDoorType : look.upperDoorType;
+  const hasInteractiveDoor =
+    renderDoors && doorKind !== 'none' && doorKind !== 'frameless-glass';
+  const shouldRenderOverlay = renderDoors && doorKind !== 'none';
   const scrollableUpper = !isBottomShutter && shelves.length > 3;
 
   const clipDoorsToBay =
@@ -3852,6 +4007,7 @@ export function Compartment({
                     night && lit
                       ? `center, ${backMat.backgroundPosition}`
                       : backMat.backgroundPosition,
+                  filter: backMat.filter,
                 };
               })()
             : {
@@ -3888,7 +4044,7 @@ export function Compartment({
             night={night}
             lit={lit}
             open={open}
-            renderDoors={renderDoors}
+            renderDoors={hasInteractiveDoor}
             onMoveShelf={onMoveShelf}
             onRenameShelf={onRenameShelf}
             onAddBook={onAddBook}
@@ -3898,15 +4054,16 @@ export function Compartment({
             pickedBook={pickedBook}
             onPickBook={onPickBook}
             onDropBook={onDropBook}
-            onRemoveKeepsake={onRemoveKeepsake}
-            onMoveKeepsake={onMoveKeepsake}
-            onAddKeepsake={onAddKeepsake}
+            onCreateFolder={onCreateFolder}
+            onOpenFolder={onOpenFolder}
+            onOpenFolderSettings={onOpenFolderSettings}
+            onDropBookToFolder={onDropBookToFolder}
           />
         ))}
       </div>
 
-      {/* Distinct Door Mechanism Over Every Bay */}
-      {renderDoors && (
+      {/* Distinct Door Mechanism or Frameless Upper Crystal Glass */}
+      {shouldRenderOverlay && (
         <CabinetDoors
           look={look}
           doorKind={doorKind}
@@ -3941,9 +4098,10 @@ export function Almirah({
   pickedBook,
   onPickBook,
   onDropBook,
-  onRemoveKeepsake,
-  onMoveKeepsake,
-  onAddKeepsake,
+  onCreateFolder,
+  onOpenFolder,
+  onOpenFolderSettings,
+  onDropBookToFolder,
   themeId = '1',
 }: {
   a: AlmirahT;
@@ -3966,9 +4124,10 @@ export function Almirah({
   pickedBook?: { fromShelfId: string; book: Book } | null;
   onPickBook?: (shelfId: string, book: Book) => void;
   onDropBook?: (targetShelfId: string, explicitSource?: { fromShelfId: string; bookId: string }) => void;
-  onRemoveKeepsake: (shelfId: string, keepsakeId: string) => void;
-  onMoveKeepsake: (fromShelfId: string, keepsakeId: string, targetShelfIndex: number) => void;
-  onAddKeepsake: (shelfId: string) => void;
+  onCreateFolder: (shelfId: string) => void;
+  onOpenFolder: (shelfId: string, folder: ShelfFolder) => void;
+  onOpenFolderSettings: (shelfId: string, folder: ShelfFolder) => void;
+  onDropBookToFolder?: (targetShelfId: string, folderId: string, explicitSource?: { fromShelfId: string; bookId: string }) => void;
   themeId?: ShelfThemeId;
 }) {
   const look = getThemeAdaptedLook(LOOKS[a.design] ?? LOOKS['Dark Chocolate']!, themeId);
@@ -4000,9 +4159,10 @@ export function Almirah({
     pickedBook,
     onPickBook,
     onDropBook,
-    onRemoveKeepsake,
-    onMoveKeepsake,
-    onAddKeepsake,
+    onCreateFolder,
+    onOpenFolder,
+    onOpenFolderSettings,
+    onDropBookToFolder,
   };
 
   const trim = getThemeAlmirahTrim(themeId);
@@ -4040,7 +4200,10 @@ export function Almirah({
             justifyContent: 'center',
             position: 'relative',
             borderRadius: '4px 4px 0 0',
-            boxShadow: '0 4px 6px rgba(0,0,0,.4), inset 0 2px 0 rgba(255,255,255,.3)',
+            boxShadow:
+              look.grain > 0
+                ? '0 5px 10px rgba(0,0,0,.45), inset 0 2px 0 rgba(255,245,220,.45), inset 0 -2px 3px rgba(0,0,0,.35)'
+                : '0 4px 6px rgba(0,0,0,.4), inset 0 2px 0 rgba(255,255,255,.3)',
             ...wood('90deg'),
           }}
         >
@@ -4071,7 +4234,11 @@ export function Almirah({
               ...stile('90deg'),
               position: 'relative',
               zIndex: 1,
-              boxShadow: look.isVault ? 'inset -2px 0 6px rgba(0,0,0,0.75), inset 1px 0 0 rgba(226,232,240,0.22)' : undefined,
+              boxShadow: look.isVault
+                ? 'inset -2px 0 6px rgba(0,0,0,0.75), inset 1px 0 0 rgba(226,232,240,0.22)'
+                : look.grain > 0
+                  ? 'inset 2px 0 0 rgba(255,244,220,0.32), inset -2px 0 6px rgba(0,0,0,0.45)'
+                  : undefined,
             }}
             className="sh-stile flex items-center justify-center pointer-events-none"
           >
@@ -4108,7 +4275,10 @@ export function Almirah({
                     <div
                       style={{
                         height: 14,
-                        boxShadow: '0 4px 6px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,0.22)',
+                        boxShadow:
+                          look.grain > 0
+                            ? '0 5px 8px rgba(0,0,0,.46), inset 0 2px 0 rgba(255,244,220,0.38), inset 0 -2px 3px rgba(0,0,0,0.42)'
+                            : '0 4px 6px rgba(0,0,0,.42), inset 0 1px 0 rgba(255,255,255,0.22)',
                         ...wood('90deg'),
                       }}
                     />
@@ -4134,7 +4304,11 @@ export function Almirah({
               ...stile('270deg'),
               position: 'relative',
               zIndex: 1,
-              boxShadow: look.isVault ? 'inset 2px 0 6px rgba(0,0,0,0.75), inset -1px 0 0 rgba(226,232,240,0.22)' : undefined,
+              boxShadow: look.isVault
+                ? 'inset 2px 0 6px rgba(0,0,0,0.75), inset -1px 0 0 rgba(226,232,240,0.22)'
+                : look.grain > 0
+                  ? 'inset 2px 0 6px rgba(0,0,0,0.45), inset -2px 0 0 rgba(255,244,220,0.32)'
+                  : undefined,
             }}
             className="sh-stile flex items-center justify-center pointer-events-none"
           >
@@ -4156,7 +4330,10 @@ export function Almirah({
             minHeight: 44,
             padding: '6px 12px',
             borderRadius: '0 0 4px 4px',
-            boxShadow: '0 5px 10px rgba(0,0,0,.42)',
+            boxShadow:
+              look.grain > 0
+                ? '0 7px 14px rgba(0,0,0,.48), inset 0 2px 0 rgba(255,244,220,0.36), inset 0 -2px 4px rgba(0,0,0,0.45)'
+                : '0 5px 10px rgba(0,0,0,.42)',
             display: 'flex',
             flexWrap: 'wrap',
             alignItems: 'center',
@@ -4331,7 +4508,7 @@ export function AddBookModal({
         {/* Tab Navigation */}
         <div className="flex border-b border-[#d6c7b0] dark:border-[#382518] bg-[#f5efe2] dark:bg-[#140e0a]/60 px-6 gap-2 text-xs font-semibold overflow-x-auto">
           {[
-            { id: 'upload', label: 'Upload PDF / EPUB', icon: Upload },
+            { id: 'upload', label: 'Upload Document', icon: Upload },
             { id: 'notes', label: 'Import Notes', icon: FileText },
             { id: 'drive', label: 'Google Drive', icon: Cloud },
             { id: 'quick', label: 'Quick Custom', icon: Plus },
@@ -4364,7 +4541,7 @@ export function AddBookModal({
               <input
                 ref={fileInputRef}
                 type="file"
-                accept=".pdf,.epub,.docx,.txt"
+                accept=".pdf,.epub,.docx,.doc,.txt"
                 onChange={handleFileUpload}
                 className="hidden"
               />
@@ -4373,10 +4550,10 @@ export function AddBookModal({
               </div>
               <div>
                 <p className="text-sm font-semibold text-[#1c140e] dark:text-[#efe4d4]">
-                  Select a Medical PDF or EPUB textbook
+                  Select a Medical PDF, Word, or EPUB document
                 </p>
                 <p className="text-xs text-[#6f5d4d] dark:text-[#a69079] mt-1">
-                  Supports .pdf, .epub, .docx up to 250MB
+                  Supports .pdf, .epub, .docx, .doc up to 250MB
                 </p>
               </div>
               <button
@@ -4384,7 +4561,7 @@ export function AddBookModal({
                 onClick={() => fileInputRef.current?.click()}
                 className="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white dark:text-[#110c09] text-xs font-bold transition shadow-lg cursor-pointer"
               >
-                Choose Local File
+                Upload Document
               </button>
             </div>
           )}
@@ -4437,7 +4614,7 @@ export function AddBookModal({
                   onClick={() => setActiveTab('upload')}
                   className="px-3.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white dark:text-[#110c09] text-xs font-bold transition cursor-pointer"
                 >
-                  Upload Note File
+                  Upload Document
                 </button>
               </div>
             )
@@ -4484,14 +4661,14 @@ export function AddBookModal({
                 <Cloud className="w-8 h-8 text-amber-700 dark:text-amber-400/70" />
                 <p className="text-xs font-semibold text-[#1c140e] dark:text-[#efe4d4]">Google Drive Folder</p>
                 <p className="text-[11px] text-[#6f5d4d] dark:text-[#a69079] max-w-sm">
-                  Switch to Upload PDF / EPUB or Quick Custom to shelve your own books.
+                  Switch to Upload Document or Quick Custom to shelve your own books.
                 </p>
                 <button
                   type="button"
                   onClick={() => setActiveTab('upload')}
                   className="px-3.5 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white dark:text-[#110c09] text-xs font-bold transition cursor-pointer"
                 >
-                  Upload Local / Drive PDF
+                  Upload Document
                 </button>
               </div>
             )
@@ -4751,10 +4928,19 @@ export default function ShelfRoom({
   /* Doors start closed so books appear behind glass (or opaque steel) and unlock when opened */
   const [openMap, setOpenMap] = useState<Record<string, boolean>>({});
 
-  /* Modals & Book Pick/Drop */
+  /* Modals, Folder Management & Book Pick/Drop */
   const [activeAddShelfId, setActiveAddShelfId] = useState<string | null>(null);
+  const [activeAddTargetFolder, setActiveAddTargetFolder] = useState<{ shelfId: string; folderId: string } | null>(null);
   const [editingShelfBook, setEditingShelfBook] = useState<{ shelfId: string; book: Book } | null>(null);
   const [pickedBook, setPickedBook] = useState<{ fromShelfId: string; book: Book } | null>(null);
+  const [creatingFolderShelfId, setCreatingFolderShelfId] = useState<string | null>(null);
+  const [newFolderName, setNewFolderName] = useState('');
+  const [newFolderColor, setNewFolderColor] = useState<string>(FOLDER_COLORS[0]);
+  const [newFolderLogo, setNewFolderLogo] = useState<string>(FOLDER_LOGOS[0].id);
+  const [folderSettingsCtx, setFolderSettingsCtx] = useState<{ shelfId: string; folderId: string } | null>(null);
+  const [folderSettingsNameDraft, setFolderSettingsNameDraft] = useState('');
+  const [folderShareNotice, setFolderShareNotice] = useState<string | null>(null);
+  const [openFolderCtx, setOpenFolderCtx] = useState<{ shelfId: string; folderId: string } | null>(null);
   const [isNewAlmirahModalOpen, setIsNewAlmirahModalOpen] = useState(false);
   const [newAlmirahName, setNewAlmirahName] = useState('');
   const [selectedDesign, setSelectedDesign] = useState<string>(DESIGNS[0]);
@@ -4764,7 +4950,10 @@ export default function ShelfRoom({
 
   const [shelfZoom, setShelfZoom] = useState<number>(() => {
     try {
-      const saved = parseInt(localStorage.getItem('ach1ev_shelf_zoom_pct') || '100', 10);
+      const saved = parseInt(
+        localStorage.getItem('achiev_shelf_zoom_pct') ?? localStorage.getItem('ach1ev_shelf_zoom_pct') ?? '100',
+        10
+      );
       if (Number.isFinite(saved) && saved >= 60 && saved <= 160) return saved;
     } catch {}
     return 100;
@@ -4772,7 +4961,7 @@ export default function ShelfRoom({
 
   useEffect(() => {
     try {
-      localStorage.setItem('ach1ev_shelf_zoom_pct', String(shelfZoom));
+      localStorage.setItem('achiev_shelf_zoom_pct', String(shelfZoom));
     } catch {}
   }, [shelfZoom]);
 
@@ -4924,104 +5113,193 @@ export default function ShelfRoom({
     setPickedBook(null);
   };
 
-  const handleRemoveKeepsake = (shelfId: string, keepsakeId: string) => {
+  const handleOpenCreateFolder = (shelfId: string) => {
+    setCreatingFolderShelfId(shelfId);
+    setNewFolderName('');
+    setNewFolderColor(FOLDER_COLORS[Math.floor(Math.random() * FOLDER_COLORS.length)]!);
+    setNewFolderLogo(FOLDER_LOGOS[0].id);
+  };
+
+  const handleConfirmCreateFolder = (e: FormEvent) => {
+    e.preventDefault();
+    if (!creatingFolderShelfId) return;
+    const folder: ShelfFolder = {
+      id: uid(),
+      name: newFolderName.trim() || 'Study Folder',
+      color: newFolderColor,
+      logoId: newFolderLogo,
+      books: [],
+      createdAt: new Date().toISOString(),
+    };
     save(
       data.map((a) => ({
         ...a,
         shelves: a.shelves.map((s) =>
-          s.id === shelfId
-            ? { ...s, keepsakes: (s.keepsakes || []).filter((k) => k.id !== keepsakeId) }
-            : s
+          s.id === creatingFolderShelfId ? { ...s, folders: [...(s.folders || []), folder] } : s
         ),
       }))
     );
+    setCreatingFolderShelfId(null);
+    setNewFolderName('');
   };
 
-  const handleMoveKeepsake = (
-    fromShelfId: string,
-    keepsakeId: string,
-    targetShelfIndex: number
+  const updateShelfFolder = (
+    shelfId: string,
+    folderId: string,
+    updater: (f: ShelfFolder) => ShelfFolder
   ) => {
-    if (!current) return;
-    let foundItem: KeepsakeItem | undefined;
-
-    const updatedShelves = current.shelves.map((s) => {
-      if (s.id === fromShelfId) {
-        const item = (s.keepsakes || []).find((k) => k.id === keepsakeId);
-        if (item) foundItem = item;
-        return { ...s, keepsakes: (s.keepsakes || []).filter((k) => k.id !== keepsakeId) };
-      }
-      return s;
-    });
-
-    if (foundItem && updatedShelves[targetShelfIndex]) {
-      const targetShelf = updatedShelves[targetShelfIndex];
-      updatedShelves[targetShelfIndex] = {
-        ...targetShelf,
-        keepsakes: [...(targetShelf.keepsakes || []), foundItem],
-      };
-      patch(current.id, (a) => ({ ...a, shelves: updatedShelves }));
-    }
-  };
-
-  const handleAddKeepsakeToShelf = (shelfId: string) => {
-    const themeOptions: Array<{ type: KeepsakeType; label: string }> =
-      themeId === '2'
-        ? [
-            { type: 'forest-lantern', label: 'Woodland Lantern' },
-            { type: 'moss-terrarium', label: 'Moss Glass Terrarium' },
-            { type: 'succulent-pot', label: 'Forest Fern Pot' },
-            { type: 'book-stack', label: 'Field Journals' },
-          ]
-        : themeId === '3'
-        ? [
-            { type: 'conch-shell', label: 'Seaside Conch' },
-            { type: 'coral-sculpt', label: 'Reef Coral Sculpture' },
-            { type: 'starfish-sculpt', label: 'Golden Starfish' },
-            { type: 'bottles-apothecary', label: 'Message Bottles' },
-          ]
-        : themeId === '4'
-        ? [
-            { type: 'chai-kulhad', label: 'Steaming Chai Kulhad' },
-            { type: 'paper-boat', label: 'Monsoon Paper Boat' },
-            { type: 'clock-brass', label: 'Rain Veranda Clock' },
-            { type: 'book-stack', label: 'Rainy Day Reading' },
-          ]
-        : themeId === '5'
-        ? [
-            { type: 'modern-ring', label: 'Obsidian Geometric Ring' },
-            { type: 'succulent-pot', label: 'Pistachio Botanica Planter' },
-            { type: 'book-stack', label: 'Monograph Folio Stack' },
-          ]
-        : [];
-
-    const keepsakeOptions: Array<{ type: KeepsakeType; label: string }> = [
-      ...themeOptions,
-      ...themeOptions,
-      { type: 'vase-gold', label: 'Porcelain Vase' },
-      { type: 'clock-brass', label: 'Brass Clock' },
-      { type: 'succulent-pot', label: 'Potted Succulent' },
-      { type: 'book-stack', label: 'Stacked Volumes' },
-      { type: 'rattan-basket', label: 'Wicker Basket' },
-      { type: 'starfish-sculpt', label: 'Starfish Sculpture' },
-      { type: 'bottles-apothecary', label: 'Apothecary Bottles' },
-      { type: 'modern-ring', label: 'Geometric Ring' },
-    ];
-    const picked = keepsakeOptions[Math.floor(Math.random() * keepsakeOptions.length)]!;
-
     save(
       data.map((a) => ({
         ...a,
         shelves: a.shelves.map((s) =>
           s.id === shelfId
-            ? { ...s, keepsakes: [...(s.keepsakes || []), { id: uid(), ...picked }] }
+            ? {
+                ...s,
+                folders: (s.folders || []).map((f) => (f.id === folderId ? updater(f) : f)),
+              }
             : s
         ),
       }))
     );
   };
 
-  const activeShelfObj = current?.shelves.find((s) => s.id === activeAddShelfId);
+  const handleDeleteFolder = (shelfId: string, folderId: string) => {
+    save(
+      data.map((a) => ({
+        ...a,
+        shelves: a.shelves.map((s) =>
+          s.id === shelfId
+            ? { ...s, folders: (s.folders || []).filter((f) => f.id !== folderId) }
+            : s
+        ),
+      }))
+    );
+    if (folderSettingsCtx?.folderId === folderId) setFolderSettingsCtx(null);
+    if (openFolderCtx?.folderId === folderId) setOpenFolderCtx(null);
+  };
+
+  const handleShareFolder = async (folder: ShelfFolder) => {
+    const summary = `Achiev Folder: "${folder.name}" (${folder.books.length} documents) — ${
+      typeof window !== 'undefined' ? window.location.origin : 'https://achiev.com'
+    }`;
+    try {
+      if (typeof navigator !== 'undefined' && navigator.share) {
+        await navigator.share({ title: `Achiev Folder — ${folder.name}`, text: summary });
+        setFolderShareNotice('Folder shared successfully!');
+      } else if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        await navigator.clipboard.writeText(summary);
+        setFolderShareNotice('Folder link & summary copied to clipboard!');
+      } else {
+        setFolderShareNotice('Share summary ready!');
+      }
+    } catch {
+      try {
+        await navigator.clipboard?.writeText(summary);
+        setFolderShareNotice('Folder link & summary copied to clipboard!');
+      } catch {
+        setFolderShareNotice('Could not copy share link.');
+      }
+    }
+    window.setTimeout(() => setFolderShareNotice(null), 2600);
+  };
+
+  const handleDropBookToFolder = (
+    targetShelfId: string,
+    folderId: string,
+    explicitSource?: { fromShelfId: string; bookId: string }
+  ) => {
+    const srcShelfId = explicitSource?.fromShelfId ?? pickedBook?.fromShelfId;
+    const srcBookId = explicitSource?.bookId ?? pickedBook?.book.id;
+    if (!srcShelfId || !srcBookId) return;
+
+    let movedBook: Book | undefined;
+    const stripped = data.map((a) => ({
+      ...a,
+      shelves: a.shelves.map((s) => {
+        if (s.id !== srcShelfId) return s;
+        const found = s.books.find((b) => b.id === srcBookId);
+        if (found) movedBook = found;
+        return { ...s, books: s.books.filter((b) => b.id !== srcBookId) };
+      }),
+    }));
+    if (!movedBook) return;
+
+    save(
+      stripped.map((a) => ({
+        ...a,
+        shelves: a.shelves.map((s) =>
+          s.id === targetShelfId
+            ? {
+                ...s,
+                folders: (s.folders || []).map((f) =>
+                  f.id === folderId ? { ...f, books: [...f.books, movedBook!] } : f
+                ),
+              }
+            : s
+        ),
+      }))
+    );
+    setPickedBook(null);
+  };
+
+  const handleAddBookToFolder = (
+    shelfId: string,
+    folderId: string,
+    title: string,
+    cover: string,
+    thumbnail?: BookThumbnailConfig
+  ) => {
+    const resolvedThumb = thumbnail || getDefaultThumbnail(title, COVER[cover]?.from);
+    updateShelfFolder(shelfId, folderId, (f) => ({
+      ...f,
+      books: [...f.books, { id: uid(), title, cover, thumbnail: resolvedThumb }],
+    }));
+  };
+
+  const handleRemoveBookFromFolder = (shelfId: string, folderId: string, bookId: string) => {
+    updateShelfFolder(shelfId, folderId, (f) => ({
+      ...f,
+      books: f.books.filter((b) => b.id !== bookId),
+    }));
+  };
+
+  const handleMoveFolderBookToShelf = (shelfId: string, folderId: string, bookId: string) => {
+    let bookToMove: Book | undefined;
+    save(
+      data.map((a) => ({
+        ...a,
+        shelves: a.shelves.map((s) => {
+          if (s.id !== shelfId) return s;
+          const nextFolders = (s.folders || []).map((f) => {
+            if (f.id !== folderId) return f;
+            bookToMove = f.books.find((b) => b.id === bookId);
+            return { ...f, books: f.books.filter((b) => b.id !== bookId) };
+          });
+          return bookToMove
+            ? { ...s, folders: nextFolders, books: [...s.books, bookToMove] }
+            : { ...s, folders: nextFolders };
+        }),
+      }))
+    );
+  };
+
+  const findFolder = (ctx: { shelfId: string; folderId: string } | null): { shelf: ShelfT; folder: ShelfFolder } | null => {
+    if (!ctx) return null;
+    for (const a of data) {
+      const sh = a.shelves.find((s) => s.id === ctx.shelfId);
+      if (sh) {
+        const fl = (sh.folders || []).find((f) => f.id === ctx.folderId);
+        if (fl) return { shelf: sh, folder: fl };
+      }
+    }
+    return null;
+  };
+
+  const activeSettingsFolderObj = findFolder(folderSettingsCtx);
+  const activeOpenFolderObj = findFolder(openFolderCtx);
+  const activeShelfObj =
+    current?.shelves.find((s) => s.id === activeAddShelfId) ||
+    data.flatMap((a) => a.shelves).find((s) => s.id === activeAddTargetFolder?.shelfId);
 
   return (
     <div style={{ maxWidth: 1180, margin: '0 auto', padding: '6px 6px', font: '14px system-ui', position: 'relative' }}>
@@ -5149,9 +5427,14 @@ export default function ShelfRoom({
                         pickedBook={pickedBook}
                         onPickBook={handleTogglePickBook}
                         onDropBook={handleDropBookToShelf}
-                        onRemoveKeepsake={handleRemoveKeepsake}
-                        onMoveKeepsake={handleMoveKeepsake}
-                        onAddKeepsake={handleAddKeepsakeToShelf}
+                        onCreateFolder={handleOpenCreateFolder}
+                        onOpenFolder={(shelfId, folder) => setOpenFolderCtx({ shelfId, folderId: folder.id })}
+                        onOpenFolderSettings={(shelfId, folder) => {
+                          setFolderSettingsCtx({ shelfId, folderId: folder.id });
+                          setFolderSettingsNameDraft(folder.name);
+                          setFolderShareNotice(null);
+                        }}
+                        onDropBookToFolder={handleDropBookToFolder}
                         themeId={themeId}
                       />
                     </div>
@@ -5163,17 +5446,438 @@ export default function ShelfRoom({
         </div>
       </div>
 
-      {/* COMPREHENSIVE ADD BOOK MODAL */}
+      {/* COMPREHENSIVE UPLOAD DOCUMENT / ADD BOOK MODAL */}
       <AddBookModal
-        isOpen={activeAddShelfId !== null}
-        onClose={() => setActiveAddShelfId(null)}
-        shelfName={activeShelfObj?.name || 'Shelf'}
+        isOpen={activeAddShelfId !== null || activeAddTargetFolder !== null}
+        onClose={() => {
+          setActiveAddShelfId(null);
+          setActiveAddTargetFolder(null);
+        }}
+        shelfName={
+          activeAddTargetFolder
+            ? findFolder(activeAddTargetFolder)?.folder.name || 'Folder'
+            : activeShelfObj?.name || 'Shelf'
+        }
         notebooks={notebooks}
         driveBooks={driveBooks}
         onAddBook={(bookTitle, bookCover, thumbCfg) => {
-          if (activeAddShelfId) handleAddBookToShelf(activeAddShelfId, bookTitle, bookCover, thumbCfg);
+          if (activeAddTargetFolder) {
+            handleAddBookToFolder(
+              activeAddTargetFolder.shelfId,
+              activeAddTargetFolder.folderId,
+              bookTitle,
+              bookCover,
+              thumbCfg
+            );
+          } else if (activeAddShelfId) {
+            handleAddBookToShelf(activeAddShelfId, bookTitle, bookCover, thumbCfg);
+          }
         }}
       />
+
+      {/* CREATE FOLDER MODAL */}
+      {creatingFolderShelfId && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fadeIn"
+          onClick={() => setCreatingFolderShelfId(null)}
+        >
+          <form
+            onSubmit={handleConfirmCreateFolder}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-md bg-[#faf6ee] dark:bg-[#18110c] border border-[#d6c7b0] dark:border-[#382518] rounded-2xl p-5 shadow-2xl text-[#1c140e] dark:text-[#efe4d4] space-y-4 max-h-[90vh] overflow-y-auto"
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="text-base font-bold flex items-center gap-2">
+                <FolderPlus className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                <span>Create Shelf Folder</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setCreatingFolderShelfId(null)}
+                className="p-1 rounded-lg text-[#6f5d4d] dark:text-[#a69079] hover:text-white"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold mb-1">Folder Name</label>
+              <input
+                type="text"
+                autoFocus
+                placeholder="e.g. Pharmacology High-Yield Notes"
+                value={newFolderName}
+                onChange={(e) => setNewFolderName(e.target.value)}
+                className="w-full px-3 py-2 text-xs bg-white dark:bg-[#110c09] border border-[#d6c7b0] dark:border-[#382518] rounded-xl focus:outline-none focus:border-amber-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold mb-1.5">Folder Colour</label>
+              <div className="flex flex-wrap gap-2">
+                {FOLDER_COLORS.map((col) => (
+                  <button
+                    key={col}
+                    type="button"
+                    onClick={() => setNewFolderColor(col)}
+                    className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center transition cursor-pointer ${
+                      newFolderColor === col ? 'border-amber-400 scale-110 shadow' : 'border-transparent opacity-85'
+                    }`}
+                    style={{ backgroundColor: col }}
+                  >
+                    {newFolderColor === col && <Check className="w-3.5 h-3.5 text-white" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-bold mb-1.5">Folder Logo</label>
+              <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5">
+                {FOLDER_LOGOS.map(({ id, label, Icon }) => (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => setNewFolderLogo(id)}
+                    title={label}
+                    className={`p-2 rounded-lg border flex items-center justify-center transition cursor-pointer ${
+                      newFolderLogo === id
+                        ? 'bg-amber-600 text-white border-amber-400 shadow'
+                        : 'bg-white dark:bg-[#110c09] border-[#d6c7b0] dark:border-[#382518] hover:border-amber-500/60'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => setCreatingFolderShelfId(null)}
+                className="px-4 py-2 rounded-xl bg-[#e8dfd0] dark:bg-[#231912] text-xs font-semibold cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white dark:text-[#110c09] text-xs font-bold cursor-pointer"
+              >
+                Create Folder
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* FOLDER SETTINGS MODAL — RED TRASH/DELETE RIGHT AT THE TOP, THEN SHARE, RENAME, COLOUR, LOGO */}
+      {activeSettingsFolderObj && folderSettingsCtx && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fadeIn"
+          onClick={() => setFolderSettingsCtx(null)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-md bg-[#faf6ee] dark:bg-[#18110c] border border-[#d6c7b0] dark:border-[#382518] rounded-2xl p-5 shadow-2xl text-[#1c140e] dark:text-[#efe4d4] space-y-4 max-h-[90vh] overflow-y-auto"
+          >
+            <div className="flex items-center justify-between border-b border-[#d6c7b0] dark:border-[#382518] pb-3">
+              <div className="flex items-center gap-2 min-w-0">
+                <Settings className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                <h3 className="text-base font-bold truncate">
+                  Folder Settings · {activeSettingsFolderObj.folder.name}
+                </h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setFolderSettingsCtx(null)}
+                className="p-1 rounded-lg text-[#6f5d4d] dark:text-[#a69079] hover:text-white cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* 1. FRONT & CENTER RED TRASH / DELETE OPTION */}
+            <button
+              type="button"
+              onClick={() => handleDeleteFolder(folderSettingsCtx.shelfId, folderSettingsCtx.folderId)}
+              className="w-full py-2.5 px-4 rounded-xl bg-red-600 hover:bg-red-700 active:scale-[0.99] text-white text-xs font-extrabold uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg border border-red-400/50 transition cursor-pointer"
+            >
+              <Trash2 className="w-4 h-4" />
+              <span>Trash · Delete Folder</span>
+            </button>
+
+            {folderShareNotice && (
+              <div className="px-3 py-2 rounded-xl bg-emerald-600/20 border border-emerald-500/40 text-emerald-700 dark:text-emerald-300 text-xs font-semibold text-center">
+                {folderShareNotice}
+              </div>
+            )}
+
+            {/* 2. SHARE FOLDER */}
+            <div className="flex items-center justify-between gap-2 p-3 rounded-xl bg-white dark:bg-[#110c09] border border-[#d6c7b0] dark:border-[#382518]">
+              <div>
+                <div className="text-xs font-bold">Share Folder</div>
+                <div className="text-[10px] text-[#6f5d4d] dark:text-[#a69079]">
+                  Share link &amp; folder summary with classmates
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleShareFolder(activeSettingsFolderObj.folder)}
+                className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs cursor-pointer shrink-0"
+              >
+                <Share2 className="w-3.5 h-3.5" />
+                <span>Share</span>
+              </button>
+            </div>
+
+            {/* 3. RENAME FOLDER */}
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold">Rename Folder</label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={folderSettingsNameDraft}
+                  onChange={(e) => setFolderSettingsNameDraft(e.target.value)}
+                  className="flex-1 px-3 py-2 text-xs bg-white dark:bg-[#110c09] border border-[#d6c7b0] dark:border-[#382518] rounded-xl focus:outline-none focus:border-amber-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const clean = folderSettingsNameDraft.trim();
+                    if (clean) {
+                      updateShelfFolder(folderSettingsCtx.shelfId, folderSettingsCtx.folderId, (f) => ({
+                        ...f,
+                        name: clean,
+                      }));
+                    }
+                  }}
+                  className="px-3 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold cursor-pointer shrink-0"
+                >
+                  Rename
+                </button>
+              </div>
+            </div>
+
+            {/* 4. CHANGE COLOUR */}
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold">Change Colour</label>
+              <div className="flex flex-wrap gap-2">
+                {FOLDER_COLORS.map((col) => {
+                  const selected = activeSettingsFolderObj.folder.color === col;
+                  return (
+                    <button
+                      key={col}
+                      type="button"
+                      onClick={() =>
+                        updateShelfFolder(folderSettingsCtx.shelfId, folderSettingsCtx.folderId, (f) => ({
+                          ...f,
+                          color: col,
+                        }))
+                      }
+                      className={`w-7 h-7 rounded-lg border-2 flex items-center justify-center transition cursor-pointer ${
+                        selected ? 'border-amber-400 scale-110 shadow' : 'border-transparent opacity-85'
+                      }`}
+                      style={{ backgroundColor: col }}
+                    >
+                      {selected && <Check className="w-3.5 h-3.5 text-white" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 5. CHANGE LOGO OF FOLDER */}
+            <div className="space-y-1.5">
+              <label className="block text-xs font-bold">Change Logo of Folder</label>
+              <div className="grid grid-cols-4 sm:grid-cols-8 gap-1.5">
+                {FOLDER_LOGOS.map(({ id, label, Icon }) => {
+                  const selected = activeSettingsFolderObj.folder.logoId === id;
+                  return (
+                    <button
+                      key={id}
+                      type="button"
+                      onClick={() =>
+                        updateShelfFolder(folderSettingsCtx.shelfId, folderSettingsCtx.folderId, (f) => ({
+                          ...f,
+                          logoId: id,
+                        }))
+                      }
+                      title={label}
+                      className={`p-2 rounded-lg border flex items-center justify-center transition cursor-pointer ${
+                        selected
+                          ? 'bg-amber-600 text-white border-amber-400 shadow'
+                          : 'bg-white dark:bg-[#110c09] border-[#d6c7b0] dark:border-[#382518] hover:border-amber-500/60'
+                      }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-1">
+              <button
+                type="button"
+                onClick={() => setFolderSettingsCtx(null)}
+                className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold cursor-pointer"
+              >
+                Done
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* FOLDER CONTENTS MODAL (VIEW, UPLOAD DOCUMENT OR MOVE TO SHELF) */}
+      {activeOpenFolderObj && openFolderCtx && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fadeIn"
+          onClick={() => setOpenFolderCtx(null)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-lg bg-[#faf6ee] dark:bg-[#18110c] border border-[#d6c7b0] dark:border-[#382518] rounded-2xl shadow-2xl text-[#1c140e] dark:text-[#efe4d4] overflow-hidden flex flex-col max-h-[85vh]"
+          >
+            <div className="px-5 py-3.5 border-b border-[#d6c7b0] dark:border-[#382518] flex items-center justify-between gap-2 bg-[#f2eadb] dark:bg-[#140e0a]">
+              <div className="flex items-center gap-2.5 min-w-0">
+                {(() => {
+                  const { Icon } = getFolderLogoMeta(activeOpenFolderObj.folder.logoId);
+                  return (
+                    <span
+                      className="w-8 h-8 rounded-lg flex items-center justify-center text-white shrink-0 shadow"
+                      style={{ backgroundColor: activeOpenFolderObj.folder.color }}
+                    >
+                      <Icon className="w-4 h-4" />
+                    </span>
+                  );
+                })()}
+                <div className="min-w-0">
+                  <h3 className="text-base font-bold truncate">{activeOpenFolderObj.folder.name}</h3>
+                  <p className="text-[10.5px] text-[#6f5d4d] dark:text-[#a69079]">
+                    {activeOpenFolderObj.shelf.name} · {activeOpenFolderObj.folder.books.length}{' '}
+                    {activeOpenFolderObj.folder.books.length === 1 ? 'document' : 'documents'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setFolderSettingsCtx({
+                      shelfId: openFolderCtx.shelfId,
+                      folderId: openFolderCtx.folderId,
+                    });
+                    setFolderSettingsNameDraft(activeOpenFolderObj.folder.name);
+                  }}
+                  className="px-2.5 py-1.5 rounded-lg bg-black/10 dark:bg-white/10 hover:bg-amber-600 hover:text-white text-xs font-semibold flex items-center gap-1 cursor-pointer"
+                >
+                  <Settings className="w-3.5 h-3.5" />
+                  <span>Settings</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setOpenFolderCtx(null)}
+                  className="p-1.5 rounded-lg text-[#6f5d4d] dark:text-[#a69079] hover:text-white cursor-pointer"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            <div className="p-5 overflow-y-auto space-y-3">
+              {activeOpenFolderObj.folder.books.length === 0 ? (
+                <div className="p-6 rounded-xl border border-dashed border-[#d6c7b0] dark:border-[#382518] text-center space-y-2">
+                  <p className="text-xs font-semibold">This folder is empty</p>
+                  <p className="text-[11px] text-[#6f5d4d] dark:text-[#a69079]">
+                    Upload a document inside or drag any book from your shelf onto this folder.
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-2">
+                  {activeOpenFolderObj.folder.books.map((bk) => (
+                    <div
+                      key={bk.id}
+                      className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-white dark:bg-[#120c08] border border-[#d6c7b0] dark:border-[#382518]"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onSelectBook?.(bk);
+                          setOpenFolderCtx(null);
+                        }}
+                        className="flex items-center gap-2.5 min-w-0 text-left flex-1 cursor-pointer"
+                      >
+                        <BookLogoBadge
+                          title={bk.title}
+                          thumbnail={bk.thumbnail}
+                          fallbackBg={COVER[bk.cover]?.from || '#7c4521'}
+                          compact
+                        />
+                        <span className="text-xs font-bold truncate hover:underline">{bk.title}</span>
+                      </button>
+                      <div className="flex items-center gap-1 shrink-0">
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleMoveFolderBookToShelf(
+                              openFolderCtx.shelfId,
+                              openFolderCtx.folderId,
+                              bk.id
+                            )
+                          }
+                          title="Move back onto shelf row"
+                          className="px-2 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-600 text-amber-800 dark:text-amber-300 hover:text-white text-[10px] font-semibold cursor-pointer"
+                        >
+                          To Shelf
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleRemoveBookFromFolder(
+                              openFolderCtx.shelfId,
+                              openFolderCtx.folderId,
+                              bk.id
+                            )
+                          }
+                          title="Remove from folder"
+                          className="p-1.5 rounded-lg bg-red-600/15 hover:bg-red-600 text-red-600 hover:text-white cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="px-5 py-3 border-t border-[#d6c7b0] dark:border-[#382518] bg-[#f2eadb] dark:bg-[#140e0a] flex items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setActiveAddTargetFolder({
+                    shelfId: openFolderCtx.shelfId,
+                    folderId: openFolderCtx.folderId,
+                  });
+                }}
+                className="px-3.5 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer"
+              >
+                <Upload className="w-3.5 h-3.5" />
+                <span>Upload Document</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setOpenFolderCtx(null)}
+                className="px-4 py-2 rounded-xl bg-black/10 dark:bg-white/10 text-xs font-semibold cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* SHELF BOOK THUMBNAIL / LOGO / 100 ICONS EDITOR MODAL */}
       <BookThumbnailEditorModal

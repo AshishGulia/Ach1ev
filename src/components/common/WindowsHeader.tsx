@@ -113,14 +113,17 @@ export const WindowsHeader: React.FC<WindowsHeaderProps> = ({
   onLogout,
   onOpenAIStudioModal,
 }) => {
-  const { user, googleUser, syncStatus, lastSyncedAt, driveAccount, openAuthModal } = useAuth();
-  const isSignedInAccount = Boolean(user || googleUser);
+  const { user, googleUser, phoneUser, syncStatus, lastSyncedAt, driveAccount, openAuthModal } = useAuth();
+  const isSignedInAccount = Boolean(user || googleUser || phoneUser);
   const [canInstallApp, setCanInstallApp] = useState(false);
 
   // Global UI / Font Zoom (85% - 135%) for comfortable reading & mobile readability
   const [uiZoom, setUiZoom] = useState<number>(() => {
     try {
-      const saved = parseInt(localStorage.getItem('ach1ev_ui_zoom_pct') || '100', 10);
+      const saved = parseInt(
+        localStorage.getItem('achiev_ui_zoom_pct') || localStorage.getItem('ach1ev_ui_zoom_pct') || '100',
+        10
+      );
       if (Number.isFinite(saved) && saved >= 80 && saved <= 135) return saved;
     } catch {}
     return 100;
@@ -132,7 +135,7 @@ export const WindowsHeader: React.FC<WindowsHeaderProps> = ({
     try {
       const px = (16 * (uiZoom / 100)).toFixed(2);
       document.documentElement.style.fontSize = `${px}px`;
-      localStorage.setItem('ach1ev_ui_zoom_pct', String(uiZoom));
+      localStorage.setItem('achiev_ui_zoom_pct', String(uiZoom));
     } catch {}
   }, [uiZoom]);
 
@@ -620,7 +623,9 @@ export const WindowsHeader: React.FC<WindowsHeaderProps> = ({
               ? `Google Account: ${googleUser.email}${
                   driveAccount.connected ? ` · Drive: ${driveAccount.folderName || 'Connected'}` : ' · Click to manage Cloud & Drive'
                 }`
-              : 'Currently in Local Mode · Click to Sign In with Google or Email'
+              : phoneUser
+              ? `Mobile Account: ${phoneUser.phone} · Verified OTP Session`
+              : 'Currently in Local Mode · Click to Sign In with Google, Phone OTP or Email'
           }
           className={`flex items-center gap-1 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl border text-[10.5px] sm:text-[11px] font-medium transition-all cursor-pointer ${
             isSignedInAccount
@@ -638,7 +643,7 @@ export const WindowsHeader: React.FC<WindowsHeaderProps> = ({
             ) : (
               <Cloud className="w-3.5 h-3.5 text-[#A47C43] dark:text-amber-400 shrink-0" />
             )
-          ) : googleUser ? (
+          ) : googleUser || phoneUser ? (
             <Cloud className="w-3.5 h-3.5 text-[#A47C43] dark:text-amber-400 shrink-0" />
           ) : (
             <CloudOff className="w-3.5 h-3.5 text-stone-400 shrink-0" />
@@ -654,12 +659,14 @@ export const WindowsHeader: React.FC<WindowsHeaderProps> = ({
                 : 'Live Sync'
               : googleUser
               ? googleUser.name?.split(' ')[0] || 'Google'
+              : phoneUser
+              ? phoneUser.phone
               : 'Sign In'}
           </span>
           {driveAccount.connected && (
             <span
               className="hidden sm:flex ml-0.5 pl-1.5 border-l border-current/25 items-center gap-1 text-[10px] text-amber-700 dark:text-amber-300"
-              title={`Personal Google Drive Vault Connected (${driveAccount.folderName || 'Ach1ev Clinical Library'})`}
+              title={`Personal Google Drive Vault Connected (${driveAccount.folderName || 'Achiev Clinical Library'})`}
             >
               <HardDrive className="w-3 h-3" />
               <span className="hidden lg:inline">Drive</span>
@@ -785,12 +792,12 @@ export const WindowsHeader: React.FC<WindowsHeaderProps> = ({
           )}
         </div>
 
-        {/* Native PWA Install App Button (shown when browser supports installing Ach1ev as an App) */}
+        {/* Native PWA Install App Button (shown when browser supports installing Achiev as an App) */}
         {canInstallApp && (
           <button
             type="button"
             onClick={() => triggerPwaInstall()}
-            title="Install Ach1ev as a desktop/mobile App"
+            title="Install Achiev as a desktop/mobile App"
             className="themed-soft-pill hidden sm:flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 text-amber-800 dark:text-amber-300 border border-amber-500/35 text-[11px] font-semibold transition-all cursor-pointer"
           >
             <Download className="w-3.5 h-3.5" />

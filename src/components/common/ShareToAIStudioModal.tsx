@@ -29,7 +29,7 @@ export const ShareToAIStudioModal: React.FC<ShareToAIStudioModalProps> = ({
 
   const APPLET_ID = '7deea275-4fca-404e-b629-b4af401b1f96';
   const AI_STUDIO_APPLET_URL = `https://aistudio.google.com/app/applet/${APPLET_ID}`;
-  const PRIMARY_DOMAIN_URL = 'https://ach1ev.com';
+  const PRIMARY_DOMAIN_URL = 'https://achiev.com';
   const SECONDARY_VERCEL_URL = 'https://achievx.vercel.app';
   const DOWNLOAD_ZIP_URL = '/api/export/aistudio';
 
@@ -39,8 +39,8 @@ export const ShareToAIStudioModal: React.FC<ShareToAIStudioModalProps> = ({
     setTimeout(() => setCopiedKey(null), 2500);
   };
 
-  const AI_STUDIO_SYSTEM_INSTRUCTION = `You are Ach1ev Studio Assistant ("Settle Ideas"), an expert medical professor and clinical pharmacologist integrated into the Ach1ev (ACH1EV) workspace.
-Current Project: Ach1ev — Settle Ideas (Primary Domain: https://ach1ev.com | Applet ID: ${APPLET_ID}).
+  const AI_STUDIO_SYSTEM_INSTRUCTION = `You are Achiev Studio Assistant ("Settle Ideas"), an expert medical professor and clinical pharmacologist integrated into the Achiev (ACHIEV) workspace.
+Current Project: Achiev — Settle Ideas (Primary Domain: https://achiev.com | Applet ID: ${APPLET_ID}).
 Model: gemini-3-flash-preview / gemini-3.1-flash-lite with server-side clinical search and reasoning.`;
 
   return (
@@ -54,13 +54,13 @@ Model: gemini-3-flash-preview / gemini-3.1-flash-lite with server-side clinical 
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h3 className="text-base font-bold text-stone-100">Share Ach1ev Workspace</h3>
+                <h3 className="text-base font-bold text-stone-100">Share Achiev Workspace</h3>
                 <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono border border-amber-500/30">
-                  ach1ev.com Primary
+                  achiev.com Primary
                 </span>
               </div>
               <p className="text-xs text-stone-400">
-                Primary domain, secondary Vercel mirror, Applet ID, and export bundle for Ach1ev
+                Primary domain, secondary Vercel mirror, Applet ID, and export bundle for Achiev
               </p>
             </div>
           </div>
@@ -122,7 +122,7 @@ Model: gemini-3-flash-preview / gemini-3.1-flash-lite with server-side clinical 
                   2. Project Bundle (.zip)
                 </span>
                 <p className="text-sm font-bold text-stone-200 mt-0.5">
-                  Download Complete Ach1ev Export ZIP
+                  Download Complete Achiev Export ZIP
                 </p>
                 <p className="text-xs text-stone-400 mt-1">
                   Complete repository with source, brand assets, metadata.json, and server.ts
@@ -131,7 +131,7 @@ Model: gemini-3-flash-preview / gemini-3.1-flash-lite with server-side clinical 
 
               <a
                 href={DOWNLOAD_ZIP_URL}
-                download="Ach1ev-AI-Studio-Export.zip"
+                download="Achiev-AI-Studio-Export.zip"
                 className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-semibold transition border border-stone-700 shrink-0"
               >
                 <Download className="w-3.5 h-3.5 text-amber-400" />
@@ -163,7 +163,7 @@ Model: gemini-3-flash-preview / gemini-3.1-flash-lite with server-side clinical 
                   rel="noreferrer"
                   className="flex-1 py-1.5 px-2 text-center rounded-lg bg-amber-950/60 hover:bg-amber-900/60 text-amber-300 text-[11px] font-semibold border border-amber-800/40 transition"
                 >
-                  Open ach1ev.com ↗
+                  Open achiev.com ↗
                 </a>
                 <button
                   type="button"

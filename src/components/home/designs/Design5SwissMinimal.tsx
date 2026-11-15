@@ -82,7 +82,7 @@ export const Design5SwissMinimal: React.FC<Design5Props> = ({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b border-stone-200/80 dark:border-[#22272e] text-xs">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2 font-bold tracking-tight text-sm">
-            <span>ACH1EV</span>
+            <span>ACHIEV</span>
             <span className="text-stone-400">◆</span>
             <span className="font-mono text-[10px] text-stone-400">SETTLE IDEAS</span>
           </div>
@@ -310,7 +310,7 @@ export const Design5SwissMinimal: React.FC<Design5Props> = ({
       {/* Swiss Bottom Line */}
       <div className="pt-6 border-t border-stone-200 dark:border-stone-800 flex items-center justify-between text-[10px] font-mono uppercase tracking-widest text-stone-400">
         <span>SETTLE IDEAS · SMALL STEPS. A BIGGER YOU.</span>
-        <span>ACH1EV v1.0.0</span>
+        <span>ACHIEV v1.0.0</span>
       </div>
     </div>
   );

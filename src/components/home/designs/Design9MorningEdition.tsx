@@ -265,7 +265,7 @@ export const Design9MorningEdition: React.FC<Design9Props> = ({
         {/* Newspaper Title */}
         <div className="text-center py-2">
           <h1 className="text-5xl sm:text-7xl font-black tracking-tight font-sans uppercase text-stone-950 dark:text-white">
-            The Ach1ev Daily
+            The Achiev Daily
           </h1>
           <p className="text-[10px] font-mono tracking-[0.28em] uppercase text-stone-600 dark:text-stone-400 mt-1">
             Settle Ideas

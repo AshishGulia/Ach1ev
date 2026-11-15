@@ -3269,7 +3269,7 @@ export const Design1ReadingRoom: React.FC<Design1Props> = ({
             {/* Footer */}
             <div className="p-3 border-t border-stone-200 dark:border-[#352317] flex justify-between items-center bg-stone-50 dark:bg-[#18110c]">
               <span className="text-[11px] text-slate-500 dark:text-[#a69079] font-mono">
-                Ach1ev Rest & Reset
+                Achiev Rest & Reset
               </span>
               <button
                 onClick={() => {

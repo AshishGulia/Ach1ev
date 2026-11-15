@@ -777,7 +777,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
         id: shelfBook.id,
         title: shelfBook.title,
         subject: 'Internal Medicine',
-        author: 'Ach1ev Medical Library',
+        author: 'Achiev Medical Library',
         edition: 'Standard Edition',
         coverColor: shelfBook.thumbnail?.bgColor || SHELF_COVER[shelfBook.cover]?.from || '#1e3a8a',
         thumbnail: shelfBook.thumbnail,
@@ -1035,7 +1035,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                       className="themed-accent-btn text-[11px] font-semibold px-2.5 py-1 rounded-lg bg-amber-700 hover:bg-amber-800 text-white flex items-center gap-1 cursor-pointer shadow-xs"
                     >
                       <Plus className="w-3 h-3" />
-                      <span>Add PDF</span>
+                      <span>Upload Document</span>
                     </button>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
@@ -1595,7 +1595,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                   <HardDrive className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-bold">Upload Heavy PDF to Personal Google Drive</h3>
+                  <h3 className="text-lg font-bold">Upload Document to Personal Google Drive</h3>
                   <p className="text-[10px] text-stone-500 dark:text-[#a69079]">
                     Offloads binary PDF to Drive (&ldquo;{DRIVE_APP_FOLDER_NAME}&rdquo;); syncs link metadata in Supabase.
                   </p>
@@ -1797,7 +1797,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                 className="themed-accent-btn px-4 py-1.5 rounded-xl bg-amber-700 hover:bg-amber-800 text-white text-xs font-semibold flex items-center gap-1.5 shadow-xs cursor-pointer disabled:opacity-50"
               >
                 <UploadCloud className="w-3.5 h-3.5" />
-                <span>{driveUploadProgress !== null ? 'Uploading to Drive...' : 'Upload to Drive & Sync'}</span>
+                <span>{driveUploadProgress !== null ? 'Uploading Document...' : 'Upload Document'}</span>
               </button>
             </div>
           </form>
@@ -2059,7 +2059,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                       style={isHeritage ? { backgroundColor: '#7c4521', color: '#fff' } : { backgroundColor: themeAccent, color: '#fff' }}
                     >
                       <UploadCloud className="w-3.5 h-3.5" />
-                      <span>Upload PDF (Drive)</span>
+                      <span>Upload Document</span>
                     </button>
                   </div>
                 )}

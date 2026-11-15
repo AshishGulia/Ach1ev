@@ -308,7 +308,7 @@ export const Design8Bookshelf: React.FC<Design8Props> = ({
                 <div className="text-xs font-bold text-amber-100 group-hover:text-amber-300 transition-colors">
                   {title}
                 </div>
-                <div className="text-[8px] font-mono text-stone-400">Ach1ev Spiral</div>
+                <div className="text-[8px] font-mono text-stone-400">Achiev Spiral</div>
               </div>
             ))}
           </div>

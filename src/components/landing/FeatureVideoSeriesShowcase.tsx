@@ -178,19 +178,19 @@ export const FEATURE_VIDEO_SERIES: SeriesEpisode[] = [
   {
     id: 'ep-07-achievers-hub',
     epNumber: 'EP 07',
-    sidebarSegment: "7. Ach1ever's Hub",
-    title: "Ach1ever's Hub · Medical Community & Study Groups",
-    subtitle: "Connect with classmates and peers inside Ach1ever's Hub to exchange clinical pearls, notes, and MCQ discussions.",
+    sidebarSegment: "7. Achiever's Hub",
+    title: "Achiever's Hub · Medical Community & Study Groups",
+    subtitle: "Connect with classmates and peers inside Achiever's Hub to exchange clinical pearls, notes, and MCQ discussions.",
     durationSec: 10,
     accent: '#14b8a6',
     accentSoft: 'rgba(20, 184, 166, 0.2)',
     highlights: [
-      "Share study notes & exam doubts inside Ach1ever's Hub",
+      "Share study notes & exam doubts inside Achiever's Hub",
       'Search fellow scholars by @username & add study friends',
       'Save shared community posts straight to your notebook',
     ],
     captions: [
-      { atPct: 0, text: "Open Ach1ever's Hub from the sidebar to join live medical student circles." },
+      { atPct: 0, text: "Open Achiever's Hub from the sidebar to join live medical student circles." },
       { atPct: 45, text: 'Discuss high-yield cases, exchange memory tricks, and snip pearls into your notes.' },
     ],
     iconKey: 'hub',
@@ -239,8 +239,8 @@ export const FEATURE_VIDEO_SERIES: SeriesEpisode[] = [
 
 const SEO_FAQS = [
   {
-    q: 'Why is Ach1ev the cheapest note-making website for medical students?',
-    a: 'Ach1ev gives MBBS, NEET-PG, USMLE, and nursing students a generous ₹0 Free Scholar plan and Clinical Starter at just ₹60/month (₹599/year)—up to 80% cheaper than GoodNotes, Notability, RemNote, Notion AI, or Evernote, with zero Apple hardware lock-in.',
+    q: 'Why is Achiev the cheapest note-making website for medical students?',
+    a: 'Achiev gives MBBS, NEET-PG, USMLE, and nursing students a generous ₹0 Free Scholar plan and Clinical Starter at just ₹60/month (₹599/year)—up to 80% cheaper than GoodNotes, Notability, RemNote, Notion AI, or Evernote, with zero Apple hardware lock-in.',
   },
   {
     q: 'Can I keep a medical textbook open beside my notes while writing?',
@@ -248,11 +248,11 @@ const SEO_FAQS = [
   },
   {
     q: 'How does the Picture-to-Table feature help medical students?',
-    a: 'Simply capture or upload a photo of a complex pharmacology, pathology, or microbiology table from a book or slide—Ach1ev converts the image into a crisp, editable structured table inside your notes.',
+    a: 'Simply capture or upload a photo of a complex pharmacology, pathology, or microbiology table from a book or slide—Achiev converts the image into a crisp, editable structured table inside your notes.',
   },
   {
-    q: 'Does Ach1ev work offline and across Android, Windows, iPad, and Mac?',
-    a: 'Yes. Ach1ev is an installable cross-platform web app (PWA) with local offline caching, Supabase cloud sync, and personal Google Drive storage offloading.',
+    q: 'Does Achiev work offline and across Android, Windows, iPad, and Mac?',
+    a: 'Yes. Achiev is an installable cross-platform web app (PWA) with local offline caching, Supabase cloud sync, and personal Google Drive storage offloading.',
   },
 ];
 
@@ -390,7 +390,7 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
         ctx.fillText(ep.epNumber, 82, 81);
         ctx.fillStyle = '#fef3c7';
         ctx.font = 'bold 24px system-ui, sans-serif';
-        ctx.fillText(`Ach1ev · ${ep.sidebarSegment}`, 205, 81);
+        ctx.fillText(`Achiev · ${ep.sidebarSegment}`, 205, 81);
 
         // Main Card
         ctx.fillStyle = 'rgba(24, 12, 6, 0.9)';
@@ -446,7 +446,7 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `Ach1ev-${ep.id}.webm`;
+      a.download = `Achiev-${ep.id}.webm`;
       a.click();
       URL.revokeObjectURL(url);
       setExportMsg(`Downloaded ${ep.epNumber} walkthrough video (.webm)!`);
@@ -476,10 +476,10 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
 
         <p className="max-w-3xl mx-auto text-sm sm:text-base text-[#d6c2a5] leading-relaxed">
           Stop paying ₹450–₹1,100/month across separate apps for PDF reading, note-taking, flashcards, habit trackers, and cloud sync.
-          <strong className="text-amber-200"> Ach1ev (Settle Ideas)</strong> gives medical scholars a complete study workspace starting at{' '}
+          <strong className="text-amber-200"> Achiev (Settle Ideas)</strong> gives medical scholars a complete study workspace starting at{' '}
           <strong className="text-emerald-300">₹0 Free Forever</strong> and{' '}
           <strong className="text-emerald-300">₹60/month Pro</strong> — with side-by-side textbook desks, Picture-to-Table conversion,
-          20-20-20 Eye Rest Timer, interactive 3D bookshelves, and Ach1ever&apos;s Hub community.
+          20-20-20 Eye Rest Timer, interactive 3D bookshelves, and Achiever&apos;s Hub community.
         </p>
 
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 max-w-4xl mx-auto">
@@ -712,14 +712,14 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
             <span>Transparent Student-First Pricing</span>
           </div>
           <h2 id="pricing-comparison-heading" className="text-xl sm:text-2xl font-bold text-amber-50">
-            Why Medical Students Switch From Expensive Subscriptions to Ach1ev
+            Why Medical Students Switch From Expensive Subscriptions to Achiev
           </h2>
           <p className="text-xs sm:text-sm text-[#ccb799] max-w-2xl mx-auto">
             Every tier unlocks cross-device medical reading &amp; note-making at a fraction of legacy app prices.
           </p>
         </div>
 
-        {/* Ach1ev Plans Strip */}
+        {/* Achiev Plans Strip */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
           {SUBSCRIPTION_TIERS.map((tier) => (
             <div
@@ -758,8 +758,8 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
               <tr className="border-b border-amber-500/20 text-[11px] uppercase tracking-wider text-amber-300 bg-black/25">
                 <th className="py-3 px-4">Popular Note App</th>
                 <th className="py-3 px-4">Their Typical Cost</th>
-                <th className="py-3 px-4">Ach1ev Cost</th>
-                <th className="py-3 px-4">Why Ach1ev Wins for Medical Students</th>
+                <th className="py-3 px-4">Achiev Cost</th>
+                <th className="py-3 px-4">Why Achiev Wins for Medical Students</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-white/10 text-xs">
@@ -768,9 +768,9 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
                   <td className="py-3 px-4 font-bold text-amber-50">{row.app}</td>
                   <td className="py-3 px-4 text-rose-300/90 font-medium">{row.typicalPriceNote}</td>
                   <td className="py-3 px-4 text-emerald-300 font-bold">
-                    ₹{row.ach1evPriceMonthlyInr}/mo ({row.matchedAch1evTier})
+                    ₹{row.achievPriceMonthlyInr}/mo ({row.matchedAchievTier})
                   </td>
-                  <td className="py-3 px-4 text-[#e0cfb7]">{row.ach1evAdvantage}</td>
+                  <td className="py-3 px-4 text-[#e0cfb7]">{row.achievAdvantage}</td>
                 </tr>
               ))}
             </tbody>

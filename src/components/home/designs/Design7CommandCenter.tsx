@@ -89,7 +89,7 @@ export const Design7CommandCenter: React.FC<Design7Props> = ({
       <div className="flex items-center justify-between text-xs text-slate-400 pb-3 border-b border-slate-800/80">
         <div className="flex items-center gap-2 font-bold text-white tracking-wide">
           <AchievBrand variant="emblem" imgClassName="w-6 h-6" />
-          <span>ACH1EV</span>
+          <span>ACHIEV</span>
           <span className="px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-400 border border-sky-500/20 text-[10px] font-mono">
             Settle Ideas · Command Center
           </span>

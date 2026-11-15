@@ -71,7 +71,7 @@ export const Design4StudyDesk: React.FC<Design4Props> = ({
             <AchievBrand variant="emblem" imgClassName="w-8 h-8" />
             <div>
               <h1 className="text-xl md:text-2xl font-bold tracking-wide">
-                Ach1ev Desk
+                Achiev Desk
               </h1>
               <p className="text-xs italic text-amber-200/80">
                 Settle Ideas · Study Today. Heal Tomorrow.
@@ -107,7 +107,7 @@ export const Design4StudyDesk: React.FC<Design4Props> = ({
               You can Do this!
             </div>
             <div className="text-right text-xs font-handwriting text-stone-600 mt-2">
-              – Ach1ev ❤️
+              – Achiev ❤️
             </div>
           </div>
 

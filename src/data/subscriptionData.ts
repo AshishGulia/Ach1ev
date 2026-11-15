@@ -74,11 +74,11 @@ export interface CompetitorAppBenchmark {
   app: string;
   typicalPriceMonthlyInr: number;
   typicalPriceNote: string;
-  matchedAch1evTier: string;
-  ach1evPriceMonthlyInr: number;
-  ach1evPriceAnnualInr: number;
+  matchedAchievTier: string;
+  achievPriceMonthlyInr: number;
+  achievPriceAnnualInr: number;
   keyMatchedFeatures: string;
-  ach1evAdvantage: string;
+  achievAdvantage: string;
 }
 
 export const COMPETITOR_BENCHMARKS: CompetitorAppBenchmark[] = [
@@ -86,61 +86,61 @@ export const COMPETITOR_BENCHMARKS: CompetitorAppBenchmark[] = [
     app: 'GoodNotes 6 (Essential / Pro)',
     typicalPriceMonthlyInr: 300,
     typicalPriceNote: '₹999/yr (iOS/iPad locked)',
-    matchedAch1evTier: 'Clinical Starter',
-    ach1evPriceMonthlyInr: 60,
-    ach1evPriceAnnualInr: 599,
+    matchedAchievTier: 'Clinical Starter',
+    achievPriceMonthlyInr: 60,
+    achievPriceAnnualInr: 599,
     keyMatchedFeatures: 'Ruled ink notebooks, PDF reading, PDF/Word export, custom styling',
-    ach1evAdvantage: '80% lower price + Almirah 3D Shelf & Flowcharts on any browser',
+    achievAdvantage: '80% lower price + Almirah 3D Shelf & Flowcharts on any browser',
   },
   {
     app: 'Notability Plus',
     typicalPriceMonthlyInr: 450,
     typicalPriceNote: '₹1,399–₹4,500/yr subscription',
-    matchedAch1evTier: 'Clinical Starter',
-    ach1evPriceMonthlyInr: 60,
-    ach1evPriceAnnualInr: 599,
+    matchedAchievTier: 'Clinical Starter',
+    achievPriceMonthlyInr: 60,
+    achievPriceAnnualInr: 599,
     keyMatchedFeatures: 'Handwriting/ink, audio/peace ambience, ruled pages, templates',
-    ach1evAdvantage: 'Includes multi-level flowchart builder & 10 full workspace themes',
+    achievAdvantage: 'Includes multi-level flowchart builder & 10 full workspace themes',
   },
   {
     app: 'RemNote Pro + AI',
     typicalPriceMonthlyInr: 650,
     typicalPriceNote: '$8/mo (~₹650/mo billed annually)',
-    matchedAch1evTier: 'Resident Scholar Pro',
-    ach1evPriceMonthlyInr: 150,
-    ach1evPriceAnnualInr: 1499,
+    matchedAchievTier: 'Resident Scholar Pro',
+    achievPriceMonthlyInr: 150,
+    achievPriceAnnualInr: 1499,
     keyMatchedFeatures: 'Mnemonics flashcards, inline AI explanations, PDF annotation',
-    ach1evAdvantage: "77% cheaper with Ach1ever's Hub social study feed & groups",
+    achievAdvantage: "77% cheaper with Achiever's Hub social study feed & groups",
   },
   {
     app: 'Notion Plus + AI',
     typicalPriceMonthlyInr: 850,
     typicalPriceNote: '$10/mo (~₹850/mo)',
-    matchedAch1evTier: 'Resident Scholar Pro',
-    ach1evPriceMonthlyInr: 150,
-    ach1evPriceAnnualInr: 1499,
+    matchedAchievTier: 'Resident Scholar Pro',
+    achievPriceMonthlyInr: 150,
+    achievPriceAnnualInr: 1499,
     keyMatchedFeatures: 'Databases/slabs, rich text editor, web clip/snip, team study groups',
-    ach1evAdvantage: 'Purpose-built dual-page textbook reader + Notion Markdown import',
+    achievAdvantage: 'Purpose-built dual-page textbook reader + Notion Markdown import',
   },
   {
     app: 'Obsidian Sync + Publish',
     typicalPriceMonthlyInr: 700,
     typicalPriceNote: '$8–$10/mo for cross-device vault sync',
-    matchedAch1evTier: 'Chief Fellow Master',
-    ach1evPriceMonthlyInr: 300,
-    ach1evPriceAnnualInr: 2999,
+    matchedAchievTier: 'Chief Fellow Master',
+    achievPriceMonthlyInr: 300,
+    achievPriceAnnualInr: 2999,
     keyMatchedFeatures: 'Multi-device cloud sync, canvas flowcharts, local vault portability',
-    ach1evAdvantage: 'Direct personal Google Drive / multi-cloud offloading included',
+    achievAdvantage: 'Direct personal Google Drive / multi-cloud offloading included',
   },
   {
     app: 'Evernote Personal',
     typicalPriceMonthlyInr: 1100,
     typicalPriceNote: '₹1,099+/mo for multi-device & PDF search',
-    matchedAch1evTier: 'Chief Fellow Master',
-    ach1evPriceMonthlyInr: 300,
-    ach1evPriceAnnualInr: 2999,
+    matchedAchievTier: 'Chief Fellow Master',
+    achievPriceMonthlyInr: 300,
+    achievPriceAnnualInr: 2999,
     keyMatchedFeatures: 'Unlimited notebooks, PDF vault, cross-device sync, offline access',
-    ach1evAdvantage: '72% more affordable with direct Developer priority channel',
+    achievAdvantage: '72% more affordable with direct Developer priority channel',
   },
 ];
 

@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://ach1ev.com/sitemap.xml
+Sitemap: https://achiev.com/sitemap.xml

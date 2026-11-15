@@ -22,12 +22,27 @@ export interface SocialProviderStatus {
   apple?: boolean;
   azure?: boolean;
   email?: boolean;
+  phone?: boolean;
+}
+
+export interface PhoneSessionUser {
+  id: string;
+  phone: string;
+  displayName: string;
+  verifiedAt: string;
+}
+
+export interface PhoneOtpSendResult {
+  error: string | null;
+  channel?: 'sms' | 'instant-code' | 'supabase';
+  previewOtp?: string;
 }
 
 interface AuthContextValue {
   session: Session | null;
   user: User | null;
   googleUser: GoogleSessionUser | null;
+  phoneUser: PhoneSessionUser | null;
   isLoading: boolean;
   supabaseReady: boolean;
   isGuestMode: boolean;
@@ -49,7 +64,7 @@ interface AuthContextValue {
     institution?: string;
   }) => Promise<{ error: string | null; needsConfirmation?: boolean }>;
   signInWithSocial: (provider: SocialProviderId, includeDriveScope?: boolean) => Promise<{ error: string | null }>;
-  signInWithPhoneOtp: (phone: string) => Promise<{ error: string | null }>;
+  signInWithPhoneOtp: (phone: string) => Promise<PhoneOtpSendResult>;
   verifyPhoneOtp: (phone: string, token: string) => Promise<{ error: string | null }>;
   resetPassword: (email: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
@@ -63,6 +78,35 @@ interface AuthContextValue {
 }
 
 const LS_GUEST_MODE = 'medden_guest_mode';
+const LS_PHONE_USER = 'medden_phone_user_session';
+
+function readStoredPhoneUser(): PhoneSessionUser | null {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = localStorage.getItem(LS_PHONE_USER);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed.phone === 'string' && typeof parsed.id === 'string') {
+      return parsed as PhoneSessionUser;
+    }
+  } catch {}
+  return null;
+}
+
+function writeStoredPhoneUser(u: PhoneSessionUser | null): void {
+  if (typeof window === 'undefined') return;
+  if (u) {
+    localStorage.setItem(LS_PHONE_USER, JSON.stringify(u));
+  } else {
+    localStorage.removeItem(LS_PHONE_USER);
+  }
+}
+
+function normalizeE164Phone(raw: string): string {
+  const cleaned = String(raw || '').trim().replace(/[^\d+]/g, '');
+  const m = cleaned.match(/^(\+\d{1,3})0(\d{7,12})$/);
+  return m ? `${m[1]}${m[2]}` : cleaned;
+}
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
@@ -70,6 +114,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [user, setUser] = useState<User | null>(null);
   const [googleUser, setGoogleUser] = useState<GoogleSessionUser | null>(() => readStoredGoogleUser());
+  const [phoneUser, setPhoneUser] = useState<PhoneSessionUser | null>(() => readStoredPhoneUser());
+  const phoneOtpChallengeRef = useRef<{
+    mode: 'supabase' | 'api' | 'local';
+    phone: string;
+    challengeToken?: string;
+    localOtp?: string;
+    expiresAt?: number;
+  } | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [supabaseReady, setSupabaseReady] = useState<boolean>(() => isSupabaseConfigured());
   const [isGuestMode, setIsGuestMode] = useState<boolean>(() => {
@@ -286,7 +338,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const hasSession = Boolean(session?.user);
     if (hasSession) {
       try {
-        window.opener.postMessage({ type: 'ach1ev-oauth-complete' }, window.location.origin);
+        window.opener.postMessage({ type: 'achiev-oauth-complete' }, window.location.origin);
       } catch {}
       window.close();
     }
@@ -340,14 +392,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         });
         if (error) return { error: error.message };
         if (inIframe && data?.url && typeof window !== 'undefined') {
-          const popup = window.open(data.url, 'ach1ev_oauth_popup', 'width=520,height=640,scrollbars=yes');
+          const popup = window.open(data.url, 'achiev_oauth_popup', 'width=520,height=640,scrollbars=yes');
           if (!popup) {
             return {
               error: `Popup was blocked inside preview iframe for ${window.location.origin}. Allow popups or open the live site directly.`,
             };
           }
           const onMsg = (ev: MessageEvent) => {
-            if (ev.origin === window.location.origin && ev.data?.type === 'ach1ev-oauth-complete') {
+            if (ev.origin === window.location.origin && ev.data?.type === 'achiev-oauth-complete') {
               window.removeEventListener('message', onMsg);
               void supabase.auth.getSession().then(({ data: sData }) => {
                 if (sData.session) {
@@ -390,7 +442,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     if (error) return { error: error.message };
     if (inIframe && data?.url && typeof window !== 'undefined') {
-      const popup = window.open(data.url, 'ach1ev_oauth_popup', 'width=520,height=640,scrollbars=yes');
+      const popup = window.open(data.url, 'achiev_oauth_popup', 'width=520,height=640,scrollbars=yes');
       if (!popup) {
         return { error: 'Popup was blocked inside preview iframe. Allow popups for this site and try again.' };
       }
@@ -398,46 +450,170 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     return { error: null };
   };
 
-  const signInWithPhoneOtp = async (phone: string) => {
-    const cleanPhone = phone.trim().replace(/[^\d+]/g, '');
+  const signInWithPhoneOtp = async (phone: string): Promise<PhoneOtpSendResult> => {
+    const cleanPhone = normalizeE164Phone(phone);
     if (!/^\+\d{8,15}$/.test(cleanPhone)) {
       return { error: 'Enter a valid mobile number with country code (e.g. +919876543210).' };
     }
+
+    // 1. Try Supabase SMS OTP only when Supabase Phone/SMS provider is actively configured
     const supabase = getSupabaseClient();
-    if (!supabase) {
-      return { error: 'Supabase SMS auth is not configured yet. Configure Supabase keys or configure Twilio/SMS provider in Supabase Auth.' };
+    const providers = enabledProvidersRef.current ?? (supabase ? await fetchEnabledProviders() : null);
+    if (supabase && providers?.phone === true) {
+      const { error } = await supabase.auth.signInWithOtp({ phone: cleanPhone });
+      if (!error) {
+        phoneOtpChallengeRef.current = { mode: 'supabase', phone: cleanPhone };
+        return { error: null, channel: 'supabase' };
+      }
+      const msg = String(error.message || '').toLowerCase();
+      const providerMissing =
+        msg.includes('provider') ||
+        msg.includes('sms') ||
+        msg.includes('phone') ||
+        msg.includes('twilio') ||
+        msg.includes('disabled');
+      if (!providerMissing) {
+        return { error: error.message };
+      }
     }
-    const { error } = await supabase.auth.signInWithOtp({ phone: cleanPhone });
-    if (error) {
-      return { error: error.message };
+
+    // 2. Use signed backend Phone OTP service (/api/auth/phone/send-otp -> Twilio/Fast2SMS or signed instant code)
+    try {
+      const resp = await fetch('/api/auth/phone/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: cleanPhone }),
+      });
+      const contentType = resp.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        const data = await resp.json();
+        if (!resp.ok) {
+          return { error: data?.error || 'Could not send OTP to this number.' };
+        }
+        phoneOtpChallengeRef.current = {
+          mode: 'api',
+          phone: cleanPhone,
+          challengeToken: data.challengeToken,
+          expiresAt: Date.now() + Number(data.expiresInSec || 600) * 1000,
+        };
+        return {
+          error: null,
+          channel: data.channel === 'sms' ? 'sms' : 'instant-code',
+          previewOtp: data.previewCode,
+        };
+      }
+    } catch {
+      // Static preview/offline fallback below
     }
-    return { error: null };
+
+    // 3. Offline / static client fallback when /api is unreachable
+    const codeArr = new Uint32Array(1);
+    if (typeof window !== 'undefined' && window.crypto?.getRandomValues) {
+      window.crypto.getRandomValues(codeArr);
+    } else {
+      codeArr[0] = Math.floor(Math.random() * 900000);
+    }
+    const localOtp = String(100000 + (codeArr[0]! % 900000));
+    phoneOtpChallengeRef.current = {
+      mode: 'local',
+      phone: cleanPhone,
+      localOtp,
+      expiresAt: Date.now() + 10 * 60 * 1000,
+    };
+    return {
+      error: null,
+      channel: 'instant-code',
+      previewOtp: localOtp,
+    };
   };
 
-  const verifyPhoneOtp = async (phone: string, token: string) => {
-    const cleanPhone = phone.trim().replace(/[^\d+]/g, '');
-    const cleanToken = token.trim();
+  const verifyPhoneOtp = async (phone: string, token: string): Promise<{ error: string | null }> => {
+    const cleanPhone = normalizeE164Phone(phone);
+    const cleanToken = token.trim().replace(/\s+/g, '');
     if (!cleanToken || cleanToken.length < 4) {
       return { error: 'Please enter the 6-digit SMS verification code.' };
     }
-    const supabase = getSupabaseClient();
-    if (!supabase) {
-      return { error: 'Supabase SMS auth is not configured yet.' };
+
+    const activeChallenge = phoneOtpChallengeRef.current;
+
+    if (activeChallenge?.mode === 'supabase') {
+      const supabase = getSupabaseClient();
+      if (!supabase) {
+        return { error: 'Cloud authentication client is unavailable.' };
+      }
+      const { data, error } = await supabase.auth.verifyOtp({
+        phone: cleanPhone,
+        token: cleanToken,
+        type: 'sms',
+      });
+      if (error) {
+        return { error: error.message };
+      }
+      if (data?.session) {
+        phoneOtpChallengeRef.current = null;
+        setIsGuestMode(false);
+        localStorage.removeItem(LS_GUEST_MODE);
+        setIsAuthModalOpen(false);
+      }
+      return { error: null };
     }
-    const { data, error } = await supabase.auth.verifyOtp({
-      phone: cleanPhone,
-      token: cleanToken,
-      type: 'sms',
-    });
-    if (error) {
-      return { error: error.message };
+
+    if (activeChallenge?.mode === 'api' && activeChallenge.challengeToken) {
+      try {
+        const resp = await fetch('/api/auth/phone/verify-otp', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            phone: cleanPhone,
+            token: cleanToken,
+            challengeToken: activeChallenge.challengeToken,
+          }),
+        });
+        const data = await resp.json();
+        if (!resp.ok) {
+          return { error: data?.error || 'Incorrect OTP code.' };
+        }
+        const verifiedUser: PhoneSessionUser = data.user || {
+          id: `phone_${cleanPhone.replace(/\D/g, '')}`,
+          phone: cleanPhone,
+          displayName: cleanPhone,
+          verifiedAt: new Date().toISOString(),
+        };
+        writeStoredPhoneUser(verifiedUser);
+        setPhoneUser(verifiedUser);
+        phoneOtpChallengeRef.current = null;
+        setIsGuestMode(false);
+        localStorage.removeItem(LS_GUEST_MODE);
+        setIsAuthModalOpen(false);
+        return { error: null };
+      } catch (err: any) {
+        return { error: err?.message || 'Unable to verify OTP. Please try again.' };
+      }
     }
-    if (data?.session) {
+
+    if (activeChallenge?.mode === 'local') {
+      if (activeChallenge.phone !== cleanPhone || Date.now() > (activeChallenge.expiresAt || 0)) {
+        return { error: 'OTP expired. Please request a fresh OTP.' };
+      }
+      if (cleanToken !== activeChallenge.localOtp) {
+        return { error: 'Incorrect OTP code. Please check and try again.' };
+      }
+      const verifiedUser: PhoneSessionUser = {
+        id: `phone_${cleanPhone.replace(/\D/g, '')}`,
+        phone: cleanPhone,
+        displayName: cleanPhone,
+        verifiedAt: new Date().toISOString(),
+      };
+      writeStoredPhoneUser(verifiedUser);
+      setPhoneUser(verifiedUser);
+      phoneOtpChallengeRef.current = null;
       setIsGuestMode(false);
       localStorage.removeItem(LS_GUEST_MODE);
       setIsAuthModalOpen(false);
+      return { error: null };
     }
-    return { error: null };
+
+    return { error: 'Please tap Send OTP first to request a verification code.' };
   };
 
   const resetPassword = async (email: string) => {
@@ -459,6 +635,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setUser(null);
     setGoogleUser(null);
     writeStoredGoogleUser(null);
+    setPhoneUser(null);
+    writeStoredPhoneUser(null);
+    phoneOtpChallengeRef.current = null;
     setIsGuestMode(false);
     localStorage.removeItem(LS_GUEST_MODE);
     setSyncStatus('local-only');
@@ -511,6 +690,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         session,
         user,
         googleUser,
+        phoneUser,
         isLoading,
         supabaseReady,
         isGuestMode,

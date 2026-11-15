@@ -87,7 +87,7 @@ export const Design2OfficeClassic: React.FC<Design2Props> = ({
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 font-bold tracking-tight text-sm">
               <AchievBrand variant="emblem" imgClassName="w-5 h-5" />
-              <span>ACH1EV</span>
+              <span>ACHIEV</span>
               <span className="text-blue-200 text-xs font-normal">| Cockpit</span>
             </div>
             {/* Ribbon Tabs */}
@@ -113,7 +113,7 @@ export const Design2OfficeClassic: React.FC<Design2Props> = ({
               <Search className="w-3.5 h-3.5 text-blue-200 absolute left-2.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search Ach1ev (Ctrl+Q)"
+                placeholder="Search Achiev (Ctrl+Q)"
                 className="pl-8 pr-2 py-1 text-xs rounded bg-blue-800/60 border border-blue-400/40 text-white placeholder-blue-300 focus:outline-none w-48"
               />
             </div>

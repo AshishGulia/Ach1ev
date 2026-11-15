@@ -54,7 +54,7 @@ export class ErrorBoundary extends Component<Props, State> {
               </div>
               <div>
                 <h2 className="text-base font-bold text-white">
-                  Ach1ev Workspace Recovery Console
+                  Achiev Workspace Recovery Console
                 </h2>
                 <p className="text-xs text-stone-400">
                   An unexpected render exception was caught. Your notes are safe.

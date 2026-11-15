@@ -50,7 +50,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                 <Crown className="w-5 h-5" />
               </span>
               <h3 className="text-base font-bold text-stone-900 dark:text-stone-50">
-                Ach1ev Academic Membership &amp; Note-App Benchmark Pricing
+                Achiev Academic Membership &amp; Note-App Benchmark Pricing
               </h3>
             </div>
             <p className="text-xs text-stone-500 dark:text-stone-400 mt-0.5">
@@ -219,7 +219,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                   Note-Making Apps Price &amp; Feature Criteria Match
                 </h4>
                 <p className="text-[11px] text-stone-500 dark:text-stone-400">
-                  How each Ach1ev tier matches top global note-making apps with student-friendly pricing
+                  How each Achiev tier matches top global note-making apps with student-friendly pricing
                 </p>
               </div>
               <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-800 dark:text-amber-300 border border-amber-500/30 font-semibold">
@@ -234,7 +234,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                     <th className="py-2.5 px-3.5">Other Note App</th>
                     <th className="py-2.5 px-3">Market Price</th>
                     <th className="py-2.5 px-3">Matched Feature Criteria</th>
-                    <th className="py-2.5 px-3">Ach1ev Tier &amp; Price</th>
+                    <th className="py-2.5 px-3">Achiev Tier &amp; Price</th>
                     <th className="py-2.5 px-3.5">Included Advantage</th>
                   </tr>
                 </thead>
@@ -253,14 +253,14 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                       </td>
                       <td className="py-2.5 px-3 whitespace-nowrap">
                         <span className="font-bold text-amber-700 dark:text-amber-300 block">
-                          {row.matchedAch1evTier}
+                          {row.matchedAchievTier}
                         </span>
                         <span className="font-mono font-bold text-stone-900 dark:text-stone-100">
-                          ₹{row.ach1evPriceMonthlyInr}/mo (₹{row.ach1evPriceAnnualInr}/yr)
+                          ₹{row.achievPriceMonthlyInr}/mo (₹{row.achievPriceAnnualInr}/yr)
                         </span>
                       </td>
                       <td className="py-2.5 px-3.5 text-stone-600 dark:text-stone-300">
-                        {row.ach1evAdvantage}
+                        {row.achievAdvantage}
                       </td>
                     </tr>
                   ))}

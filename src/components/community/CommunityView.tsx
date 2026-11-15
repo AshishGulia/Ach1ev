@@ -133,7 +133,7 @@ const STARTER_PEERS: StudyPeer[] = [
     name: 'Kabir Mehta',
     username: 'kabir_cardio',
     role: 'USMLE Step 1 Prep',
-    institution: 'Ach1ev Cohort',
+    institution: 'Achiev Cohort',
     specialty: 'Cardiology',
     avatar: '',
     status: 'in-library',
@@ -189,7 +189,7 @@ const STARTER_POSTS: CommunityPost[] = [
       name: 'Aarav Sharma',
       username: 'aarav_med',
       role: 'MBBS Year 3',
-      hospitalOrCollege: 'Ach1ev Study Circle',
+      hospitalOrCollege: 'Achiev Study Circle',
       avatar: '',
       badge: 'Top Contributor',
     },
@@ -264,7 +264,7 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
   const myName = userProfile?.name || 'Scholar';
   const myUsername = userProfile?.username || 'scholar';
 
-  // Study-centric Ach1evers Hub tabs: Feed (default FB-style hub), Friends & Requests, Study Groups, Messenger
+  // Study-centric Achievers Hub tabs: Feed (default FB-style hub), Friends & Requests, Study Groups, Messenger
   const [activeSection, setActiveSection] = useState<'feed' | 'friends' | 'groups' | 'chat'>('feed');
 
   // Floating bottom chat dock
@@ -274,7 +274,7 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
   // Persisted state
   const [peers, setPeers] = useState<StudyPeer[]>(() => {
     try {
-      const saved = localStorage.getItem('ach1ev_hub_friends_v1');
+      const saved = localStorage.getItem('achiev_hub_friends_v1') ?? localStorage.getItem('ach1ev_hub_friends_v1');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -285,7 +285,7 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
 
   const [groups, setGroups] = useState<StudyGroupItem[]>(() => {
     try {
-      const saved = localStorage.getItem('ach1ev_hub_groups_v1');
+      const saved = localStorage.getItem('achiev_hub_groups_v1') ?? localStorage.getItem('ach1ev_hub_groups_v1');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -296,7 +296,7 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
 
   const [posts, setPosts] = useState<CommunityPost[]>(() => {
     try {
-      const saved = localStorage.getItem('ach1ev_hub_posts_v1');
+      const saved = localStorage.getItem('achiev_hub_posts_v1') ?? localStorage.getItem('ach1ev_hub_posts_v1');
       if (saved) {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
@@ -307,7 +307,7 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
 
   const [chatMessages, setChatMessages] = useState<Record<string, ChatMessage[]>>(() => {
     try {
-      const saved = localStorage.getItem('ach1ev_hub_chats_v1');
+      const saved = localStorage.getItem('achiev_hub_chats_v1') ?? localStorage.getItem('ach1ev_hub_chats_v1');
       if (saved) return JSON.parse(saved);
     } catch {}
     return {};
@@ -315,25 +315,25 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
 
   useEffect(() => {
     try {
-      localStorage.setItem('ach1ev_hub_friends_v1', JSON.stringify(peers));
+      localStorage.setItem('achiev_hub_friends_v1', JSON.stringify(peers));
     } catch {}
   }, [peers]);
 
   useEffect(() => {
     try {
-      localStorage.setItem('ach1ev_hub_groups_v1', JSON.stringify(groups));
+      localStorage.setItem('achiev_hub_groups_v1', JSON.stringify(groups));
     } catch {}
   }, [groups]);
 
   useEffect(() => {
     try {
-      localStorage.setItem('ach1ev_hub_posts_v1', JSON.stringify(posts));
+      localStorage.setItem('achiev_hub_posts_v1', JSON.stringify(posts));
     } catch {}
   }, [posts]);
 
   useEffect(() => {
     try {
-      localStorage.setItem('ach1ev_hub_chats_v1', JSON.stringify(chatMessages));
+      localStorage.setItem('achiev_hub_chats_v1', JSON.stringify(chatMessages));
     } catch {}
   }, [chatMessages]);
 
@@ -455,10 +455,10 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
       author: {
         name: myName,
         username: myUsername,
-        role: userProfile?.institution ? `${userProfile.institution} Scholar` : 'Ach1ev Scholar',
-        hospitalOrCollege: userProfile?.institution || 'Ach1ev Study Hub',
+        role: userProfile?.institution ? `${userProfile.institution} Scholar` : 'Achiev Scholar',
+        hospitalOrCollege: userProfile?.institution || 'Achiev Study Hub',
         avatar: userProfile?.avatarUrl || '',
-        badge: 'Ach1ever',
+        badge: 'Achiever',
       },
       timeAgo: 'Just now',
       subject: currentSubject,
@@ -541,7 +541,7 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
       onSnipToNote({
         id: `snip-comm-${Date.now()}`,
         dataUrl: '',
-        sourceBookTitle: `Ach1ever's Hub: ${p.title}`,
+        sourceBookTitle: `Achiever's Hub: ${p.title}`,
         pageNumber: 1,
         caption: `[${p.type.toUpperCase()}] ${p.title} (@${p.author.username}): ${p.content.slice(0, 180)}`,
         timestamp: new Date().toLocaleTimeString(),
@@ -578,7 +578,7 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
 
   return (
     <div className="themed-workspace-surface flex-1 flex flex-col h-full bg-[#f8f7f3] dark:bg-[#110c09] text-stone-900 dark:text-stone-100 overflow-hidden transition-colors">
-      {/* 1. TOP ACH1EVERS HUB NAVIGATION BAR */}
+      {/* 1. TOP ACHIEVERS HUB NAVIGATION BAR */}
       <div className="themed-glass-bar px-4 sm:px-6 py-2.5 bg-white dark:bg-[#18110c] border-b border-stone-200/80 dark:border-[#382518] shrink-0 flex flex-wrap items-center justify-between gap-2.5 shadow-2xs">
         <div className="flex items-center gap-1.5 bg-stone-100 dark:bg-[#140e0a] p-1 rounded-xl border border-stone-200 dark:border-[#352317] flex-wrap">
           <button
@@ -591,7 +591,7 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
             }`}
           >
             <Newspaper className="w-3.5 h-3.5 text-[#A47C43]" />
-            <span>Ach1ever's Hub</span>
+            <span>Achiever's Hub</span>
           </button>
 
           <button
@@ -664,7 +664,7 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
       {/* 2. MAIN SECTION CONTENT */}
       <div className="flex-1 overflow-hidden flex relative">
         {/* ========================================================================= */}
-        {/* VIEW 1: ACH1EVERS HUB COMMON STUDY FEED (FB-STYLE, STUDY CENTRIC)         */}
+        {/* VIEW 1: ACHIEVERS HUB COMMON STUDY FEED (FB-STYLE, STUDY CENTRIC)         */}
         {/* ========================================================================= */}
         {activeSection === 'feed' && (
           <div className="flex-1 overflow-y-auto p-4 sm:p-6 custom-scrollbar">
@@ -695,7 +695,7 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
                   rows={2}
                   value={composerContent}
                   onChange={(e) => setComposerContent(e.target.value)}
-                  placeholder="Share study notes, explanations, memory tricks, or an exam doubt with all Ach1evers..."
+                  placeholder="Share study notes, explanations, memory tricks, or an exam doubt with all Achievers..."
                   className="w-full px-3.5 py-2.5 rounded-xl bg-stone-50 dark:bg-[#110c09] border border-stone-200 dark:border-[#382518] text-xs outline-none focus:border-[#A47C43] resize-none"
                 />
 
@@ -1066,7 +1066,7 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
                     name: newPeerName.trim() || `@${cleanHandle}`,
                     username: cleanHandle,
                     role: 'Study Peer',
-                    institution: 'Ach1ev Network',
+                    institution: 'Achiev Network',
                     specialty: newPeerSubject.trim() || currentSubject,
                     avatar: '',
                     status: 'online',

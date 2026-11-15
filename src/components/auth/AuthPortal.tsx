@@ -119,22 +119,12 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
   const [phoneDigits, setPhoneDigits] = useState('');
   const [otpSent, setOtpSent] = useState(false);
   const [otpCode, setOtpCode] = useState('');
+  const [instantOtpPreview, setInstantOtpPreview] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
 
   const [submitting, setSubmitting] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
-
-  // Fast Brand Opening Intro Animation (<= 2 seconds total for crisp PageSpeed LCP)
-  const [showIntro, setShowIntro] = useState<boolean>(!isModal);
-
-  useEffect(() => {
-    if (!showIntro) return;
-    const tEnd = window.setTimeout(() => setShowIntro(false), 1850);
-    return () => {
-      window.clearTimeout(tEnd);
-    };
-  }, [showIntro]);
 
   useEffect(() => {
     if (resendCooldown <= 0) return;
@@ -165,26 +155,32 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
     if (error) setErrorMsg(error);
   };
 
-  const fullPhone = `${countryCode}${phoneDigits.replace(/[^\d]/g, '')}`;
+  const cleanedDigits = phoneDigits.replace(/[^\d]/g, '').replace(/^0+/, '');
+  const fullPhone = `${countryCode}${cleanedDigits}`;
 
   const handleSendPhoneOtp = async (e?: React.FormEvent) => {
     e?.preventDefault();
     setErrorMsg(null);
     setSuccessMsg(null);
-    const digitsOnly = phoneDigits.replace(/[^\d]/g, '');
-    if (digitsOnly.length < 7) {
+    if (cleanedDigits.length < 7) {
       setErrorMsg('Please enter a valid mobile number (without country code).');
       return;
     }
     setSubmitting('phone-send');
-    const { error } = await signInWithPhoneOtp(fullPhone);
+    const res = await signInWithPhoneOtp(fullPhone);
     setSubmitting(null);
-    if (error) {
-      setErrorMsg(error);
+    if (res.error) {
+      setErrorMsg(res.error);
     } else {
       setOtpSent(true);
       setResendCooldown(30);
-      setSuccessMsg(`Verification code sent via SMS to ${fullPhone}.`);
+      if (res.previewOtp) {
+        setInstantOtpPreview(res.previewOtp);
+        setSuccessMsg(`6-digit verification code ready for ${fullPhone}.`);
+      } else {
+        setInstantOtpPreview(null);
+        setSuccessMsg(`Verification code sent via SMS to ${fullPhone}.`);
+      }
     }
   };
 
@@ -201,6 +197,8 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
     setSubmitting(null);
     if (error) {
       setErrorMsg(error);
+    } else {
+      setInstantOtpPreview(null);
     }
   };
 
@@ -281,55 +279,19 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
           'radial-gradient(ellipse 85% 75% at 22% 24%, #261209 0%, #150904 52%, #0c0402 100%)',
       }}
     >
-      {/* FAST <= 2-SECOND BRAND REVEAL INTRO */}
-      {showIntro && (
-        <div
-          className="fixed inset-0 z-[70] flex flex-col items-center justify-center overflow-hidden"
-          style={{
-            background:
-              'radial-gradient(ellipse 85% 78% at 50% 50%, #1c0c05 0%, #100502 50%, #090301 100%)',
-            animation: 'loginIntroFadeOut 0.35s ease-in 1.5s both',
-          }}
-        >
-          {/* Crisp Gold Lockup centered at identical hero scale on Espresso Background */}
-          <div
-            className="relative flex items-center justify-center w-[min(78vw,630px)] select-none"
-            style={{ animation: 'loginFinalReveal 0.4s cubic-bezier(0.22, 1, 0.36, 1) both' }}
-          >
-            <span
-              className="relative inline-block w-full"
-              style={{ ['--achiev-mask' as string]: `url(${ACHIEV_LOCKUP_URL})` } as React.CSSProperties}
-            >
-              <img
-                src={ACHIEV_LOCKUP_URL}
-                alt="Ach1ev — Settle Ideas"
-                draggable={false}
-                fetchPriority="high"
-                decoding="sync"
-                className="w-full h-auto object-contain select-none pointer-events-none"
-                style={{
-                  filter:
-                    'drop-shadow(0 12px 26px rgba(0, 0, 0, 0.85)) drop-shadow(0 3px 10px rgba(42, 18, 6, 0.55))',
-                }}
-              />
-              <span className="achiev-masked-glare achiev-masked-glare-intro" aria-hidden="true" />
-            </span>
-          </div>
-        </div>
-      )}
 
-      {/* Ambient Subtle Warm Orbs behind the frosted glass box */}
+      {/* Ambient Subtle Warm Orbs softly dispersed behind workspace */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
         <div
-          className="absolute -top-28 -left-20 w-[440px] h-[440px] rounded-full blur-3xl animate-pulse bg-[#5c2d16] opacity-30"
+          className="absolute -top-28 -left-20 w-[480px] h-[480px] rounded-full blur-3xl animate-pulse bg-[#5c2d16] opacity-15"
           style={{ animationDuration: '9s' }}
         />
         <div
-          className="absolute top-1/4 right-[8%] w-[360px] h-[360px] rounded-full blur-3xl animate-pulse bg-[#6b3a1c] opacity-20"
+          className="absolute top-1/4 right-[8%] w-[380px] h-[380px] rounded-full blur-3xl animate-pulse bg-[#6b3a1c] opacity-15"
           style={{ animationDuration: '11s' }}
         />
         <div
-          className="absolute -bottom-32 -right-16 w-[480px] h-[480px] rounded-full blur-3xl animate-pulse bg-[#3d1c0d] opacity-25"
+          className="absolute -bottom-32 -right-16 w-[500px] h-[500px] rounded-full blur-3xl animate-pulse bg-[#3d1c0d] opacity-20"
           style={{ animationDuration: '12s' }}
         />
       </div>
@@ -353,23 +315,26 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
         {/* Left: Frameless Brand Panel */}
         <div className="lg:col-span-5 flex flex-col items-center lg:items-start justify-center text-center lg:text-left p-4 sm:p-6 relative">
           <div className="flex flex-col items-center lg:items-start gap-2 w-full">
-            <div className="relative flex items-center justify-center lg:justify-start mb-1 select-none">
-              <span
-                className="relative inline-block"
-                style={{ ['--achiev-mask' as string]: `url(${ACHIEV_LOCKUP_URL})` } as React.CSSProperties}
-              >
-                <img
-                  src={ACHIEV_LOCKUP_URL}
-                  alt="Ach1ev — Settle Ideas"
-                  draggable={false}
-                  className="h-[62px] sm:h-[76px] w-auto object-contain select-none pointer-events-none"
-                  style={{
-                    filter:
-                      'drop-shadow(0 8px 18px rgba(0, 0, 0, 0.85)) drop-shadow(0 2px 6px rgba(42, 18, 6, 0.5))',
-                  }}
-                />
-                <span className="achiev-masked-glare" aria-hidden="true" />
-              </span>
+            <div className="relative flex items-center justify-center lg:justify-start mb-1.5 select-none max-w-full">
+              <div
+                aria-hidden="true"
+                className="pointer-events-none absolute -inset-x-12 -inset-y-8 rounded-full blur-2xl opacity-50"
+                style={{
+                  background:
+                    'radial-gradient(ellipse 70% 65% at 50% 50%, rgba(10, 4, 1, 0.45) 0%, rgba(22, 10, 4, 0.18) 54%, transparent 82%)',
+                }}
+              />
+              <img
+                src={ACHIEV_LOCKUP_URL}
+                alt="Achiev — Settle Ideas"
+                draggable={false}
+                fetchPriority="high"
+                decoding="sync"
+                className="relative z-10 h-[81px] sm:h-[99px] max-w-full w-auto object-contain select-none pointer-events-none"
+                style={{
+                  filter: 'drop-shadow(0 10px 28px rgba(10, 4, 1, 0.34))',
+                }}
+              />
             </div>
 
             <p
@@ -800,6 +765,20 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
 
                 {otpSent && (
                   <div className="space-y-2 animate-in fade-in duration-150">
+                    {instantOtpPreview && (
+                      <div className="px-3 py-2 rounded-xl bg-amber-500/15 border border-amber-400/35 flex items-center justify-between gap-2 text-xs text-amber-100">
+                        <span className="font-medium">
+                          Verification OTP: <strong className="font-mono tracking-[0.2em] text-amber-300">{instantOtpPreview}</strong>
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => setOtpCode(instantOtpPreview)}
+                          className="px-2 py-0.5 rounded-lg bg-amber-400 text-[#1b1007] font-bold text-[10px] hover:bg-amber-300 cursor-pointer shrink-0"
+                        >
+                          Auto-Fill
+                        </button>
+                      </div>
+                    )}
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-semibold opacity-85 flex items-center gap-1.5">
                         <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
@@ -810,6 +789,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                         onClick={() => {
                           setOtpSent(false);
                           setOtpCode('');
+                          setInstantOtpPreview(null);
                           setErrorMsg(null);
                           setSuccessMsg(null);
                         }}
@@ -821,8 +801,10 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                     <input
                       type="text"
                       inputMode="numeric"
+                      autoComplete="one-time-code"
+                      autoFocus
                       maxLength={6}
-                      placeholder="Enter 6-digit SMS OTP"
+                      placeholder="Enter 6-digit OTP"
                       value={otpCode}
                       onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                       className="w-full px-4 py-2.5 rounded-xl text-sm font-mono tracking-[0.35em] text-center outline-none transition-all focus:ring-2 focus:ring-amber-500/40 bg-[#120c08]/90 text-[#efe4d4] placeholder-[#8b735c] placeholder:tracking-normal"
@@ -833,7 +815,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                       required
                     />
                     <div className="flex items-center justify-between text-[11px] text-[#c9b08a]">
-                      <span>SMS sent to {fullPhone}</span>
+                      <span>{instantOtpPreview ? `Code generated for ${fullPhone}` : `SMS sent to ${fullPhone}`}</span>
                       <button
                         type="button"
                         disabled={resendCooldown > 0 || submitting === 'phone-send'}
@@ -875,7 +857,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                       : submitting === 'phone-verify'
                       ? 'Verifying OTP...'
                       : otpSent
-                      ? 'Verify OTP & Enter Ach1ev'
+                      ? 'Verify OTP & Enter Achiev'
                       : 'Send OTP'}
                   </span>
                   <ArrowRight className="w-4 h-4 relative z-10" />

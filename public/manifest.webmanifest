@@ -1,8 +1,8 @@
 {
   "id": "/",
-  "name": "Ach1ev — Settle Ideas",
-  "short_name": "Ach1ev",
-  "description": "Ach1ev (Settle Ideas) — Multi-device medical and academic notes workspace with Supabase real-time sync and personal Google Drive storage offloading.",
+  "name": "Achiev — Settle Ideas",
+  "short_name": "Achiev",
+  "description": "Achiev (Settle Ideas) — Multi-device medical and academic notes workspace with Supabase real-time sync and personal Google Drive storage offloading.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

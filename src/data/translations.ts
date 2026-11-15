@@ -19,7 +19,7 @@ export const INDIAN_LANGUAGES: LanguageOption[] = [
 ];
 
 export const WORLD_LANGUAGES: LanguageOption[] = [
-  { code: 'en', label: 'English', nativeLabel: 'English', flag: '🇬🇧', region: 'world', greeting: 'Welcome to your Ach1ev study workspace' },
+  { code: 'en', label: 'English', nativeLabel: 'English', flag: '🇬🇧', region: 'world', greeting: 'Welcome to your Achiev study workspace' },
   { code: 'zh', label: 'Mandarin Chinese', nativeLabel: '中文', flag: '🇨🇳', region: 'world', greeting: '欢迎来到您的医学学习空间' },
   { code: 'es', label: 'Spanish', nativeLabel: 'Español', flag: '🇪🇸', region: 'world', greeting: 'Bienvenido a tu espacio de estudio médico' },
   { code: 'fr', label: 'French', nativeLabel: 'Français', flag: '🇫🇷', region: 'world', greeting: 'Bienvenue dans votre espace d’étude' },
@@ -51,7 +51,7 @@ const EN_BASE: Record<string, string> = {
   'nav.calendar': 'Calendar',
   'nav.myShelf': 'Shelf',
   'nav.mnemonics': 'Mnemonics',
-  'nav.community': "Ach1ever's Hub",
+  'nav.community': "Achiever's Hub",
   'nav.leisure': 'Leisure',
   'nav.talkToDev': 'Talk to Developer',
   'nav.settings': 'Settings',

@@ -76,6 +76,7 @@ export default function App() {
   const {
     user,
     googleUser,
+    phoneUser,
     isLoading: authLoading,
     isGuestMode,
     isAuthModalOpen,
@@ -246,9 +247,10 @@ export default function App() {
   // Default opening dashboard theme: Light Mode & Theme 1 (one-time migration key)
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     try {
-      const migrated = localStorage.getItem('ach1ev_defaults_v2');
+      const migrated =
+        localStorage.getItem('achiev_defaults_v2') ?? localStorage.getItem('ach1ev_defaults_v2');
       if (!migrated) {
-        localStorage.setItem('ach1ev_defaults_v2', '1');
+        localStorage.setItem('achiev_defaults_v2', '1');
         localStorage.setItem('medden_theme', 'light');
         localStorage.setItem('medden_active_design', '1');
         return false;
@@ -319,7 +321,7 @@ export default function App() {
 
   // Sync Dark Theme class & attributes on <html>:
   // Splash & Login screen always force Dark Mode; inside Dashboard reflects isDarkMode (default Light) + activeDesign (default Theme 1).
-  const isInsideDashboard = Boolean(user || googleUser || isGuestMode) && !authLoading;
+  const isInsideDashboard = Boolean(user || googleUser || phoneUser || isGuestMode) && !authLoading;
   useEffect(() => {
     const root = document.documentElement;
     const effectiveDark = isInsideDashboard ? isDarkMode : true;
@@ -934,14 +936,14 @@ export default function App() {
     const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(notebooks, null, 2));
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute('href', dataStr);
-    downloadAnchor.setAttribute('download', `Ach1ev_Clinical_Notes_${new Date().toISOString().split('T')[0]}.json`);
+    downloadAnchor.setAttribute('download', `Achiev_Clinical_Notes_${new Date().toISOString().split('T')[0]}.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
   };
 
   const handleResetSession = () => {
-    if (confirm('Reset Ach1ev workspace and clear all local data?')) {
+    if (confirm('Reset Achiev workspace and clear all local data?')) {
       localStorage.clear();
       setOptionSlabs(INITIAL_OPTION_SLABS);
       setNotebooks([]);
@@ -969,20 +971,19 @@ export default function App() {
       >
         <img
           src={ACHIEV_LOCKUP_URL}
-          alt="Ach1ev — Settle Ideas"
+          alt="Achiev — Settle Ideas"
           draggable={false}
           className="w-[min(72vw,432px)] h-auto object-contain select-none pointer-events-none animate-pulse"
           style={{
-            filter:
-              'drop-shadow(0 10px 24px rgba(0, 0, 0, 0.85)) drop-shadow(0 3px 10px rgba(42, 18, 6, 0.5))',
+            filter: 'drop-shadow(0 14px 36px rgba(10, 4, 1, 0.38))',
           }}
         />
-        <p className="text-xs font-mono opacity-75">Initializing Ach1ev Cloud Workspace...</p>
+        <p className="text-xs font-mono opacity-75">Initializing Achiev Cloud Workspace...</p>
       </div>
     );
   }
 
-  if (!user && !googleUser && !isGuestMode) {
+  if (!user && !googleUser && !phoneUser && !isGuestMode) {
     return (
       <AuthPortal
         isDarkMode={true}

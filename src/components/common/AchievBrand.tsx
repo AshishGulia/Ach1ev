@@ -16,10 +16,10 @@ const resolveAssetUrl = (relativePath: string): string => {
   return `${normalizedBase}${relativePath.replace(/^\/+/, '')}`;
 };
 
-export const ACHIEV_LOGO_URL = resolveAssetUrl('assets/brand/achiev-emblem.png?v=hd7');
-export const ACHIEV_EMBLEM_URL = resolveAssetUrl('assets/brand/achiev-emblem.png?v=hd7');
-export const ACHIEV_WORDMARK_URL = resolveAssetUrl('assets/brand/achiev-wordmark.png?v=hd7');
-export const ACHIEV_LOCKUP_URL = resolveAssetUrl('assets/brand/achiev-logo.png?v=hd7');
+export const ACHIEV_LOGO_URL = resolveAssetUrl('assets/brand/achiev-emblem.png?v=hd8');
+export const ACHIEV_EMBLEM_URL = resolveAssetUrl('assets/brand/achiev-emblem.png?v=hd8');
+export const ACHIEV_WORDMARK_URL = resolveAssetUrl('assets/brand/achiev-wordmark.png?v=hd8');
+export const ACHIEV_LOCKUP_URL = resolveAssetUrl('assets/brand/achiev-logo.png?v=hd8');
 export const ACHIEV_LEATHER_HERO_URL = resolveAssetUrl('assets/brand/achiev-leather-hero.jpg?v=1');
 export const ACHIEV_LEATHER_LOGIN_URL = resolveAssetUrl('assets/brand/achiev-leather-login.jpg?v=1');
 
@@ -29,12 +29,12 @@ export const AchievBrand: React.FC<AchievBrandProps> = ({
   className = '',
   imgClassName = '',
   emblemClassName = '',
-  title = 'Ach1ev — Settle Ideas',
+  title = 'Achiev — Settle Ideas',
 }) => {
   const emblemMaskStyle = { ['--achiev-mask' as string]: `url(${ACHIEV_EMBLEM_URL})` } as React.CSSProperties;
   const wordmarkMaskStyle = { ['--achiev-mask' as string]: `url(${ACHIEV_WORDMARK_URL})` } as React.CSSProperties;
 
-  const EmblemWithGlare = ({ sizeClass, alt = 'Ach1ev' }: { sizeClass: string; alt?: string }) => (
+  const EmblemWithGlare = ({ sizeClass, alt = 'Achiev' }: { sizeClass: string; alt?: string }) => (
     <span className="achiev-emblem-wrap" style={emblemMaskStyle}>
       <img
         src={ACHIEV_EMBLEM_URL}
@@ -48,7 +48,7 @@ export const AchievBrand: React.FC<AchievBrandProps> = ({
   );
 
   if (variant === 'emblem') {
-    return <EmblemWithGlare sizeClass={imgClassName || 'w-7 h-7'} alt="Ach1ev" />;
+    return <EmblemWithGlare sizeClass={imgClassName || 'w-7 h-7'} alt="Achiev" />;
   }
 
   if (variant === 'lockup') {
@@ -59,12 +59,12 @@ export const AchievBrand: React.FC<AchievBrandProps> = ({
       >
         <EmblemWithGlare
           sizeClass={emblemClassName || 'w-14 h-14 sm:w-[70px] sm:h-[70px] shrink-0'}
-          alt="Ach1ev emblem"
+          alt="Achiev emblem"
         />
         <span className="relative inline-block max-w-full" style={wordmarkMaskStyle}>
           <img
             src={ACHIEV_WORDMARK_URL}
-            alt="Ach1ev — Settle Ideas"
+            alt="Achiev — Settle Ideas"
             draggable={false}
             className={`bg-transparent select-none object-contain max-w-full achiev-brand-clean ${imgClassName || 'h-12 sm:h-[58px] w-auto'}`}
           />
@@ -81,7 +81,7 @@ export const AchievBrand: React.FC<AchievBrandProps> = ({
         <span className="relative inline-block" style={wordmarkMaskStyle}>
           <img
             src={ACHIEV_WORDMARK_URL}
-            alt={showTagline ? 'Ach1ev — Settle Ideas' : 'Ach1ev'}
+            alt={showTagline ? 'Achiev — Settle Ideas' : 'Achiev'}
             draggable={false}
             className="h-5 sm:h-6 w-auto object-contain select-none achiev-brand-clean"
           />
@@ -91,15 +91,15 @@ export const AchievBrand: React.FC<AchievBrandProps> = ({
     );
   }
 
-  // 'compact' sidebar header: extracted Champagne Gold emblem + extracted ACH1EV / SETTLE IDEAS wordmark
+  // 'compact' sidebar header: extracted Champagne Gold emblem + extracted ACHIEV / SETTLE IDEAS wordmark
   return (
     <div className={`flex items-center gap-1.5 bg-transparent select-none min-w-0 w-full overflow-visible py-0.5 ${className}`} title={title}>
-      <EmblemWithGlare sizeClass={imgClassName || 'w-[38px] h-[38px] shrink-0'} alt="Ach1ev emblem" />
+      <EmblemWithGlare sizeClass={imgClassName || 'w-[38px] h-[38px] shrink-0'} alt="Achiev emblem" />
       <div className="min-w-0 flex-1 flex items-center justify-start overflow-visible">
         <span className="relative inline-block max-w-full" style={wordmarkMaskStyle}>
           <img
             src={ACHIEV_WORDMARK_URL}
-            alt="Ach1ev — Settle Ideas"
+            alt="Achiev — Settle Ideas"
             draggable={false}
             className="h-[30px] max-w-full w-auto object-contain select-none achiev-brand-clean"
           />

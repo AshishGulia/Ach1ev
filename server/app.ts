@@ -1,6 +1,7 @@
 import express from 'express';
 import path from 'path';
 import fs from 'fs';
+import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import { GoogleGenAI } from '@google/genai';
 
@@ -78,8 +79,10 @@ async function generateContentWithFallback(ai: GoogleGenAI, params: GeneratePara
   throw lastError;
 }
 
-const PRIMARY_DOMAIN = 'https://ach1ev.com';
+const PRIMARY_DOMAIN = 'https://achiev.com';
 const SECONDARY_DOMAINS = [
+  'https://www.achiev.com',
+  'https://ach1ev.com',
   'https://www.ach1ev.com',
   'https://achievx.vercel.app',
   'https://ashish-ashish01.vercel.app',
@@ -100,13 +103,14 @@ export function attachApiRoutes(app: express.Express): express.Express {
   app.set('trust proxy', 1);
   app.use(express.json({ limit: '20mb' }));
 
-  // Allow requests from primary domain (ach1ev.com), secondary Vercel domains, and local dev
+  // Allow requests from primary domain (achiev.com), secondary Vercel domains, and local dev
   app.use((req, res, next) => {
     const origin = req.headers.origin;
     if (origin) {
       const allowed =
         origin === PRIMARY_DOMAIN ||
         SECONDARY_DOMAINS.includes(origin) ||
+        origin.endsWith('.achiev.com') ||
         origin.endsWith('.ach1ev.com') ||
         origin.endsWith('.vercel.app') ||
         origin.endsWith('.run.app') ||
@@ -129,8 +133,8 @@ export function attachApiRoutes(app: express.Express): express.Express {
     const clientId = process.env.GOOGLE_CLIENT_ID || process.env.VITE_GOOGLE_CLIENT_ID || '';
     res.json({
       status: 'ok',
-      service: 'ach1ev-cloud-api',
-      brand: 'Ach1ev — Settle Ideas',
+      service: 'achiev-cloud-api',
+      brand: 'Achiev — Settle Ideas',
       primaryDomain: PRIMARY_DOMAIN,
       secondaryDomains: SECONDARY_DOMAINS,
       geminiConfigured: Boolean(process.env.GEMINI_API_KEY),
@@ -167,7 +171,7 @@ export function attachApiRoutes(app: express.Express): express.Express {
       (typeof req.query.redirectUri === 'string' && req.query.redirectUri) ||
       process.env.GOOGLE_REDIRECT_URI ||
       `${getRequestOrigin(req)}/api/auth/google/callback`;
-    const state = typeof req.query.state === 'string' ? req.query.state : 'ach1ev_drive_oauth';
+    const state = typeof req.query.state === 'string' ? req.query.state : 'achiev_drive_oauth';
 
     const params = new URLSearchParams({
       client_id: clientId,
@@ -272,6 +276,150 @@ export function attachApiRoutes(app: express.Express): express.Express {
       });
     } catch (error: any) {
       return res.status(500).json({ error: error.message || 'Token refresh error.' });
+    }
+  });
+
+  // Phone Number + SMS OTP Authentication (Carrier SMS via Twilio/Fast2SMS when configured, or signed instant OTP)
+  const getOtpSigningSecret = () =>
+    process.env.OTP_SIGNING_SECRET ||
+    process.env.SESSION_SECRET ||
+    process.env.GOOGLE_CLIENT_SECRET ||
+    'achiev-phone-otp-hmac-secret-2026';
+
+  const normalizeE164Phone = (raw: string): string => {
+    const cleaned = String(raw || '').trim().replace(/[^\d+]/g, '');
+    // Strip accidental trunk '0' right after +91 / +44 / etc. when length > 12
+    const m = cleaned.match(/^(\+\d{1,3})0(\d{7,12})$/);
+    return m ? `${m[1]}${m[2]}` : cleaned;
+  };
+
+  app.post('/api/auth/phone/send-otp', async (req, res) => {
+    try {
+      const cleanPhone = normalizeE164Phone(req.body?.phone || '');
+      if (!/^\+\d{8,15}$/.test(cleanPhone)) {
+        return res.status(400).json({ error: 'Enter a valid mobile number with country code (e.g. +919876543210).' });
+      }
+
+      const code = String(crypto.randomInt(100000, 1000000));
+      const exp = Date.now() + 10 * 60 * 1000;
+      const otpHash = crypto.createHash('sha256').update(`${code}:${cleanPhone}`).digest('hex');
+      const payloadB64 = Buffer.from(JSON.stringify({ phone: cleanPhone, otpHash, exp })).toString('base64url');
+      const sig = crypto.createHmac('sha256', getOtpSigningSecret()).update(payloadB64).digest('base64url');
+      const challengeToken = `${payloadB64}.${sig}`;
+
+      // 1. Dispatch via Twilio SMS if configured
+      const twSid = process.env.TWILIO_ACCOUNT_SID;
+      const twToken = process.env.TWILIO_AUTH_TOKEN;
+      const twFrom = process.env.TWILIO_PHONE_NUMBER;
+      if (twSid && twToken && twFrom) {
+        const authHdr = Buffer.from(`${twSid}:${twToken}`).toString('base64');
+        const twResp = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${twSid}/Messages.json`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Basic ${authHdr}`,
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: new URLSearchParams({
+            To: cleanPhone,
+            From: twFrom,
+            Body: `Your Achiev verification code is ${code}. Valid for 10 minutes.`,
+          }),
+        });
+        if (!twResp.ok) {
+          const errData = await twResp.json().catch(() => ({}));
+          return res.status(502).json({
+            error: errData?.message || 'Carrier SMS delivery failed via Twilio. Please verify number.',
+          });
+        }
+        return res.json({ ok: true, channel: 'sms', phone: cleanPhone, challengeToken, expiresInSec: 600 });
+      }
+
+      // 2. Dispatch via Fast2SMS if configured (India +91)
+      const fast2Key = process.env.FAST2SMS_API_KEY;
+      if (fast2Key && cleanPhone.startsWith('+91')) {
+        const localTen = cleanPhone.slice(3);
+        const fResp = await fetch('https://www.fast2sms.com/dev/bulkV2', {
+          method: 'POST',
+          headers: {
+            authorization: fast2Key,
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            route: 'otp',
+            variables_values: code,
+            numbers: localTen,
+          }),
+        });
+        if (fResp.ok) {
+          return res.json({ ok: true, channel: 'sms', phone: cleanPhone, challengeToken, expiresInSec: 600 });
+        }
+      }
+
+      // 3. Server-signed instant OTP code fallback when no paid SMS gateway is configured yet
+      return res.json({
+        ok: true,
+        channel: 'instant-code',
+        phone: cleanPhone,
+        previewCode: code,
+        challengeToken,
+        expiresInSec: 600,
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: error.message || 'Could not generate verification code.' });
+    }
+  });
+
+  app.post('/api/auth/phone/verify-otp', (req, res) => {
+    try {
+      const cleanPhone = normalizeE164Phone(req.body?.phone || '');
+      const cleanToken = String(req.body?.token || '').trim();
+      const challengeToken = String(req.body?.challengeToken || '').trim();
+
+      if (!/^\+\d{8,15}$/.test(cleanPhone)) {
+        return res.status(400).json({ error: 'Invalid mobile number format.' });
+      }
+      if (!/^\d{4,8}$/.test(cleanToken)) {
+        return res.status(400).json({ error: 'Please enter the 6-digit OTP verification code.' });
+      }
+      if (!challengeToken || !challengeToken.includes('.')) {
+        return res.status(400).json({ error: 'OTP session expired. Please request a new OTP.' });
+      }
+
+      const [payloadB64, sig] = challengeToken.split('.');
+      const expectedSig = crypto
+        .createHmac('sha256', getOtpSigningSecret())
+        .update(payloadB64)
+        .digest('base64url');
+      if (sig !== expectedSig) {
+        return res.status(401).json({ error: 'Invalid OTP challenge signature. Please resend OTP.' });
+      }
+
+      const payload = JSON.parse(Buffer.from(payloadB64, 'base64url').toString('utf8'));
+      if (!payload || payload.phone !== cleanPhone) {
+        return res.status(401).json({ error: 'Phone number mismatch. Please request a fresh OTP.' });
+      }
+      if (Date.now() > Number(payload.exp || 0)) {
+        return res.status(401).json({ error: 'OTP has expired. Please tap Resend OTP.' });
+      }
+
+      const providedHash = crypto.createHash('sha256').update(`${cleanToken}:${cleanPhone}`).digest('hex');
+      if (providedHash !== payload.otpHash) {
+        return res.status(401).json({ error: 'Incorrect OTP code. Please check and try again.' });
+      }
+
+      const phoneUserId =
+        'phone_' + crypto.createHash('sha256').update(cleanPhone).digest('hex').slice(0, 16);
+      return res.json({
+        ok: true,
+        user: {
+          id: phoneUserId,
+          phone: cleanPhone,
+          displayName: cleanPhone,
+          verifiedAt: new Date().toISOString(),
+        },
+      });
+    } catch (error: any) {
+      return res.status(500).json({ error: error.message || 'OTP verification failed.' });
     }
   });
 
