@@ -29,6 +29,9 @@ import {
 const FeatureVideoSeriesShowcase = React.lazy(
   () => import('../landing/FeatureVideoSeriesShowcase')
 );
+const ProductDemoShowcase = React.lazy(
+  () => import('../landing/productDemo/ProductDemoShowcase')
+);
 
 interface AuthPortalProps {
   isModal?: boolean;
@@ -922,7 +925,10 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
           >
             {showShowcase ? (
               <Suspense fallback={<div className="w-full max-w-6xl mx-auto mt-4 h-48 rounded-3xl bg-[#EFE4CC]/60 animate-pulse" />}>
-                <FeatureVideoSeriesShowcase />
+                <>
+                  <ProductDemoShowcase />
+                  <FeatureVideoSeriesShowcase />
+                </>
               </Suspense>
             ) : (
               <div className="w-full max-w-6xl mx-auto h-32" />
