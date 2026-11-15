@@ -459,26 +459,26 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
   };
 
   return (
-    <div id="medical-student-seo-guide" className="w-full max-w-6xl mx-auto mt-14 pt-10 border-t border-amber-500/20 space-y-16 text-[#efe4d4]">
+    <div id="medical-student-seo-guide" className="w-full max-w-6xl mx-auto space-y-14 sm:space-y-16 text-[#23140A]">
       {/* ═══════════════ 1. SEO HERO VALUE PROPOSITION: CHEAPEST FOR MEDICAL STUDENTS ═══════════════ */}
-      <section aria-labelledby="seo-hero-heading" className="text-center space-y-4 px-2">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-500/15 border border-amber-400/35 text-amber-200 text-xs font-semibold">
-          <Award className="w-3.5 h-3.5 text-amber-300" />
+      <section aria-labelledby="seo-hero-heading" className="text-center space-y-4 px-1 sm:px-2">
+        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#F3E7CC] border border-[#DAC190] text-[#5C3D18] text-[11px] sm:text-xs font-semibold shadow-2xs">
+          <Award className="w-3.5 h-3.5 text-[#9B6A1F] shrink-0" />
           <span>Rated Best Budget Medical Note-Making Studio · MBBS · NEET-PG · USMLE · Nursing</span>
         </div>
 
         <h1
           id="seo-hero-heading"
-          className="text-2xl sm:text-4xl font-bold tracking-tight text-amber-50 font-serif"
+          className="text-2xl sm:text-4xl font-bold tracking-tight text-[#1E1007] font-serif pt-2"
         >
           The Cheapest &amp; Best Note-Making Website Built Specifically for Medical Students
         </h1>
 
-        <p className="max-w-3xl mx-auto text-sm sm:text-base text-[#d6c2a5] leading-relaxed">
+        <p className="max-w-3xl mx-auto text-sm sm:text-base text-[#563D25] leading-relaxed">
           Stop paying ₹450–₹1,100/month across separate apps for PDF reading, note-taking, flashcards, habit trackers, and cloud sync.
-          <strong className="text-amber-200"> Achiev (Settle Ideas)</strong> gives medical scholars a complete study workspace starting at{' '}
-          <strong className="text-emerald-300">₹0 Free Forever</strong> and{' '}
-          <strong className="text-emerald-300">₹60/month Pro</strong> — with side-by-side textbook desks, Picture-to-Table conversion,
+          <strong className="text-[#8E5B13]"> Achiev (Settle Ideas)</strong> gives medical scholars a complete study workspace starting at{' '}
+          <strong className="text-[#0E7752]">₹0 Free Forever</strong> and{' '}
+          <strong className="text-[#0E7752]">₹60/month Pro</strong> — with side-by-side textbook desks, Picture-to-Table conversion,
           20-20-20 Eye Rest Timer, interactive 3D bookshelves, and Achiever&apos;s Hub community.
         </p>
 
@@ -491,11 +491,11 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
           ].map((stat) => (
             <div
               key={stat.label}
-              className="rounded-2xl p-3.5 text-left border border-amber-500/20 bg-[#1a0d06]/70 backdrop-blur-md"
+              className="rounded-2xl p-3.5 text-left border border-[#E3D2B1] bg-[#FFFDF8] shadow-[0_6px_20px_rgba(88,58,18,0.06)]"
             >
-              <div className="text-[11px] uppercase tracking-wider text-amber-300/80 font-semibold">{stat.label}</div>
-              <div className="text-lg font-bold text-amber-50 mt-0.5">{stat.val}</div>
-              <div className="text-[11px] text-[#c7b194] mt-0.5">{stat.sub}</div>
+              <div className="text-[11px] uppercase tracking-wider text-[#8E5B13] font-bold">{stat.label}</div>
+              <div className="text-lg font-bold text-[#1E1007] mt-0.5">{stat.val}</div>
+              <div className="text-[11px] text-[#6B5038] mt-0.5">{stat.sub}</div>
             </div>
           ))}
         </div>
@@ -505,22 +505,22 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
       <section aria-labelledby="video-series-heading" className="space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
           <div>
-            <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-amber-300">
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#9B6A1F]">
               <Film className="w-4 h-4" />
               <span>9-Part Interactive Video Walkthrough Series</span>
             </div>
-            <h2 id="video-series-heading" className="text-xl sm:text-2xl font-bold text-amber-50 mt-1">
+            <h2 id="video-series-heading" className="text-xl sm:text-2xl font-bold text-[#1E1007] mt-1 font-serif">
               Explore Every Feature: Dashboard to Last Sidebar Segment
             </h2>
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
-            <label className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 text-xs cursor-pointer select-none">
+            <label className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#FFFDF8] border border-[#E0CFAF] text-[#3E2816] text-xs font-medium cursor-pointer select-none shadow-2xs">
               <input
                 type="checkbox"
                 checked={autoAdvance}
                 onChange={(e) => setAutoAdvance(e.target.checked)}
-                className="accent-amber-500"
+                className="accent-amber-600"
               />
               <span>Auto-Play Next Episode</span>
             </label>
@@ -529,7 +529,7 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
               type="button"
               onClick={handleDownloadEpisodeVideo}
               disabled={exportingId !== null}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-amber-600/90 hover:bg-amber-500 text-white text-xs font-bold transition cursor-pointer disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#9B6A1F] hover:bg-[#825614] text-white text-xs font-bold transition cursor-pointer disabled:opacity-50 shadow-sm"
             >
               <Download className="w-3.5 h-3.5" />
               <span>{exportingId ? 'Rendering WebM...' : `Export ${episode.epNumber} Video`}</span>
@@ -538,14 +538,14 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
         </div>
 
         {exportMsg && (
-          <div className="px-4 py-2 rounded-xl bg-amber-500/15 border border-amber-400/30 text-amber-200 text-xs font-medium">
+          <div className="px-4 py-2 rounded-xl bg-[#F3E7CC] border border-[#D4B77E] text-[#5C3D18] text-xs font-medium">
             {exportMsg}
           </div>
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
           {/* Left 7 Cols: 16:9 Live Animated Feature Theatre Player */}
-          <div className="lg:col-span-7 flex flex-col rounded-3xl overflow-hidden border border-amber-500/25 bg-[#120804]/90 shadow-2xl">
+          <div className="lg:col-span-7 flex flex-col rounded-3xl overflow-hidden border border-[#DFCCA8] bg-[#FFFDF8] shadow-[0_14px_40px_rgba(78,50,15,0.10)]">
             {/* Video Stage */}
             <div className="relative aspect-video w-full p-5 sm:p-6 flex flex-col justify-between overflow-hidden bg-gradient-to-br from-[#231108] via-[#130904] to-[#080301]">
               {/* Top Episode Badge */}
@@ -580,7 +580,7 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
             </div>
 
             {/* Video Scrubber & Transport Controls */}
-            <div className="p-4 bg-[#170b05] border-t border-amber-500/15 space-y-3">
+            <div className="p-4 bg-[#FAF4E6] border-t border-[#E6D6B8] space-y-3 text-[#2A170B]">
               {/* Clickable Seek Bar */}
               <div
                 role="slider"
@@ -594,7 +594,7 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
                   const pct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
                   setProgressPct(pct);
                 }}
-                className="w-full h-2 rounded-full bg-white/10 cursor-pointer overflow-hidden"
+                className="w-full h-2 rounded-full bg-[#E5D7BA] cursor-pointer overflow-hidden"
               >
                 <div
                   className="h-full rounded-full transition-all duration-100"
@@ -607,7 +607,7 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => selectEpisode((activeIdx - 1 + FEATURE_VIDEO_SERIES.length) % FEATURE_VIDEO_SERIES.length)}
-                    className="p-2 rounded-xl bg-white/5 hover:bg-white/15 transition cursor-pointer"
+                    className="p-2 rounded-xl bg-[#EFE4CC] hover:bg-[#E5D4B2] text-[#2A170B] transition cursor-pointer"
                     title="Previous Episode"
                   >
                     <SkipBack className="w-4 h-4" />
@@ -624,7 +624,7 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
                   <button
                     type="button"
                     onClick={() => selectEpisode((activeIdx + 1) % FEATURE_VIDEO_SERIES.length)}
-                    className="p-2 rounded-xl bg-white/5 hover:bg-white/15 transition cursor-pointer"
+                    className="p-2 rounded-xl bg-[#EFE4CC] hover:bg-[#E5D4B2] text-[#2A170B] transition cursor-pointer"
                     title="Next Episode"
                   >
                     <SkipForward className="w-4 h-4" />
@@ -635,14 +635,14 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
                       setProgressPct(0);
                       setIsPlaying(true);
                     }}
-                    className="p-2 rounded-xl bg-white/5 hover:bg-white/15 transition cursor-pointer"
+                    className="p-2 rounded-xl bg-[#EFE4CC] hover:bg-[#E5D4B2] text-[#2A170B] transition cursor-pointer"
                     title="Replay Episode"
                   >
                     <RotateCcw className="w-4 h-4" />
                   </button>
                 </div>
 
-                <div className="text-xs text-[#cbb597] font-medium truncate max-w-[260px]">
+                <div className="text-xs text-[#6B5038] font-semibold truncate max-w-[260px]">
                   {episode.title}
                 </div>
               </div>
@@ -650,7 +650,7 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
               {/* Episode Highlights */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
                 {episode.highlights.map((h) => (
-                  <div key={h} className="flex items-start gap-1.5 text-[11px] text-[#e7d6be] bg-white/[0.04] rounded-xl p-2 border border-white/5">
+                  <div key={h} className="flex items-start gap-1.5 text-[11px] text-[#3F2918] bg-[#FFFDF8] rounded-xl p-2 border border-[#E6D7B9]">
                     <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5" style={{ color: episode.accent }} />
                     <span>{h}</span>
                   </div>
@@ -660,8 +660,8 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
           </div>
 
           {/* Right 5 Cols: Series-Wise Playlist (Cockpit -> Last Sidebar Segment) */}
-          <div className="lg:col-span-5 rounded-3xl border border-amber-500/20 bg-[#160b05]/85 p-3.5 flex flex-col gap-2 max-h-[540px] overflow-y-auto custom-scrollbar">
-            <div className="px-2 py-1 text-xs font-bold uppercase tracking-wider text-amber-300/90 flex items-center justify-between">
+          <div className="lg:col-span-5 rounded-3xl border border-[#DFCCA8] bg-[#FFFDF8] p-3.5 flex flex-col gap-2 max-h-[540px] overflow-y-auto custom-scrollbar shadow-[0_10px_30px_rgba(78,50,15,0.07)]">
+            <div className="px-2 py-1 text-xs font-bold uppercase tracking-wider text-[#8E5B13] flex items-center justify-between">
               <span>Series Playlist (Sidebar Order)</span>
               <span>{FEATURE_VIDEO_SERIES.length} Episodes</span>
             </div>
@@ -676,13 +676,16 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
                   onClick={() => selectEpisode(idx)}
                   className={`w-full text-left p-2.5 rounded-2xl border transition-all cursor-pointer flex items-start gap-3 ${
                     active
-                      ? 'bg-amber-500/15 border-amber-400/50 shadow-md'
-                      : 'bg-white/[0.03] border-white/5 hover:bg-white/[0.07]'
+                      ? 'bg-[#FBF1DA] border-[#C9963B] shadow-sm'
+                      : 'bg-[#FAF5EA]/75 border-[#EAE0C8] hover:bg-[#F5EAD2]'
                   }`}
                 >
                   <div
-                    className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 text-white shadow-xs"
-                    style={{ background: active ? ep.accent : 'rgba(255,255,255,0.08)' }}
+                    className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 shadow-2xs"
+                    style={{
+                      background: active ? ep.accent : '#EDE2C8',
+                      color: active ? '#ffffff' : '#5E4224',
+                    }}
                   >
                     <Icon className="w-4 h-4" />
                   </div>
@@ -691,9 +694,9 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
                       <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: ep.accent }}>
                         {ep.epNumber} · {ep.sidebarSegment}
                       </span>
-                      <span className="text-[10px] font-mono text-[#bfa98c]">{formatSec(ep.durationSec)}</span>
+                      <span className="text-[10px] font-mono text-[#7A5D41]">{formatSec(ep.durationSec)}</span>
                     </div>
-                    <div className="text-xs sm:text-[13px] font-bold text-amber-50 leading-snug mt-0.5">
+                    <div className="text-xs sm:text-[13px] font-bold text-[#221208] leading-snug mt-0.5">
                       {ep.title}
                     </div>
                   </div>
@@ -707,14 +710,14 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
       {/* ═══════════════ 3. CHEAPEST MEDICAL STUDENT PRICING COMPARISON ═══════════════ */}
       <section aria-labelledby="pricing-comparison-heading" className="space-y-6">
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-emerald-300">
+          <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#0E7752]">
             <IndianRupee className="w-3.5 h-3.5" />
             <span>Transparent Student-First Pricing</span>
           </div>
-          <h2 id="pricing-comparison-heading" className="text-xl sm:text-2xl font-bold text-amber-50">
+          <h2 id="pricing-comparison-heading" className="text-xl sm:text-2xl font-bold text-[#1E1007] font-serif">
             Why Medical Students Switch From Expensive Subscriptions to Achiev
           </h2>
-          <p className="text-xs sm:text-sm text-[#ccb799] max-w-2xl mx-auto">
+          <p className="text-xs sm:text-sm text-[#63482E] max-w-2xl mx-auto">
             Every tier unlocks cross-device medical reading &amp; note-making at a fraction of legacy app prices.
           </p>
         </div>
@@ -726,23 +729,23 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
               key={tier.id}
               className={`rounded-2xl p-4 border flex flex-col justify-between ${
                 tier.highlight
-                  ? 'bg-gradient-to-b from-amber-900/35 to-[#160a05] border-amber-400/55 shadow-lg'
-                  : 'bg-[#170c06]/80 border-amber-500/20'
+                  ? 'bg-gradient-to-b from-[#FFF7E1] to-[#F9EED2] border-[#C89336] ring-1 ring-[#D7A648]/35 shadow-[0_12px_28px_rgba(142,91,19,0.12)]'
+                  : 'bg-[#FFFDF8] border-[#E3D2B1] shadow-[0_6px_18px_rgba(78,50,15,0.05)]'
               }`}
             >
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-wider text-amber-300">{tier.badge}</div>
-                <h3 className="text-base font-bold text-amber-50 mt-1">{tier.name}</h3>
-                <div className="text-2xl font-extrabold text-emerald-300 mt-1">
+                <div className="text-[10px] font-bold uppercase tracking-wider text-[#9B6A1F]">{tier.badge}</div>
+                <h3 className="text-base font-bold text-[#1E1007] mt-1">{tier.name}</h3>
+                <div className="text-2xl font-extrabold text-[#0E7752] mt-1">
                   {tier.priceMonthly === 0 ? '₹0' : `₹${tier.priceMonthly}`}
-                  <span className="text-xs font-normal text-[#cbb497]">/month</span>
+                  <span className="text-xs font-normal text-[#7A5D41]">/month</span>
                 </div>
-                <p className="text-xs text-[#d2bea1] mt-2 leading-relaxed">{tier.description}</p>
+                <p className="text-xs text-[#594028] mt-2 leading-relaxed">{tier.description}</p>
               </div>
-              <ul className="mt-3 pt-3 border-t border-white/10 space-y-1.5">
+              <ul className="mt-3 pt-3 border-t border-[#E6D7B9] space-y-1.5">
                 {tier.features.slice(0, 4).map((f) => (
-                  <li key={f} className="flex items-start gap-1.5 text-[11px] text-[#eadbc6]">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                  <li key={f} className="flex items-start gap-1.5 text-[11px] text-[#3C2715]">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#0E7752] shrink-0 mt-0.5" />
                     <span>{f}</span>
                   </li>
                 ))}
@@ -752,25 +755,25 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
         </div>
 
         {/* Competitor Comparison Table */}
-        <div className="rounded-2xl border border-amber-500/20 bg-[#150a05]/85 overflow-x-auto">
+        <div className="rounded-2xl border border-[#E0CFAF] bg-[#FFFDF8] overflow-x-auto shadow-[0_8px_24px_rgba(78,50,15,0.06)]">
           <table className="w-full text-left border-collapse min-w-[640px]">
             <thead>
-              <tr className="border-b border-amber-500/20 text-[11px] uppercase tracking-wider text-amber-300 bg-black/25">
+              <tr className="border-b border-[#E0CFAF] text-[11px] uppercase tracking-wider text-[#6D4715] bg-[#F5EBD4]">
                 <th className="py-3 px-4">Popular Note App</th>
                 <th className="py-3 px-4">Their Typical Cost</th>
                 <th className="py-3 px-4">Achiev Cost</th>
                 <th className="py-3 px-4">Why Achiev Wins for Medical Students</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/10 text-xs">
+            <tbody className="divide-y divide-[#EDE1C7] text-xs">
               {COMPETITOR_BENCHMARKS.map((row) => (
-                <tr key={row.app} className="hover:bg-white/[0.03]">
-                  <td className="py-3 px-4 font-bold text-amber-50">{row.app}</td>
-                  <td className="py-3 px-4 text-rose-300/90 font-medium">{row.typicalPriceNote}</td>
-                  <td className="py-3 px-4 text-emerald-300 font-bold">
+                <tr key={row.app} className="hover:bg-[#FAF4E4]">
+                  <td className="py-3 px-4 font-bold text-[#1E1007]">{row.app}</td>
+                  <td className="py-3 px-4 text-[#B93838] font-medium">{row.typicalPriceNote}</td>
+                  <td className="py-3 px-4 text-[#0E7752] font-bold">
                     ₹{row.achievPriceMonthlyInr}/mo ({row.matchedAchievTier})
                   </td>
-                  <td className="py-3 px-4 text-[#e0cfb7]">{row.achievAdvantage}</td>
+                  <td className="py-3 px-4 text-[#4A331F]">{row.achievAdvantage}</td>
                 </tr>
               ))}
             </tbody>
@@ -779,8 +782,8 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
       </section>
 
       {/* ═══════════════ 4. MEDICAL STUDENT SEO FAQ ACCORDION ═══════════════ */}
-      <section aria-labelledby="medical-faq-heading" className="max-w-4xl mx-auto space-y-3 pb-6">
-        <h2 id="medical-faq-heading" className="text-lg sm:text-xl font-bold text-center text-amber-50 mb-4">
+      <section aria-labelledby="medical-faq-heading" className="max-w-4xl mx-auto space-y-3 pb-4">
+        <h2 id="medical-faq-heading" className="text-lg sm:text-xl font-bold text-center text-[#1E1007] font-serif mb-4">
           Frequently Asked Questions · Medical Student Study Workspace
         </h2>
         {SEO_FAQS.map((item, i) => {
@@ -788,22 +791,22 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
           return (
             <div
               key={item.q}
-              className="rounded-2xl border border-amber-500/20 bg-[#180c06]/80 overflow-hidden"
+              className="rounded-2xl border border-[#E3D2B1] bg-[#FFFDF8] overflow-hidden shadow-[0_4px_14px_rgba(78,50,15,0.05)]"
             >
               <button
                 type="button"
                 onClick={() => setOpenFaqIdx(isOpen ? null : i)}
-                className="w-full px-4 py-3.5 text-left flex items-center justify-between gap-3 cursor-pointer hover:bg-white/[0.03]"
+                className="w-full px-4 py-3.5 text-left flex items-center justify-between gap-3 cursor-pointer hover:bg-[#FAF3E2]"
               >
-                <span className="text-xs sm:text-sm font-bold text-amber-100">{item.q}</span>
+                <span className="text-xs sm:text-sm font-bold text-[#221208]">{item.q}</span>
                 {isOpen ? (
-                  <ChevronUp className="w-4 h-4 text-amber-300 shrink-0" />
+                  <ChevronUp className="w-4 h-4 text-[#9B6A1F] shrink-0" />
                 ) : (
-                  <ChevronDown className="w-4 h-4 text-amber-300 shrink-0" />
+                  <ChevronDown className="w-4 h-4 text-[#9B6A1F] shrink-0" />
                 )}
               </button>
               {isOpen && (
-                <div className="px-4 pb-3.5 text-xs sm:text-[13px] text-[#d6c2a5] leading-relaxed border-t border-white/5 pt-2.5">
+                <div className="px-4 pb-3.5 text-xs sm:text-[13px] text-[#523B26] leading-relaxed border-t border-[#EDE1C7] pt-2.5 bg-[#FDFBF5]">
                   {item.a}
                 </div>
               )}

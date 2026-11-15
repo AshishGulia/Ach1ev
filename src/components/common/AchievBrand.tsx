@@ -19,7 +19,7 @@ const resolveAssetUrl = (relativePath: string): string => {
 export const ACHIEV_LOGO_URL = resolveAssetUrl('assets/brand/achiev-emblem.png?v=hd8');
 export const ACHIEV_EMBLEM_URL = resolveAssetUrl('assets/brand/achiev-emblem.png?v=hd8');
 export const ACHIEV_WORDMARK_URL = resolveAssetUrl('assets/brand/achiev-wordmark.png?v=hd8');
-export const ACHIEV_LOCKUP_URL = resolveAssetUrl('assets/aistudio/Logo_webp_da8523c0.webp');
+export const ACHIEV_LOCKUP_URL = resolveAssetUrl('assets/aistudio/IMG_2993_-_mini_beda30e2.webp');
 export const ACHIEV_LEATHER_HERO_URL = resolveAssetUrl('assets/brand/achiev-leather-hero.jpg?v=1');
 export const ACHIEV_LEATHER_LOGIN_URL = resolveAssetUrl('assets/brand/achiev-leather-login.jpg?v=1');
 

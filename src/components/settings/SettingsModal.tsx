@@ -56,6 +56,8 @@ import {
   Target,
   Type,
   ArrowLeft,
+  ArrowRight,
+  Menu,
 } from 'lucide-react';
 
 export type SettingsTabId =
@@ -241,6 +243,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   } = useAuth();
 
   const [activeTab, setActiveTab] = useState<SettingsTabId>(initialTab);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState<boolean>(true);
   const [driveConnecting, setDriveConnecting] = useState(false);
   const [driveOpError, setDriveOpError] = useState<string | null>(null);
   const [driveOpSuccess, setDriveOpSuccess] = useState<string | null>(null);
@@ -740,175 +743,165 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
         </div>
       )}
 
-        {/* Master-Detail Layout */}
-        <div className="flex-1 flex flex-col sm:flex-row overflow-hidden">
-          {/* Left Navigation Sidebar (Top Back button + tabs ordered most-to-least usable) */}
-          <div className="themed-glass-bar w-full sm:w-44 border-b sm:border-b-0 sm:border-r border-stone-200/80 dark:border-[#382518] bg-stone-50/70 dark:bg-[#140e0a] p-1.5 flex sm:flex-col justify-between gap-2 shrink-0">
-            {/* Top Back Button styled like Dashboard Sidebar top back button */}
-            {onClose && (
-              <div className="sm:pb-1.5 sm:border-b sm:border-stone-200/80 dark:sm:border-[#382518] shrink-0 flex items-center">
+        {/* Master-Detail Layout (Vertical Settings Sidebar on Mobile & Desktop matching Dashboard Sidebar) */}
+        <div className="flex-1 flex flex-row overflow-hidden relative">
+          {/* Mobile Drawer Backdrop when expanded vertical Settings Sidebar overlays content */}
+          {isMobileSidebarOpen && (
+            <div
+              className="sm:hidden absolute inset-0 bg-black/50 backdrop-blur-[1px] z-20 animate-in fade-in duration-150"
+              onClick={() => setIsMobileSidebarOpen(false)}
+              aria-hidden="true"
+            />
+          )}
+
+          {/* Collapsed Vertical Icon Rail on Mobile (<sm) matching minimized Dashboard Sidebar */}
+          {!isMobileSidebarOpen && (
+            <div className="themed-glass-bar sm:hidden w-11 border-r border-stone-200/80 dark:border-[#382518] bg-stone-50/90 dark:bg-[#140e0a] py-1.5 px-1 flex flex-col items-center justify-between gap-1.5 shrink-0 z-10">
+              <div className="flex flex-col items-center gap-1 w-full">
+                <button
+                  type="button"
+                  onClick={() => setIsMobileSidebarOpen(true)}
+                  title="Expand Settings Menu"
+                  aria-label="Expand Settings Menu"
+                  className="w-8 h-8 rounded-xl flex items-center justify-center bg-stone-200/80 hover:bg-stone-300/80 dark:bg-[#241911] dark:hover:bg-[#312116] text-stone-800 dark:text-[#efe4d4] border border-stone-300/80 dark:border-[#3e291b] cursor-pointer transition-all"
+                >
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+
+              <div className="flex flex-col items-center gap-1 overflow-y-auto flex-1 w-full py-1 custom-scrollbar">
+                {(
+                  [
+                    { id: 'designs', label: 'Themes', icon: Palette },
+                    { id: 'typography', label: 'Fonts', icon: Type },
+                    { id: 'cloud-sync', label: 'Cloud & Drive', icon: Cloud, iconClass: 'text-amber-600 dark:text-amber-400' },
+                    { id: 'import-notes', label: 'Import Notes', icon: UploadCloud, iconClass: 'text-amber-600 dark:text-amber-400' },
+                    { id: 'sidebar-buttons', label: 'Sidebar Customizer', icon: SlidersHorizontal, iconClass: 'text-amber-600 dark:text-amber-400' },
+                    { id: 'customizer', label: 'Student Customizer', icon: Sparkles, iconClass: 'text-amber-500' },
+                    { id: 'profile', label: 'Student Profile', icon: User },
+                    { id: 'languages', label: 'Languages', icon: Globe, iconClass: 'text-amber-600 dark:text-amber-400' },
+                    { id: 'subscription', label: 'Plans & Pricing', icon: Crown, iconClass: 'text-amber-500' },
+                    { id: 'defaults', label: 'Backup & Reset', icon: RotateCcw },
+                  ] as Array<{ id: SettingsTabId; label: string; icon: React.ComponentType<any>; iconClass?: string }>
+                ).map((tab) => {
+                  const TabIcon = tab.icon;
+                  const isActive = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => setActiveTab(tab.id)}
+                      title={tab.label}
+                      aria-label={tab.label}
+                      className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer shrink-0 ${
+                        isActive
+                          ? 'themed-tab-active bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 shadow-xs'
+                          : 'text-stone-600 dark:text-stone-400 hover:bg-stone-200/60 dark:hover:bg-[#251a12]'
+                      }`}
+                    >
+                      <TabIcon className={`w-4 h-4 shrink-0 ${isActive ? '' : tab.iconClass || ''}`} />
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                type="button"
+                onClick={handleSettingsLogout}
+                title={user?.email ? `Log out (${user.email})` : 'Log out / Switch Account'}
+                aria-label="Log Out"
+                className="w-8 h-8 rounded-xl flex items-center justify-center bg-[#7f1d1d]/12 hover:bg-[#7f1d1d]/22 dark:bg-[#6e171b]/30 dark:hover:bg-[#6e171b]/50 text-[#7f1d1d] dark:text-[#e49b9e] border border-[#7f1d1d]/25 dark:border-[#962d32]/45 cursor-pointer shrink-0"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          )}
+
+          {/* Left Vertical Settings Sidebar (Expanded Drawer on Mobile matching Dashboard Sidebar, Static Column on Desktop) */}
+          <div
+            className={`themed-glass-bar border-r border-stone-200/80 dark:border-[#382518] bg-stone-50/95 dark:bg-[#140e0a] p-1.5 flex-col justify-between gap-2 shrink-0 ${
+              isMobileSidebarOpen
+                ? 'flex absolute inset-y-0 left-0 z-30 w-[200px] shadow-2xl sm:static sm:w-48 sm:shadow-none animate-in slide-in-from-left-4 duration-150'
+                : 'hidden sm:flex sm:w-48'
+            }`}
+          >
+            {/* Top Navigation Action Row: Back to Dashboard + Minimize arrow on Mobile */}
+            <div className="pb-1.5 border-b border-stone-200/80 dark:border-[#382518] shrink-0 flex items-center gap-1">
+              {onClose && (
                 <button
                   type="button"
                   onClick={onClose}
                   title="Back to Dashboard"
                   aria-label="Back to Dashboard"
-                  className="w-full group flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-xs hover:brightness-110 active:scale-[0.97] cursor-pointer bg-stone-200/75 hover:bg-stone-300/80 dark:bg-[#241911] dark:hover:bg-[#312116] text-stone-800 dark:text-[#efe4d4] border border-stone-300/80 dark:border-[#3e291b]"
+                  className="flex-1 group flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-xs hover:brightness-110 active:scale-[0.97] cursor-pointer bg-stone-200/75 hover:bg-stone-300/80 dark:bg-[#241911] dark:hover:bg-[#312116] text-stone-800 dark:text-[#efe4d4] border border-stone-300/80 dark:border-[#3e291b]"
                 >
                   <ArrowLeft className="w-3.5 h-3.5 stroke-[2.2] transition-transform duration-200 group-hover:-translate-x-1" />
-                  <span className="hidden sm:inline">Back</span>
+                  <span>Back</span>
                 </button>
-              </div>
-            )}
-
-            <div className="flex sm:flex-col overflow-x-auto sm:overflow-y-auto gap-1 flex-1 custom-scrollbar">
-            {/* 1. Themes (Most Used) */}
-            <button
-              type="button"
-              onClick={() => setActiveTab('designs')}
-              className={`flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer shrink-0 whitespace-nowrap sm:whitespace-normal sm:w-full ${
-                activeTab === 'designs'
-                  ? 'themed-tab-active bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 shadow-xs font-semibold'
-                  : 'text-stone-600 dark:text-stone-400 hover:bg-stone-200/60 dark:hover:bg-[#251a12] hover:text-stone-900 dark:hover:text-stone-100'
-              }`}
-            >
-              <Palette className="w-4 h-4 shrink-0" />
-              <span>Themes</span>
-            </button>
-
-            {/* 2. Fonts */}
-            <button
-              type="button"
-              onClick={() => setActiveTab('typography')}
-              className={`flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer shrink-0 whitespace-nowrap sm:whitespace-normal sm:w-full ${
-                activeTab === 'typography'
-                  ? 'themed-tab-active bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 shadow-xs font-semibold'
-                  : 'text-stone-600 dark:text-stone-400 hover:bg-stone-200/60 dark:hover:bg-[#251a12] hover:text-stone-900 dark:hover:text-stone-100'
-              }`}
-            >
-              <Type className="w-4 h-4 shrink-0" />
-              <span>Fonts</span>
-            </button>
-
-            {/* 3. Cloud & Drive */}
-            <button
-              type="button"
-              onClick={() => setActiveTab('cloud-sync')}
-              className={`flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer shrink-0 whitespace-nowrap sm:whitespace-normal sm:w-full ${
-                activeTab === 'cloud-sync'
-                  ? 'themed-tab-active bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 shadow-xs font-semibold'
-                  : 'text-stone-600 dark:text-stone-400 hover:bg-stone-200/60 dark:hover:bg-[#251a12] hover:text-stone-900 dark:hover:text-stone-100'
-              }`}
-            >
-              <Cloud className="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400" />
-              <span>Cloud &amp; Drive</span>
-            </button>
-
-            {/* 4. Import Notes */}
-            <button
-              type="button"
-              onClick={() => setActiveTab('import-notes')}
-              className={`flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer shrink-0 whitespace-nowrap sm:whitespace-normal sm:w-full ${
-                activeTab === 'import-notes'
-                  ? 'themed-tab-active bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 shadow-xs font-semibold'
-                  : 'text-stone-600 dark:text-stone-400 hover:bg-stone-200/60 dark:hover:bg-[#251a12] hover:text-stone-900 dark:hover:text-stone-100'
-              }`}
-            >
-              <UploadCloud className="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400" />
-              <span>Import Notes</span>
-            </button>
-
-            {/* 5. Sidebar Customizer */}
-            <button
-              type="button"
-              onClick={() => setActiveTab('sidebar-buttons')}
-              className={`flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer shrink-0 whitespace-nowrap sm:whitespace-normal sm:w-full ${
-                activeTab === 'sidebar-buttons'
-                  ? 'themed-tab-active bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 shadow-xs font-semibold'
-                  : 'text-stone-600 dark:text-stone-400 hover:bg-stone-200/60 dark:hover:bg-[#251a12] hover:text-stone-900 dark:hover:text-stone-100'
-              }`}
-            >
-              <SlidersHorizontal className="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400" />
-              <span>Sidebar Customizer</span>
-            </button>
-
-            {/* 6. Student Customizer */}
-            <button
-              type="button"
-              onClick={() => setActiveTab('customizer')}
-              className={`flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer shrink-0 whitespace-nowrap sm:whitespace-normal sm:w-full ${
-                activeTab === 'customizer'
-                  ? 'themed-tab-active bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 shadow-xs font-semibold'
-                  : 'text-stone-600 dark:text-stone-400 hover:bg-stone-200/60 dark:hover:bg-[#251a12] hover:text-stone-900 dark:hover:text-stone-100'
-              }`}
-            >
-              <Sparkles className="w-4 h-4 shrink-0 text-amber-500" />
-              <span>Student Customizer</span>
-            </button>
-
-            {/* 7. Student Profile */}
-            <button
-              type="button"
-              onClick={() => setActiveTab('profile')}
-              className={`flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer shrink-0 whitespace-nowrap sm:whitespace-normal sm:w-full ${
-                activeTab === 'profile'
-                  ? 'themed-tab-active bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 shadow-xs font-semibold'
-                  : 'text-stone-600 dark:text-stone-400 hover:bg-stone-200/60 dark:hover:bg-[#251a12] hover:text-stone-900 dark:hover:text-stone-100'
-              }`}
-            >
-              <User className="w-4 h-4 shrink-0" />
-              <span>Student Profile</span>
-            </button>
-
-            {/* 8. Languages */}
-            <button
-              type="button"
-              onClick={() => setActiveTab('languages')}
-              className={`flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer shrink-0 whitespace-nowrap sm:whitespace-normal sm:w-full ${
-                activeTab === 'languages'
-                  ? 'themed-tab-active bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 shadow-xs font-semibold'
-                  : 'text-stone-600 dark:text-stone-400 hover:bg-stone-200/60 dark:hover:bg-[#251a12] hover:text-stone-900 dark:hover:text-stone-100'
-              }`}
-            >
-              <Globe className="w-4 h-4 shrink-0 text-amber-600 dark:text-amber-400" />
-              <span>Languages</span>
-            </button>
-
-            {/* 9. Plans & Pricing */}
-            <button
-              type="button"
-              onClick={() => setActiveTab('subscription')}
-              className={`flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer shrink-0 whitespace-nowrap sm:whitespace-normal sm:w-full ${
-                activeTab === 'subscription'
-                  ? 'themed-tab-active bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 shadow-xs font-semibold'
-                  : 'text-stone-600 dark:text-stone-400 hover:bg-stone-200/60 dark:hover:bg-[#251a12] hover:text-stone-900 dark:hover:text-stone-100'
-              }`}
-            >
-              <Crown className="w-4 h-4 shrink-0 text-amber-500" />
-              <span>Plans &amp; Pricing</span>
-            </button>
-
-            {/* 10. Backup & Reset (Least Used) */}
-            <button
-              type="button"
-              onClick={() => setActiveTab('defaults')}
-              className={`flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-medium transition-all cursor-pointer shrink-0 whitespace-nowrap sm:whitespace-normal sm:w-full ${
-                activeTab === 'defaults'
-                  ? 'themed-tab-active bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 shadow-xs font-semibold'
-                  : 'text-stone-600 dark:text-stone-400 hover:bg-stone-200/60 dark:hover:bg-[#251a12] hover:text-stone-900 dark:hover:text-stone-100'
-              }`}
-            >
-              <RotateCcw className="w-4 h-4 shrink-0" />
-              <span>Backup &amp; Reset</span>
-            </button>
+              )}
+              <button
+                type="button"
+                onClick={() => setIsMobileSidebarOpen(false)}
+                title="Collapse Settings Sidebar"
+                aria-label="Collapse Settings Sidebar"
+                className="sm:hidden p-1.5 rounded-xl bg-stone-200/75 hover:bg-stone-300/80 dark:bg-[#241911] dark:hover:bg-[#312116] text-stone-700 dark:text-[#efe4d4] border border-stone-300/80 dark:border-[#3e291b] cursor-pointer shrink-0"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" />
+              </button>
             </div>
 
-            {/* Bottom-pinned Log Out button (shifted from top ribbon into Settings last position) */}
-            <div className="sm:pt-2 sm:border-t sm:border-stone-200/80 dark:sm:border-[#382518] shrink-0 flex items-center">
+            {/* Vertical Section Container styled identically to Dashboard Sidebar (.rounded-xl p-1 space-y-0.5) */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
+              <div className="rounded-xl p-1 space-y-0.5 bg-stone-100/70 dark:bg-[#1a110b] border border-stone-200/75 dark:border-[#2e1e13]">
+                {(
+                  [
+                    { id: 'designs', label: 'Themes', icon: Palette },
+                    { id: 'typography', label: 'Fonts', icon: Type },
+                    { id: 'cloud-sync', label: 'Cloud & Drive', icon: Cloud, iconClass: 'text-amber-600 dark:text-amber-400' },
+                    { id: 'import-notes', label: 'Import Notes', icon: UploadCloud, iconClass: 'text-amber-600 dark:text-amber-400' },
+                    { id: 'sidebar-buttons', label: 'Sidebar Customizer', icon: SlidersHorizontal, iconClass: 'text-amber-600 dark:text-amber-400' },
+                    { id: 'customizer', label: 'Student Customizer', icon: Sparkles, iconClass: 'text-amber-500' },
+                    { id: 'profile', label: 'Student Profile', icon: User },
+                    { id: 'languages', label: 'Languages', icon: Globe, iconClass: 'text-amber-600 dark:text-amber-400' },
+                    { id: 'subscription', label: 'Plans & Pricing', icon: Crown, iconClass: 'text-amber-500' },
+                    { id: 'defaults', label: 'Backup & Reset', icon: RotateCcw },
+                  ] as Array<{ id: SettingsTabId; label: string; icon: React.ComponentType<any>; iconClass?: string }>
+                ).map((tab) => {
+                  const TabIcon = tab.icon;
+                  const isActive = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      type="button"
+                      onClick={() => {
+                        setActiveTab(tab.id);
+                        setIsMobileSidebarOpen(false);
+                      }}
+                      className={`w-full min-h-[36px] sm:min-h-[32px] h-auto flex items-center gap-2 px-2 py-1.5 rounded-lg text-[12px] sm:text-xs font-medium transition-all cursor-pointer text-left ${
+                        isActive
+                          ? 'themed-tab-active bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 shadow-xs font-semibold'
+                          : 'text-stone-700 dark:text-stone-300 hover:bg-stone-200/70 dark:hover:bg-[#251a12] hover:text-stone-900 dark:hover:text-stone-100'
+                      }`}
+                    >
+                      <div className="w-4 h-4 flex items-center justify-center shrink-0">
+                        <TabIcon className={`w-3.5 h-3.5 shrink-0 ${isActive ? '' : tab.iconClass || ''}`} />
+                      </div>
+                      <span className="leading-tight break-words whitespace-normal flex-1 min-w-0">
+                        {tab.label}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Bottom-pinned Log Out button */}
+            <div className="pt-1.5 border-t border-stone-200/80 dark:border-[#382518] shrink-0">
               <button
                 type="button"
                 onClick={handleSettingsLogout}
                 title={user?.email ? `Log out (${user.email})` : 'Log out / Switch Account'}
-                className="flex items-center gap-2 px-2.5 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer shrink-0 whitespace-nowrap sm:w-full bg-[#7f1d1d]/12 hover:bg-[#7f1d1d]/22 dark:bg-[#6e171b]/30 dark:hover:bg-[#6e171b]/50 text-[#7f1d1d] dark:text-[#e49b9e] border border-[#7f1d1d]/25 dark:border-[#962d32]/45"
+                className="w-full min-h-[36px] sm:min-h-[32px] flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer bg-[#7f1d1d]/12 hover:bg-[#7f1d1d]/22 dark:bg-[#6e171b]/30 dark:hover:bg-[#6e171b]/50 text-[#7f1d1d] dark:text-[#e49b9e] border border-[#7f1d1d]/25 dark:border-[#962d32]/45"
               >
                 <LogOut className="w-4 h-4 shrink-0" />
                 <span className="truncate">Log Out</span>
@@ -917,7 +910,36 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           </div>
 
           {/* Right Detail Content Viewport */}
-          <div className="p-3 sm:p-6 overflow-y-auto space-y-5 flex-1 custom-scrollbar">
+          <div className="p-3 sm:p-6 overflow-y-auto space-y-5 flex-1 min-w-0 custom-scrollbar">
+            {/* Mobile Settings Bar to reopen full vertical Settings Sidebar anytime */}
+            <div className="sm:hidden flex items-center justify-between gap-2 pb-2 border-b border-stone-200/80 dark:border-[#382518]">
+              <button
+                type="button"
+                onClick={() => setIsMobileSidebarOpen((v) => !v)}
+                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-stone-200/75 dark:bg-[#241911] text-stone-800 dark:text-[#efe4d4] border border-stone-300/80 dark:border-[#3e291b] cursor-pointer"
+              >
+                <Menu className="w-3.5 h-3.5" />
+                <span>Settings Menu</span>
+              </button>
+              <span className="text-[11px] font-semibold text-stone-600 dark:text-stone-400 truncate">
+                {
+                  (
+                    {
+                      designs: 'Themes',
+                      typography: 'Fonts',
+                      'cloud-sync': 'Cloud & Drive',
+                      'import-notes': 'Import Notes',
+                      'sidebar-buttons': 'Sidebar Customizer',
+                      customizer: 'Student Customizer',
+                      profile: 'Student Profile',
+                      languages: 'Languages',
+                      subscription: 'Plans & Pricing',
+                      defaults: 'Backup & Reset',
+                    } as Record<SettingsTabId, string>
+                  )[activeTab]
+                }
+              </span>
+            </div>
           {/* ========================================================================= */}
           {/* TAB 1: THEMES (COMPACT MOBILE + LIGHT/DARK SCREENSHOT TOGGLE BESIDE APPLY)*/}
           {/* ========================================================================= */}

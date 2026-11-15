@@ -272,30 +272,16 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
       className={`${
         isModal
           ? 'fixed inset-0 z-50 bg-black/55 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto overflow-x-hidden'
-          : 'min-h-screen w-full relative overflow-y-auto overflow-x-hidden flex flex-col items-center p-4 sm:p-8'
+          : 'min-h-[100dvh] w-full relative overflow-y-auto overflow-x-hidden flex flex-col'
       } transition-colors duration-300 text-[#efe4d4]`}
-      style={{
-        background:
-          'radial-gradient(ellipse 85% 75% at 22% 24%, #261209 0%, #150904 52%, #0c0402 100%)',
-      }}
+      style={
+        isModal
+          ? undefined
+          : {
+              backgroundColor: '#0c0402',
+            }
+      }
     >
-
-      {/* Ambient Subtle Warm Orbs softly dispersed behind workspace */}
-      <div className="fixed inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
-        <div
-          className="absolute -top-28 -left-20 w-[480px] h-[480px] rounded-full blur-3xl animate-pulse bg-[#5c2d16] opacity-15"
-          style={{ animationDuration: '9s' }}
-        />
-        <div
-          className="absolute top-1/4 right-[8%] w-[380px] h-[380px] rounded-full blur-3xl animate-pulse bg-[#6b3a1c] opacity-15"
-          style={{ animationDuration: '11s' }}
-        />
-        <div
-          className="absolute -bottom-32 -right-16 w-[500px] h-[500px] rounded-full blur-3xl animate-pulse bg-[#3d1c0d] opacity-20"
-          style={{ animationDuration: '12s' }}
-        />
-      </div>
-
       {/* Modal close button only */}
       {isModal && onClose && (
         <div className="fixed top-4 right-4 z-50 flex items-center">
@@ -310,8 +296,42 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
         </div>
       )}
 
+      {/* Top Dark Login Screen Viewport (fills screen height leaving only a subtle bottom peek of the cream showcase) */}
+      <div
+        className={
+          isModal
+            ? 'relative z-10 w-full max-w-4xl grid grid-cols-1 lg:grid-cols-12 gap-6 items-center'
+            : 'relative w-full min-h-[calc(100dvh-46px)] sm:min-h-[calc(100dvh-54px)] flex items-center justify-center px-4 sm:px-8 py-4 sm:py-6 overflow-hidden shrink-0'
+        }
+        style={
+          isModal
+            ? undefined
+            : {
+                background:
+                  'radial-gradient(ellipse 85% 75% at 22% 24%, #261209 0%, #150904 52%, #0c0402 100%)',
+              }
+        }
+      >
+        {/* Ambient Subtle Warm Orbs softly dispersed inside dark login hero */}
+        {!isModal && (
+          <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
+            <div
+              className="absolute -top-28 -left-20 w-[480px] h-[480px] rounded-full blur-3xl animate-pulse bg-[#5c2d16] opacity-15"
+              style={{ animationDuration: '9s' }}
+            />
+            <div
+              className="absolute top-1/4 right-[8%] w-[380px] h-[380px] rounded-full blur-3xl animate-pulse bg-[#6b3a1c] opacity-15"
+              style={{ animationDuration: '11s' }}
+            />
+            <div
+              className="absolute -bottom-32 -right-16 w-[500px] h-[500px] rounded-full blur-3xl animate-pulse bg-[#3d1c0d] opacity-20"
+              style={{ animationDuration: '12s' }}
+            />
+          </div>
+        )}
+
       {/* Simple Clean Split Layout: Brand Logo & Name Beside Bevelled Frosted-Glass Login Box */}
-      <div className="relative z-10 w-full max-w-4xl grid grid-cols-1 lg:grid-cols-12 gap-6 items-center my-auto">
+      <div className={isModal ? 'contents' : 'relative z-10 w-full max-w-4xl grid grid-cols-1 lg:grid-cols-12 gap-6 items-center my-auto'}>
         {/* Left: Frameless Brand Panel */}
         <div className="lg:col-span-5 flex flex-col items-center lg:items-start justify-center text-center lg:text-left p-4 sm:p-6 relative">
           <div className="flex flex-col items-center lg:items-start gap-2 w-full">
@@ -330,22 +350,14 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                   filter: 'drop-shadow(0 10px 28px rgba(10, 4, 1, 0.34))',
                 }}
               >
-                <div className="relative w-[241px] sm:w-[295px] max-w-full aspect-[1845/620] overflow-hidden select-none pointer-events-none">
-                  <img
-                    src={ACHIEV_LOCKUP_URL}
-                    alt="Achiev — Settle Ideas"
-                    draggable={false}
-                    fetchPriority="high"
-                    decoding="sync"
-                    className="absolute max-w-none select-none pointer-events-none"
-                    style={{
-                      width: '144.4986%',
-                      height: '258.0645%',
-                      left: '-24.9864%',
-                      top: '-75.3226%',
-                    }}
-                  />
-                </div>
+                <img
+                  src={ACHIEV_LOCKUP_URL}
+                  alt="Achiev — Settle Ideas"
+                  draggable={false}
+                  fetchPriority="high"
+                  decoding="sync"
+                  className="w-[241px] sm:w-[295px] max-w-full h-auto object-contain select-none pointer-events-none"
+                />
               </div>
             </div>
 
@@ -879,11 +891,21 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
           </div>
         </div>
       </div>
+      </div>
 
       {!isModal && (
-        <Suspense fallback={<div className="w-full max-w-6xl mx-auto mt-12 h-48 rounded-3xl bg-white/[0.03] animate-pulse" />}>
-          <FeatureVideoSeriesShowcase />
-        </Suspense>
+        <section
+          aria-label="Achiev Medical Study Guide & Tour"
+          className="w-full relative z-10 border-t border-[#E2D1B0] px-4 sm:px-8 pt-3.5 sm:pt-4 pb-14 sm:pb-16 text-[#23140A]"
+          style={{
+            background: 'linear-gradient(180deg, #FCF9F1 0%, #F7EFE0 52%, #F1E6CE 100%)',
+            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.85)',
+          }}
+        >
+          <Suspense fallback={<div className="w-full max-w-6xl mx-auto mt-6 h-48 rounded-3xl bg-[#EFE4CC]/60 animate-pulse" />}>
+            <FeatureVideoSeriesShowcase />
+          </Suspense>
+        </section>
       )}
     </div>
   );

@@ -970,25 +970,17 @@ export default function App() {
         }}
       >
         <div
-          className="animate-pulse max-w-full"
+          className="animate-pulse max-w-full flex items-center justify-center"
           style={{
             filter: 'drop-shadow(0 14px 36px rgba(10, 4, 1, 0.38))',
           }}
         >
-          <div className="relative w-[min(72vw,432px)] aspect-[1845/620] overflow-hidden select-none pointer-events-none">
-            <img
-              src={ACHIEV_LOCKUP_URL}
-              alt="Achiev — Settle Ideas"
-              draggable={false}
-              className="absolute max-w-none select-none pointer-events-none"
-              style={{
-                width: '144.4986%',
-                height: '258.0645%',
-                left: '-24.9864%',
-                top: '-75.3226%',
-              }}
-            />
-          </div>
+          <img
+            src={ACHIEV_LOCKUP_URL}
+            alt="Achiev — Settle Ideas"
+            draggable={false}
+            className="w-[min(72vw,432px)] h-auto object-contain select-none pointer-events-none"
+          />
         </div>
         <p className="text-xs font-mono opacity-75">Initializing Achiev Cloud Workspace...</p>
       </div>
