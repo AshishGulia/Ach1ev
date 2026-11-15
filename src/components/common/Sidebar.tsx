@@ -15,6 +15,8 @@ import {
   MessageSquareCode,
   Brain,
   Coffee,
+  ChevronDown,
+  MoreHorizontal,
 } from 'lucide-react';
 
 // Authentic Bookshelf / Almirah SVG Icon
@@ -134,6 +136,8 @@ interface SidebarProps {
   isDarkMode?: boolean;
 }
 
+const MORE_BRANCH_IDS = new Set(['mnemonics', 'leisure', 'talk-to-dev']);
+
 export const Sidebar: React.FC<SidebarProps> = ({
   isOpen,
   onClose,
@@ -148,6 +152,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
   isDarkMode,
 }) => {
   const isSettingsOn = activeView === 'settings' || !!isSettingsActive;
+  const [isMoreExpanded, setIsMoreExpanded] = useState<boolean>(() =>
+    MORE_BRANCH_IDS.has(activeView)
+  );
+
+  useEffect(() => {
+    if (MORE_BRANCH_IDS.has(activeView)) {
+      setIsMoreExpanded(true);
+    }
+  }, [activeView]);
 
   const isNightMode =
     isDarkMode !== undefined
@@ -363,8 +376,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
   });
 
   const navItems = sortedNavItems.filter(
-    (item) => sidebarSettings[item.settingKey] !== false
+    (item) => !MORE_BRANCH_IDS.has(item.id) && sidebarSettings[item.settingKey] !== false
   );
+
+  // Sub-items grouped under expandable "More" branch at the bottom of Section 2
+  const moreBranchItems = [
+    sortedNavItems.find((i) => i.id === 'mnemonics'),
+    sortedNavItems.find((i) => i.id === 'leisure'),
+    sortedNavItems.find((i) => i.id === 'talk-to-dev'),
+  ].filter((item): item is NonNullable<typeof item> => Boolean(item));
 
   const handleItemClick = (id: AppViewType) => {
     onNavigate(id);
@@ -506,6 +526,115 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     </button>
                   );
                 })}
+
+                {/* Expandable "More" branch for Mnemonics, Leisure & Talk to Developer */}
+                {moreBranchItems.length > 0 && (
+                  <div className="pt-0.5">
+                    <button
+                      type="button"
+                      onClick={() => setIsMoreExpanded((prev) => !prev)}
+                      aria-expanded={isMoreExpanded}
+                      style={getBtnStyle(MORE_BRANCH_IDS.has(activeView) && !isMoreExpanded)}
+                      className={`w-full min-h-[34px] md:min-h-[29px] h-auto flex items-center px-2 md:px-1.5 py-1.5 text-[12px] md:text-[11px] font-medium transition-all hover:brightness-110 cursor-pointer text-left ${leatherBtnCls}`}
+                    >
+                      <div className="flex items-center gap-1.5 min-w-0 w-full">
+                        <div className="w-4 h-4 flex items-center justify-center shrink-0">
+                          <MoreHorizontal
+                            className="w-3.5 h-3.5 shrink-0"
+                            style={{ color: MORE_BRANCH_IDS.has(activeView) ? sb.activeIconColor : sb.idleIconColor }}
+                          />
+                        </div>
+                        <span className="leading-tight flex-1 min-w-0">{getTranslation('nav.more', currentLang)}</span>
+                        <ChevronDown
+                          className={`w-3 h-3 shrink-0 transition-transform duration-200 ${
+                            isMoreExpanded ? 'rotate-180' : ''
+                          }`}
+                          style={{ color: sb.mutedLabelColor }}
+                        />
+                      </div>
+                    </button>
+
+                    {isMoreExpanded && (
+                      <div
+                        className="mt-1 ml-2.5 pl-2 space-y-0.5 flex flex-col border-l"
+                        style={{ borderColor: sb.sectionBorder }}
+                      >
+                        {moreBranchItems.map((sub) => {
+                          const SubIcon = sub.icon;
+                          const isSubActive = activeView === sub.id;
+                          return (
+                            <div key={sub.id} className="relative flex items-center">
+                              <span
+                                aria-hidden="true"
+                                className="absolute -left-2 w-1.5 h-[1px]"
+                                style={{ backgroundColor: sb.sectionBorder }}
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleItemClick(sub.id)}
+                                style={getBtnStyle(isSubActive)}
+                                className={`w-full min-h-[32px] md:min-h-[27px] h-auto flex items-center px-1.5 py-1 text-[11px] md:text-[10.5px] font-medium transition-all hover:brightness-110 cursor-pointer text-left ${leatherBtnCls}`}
+                              >
+                                <div className="flex items-center gap-1.5 min-w-0 w-full">
+                                  <div className="w-3.5 h-3.5 flex items-center justify-center shrink-0">
+                                    <SubIcon
+                                      className="w-3 h-3 shrink-0"
+                                      style={{ color: isSubActive ? sb.activeIconColor : sb.idleIconColor }}
+                                    />
+                                  </div>
+                                  <span className="leading-tight break-words whitespace-normal flex-1 min-w-0">
+                                    {sub.label}
+                                  </span>
+                                </div>
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Subtle Watermark Emblem between Section 2 Navigation & Daily Thought */}
+              <div
+                aria-hidden="true"
+                className="pointer-events-none select-none flex flex-col items-center justify-center py-2 px-2"
+                style={{ opacity: isNightMode ? 0.16 : 0.14, color: sb.railText }}
+              >
+                <svg
+                  viewBox="0 0 120 88"
+                  className="w-[74px] h-[54px]"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.1"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  {/* Stethoscope-shaped Headphones Arch & Binaural Earpieces */}
+                  <path d="M24 38C24 18 40 7 60 7C80 7 96 18 96 38" />
+                  <rect x="17" y="34" width="11" height="18" rx="5.5" />
+                  <rect x="92" y="34" width="11" height="18" rx="5.5" />
+                  {/* Stethoscope Chestpiece Bell Accent at Crown */}
+                  <circle cx="60" cy="7" r="3.8" fill="currentColor" fillOpacity="0.22" />
+
+                  {/* Cute Smiling Open Notebook Resting Inside the Arch */}
+                  <path d="M33 32C42 29 51 31 60 35C69 31 78 29 87 32V61C78 58 69 60 60 64C51 60 42 58 33 61Z" />
+                  <line x1="60" y1="35" x2="60" y2="64" />
+                  {/* Cute Eyes & Warm Smile */}
+                  <circle cx="47" cy="45" r="1.6" fill="currentColor" stroke="none" />
+                  <circle cx="73" cy="45" r="1.6" fill="currentColor" stroke="none" />
+                  <path d="M55 51.5C57.5 54 62.5 54 65 51.5" strokeWidth="1.8" />
+                  {/* Notebook ruled lines */}
+                  <line x1="39" y1="53" x2="49" y2="52" strokeWidth="1.3" opacity="0.55" />
+                  <line x1="71" y1="52" x2="81" y2="53" strokeWidth="1.3" opacity="0.55" />
+
+                  {/* Sleek Fountain/Study Pen Horizontally Underneath */}
+                  <path d="M28 74H82L91 77.5L82 81H28C25.5 81 24 79.5 24 77.5C24 75.5 25.5 74 28 74Z" />
+                  <line x1="37" y1="74" x2="37" y2="81" strokeWidth="1.6" />
+                  <line x1="77" y1="74" x2="77" y2="81" strokeWidth="1.6" />
+                  <line x1="44" y1="74" x2="63" y2="74" strokeWidth="2.8" opacity="0.7" />
+                </svg>
               </div>
             </div>
 
@@ -662,6 +791,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     </button>
                   );
                 })}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setIsMoreExpanded(true);
+                    onToggle();
+                  }}
+                  title="More (Mnemonics, Leisure, Talk to Developer)"
+                  style={getBtnStyle(MORE_BRANCH_IDS.has(activeView))}
+                  className={`w-6 h-6 flex items-center justify-center transition-all hover:brightness-110 cursor-pointer ${leatherBtnCls}`}
+                >
+                  <MoreHorizontal
+                    className="w-3.5 h-3.5"
+                    style={{ color: MORE_BRANCH_IDS.has(activeView) ? sb.activeIconColor : sb.idleIconColor }}
+                  />
+                </button>
               </div>
 
               <div

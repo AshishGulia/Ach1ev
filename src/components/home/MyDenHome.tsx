@@ -57,9 +57,9 @@ export const DESIGN_OPTIONS = [
   {
     id: '4' as DesignId,
     num: '4',
-    name: 'Turquoise & Kabul',
-    label: 'Turquoise & Kabul Loft',
-    tagline: 'Bright turquoise #21DAEF accents paired with warm architectural #58423E Kabul bronze',
+    name: 'Slate & Cobalt Loft',
+    label: 'Slate & Cobalt Loft',
+    tagline: 'Dark Slate Grey #1F242D & Cobalt Blue #3B82F6 (Dark) with Cool Slate & Blue #2563EB (Light)',
     badge: 'Theme 4',
   },
   {

@@ -30,6 +30,7 @@ function getGenAI() {
 }
 
 const GEMINI_MODEL_PRIORITY = [
+  'gemini-4-hydrogen',
   'gemini-3-flash-preview',
   'gemini-3.1-flash-lite',
   'gemini-3.8-flash',
@@ -617,6 +618,157 @@ Return ONLY a valid JSON array of objects with the exact following schema:
     } catch (error: any) {
       console.error('Error in /api/gemini/explain:', error);
       return res.status(500).json({ error: error.message || 'Failed to explain selected term.' });
+    }
+  });
+
+  // Live Leisure Inshorts-Style News Feed powered by Gemini
+  app.post('/api/gemini/leisure-news', async (req, res) => {
+    const rawCat = String(req.body?.category || 'All').trim();
+    const category = ['All', 'World', 'India', 'Medical', 'Tech'].includes(rawCat) ? rawCat : 'All';
+
+    const curatedFallback = [
+      {
+        id: `news-${Date.now()}-1`,
+        title: 'AI Clinical Triage Cut ER Waiting Times Across Teaching Hospitals',
+        summary:
+          'Multi-center observational trials across major academic emergency departments report a 28% reduction in initial triage bottlenecks using structured symptom-scoring tools. Clinicians retain full diagnostic authority while rapid lab flagging prioritizes sepsis, chest pain, and stroke pathways within critical golden-hour treatment windows.',
+        source: 'Clinical Informatics Digest',
+        category: 'Medical',
+        timestamp: 'Just now',
+        relevance: 'High-yield digital health & emergency triage',
+      },
+      {
+        id: `news-${Date.now()}-2`,
+        title: 'India Expands Competency-Based Medical Simulation Labs in 40 Colleges',
+        summary:
+          'National medical education councils announced upgraded clinical skill labs equipped with ultrasound phantoms, airway trainers, and pharmacology case stations. The rollout aims to give undergraduate and postgraduate cohorts hands-on procedural readiness alongside structured casebooks before ward rotations begin.',
+        source: 'National Medical Chronicle',
+        category: 'India',
+        timestamp: '12m ago',
+        relevance: 'MBBS & PG clinical training update',
+      },
+      {
+        id: `news-${Date.now()}-3`,
+        title: 'Wearable Continuous Lactate & Hydration Sensors Enter Sports Science',
+        summary:
+          'Next-generation epidermal patches now sample interstitial sweat biomarkers non-invasively every minute during endurance sessions. Sports physicians are validating threshold alerts that warn athletes and medical residents on long shifts before subtle dehydration or fatigue degrades cognitive focus.',
+        source: 'MedTech Review',
+        category: 'Tech',
+        timestamp: '26m ago',
+        relevance: 'Biomedical sensor & focus physiology',
+      },
+      {
+        id: `news-${Date.now()}-4`,
+        title: 'WHO Updates Global Essential Medicines List for Resistant Infections',
+        summary:
+          'Expert committees released revised antimicrobial stewardship guidance emphasizing narrow-spectrum oral step-down therapy and rapid susceptibility testing. The updated global framework helps hospital formularies preserve reserve carbapenems while improving outpatient cure rates for community-acquired infections.',
+        source: 'Global Health Wire',
+        category: 'World',
+        timestamp: '42m ago',
+        relevance: 'Pharmacology & antimicrobial stewardship',
+      },
+      {
+        id: `news-${Date.now()}-5`,
+        title: 'Spaced Retrieval Outperforms Re-Reading in 12-Week Anatomy Retention',
+        summary:
+          'A longitudinal cognitive study comparing 640 health-science students found active recall notebooks paired with visual flowcharts improved delayed exam retention by 34%. Short 20-minute ocular breaks every hour further prevented attention drift during dense evening revision sprints.',
+        source: 'Cognitive Education Journal',
+        category: 'Medical',
+        timestamp: '1h ago',
+        relevance: 'Evidence-based study science',
+      },
+      {
+        id: `news-${Date.now()}-6`,
+        title: 'Open Orbital Telescopes Capture High-Resolution Exoplanet Atmospheres',
+        summary:
+          'Infrared spectroscopy teams released new atmospheric water-vapor and methane profiles from temperate rocky worlds observed this quarter. High-sensitivity detector arrays originally refined for astrophysics are also inspiring sharper low-dose medical imaging reconstruction algorithms on Earth.',
+        source: 'Science & Space Brief',
+        category: 'World',
+        timestamp: '1h ago',
+        relevance: 'Optics & space instrumentation',
+      },
+    ];
+
+    try {
+      const apiKey = process.env.GEMINI_API_KEY || process.env.GOOGLE_API_KEY;
+      if (!apiKey) {
+        const filtered =
+          category === 'All'
+            ? curatedFallback
+            : curatedFallback.filter((item) => item.category === category);
+        return res.json({
+          items: filtered.length > 0 ? filtered : curatedFallback,
+          generatedAt: new Date().toISOString(),
+          source: 'curated',
+        });
+      }
+
+      const ai = getGenAI();
+      const catDirective =
+        category === 'All'
+          ? 'Mix across World, India, Medical, and Tech categories.'
+          : `Focus primarily on the "${category}" category (with every item categorized accurately as "${category}").`;
+
+      const prompt = `Generate 6 crisp, factual, intriguing Inshorts-style news briefing cards for ambitious medical students and lifelong learners. ${catDirective}
+Return strictly a JSON array of 6 objects with keys:
+- "id": unique short string
+- "title": sharp headline (max 12 words)
+- "summary": engaging 45 to 60 words summarizing what happened and why it matters
+- "source": credible publication/wire name (e.g. "MedBrief Wire", "Global Science Desk", "India Edu Dispatch", "Clinical Tech Daily")
+- "category": strictly one of "World" | "India" | "Medical" | "Tech"
+- "timestamp": e.g. "Just now", "15m ago", "1h ago"
+- "relevance": short 4-6 word takeaway tag`;
+
+      const response = await generateContentWithFallback(ai, {
+        contents: prompt,
+        config: {
+          responseMimeType: 'application/json',
+          systemInstruction:
+            'You are an Inshorts-style news editor crafting crisp, intelligent, accurate 60-word news cards. Return valid JSON array only.',
+        },
+      });
+
+      const rawText = (response.text || '').trim();
+      const parsed = JSON.parse(rawText);
+      const validItems = Array.isArray(parsed)
+        ? parsed
+            .filter((it: any) => it && it.title && it.summary)
+            .slice(0, 6)
+            .map((it: any, idx: number) => ({
+              id: String(it.id || `gem-news-${Date.now()}-${idx}`),
+              title: String(it.title).trim(),
+              summary: String(it.summary).trim(),
+              source: String(it.source || 'Achiev Gemini Wire').trim(),
+              category: ['World', 'India', 'Medical', 'Tech'].includes(String(it.category))
+                ? String(it.category)
+                : category === 'All'
+                  ? 'World'
+                  : category,
+              timestamp: String(it.timestamp || 'Just now').trim(),
+              relevance: String(it.relevance || 'Live Briefing').trim(),
+            }))
+        : [];
+
+      if (validItems.length === 0) {
+        throw new Error('Empty Gemini news payload');
+      }
+
+      return res.json({
+        items: validItems,
+        generatedAt: new Date().toISOString(),
+        source: 'gemini',
+      });
+    } catch (err) {
+      console.warn('Leisure news fallback triggered:', err);
+      const filtered =
+        category === 'All'
+          ? curatedFallback
+          : curatedFallback.filter((item) => item.category === category);
+      return res.json({
+        items: filtered.length > 0 ? filtered : curatedFallback,
+        generatedAt: new Date().toISOString(),
+        source: 'curated',
+      });
     }
   });
 

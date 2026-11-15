@@ -57,11 +57,15 @@ import {
   Image as ImageIcon,
   Upload,
   AlertTriangle,
+  PenTool,
+  ChevronLeft,
 } from 'lucide-react';
 import { INITIAL_POST_MBBS_OPPORTUNITIES, PostMbbsOpportunity } from '../../data/subscriptionData';
+import { getWingBlogBundle, LEISURE_ASSETS } from '../../data/leisureWingBlogs';
 
 interface LeisureDashboardProps {
   onBackToStudy?: () => void;
+  onReturnToLastReadBook?: () => void;
 }
 
 export type PeaceSoundType =
@@ -535,9 +539,297 @@ export const INITIAL_WINGS: AtelierWing[] = [
       },
     ],
   },
+  {
+    id: 'photography',
+    title: 'Photography & Visual Optics',
+    badge: 'PHOTOGRAPHY',
+    tagline: 'Light, depth of field & visual framing · 2 slabs',
+    icon: '📷',
+    badgeColor: '#d97706',
+    slabs: [
+      {
+        id: 'slab-photo-optics',
+        wingId: 'photography',
+        name: 'Exposure Triangle & Lens Craft',
+        tagline: 'Aperture bokeh, shutter freeze & clinical eye calibration',
+        badge: 'OPTICS',
+        modulesCount: 4,
+        icon: '📷',
+        bannerType: 'arches',
+        primaryColor: '#d97706',
+        consoleId: 'wing-guide',
+        watermark: 'P',
+      },
+      {
+        id: 'slab-photo-story',
+        wingId: 'photography',
+        name: 'Chiaroscuro & Street Narrative',
+        tagline: 'Golden-hour lighting, color temperature & 12-frame archives',
+        badge: 'VISUAL STORY',
+        modulesCount: 3,
+        icon: '🎞️',
+        bannerType: 'ribbons',
+        primaryColor: '#b45309',
+        consoleId: 'wing-guide',
+        watermark: 'F',
+      },
+    ],
+  },
+  {
+    id: 'music',
+    title: 'Music & Acoustic Harmonics',
+    badge: 'MUSIC',
+    tagline: 'Rhythm, counterpoint & neurological reset · 2 slabs',
+    icon: '🎵',
+    badgeColor: '#8b5cf6',
+    slabs: [
+      {
+        id: 'slab-music-rhythm',
+        wingId: 'music',
+        name: 'Acoustic Theory & Baroque Tempo',
+        tagline: '60 BPM string clarity, modal intervals & neural synchrony',
+        badge: 'HARMONY',
+        modulesCount: 4,
+        icon: '🎼',
+        bannerType: 'ripple',
+        primaryColor: '#8b5cf6',
+        consoleId: 'wing-guide',
+        watermark: 'M',
+      },
+      {
+        id: 'slab-music-vinyl',
+        wingId: 'music',
+        name: 'Deep-Album Listening Lounge',
+        tagline: 'Uninterrupted lossless sessions & ambient instrumentals',
+        badge: 'LISTENING',
+        modulesCount: 3,
+        icon: '🎧',
+        bannerType: 'ribbons',
+        primaryColor: '#7c3aed',
+        consoleId: 'wing-guide',
+        watermark: 'V',
+      },
+    ],
+  },
+  {
+    id: 'travel',
+    title: 'Travel & Geographic Expeditions',
+    badge: 'TRAVEL',
+    tagline: 'Slow rail routes, alpine passes & cultural immersion · 2 slabs',
+    icon: '🧭',
+    badgeColor: '#0284c7',
+    slabs: [
+      {
+        id: 'slab-travel-rails',
+        wingId: 'travel',
+        name: 'Scenic Rail & Coastal Sanctuaries',
+        tagline: 'Himalayan toy trains, coastal towns & offline field journals',
+        badge: 'EXPEDITIONS',
+        modulesCount: 4,
+        icon: '🚆',
+        bannerType: 'arches',
+        primaryColor: '#0284c7',
+        consoleId: 'wing-guide',
+        watermark: 'T',
+      },
+      {
+        id: 'slab-travel-trails',
+        wingId: 'travel',
+        name: 'Micro-Escape & Heritage Atlas',
+        tagline: 'Weekend walk blueprints & architectural mapping',
+        badge: 'ATLAS',
+        modulesCount: 3,
+        icon: '🗺️',
+        bannerType: 'network',
+        primaryColor: '#0369a1',
+        consoleId: 'wing-guide',
+        watermark: 'E',
+      },
+    ],
+  },
+  {
+    id: 'nutrition',
+    title: 'Nutrition & Metabolic Fuel',
+    badge: 'NUTRITION',
+    tagline: 'Brain lipids, glycemic stability & hydration · 2 slabs',
+    icon: '🥗',
+    badgeColor: '#16a34a',
+    slabs: [
+      {
+        id: 'slab-nutrition-plate',
+        wingId: 'nutrition',
+        name: 'Cognitive Plate & Brain Lipids',
+        tagline: 'Omega-3 DHA, polyphenol pairings & zero afternoon crash',
+        badge: 'METABOLIC',
+        modulesCount: 4,
+        icon: '🥑',
+        bannerType: 'ripple',
+        primaryColor: '#16a34a',
+        consoleId: 'wing-guide',
+        watermark: 'N',
+      },
+      {
+        id: 'slab-nutrition-caffeine',
+        wingId: 'nutrition',
+        name: 'Smart Caffeine & Hydration Timing',
+        tagline: 'Adenosine washout protocols & electrolyte balance',
+        badge: 'FUELING',
+        modulesCount: 3,
+        icon: '🍵',
+        bannerType: 'tiles',
+        primaryColor: '#15803d',
+        consoleId: 'wing-guide',
+        watermark: 'H',
+      },
+    ],
+  },
+  {
+    id: 'sports',
+    title: 'Sports & Athletic Strategy',
+    badge: 'SPORTS',
+    tagline: 'Zone-2 cardio, racquet reflexes & championship tactics · 2 slabs',
+    icon: '🏅',
+    badgeColor: '#ea580c',
+    slabs: [
+      {
+        id: 'slab-sports-tactics',
+        wingId: 'sports',
+        name: 'Badminton, Tennis & Racquet Reflexes',
+        tagline: 'Visuomotor anticipation drills & quick match decompression',
+        badge: 'REFLEXES',
+        modulesCount: 4,
+        icon: '🏸',
+        bannerType: 'velocity',
+        primaryColor: '#ea580c',
+        consoleId: 'wing-guide',
+        watermark: 'S',
+      },
+      {
+        id: 'slab-sports-zone2',
+        wingId: 'sports',
+        name: 'Zone-2 Aerobic Base & Vo2 Peak',
+        tagline: 'Mitochondrial endurance protocols & pacing charts',
+        badge: 'ENDURANCE',
+        modulesCount: 3,
+        icon: '🏃',
+        bannerType: 'velocity',
+        primaryColor: '#c2410c',
+        consoleId: 'wing-guide',
+        watermark: 'Z',
+      },
+    ],
+  },
+  {
+    id: 'exercises',
+    title: 'Exercises & Strength Conditioning',
+    badge: 'EXERCISES',
+    tagline: 'Desk mobility, cervical relief & functional strength · 2 slabs',
+    icon: '🏋️',
+    badgeColor: '#dc2626',
+    slabs: [
+      {
+        id: 'slab-exercise-cspine',
+        wingId: 'exercises',
+        name: 'C-Spine & Thoracic Mobility Flow',
+        tagline: 'Undo textbook hunching in 5 minutes with scapular resets',
+        badge: 'MOBILITY',
+        modulesCount: 4,
+        icon: '🤸',
+        bannerType: 'ripple',
+        primaryColor: '#dc2626',
+        consoleId: 'wing-guide',
+        watermark: 'X',
+      },
+      {
+        id: 'slab-exercise-compound',
+        wingId: 'exercises',
+        name: '30-Minute Student Compound Circuit',
+        tagline: 'Push, pull, hinge & kettlebell conditioning for busy rosters',
+        badge: 'STRENGTH',
+        modulesCount: 3,
+        icon: '🏋️',
+        bannerType: 'tiles',
+        primaryColor: '#b91c1c',
+        consoleId: 'wing-guide',
+        watermark: 'K',
+      },
+    ],
+  },
+  {
+    id: 'lifestyle',
+    title: 'Lifestyle, Sleep & Rituals',
+    badge: 'LIFESTYLE',
+    tagline: 'Circadian alignment, analog wind-down & calm rooms · 2 slabs',
+    icon: '🕯️',
+    badgeColor: '#0d9488',
+    slabs: [
+      {
+        id: 'slab-lifestyle-circadian',
+        wingId: 'lifestyle',
+        name: 'Circadian Wind-Down & Deep REM',
+        tagline: '90-minute evening light curve & slow-wave memory consolidation',
+        badge: 'RITUALS',
+        modulesCount: 4,
+        icon: '🌙',
+        bannerType: 'neural',
+        primaryColor: '#0d9488',
+        consoleId: 'wing-guide',
+        watermark: 'L',
+      },
+      {
+        id: 'slab-lifestyle-minimal',
+        wingId: 'lifestyle',
+        name: 'Calm Room & Analog Reset Habits',
+        tagline: 'Tactile tea rituals, frictionless desks & unhurried mornings',
+        badge: 'WELLBEING',
+        modulesCount: 3,
+        icon: '☕',
+        bannerType: 'editorial',
+        primaryColor: '#0f766e',
+        consoleId: 'wing-guide',
+        watermark: 'R',
+      },
+    ],
+  },
+  {
+    id: 'space',
+    title: 'Space, Astrophysics & Cosmos',
+    badge: 'SPACE',
+    tagline: 'JWST deep fields, orbital mechanics & exoplanet skies · 2 slabs',
+    icon: '🪐',
+    badgeColor: '#3b82f6',
+    slabs: [
+      {
+        id: 'slab-space-jwst',
+        wingId: 'space',
+        name: 'Webb Infrared Deep-Field Atlas',
+        tagline: 'Carina nebulae, high-redshift galaxies & cosmic spectroscopy',
+        badge: 'ASTROPHYSICS',
+        modulesCount: 4,
+        icon: '🔭',
+        bannerType: 'neural',
+        primaryColor: '#3b82f6',
+        consoleId: 'wing-guide',
+        watermark: 'W',
+      },
+      {
+        id: 'slab-space-orbital',
+        wingId: 'space',
+        name: 'Orbital Mechanics & Exoplanet Worlds',
+        tagline: 'Lagrange points, Europa oceans & ISRO deep-space missions',
+        badge: 'COSMOS',
+        modulesCount: 3,
+        icon: '🚀',
+        bannerType: 'arches',
+        primaryColor: '#2563eb',
+        consoleId: 'wing-guide',
+        watermark: 'O',
+      },
+    ],
+  },
 ];
 
-// Bespoke Category-Matched Scenic SVG Backdrop + Vector Artwork for all 26 Leisure Slabs
+// Bespoke Category-Matched Scenic SVG Backdrop + Vector Artwork for all Leisure Slabs
 const getCategoryBackdropPalette = (slab: AtelierSlab): [string, string, string] => {
   switch (slab.id) {
     case 'slab-breathing': return ['#1e293b', '#334155', '#e2b887'];
@@ -566,6 +858,22 @@ const getCategoryBackdropPalette = (slab: AtelierSlab): [string, string, string]
     case 'slab-magazines': return ['#1e222b', '#333b4a', '#e2e8f0'];
     case 'slab-post-mbbs': return ['#0e2536', '#173e5c', '#93c5fd'];
     case 'slab-overseas-jobs': return ['#271b0d', '#4b3317', '#fcd34d'];
+    case 'slab-photo-optics': return ['#24180d', '#4f3216', '#fbbf24'];
+    case 'slab-photo-story': return ['#291b14', '#4d3020', '#f59e0b'];
+    case 'slab-music-rhythm': return ['#1f1333', '#3b2166', '#c4b5fd'];
+    case 'slab-music-vinyl': return ['#19142b', '#312554', '#a78bfa'];
+    case 'slab-travel-rails': return ['#0c2233', '#154266', '#7dd3fc'];
+    case 'slab-travel-trails': return ['#0e2a38', '#174963', '#38bdf8'];
+    case 'slab-nutrition-plate': return ['#0d2618', '#184a2d', '#86efac'];
+    case 'slab-nutrition-caffeine': return ['#12291c', '#1f4a32', '#4ade80'];
+    case 'slab-sports-tactics': return ['#2d1409', '#572711', '#fb923c'];
+    case 'slab-sports-zone2': return ['#2b1708', '#4f290e', '#fdba74'];
+    case 'slab-exercise-cspine': return ['#2e1014', '#5c1e26', '#fca5a5'];
+    case 'slab-exercise-compound': return ['#290f12', '#4f1b20', '#f87171'];
+    case 'slab-lifestyle-circadian': return ['#0d2624', '#164542', '#5eead4'];
+    case 'slab-lifestyle-minimal': return ['#122624', '#1f423e', '#99f6e4'];
+    case 'slab-space-jwst': return ['#091229', '#122554', '#93c5fd'];
+    case 'slab-space-orbital': return ['#070e21', '#0f1f47', '#60a5fa'];
     default: return ['#241911', '#3b281b', '#e5ce95'];
   }
 };
@@ -938,6 +1246,71 @@ const SlabArtisticThumbnail: React.FC<{ slabId: string; color: string; className
           <path d="M16 8l3 3-5 1-2 4-1-1 1-3-3-2 1-1 3 1z" fill="#38bdf8" stroke="#38bdf8" strokeWidth="1" />
         </svg>
       );
+    case 'slab-photo-optics':
+    case 'slab-photo-story':
+      return (
+        <svg viewBox="0 0 24 24" fill="none" className={className} stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <rect x="3" y="6" width="18" height="14" rx="2.5" fill={`${color}18`} />
+          <circle cx="12" cy="13" r="4" fill={`${color}35`} />
+          <path d="M8 6l1.5-2.5h5L16 6" />
+        </svg>
+      );
+    case 'slab-music-rhythm':
+    case 'slab-music-vinyl':
+      return (
+        <svg viewBox="0 0 24 24" fill="none" className={className} stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M9 18V5l10-2v13" />
+          <circle cx="6.5" cy="18" r="2.5" fill={`${color}35`} />
+          <circle cx="16.5" cy="16" r="2.5" fill={`${color}35`} />
+        </svg>
+      );
+    case 'slab-travel-rails':
+    case 'slab-travel-trails':
+      return (
+        <svg viewBox="0 0 24 24" fill="none" className={className} stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="9" fill={`${color}16`} />
+          <polygon points="15,9 11,11 9,15 13,13" fill={color} />
+        </svg>
+      );
+    case 'slab-nutrition-plate':
+    case 'slab-nutrition-caffeine':
+      return (
+        <svg viewBox="0 0 24 24" fill="none" className={className} stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 21c-4.5-3-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-2.5 8-7 11z" fill={`${color}22`} />
+          <path d="M12 10v7M9 13l3-2 3-1" />
+        </svg>
+      );
+    case 'slab-sports-tactics':
+    case 'slab-sports-zone2':
+      return (
+        <svg viewBox="0 0 24 24" fill="none" className={className} stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="9" fill={`${color}18`} />
+          <path d="M5.6 5.6c4 4 4 8.8 0 12.8M18.4 5.6c-4 4-4 8.8 0 12.8" />
+        </svg>
+      );
+    case 'slab-exercise-cspine':
+    case 'slab-exercise-compound':
+      return (
+        <svg viewBox="0 0 24 24" fill="none" className={className} stroke={color} strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M6 8v8M18 8v8M3 10v4M21 10v4M6 12h12" />
+        </svg>
+      );
+    case 'slab-lifestyle-circadian':
+    case 'slab-lifestyle-minimal':
+      return (
+        <svg viewBox="0 0 24 24" fill="none" className={className} stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M12 3c2 2.5 3 4.5 3 6.5a3 3 0 1 1-6 0c0-2 1-4 3-6.5z" fill={`${color}35`} />
+          <rect x="7" y="13" width="10" height="8" rx="1.5" fill={`${color}18`} />
+        </svg>
+      );
+    case 'slab-space-jwst':
+    case 'slab-space-orbital':
+      return (
+        <svg viewBox="0 0 24 24" fill="none" className={className} stroke={color} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="12" cy="12" r="4.5" fill={`${color}35`} />
+          <ellipse cx="12" cy="12" rx="10" ry="3.5" transform="rotate(-24 12 12)" />
+        </svg>
+      );
     default:
       return (
         <div className="w-5 h-5 rounded-full flex items-center justify-center font-serif font-bold text-xs" style={{ backgroundColor: `${color}30`, color }}>
@@ -1111,7 +1484,10 @@ const SlabBannerGraphic: React.FC<{
   );
 };
 
-export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({ onBackToStudy }) => {
+export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({
+  onBackToStudy,
+  onReturnToLastReadBook,
+}) => {
   // 1. Wings & Custom Slabs State + Persistent Wing Reordering
   const [wings, setWings] = useState<AtelierWing[]>(() => {
     let base = INITIAL_WINGS;
@@ -1298,7 +1674,7 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({ onBackToStud
     } catch {}
   };
 
-  // Custom Set Timer Tick
+  // Custom Set Timer Tick — Auto-returns to last opened read book upon completion
   useEffect(() => {
     let interval: any = null;
     if (breakAlarmActive && breakAlarmSecondsLeft > 0) {
@@ -1307,7 +1683,13 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({ onBackToStud
           if (prev <= 1) {
             setBreakAlarmActive(false);
             playChimeAlert(alarmTone, alarmVolume);
-            setIsBreakAlarmModalOpen(true);
+            setTimeout(() => {
+              if (onReturnToLastReadBook) {
+                onReturnToLastReadBook();
+              } else {
+                setIsBreakAlarmModalOpen(true);
+              }
+            }, 650);
             return 0;
           }
           return prev - 1;
@@ -1317,7 +1699,7 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({ onBackToStud
     return () => {
       if (interval) clearInterval(interval);
     };
-  }, [breakAlarmActive, breakAlarmSecondsLeft, alarmTone, alarmVolume]);
+  }, [breakAlarmActive, breakAlarmSecondsLeft, alarmTone, alarmVolume, onReturnToLastReadBook]);
 
   const handleStartCustomTimer = (mins = timerInputMinutes, secs = timerInputSeconds) => {
     const total = Math.max(1, mins * 60 + secs);
@@ -1937,9 +2319,193 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({ onBackToStud
 
   useEffect(() => () => clearF1Timers(), []);
 
-  // Daily Pulse (World vs India News, Magazines Reader)
+  // Daily Pulse (Live Inshorts-style Gemini News + Magazines Reader)
   const [newsTab, setNewsTab] = useState<'world' | 'india'>('world');
   const [magIdx, setMagIdx] = useState(0);
+
+  interface LiveNewsCardItem {
+    id: string;
+    title: string;
+    summary: string;
+    source: string;
+    category: string;
+    timestamp: string;
+    readTime?: string;
+    relevanceForStudents?: string;
+    imageUrl: string;
+  }
+
+  const pickFallbackNewsImage = (cat: string, idx: number): string => {
+    const low = cat.toLowerCase();
+    if (low.includes('space') || low.includes('cosmos') || low.includes('tech')) return LEISURE_ASSETS.spaceCosmosImg;
+    if (low.includes('sport') || low.includes('health')) return LEISURE_ASSETS.wellnessSportImg;
+    if (low.includes('art') || low.includes('culture')) return LEISURE_ASSETS.photoStudioImg;
+    const pool = [
+      LEISURE_ASSETS.medicalNewsImg,
+      LEISURE_ASSETS.spaceCosmosImg,
+      LEISURE_ASSETS.wellnessSportImg,
+      LEISURE_ASSETS.photoStudioImg,
+      LEISURE_ASSETS.musicAcousticsImg,
+    ];
+    return pool[idx % pool.length]!;
+  };
+
+  const buildLocalInshortsFallback = (cat: string): LiveNewsCardItem[] => {
+    const pool = cat.toLowerCase() === 'india' ? INDIA_NEWS_FEED : [...INDIA_NEWS_FEED.slice(0, 3), ...WORLD_NEWS_FEED.slice(0, 3)];
+    return pool.map((n, idx) => ({
+      id: n.id,
+      title: n.title,
+      summary: `${n.bulletSummary.join(' ')} ${n.relevanceForStudents}`.slice(0, 310),
+      source: n.source,
+      category: cat === 'All' ? (idx < 3 ? 'India & ICMR' : 'World & Science') : cat,
+      timestamp: n.timestamp,
+      readTime: '35 sec read',
+      relevanceForStudents: n.relevanceForStudents,
+      imageUrl: pickFallbackNewsImage(cat, idx),
+    }));
+  };
+
+  const [liveNewsCategory, setLiveNewsCategory] = useState<'All' | 'World' | 'India' | 'Medical' | 'Tech'>('All');
+  const [liveNewsItems, setLiveNewsItems] = useState<LiveNewsCardItem[]>(() => buildLocalInshortsFallback('All'));
+  const [liveNewsLoading, setLiveNewsLoading] = useState(false);
+  const [liveNewsAutoRefresh, setLiveNewsAutoRefresh] = useState(true);
+  const [liveNewsLastUpdated, setLiveNewsLastUpdated] = useState<string>('Ready');
+
+  const fetchLiveGeminiNews = async (category: 'All' | 'World' | 'India' | 'Medical' | 'Tech' = liveNewsCategory) => {
+    setLiveNewsLoading(true);
+    try {
+      const resp = await fetch('/api/gemini/leisure-news', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category, count: 6 }),
+      });
+      if (resp.ok) {
+        const payload = await resp.json();
+        const items = Array.isArray(payload?.articles) ? payload.articles : [];
+        if (items.length > 0) {
+          setLiveNewsItems(
+            items.map((art: any, i: number) => ({
+              id: art.id || `gem-news-${Date.now()}-${i}`,
+              title: String(art.title || 'Latest Global Briefing'),
+              summary: String(art.summary || ''),
+              source: String(art.source || 'Gemini Wire'),
+              category: String(art.category || category),
+              timestamp: String(art.timestamp || 'Just now'),
+              readTime: String(art.readTime || '40 sec read'),
+              relevanceForStudents: art.relevanceForStudents ? String(art.relevanceForStudents) : undefined,
+              imageUrl: pickFallbackNewsImage(String(art.category || category), i),
+            }))
+          );
+          setLiveNewsLastUpdated(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+          setLiveNewsLoading(false);
+          return;
+        }
+      }
+      setLiveNewsItems(buildLocalInshortsFallback(category));
+      setLiveNewsLastUpdated(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+    } catch {
+      setLiveNewsItems(buildLocalInshortsFallback(category));
+      setLiveNewsLastUpdated(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+    } finally {
+      setLiveNewsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeConsoleSlab?.consoleId !== 'news') return;
+    fetchLiveGeminiNews(liveNewsCategory);
+  }, [activeConsoleSlab?.consoleId, liveNewsCategory]);
+
+  useEffect(() => {
+    if (activeConsoleSlab?.consoleId !== 'news' || !liveNewsAutoRefresh) return;
+    const id = setInterval(() => {
+      fetchLiveGeminiNews(liveNewsCategory);
+    }, 90000);
+    return () => clearInterval(id);
+  }, [activeConsoleSlab?.consoleId, liveNewsAutoRefresh, liveNewsCategory]);
+
+  // Wing Notes Dual Web-View Modal (Mini Create Note + 4-Page Curated Illustrated Blog + Top 5 Learn-More Sites)
+  const [activeWingNotes, setActiveWingNotes] = useState<{ id: string; title: string } | null>(null);
+  const [wingBlogPage, setWingBlogPage] = useState(0);
+  const [wingMiniNoteTitle, setWingMiniNoteTitle] = useState('');
+  const [wingMiniNoteBody, setWingMiniNoteBody] = useState('');
+  const [wingMiniNoteAccent, setWingMiniNoteAccent] = useState<'#fffbeb' | '#f0fdf4' | '#eff6ff' | '#fdf4ff'>('#fffbeb');
+  const [wingMiniNoteSavedMsg, setWingMiniNoteSavedMsg] = useState<string | null>(null);
+
+  const openWingDualNotes = (wingId: string, wingTitle: string) => {
+    setActiveWingNotes({ id: wingId, title: wingTitle });
+    setWingBlogPage(0);
+    setWingMiniNoteSavedMsg(null);
+    try {
+      const draftKey = `achiev_wing_mini_note_${wingId}`;
+      const savedDraft = localStorage.getItem(draftKey);
+      if (savedDraft) {
+        const parsed = JSON.parse(savedDraft);
+        setWingMiniNoteTitle(parsed.title || `${wingTitle} · Study Reflection`);
+        setWingMiniNoteBody(parsed.body || '');
+      } else {
+        setWingMiniNoteTitle(`${wingTitle} · Key Insights`);
+        setWingMiniNoteBody('');
+      }
+    } catch {
+      setWingMiniNoteTitle(`${wingTitle} · Key Insights`);
+      setWingMiniNoteBody('');
+    }
+  };
+
+  const handleSaveWingMiniNoteToNotebooks = () => {
+    if (!activeWingNotes) return;
+    const cleanTitle = wingMiniNoteTitle.trim() || `${activeWingNotes.title} · Reflection`;
+    const cleanBody = wingMiniNoteBody.trim();
+    if (!cleanBody) {
+      setWingMiniNoteSavedMsg('Write a few lines first to save your note.');
+      setTimeout(() => setWingMiniNoteSavedMsg(null), 2400);
+      return;
+    }
+
+    try {
+      localStorage.setItem(
+        `achiev_wing_mini_note_${activeWingNotes.id}`,
+        JSON.stringify({ title: cleanTitle, body: cleanBody })
+      );
+      const raw = localStorage.getItem('medden_notebooks');
+      const existing: any[] = raw ? JSON.parse(raw) : [];
+      const htmlContent = `<p><strong>${cleanTitle}</strong></p>${cleanBody
+        .split('\n')
+        .filter((l) => l.trim())
+        .map((line) => `<p>${line.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>`)
+        .join('')}`;
+
+      const matchIdx = Array.isArray(existing)
+        ? existing.findIndex((nb) => nb.id === `wing-note-${activeWingNotes.id}` || nb.title === cleanTitle)
+        : -1;
+
+      const updated = Array.isArray(existing) ? [...existing] : [];
+      const noteRecord = {
+        id: `wing-note-${activeWingNotes.id}`,
+        title: cleanTitle,
+        subject: `Leisure · ${activeWingNotes.title}`,
+        paperStyle: 'ruled',
+        paperTint: 'cream',
+        updatedAt: new Date().toISOString(),
+        pages: [{ id: 'p1', content: htmlContent }],
+        content: htmlContent,
+        coverColor: '#b45309',
+      };
+      if (matchIdx >= 0) {
+        updated[matchIdx] = { ...updated[matchIdx], ...noteRecord };
+      } else {
+        updated.unshift(noteRecord);
+      }
+      localStorage.setItem('medden_notebooks', JSON.stringify(updated));
+      window.dispatchEvent(new Event('medden_notebooks_updated'));
+      setWingMiniNoteSavedMsg('Saved directly to your Create Note workspace!');
+      setTimeout(() => setWingMiniNoteSavedMsg(null), 2800);
+    } catch {
+      setWingMiniNoteSavedMsg('Saved local draft cleanly.');
+      setTimeout(() => setWingMiniNoteSavedMsg(null), 2200);
+    }
+  };
 
   // Custom Slab Scratchpad
   const [customSlabNotes, setCustomSlabNotes] = useState<Record<string, string>>(() => {
@@ -2379,6 +2945,16 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({ onBackToStud
                         <ChevronDown className="w-3.5 h-3.5" />
                       </button>
                     </div>
+
+                    <button
+                      type="button"
+                      onClick={() => openWingDualNotes(wing.id, wing.title)}
+                      className="px-2.5 py-1 rounded-lg bg-[#A47C43] hover:bg-[#8f6730] text-white border border-amber-500/40 text-[10px] font-mono font-bold uppercase tracking-wider flex items-center gap-1 shadow-xs transition-colors cursor-pointer"
+                      title={`Open Notes & 4-Page Blog for ${wing.title}`}
+                    >
+                      <PenTool className="w-3 h-3" />
+                      <span>Notes</span>
+                    </button>
 
                     <button
                       type="button"
@@ -3336,47 +3912,106 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({ onBackToStud
                 );
               })()}
 
-              {/* CONSOLE F: WORLD NEWS & INDIA PULSE */}
+              {/* CONSOLE F: INSHORTS-STYLE LIVE GEMINI NEWS PULSE */}
               {activeConsoleSlab.consoleId === 'news' && (
                 <div className="space-y-4">
-                  <div className="flex flex-wrap items-center justify-between gap-2">
-                    <div className="text-xs font-semibold text-stone-300">
-                      Curated Science, ICMR/AIIMS &amp; Global Medicine Pulse
+                  <div className="flex flex-wrap items-center justify-between gap-2.5 p-3.5 rounded-2xl bg-[#1a120d] border border-[#382518]">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {(['All', 'India', 'World', 'Medical', 'Tech'] as const).map((cat) => (
+                        <button
+                          key={cat}
+                          type="button"
+                          onClick={() => setLiveNewsCategory(cat)}
+                          className={`px-3 py-1 rounded-full text-xs font-semibold transition cursor-pointer ${
+                            liveNewsCategory === cat
+                              ? 'bg-[#A47C43] text-white shadow-xs'
+                              : 'bg-[#120c08] text-stone-400 hover:text-stone-200 border border-[#382518]'
+                          }`}
+                        >
+                          {cat === 'All'
+                            ? '⚡ Top Briefs'
+                            : cat === 'India'
+                              ? '🇮🇳 India'
+                              : cat === 'World'
+                                ? '🌍 World'
+                                : cat === 'Medical'
+                                  ? '🩺 Medical'
+                                  : '💻 Sci-Tech'}
+                        </button>
+                      ))}
                     </div>
-                    <div className="flex items-center gap-1.5 bg-[#120c08] p-1 rounded-xl border border-[#382518]">
+
+                    <div className="flex items-center gap-2">
+                      <label className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#120c08] border border-[#382518] text-[11px] text-stone-300 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={liveNewsAutoRefresh}
+                          onChange={(e) => setLiveNewsAutoRefresh(e.target.checked)}
+                          className="accent-amber-500"
+                        />
+                        <span>Auto-update</span>
+                      </label>
                       <button
                         type="button"
-                        onClick={() => setNewsTab('world')}
-                        className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer ${newsTab === 'world' ? 'bg-[#A47C43] text-white' : 'text-stone-400 hover:text-stone-200'}`}
+                        onClick={() => fetchLiveGeminiNews(liveNewsCategory)}
+                        disabled={liveNewsLoading}
+                        className="px-3 py-1 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                       >
-                        🌐 World Medical &amp; Space
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setNewsTab('india')}
-                        className={`px-3 py-1 rounded-lg text-xs font-semibold cursor-pointer ${newsTab === 'india' ? 'bg-[#A47C43] text-white' : 'text-stone-400 hover:text-stone-200'}`}
-                      >
-                        🇮🇳 India &amp; AIIMS/ICMR
+                        <RefreshCw className={`w-3.5 h-3.5 ${liveNewsLoading ? 'animate-spin' : ''}`} />
+                        <span>{liveNewsLoading ? 'Updating...' : 'Refresh Wire'}</span>
                       </button>
                     </div>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {(newsTab === 'world' ? WORLD_NEWS_FEED : INDIA_NEWS_FEED).map((n) => (
-                      <div key={n.id} className="p-5 rounded-2xl bg-[#1a120d] border border-[#382518] space-y-2.5">
-                        <div className="flex items-center justify-between text-[10px] font-mono text-stone-400">
-                          <span className="text-amber-400 font-semibold">{n.source}</span>
-                          <span>{n.timestamp}</span>
+
+                  <div className="flex items-center justify-between text-[11px] font-mono text-stone-400 px-1">
+                    <span>Inshorts Format · Concise 60-word news cards · Powered by Gemini</span>
+                    <span>Updated: {liveNewsLastUpdated}</span>
+                  </div>
+
+                  {/* Inshorts-Style Visual + Short-Read Cards Grid */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {liveNewsItems.map((n) => (
+                      <article
+                        key={n.id}
+                        className="rounded-2xl overflow-hidden bg-[#1a120d] border border-[#382518] hover:border-amber-500/50 transition-all flex flex-col justify-between shadow-lg"
+                      >
+                        <div>
+                          <div className="relative h-40 w-full overflow-hidden bg-black">
+                            <img
+                              src={n.imageUrl}
+                              alt={n.title}
+                              className="w-full h-full object-cover"
+                              loading="lazy"
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-[#1a120d] via-black/25 to-transparent" />
+                            <span className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded-full bg-black/75 border border-amber-400/40 text-[10px] font-mono font-bold text-amber-300 uppercase">
+                              {n.category}
+                            </span>
+                            <span className="absolute bottom-2 right-2.5 text-[10px] font-mono text-stone-300 bg-black/65 px-2 py-0.5 rounded">
+                              {n.readTime || '45 sec read'}
+                            </span>
+                          </div>
+
+                          <div className="p-4 space-y-2">
+                            <div className="flex items-center justify-between text-[10px] font-mono text-stone-400">
+                              <span className="text-amber-400 font-semibold truncate max-w-[140px]">{n.source}</span>
+                              <span>{n.timestamp}</span>
+                            </div>
+                            <h4 className="font-serif font-bold text-[15px] text-stone-100 leading-snug">
+                              {n.title}
+                            </h4>
+                            <p className="text-xs text-stone-300 leading-relaxed">
+                              {n.summary}
+                            </p>
+                          </div>
                         </div>
-                        <h4 className="font-bold text-sm text-stone-100 leading-snug">{n.title}</h4>
-                        <ul className="space-y-1 text-xs text-stone-300 list-disc pl-4">
-                          {n.bulletSummary.map((b, bi) => (
-                            <li key={bi}>{b}</li>
-                          ))}
-                        </ul>
-                        <div className="p-2.5 rounded-xl bg-[#120c08] border border-[#352317] text-[11px] text-[#d4aa6e]">
-                          <strong>Exam Pearl:</strong> {n.relevanceForStudents}
-                        </div>
-                      </div>
+
+                        {n.relevanceForStudents && (
+                          <div className="mx-4 mb-4 p-2.5 rounded-xl bg-[#120c08] border border-[#352317] text-[11px] text-[#d4aa6e]">
+                            <strong>Takeaway:</strong> {n.relevanceForStudents}
+                          </div>
+                        )}
+                      </article>
                     ))}
                   </div>
                 </div>
@@ -4396,12 +5031,74 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({ onBackToStud
                 );
               })()}
 
+              {/* CONSOLE H1: WING GUIDE INTERACTIVE FIELD READER FOR 8 NEW LEISURE WINGS */}
+              {activeConsoleSlab.consoleId === 'wing-guide' && (() => {
+                const wingBundle = getWingBlogBundle(activeConsoleSlab.wingId, activeConsoleSlab.name);
+                const pageOne = wingBundle.pages[0];
+                return (
+                  <div className="p-6 rounded-3xl bg-[#1a120d] border border-[#382518] space-y-5">
+                    <div className="grid grid-cols-1 md:grid-cols-12 gap-5 items-center">
+                      <div className="md:col-span-5 h-48 rounded-2xl overflow-hidden border border-[#352317]">
+                        <img
+                          src={wingBundle.heroImage}
+                          alt={wingBundle.blogTitle}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                      <div className="md:col-span-7 space-y-2.5">
+                        <span className="px-2.5 py-0.5 rounded-full bg-[#A47C43]/25 border border-[#A47C43]/50 text-amber-300 text-[10px] font-mono uppercase">
+                          {wingBundle.categoryName} · {wingBundle.readMinutes} min field read
+                        </span>
+                        <h4 className="font-serif text-xl font-bold text-stone-100 leading-snug">
+                          {activeConsoleSlab.name}
+                        </h4>
+                        <p className="text-xs text-stone-300 leading-relaxed">{wingBundle.subtitle}</p>
+                        <div className="pt-1 flex flex-wrap gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const targetWing = wings.find((w) => w.id === activeConsoleSlab.wingId);
+                              openWingDualNotes(
+                                activeConsoleSlab.wingId,
+                                targetWing?.title || wingBundle.categoryName
+                              );
+                            }}
+                            className="px-4 py-2 rounded-xl bg-[#A47C43] hover:bg-[#8f6730] text-white text-xs font-bold flex items-center gap-1.5 shadow cursor-pointer"
+                          >
+                            <PenTool className="w-3.5 h-3.5" />
+                            <span>Open Dual Web-View: Notes + 4-Page Blog</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => toggleAudio('forest')}
+                            className="px-3.5 py-2 rounded-xl bg-[#251a12] hover:bg-[#322318] text-stone-200 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+                          >
+                            <Volume2 className="w-3.5 h-3.5 text-amber-400" />
+                            <span>{isAudioPlaying ? 'Mute Sound' : 'Ambient Focus Sound'}</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {pageOne && (
+                      <div className="p-4 rounded-2xl bg-[#120c08] border border-[#352317] space-y-2">
+                        <div className="text-xs font-bold text-amber-300">{pageOne.title}</div>
+                        <p className="text-xs text-stone-300 leading-relaxed">{pageOne.paragraphs[0]}</p>
+                        <blockquote className="text-xs italic text-amber-200 border-l-2 border-amber-500 pl-3 py-0.5">
+                          {pageOne.highlightQuote}
+                        </blockquote>
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
+
               {/* CONSOLE H: INTERACTIVE CUSTOM SLAB SANCTUARY */}
               {![
                 'nature', 'scramble', 'stretches', 'sleep-cycles', 'daily-biases', 'biases-casino',
                 'news', 'motorsport', 'racing-mindset', 'post-mbbs-careers', 'overseas-jobs',
                 'coding', 'vocab', 'chess', 'latin-roots', 'poetry', 'idioms',
-                'sociology', 'urbanism', 'history', 'worldmap', 'heritage', 'art', 'fashion', 'architecture', 'magazines'
+                'sociology', 'urbanism', 'history', 'worldmap', 'heritage', 'art', 'fashion', 'architecture', 'magazines', 'wing-guide'
               ].includes(activeConsoleSlab.consoleId) && (
                 <div className="p-6 rounded-3xl bg-[#1a120d] border border-[#382518] space-y-4">
                   <div className="flex items-center gap-3">
@@ -4450,6 +5147,251 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({ onBackToStud
         </div>
       )}
 
+      {/* 5B. DUAL WEB-VIEW WINDOW: MINI CREATE NOTE + 4-PAGE ILLUSTRATED BLOG & TOP 5 WEBSITES */}
+      {activeWingNotes && (() => {
+        const blog = getWingBlogBundle(activeWingNotes.id, activeWingNotes.title);
+        const page = blog.pages[Math.min(wingBlogPage, blog.pages.length - 1)] || blog.pages[0]!;
+        return (
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/82 backdrop-blur-md p-2 sm:p-5 animate-in fade-in duration-150"
+            onClick={() => setActiveWingNotes(null)}
+          >
+            <div
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-6xl h-[92vh] bg-[#160f0b] border border-[#4a321e] rounded-3xl shadow-2xl overflow-hidden flex flex-col"
+            >
+              {/* Dual Web-View Chrome Header */}
+              <div className="px-4 sm:px-6 py-3 bg-[#1e130c] border-b border-[#3a2617] flex items-center justify-between gap-3 shrink-0">
+                <div className="flex items-center gap-2.5 min-w-0">
+                  <span className="px-2.5 py-0.5 rounded-full bg-[#A47C43] text-white text-[10px] font-mono font-bold uppercase shrink-0">
+                    Dual Web-View
+                  </span>
+                  <h3 className="font-serif text-sm sm:text-base font-bold text-stone-100 truncate">
+                    {activeWingNotes.title} · Mini Notes &amp; Editorial Blog
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setActiveWingNotes(null)}
+                  className="p-1.5 rounded-lg bg-[#2a1c12] hover:bg-[#3a2719] text-stone-300 cursor-pointer"
+                  aria-label="Close dual web-view window"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Split Dual Windows */}
+              <div className="flex-1 min-h-0 grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
+                {/* WINDOW 1 (LEFT 5 COLS): MINI VERSION OF CREATE NOTE */}
+                <div className="lg:col-span-5 flex flex-col border-b lg:border-b-0 lg:border-r border-[#3a2617] bg-[#140d09] min-h-0">
+                  <div className="px-4 py-2.5 border-b border-[#352317] flex items-center justify-between gap-2 bg-[#1a110b]">
+                    <div className="flex items-center gap-2">
+                      <PenTool className="w-3.5 h-3.5 text-amber-400" />
+                      <span className="text-xs font-bold text-amber-100">Mini Create Note</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      {(['#fffbeb', '#f0fdf4', '#eff6ff', '#fdf4ff'] as const).map((col) => (
+                        <button
+                          key={col}
+                          type="button"
+                          onClick={() => setWingMiniNoteAccent(col)}
+                          className={`w-4 h-4 rounded-full border cursor-pointer ${
+                            wingMiniNoteAccent === col ? 'border-amber-500 scale-110' : 'border-stone-500/40'
+                          }`}
+                          style={{ backgroundColor: col }}
+                          title="Paper tone"
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="p-4 flex-1 flex flex-col gap-3 min-h-0 overflow-y-auto custom-scrollbar">
+                    <input
+                      type="text"
+                      value={wingMiniNoteTitle}
+                      onChange={(e) => setWingMiniNoteTitle(e.target.value)}
+                      placeholder="Notebook title..."
+                      className="w-full px-3 py-2 rounded-xl bg-[#1d130d] border border-[#3d281a] text-xs font-bold text-stone-100 outline-none focus:border-amber-500"
+                    />
+
+                    {/* Mini Ruled Canvas */}
+                    <div
+                      className="flex-1 min-h-[220px] rounded-2xl border border-[#d6c7b0]/40 shadow-inner p-3.5 flex flex-col"
+                      style={{
+                        backgroundColor: wingMiniNoteAccent,
+                        backgroundImage: 'repeating-linear-gradient(to bottom, transparent 0 25px, rgba(148,130,105,0.22) 25px 26px)',
+                      }}
+                    >
+                      <textarea
+                        value={wingMiniNoteBody}
+                        onChange={(e) => setWingMiniNoteBody(e.target.value)}
+                        placeholder={`Capture notes while reading the ${blog.categoryName} blog...\n\n• Paste highlights or personal insights\n• Click Save to sync straight to your Achiev Notebooks`}
+                        className="w-full flex-1 bg-transparent text-[#24160b] text-xs leading-[26px] resize-none outline-none font-serif"
+                      />
+                    </div>
+
+                    {wingMiniNoteSavedMsg && (
+                      <div className="px-3 py-1.5 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-[11px] font-semibold text-center">
+                        {wingMiniNoteSavedMsg}
+                      </div>
+                    )}
+
+                    <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setWingMiniNoteBody((prev) =>
+                            `${prev ? `${prev}\n\n` : ''}[Page ${page.pageNumber}: ${page.title}]\n${page.highlightQuote}`
+                          )
+                        }
+                        className="px-3 py-1.5 rounded-xl bg-[#251911] hover:bg-[#332317] text-amber-200 border border-amber-700/35 text-[11px] font-semibold cursor-pointer"
+                      >
+                        + Clip Page Quote
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={handleSaveWingMiniNoteToNotebooks}
+                        className="px-4 py-1.5 rounded-xl bg-[#A47C43] hover:bg-[#8f6730] text-white text-xs font-bold shadow cursor-pointer flex items-center gap-1.5"
+                      >
+                        <Check className="w-3.5 h-3.5" />
+                        <span>Save to Notebooks</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* WINDOW 2 (RIGHT 7 COLS): 4-PAGE ILLUSTRATED BLOG READER + TOP 5 LEARN MORE WEBSITES */}
+                <div className="lg:col-span-7 overflow-y-auto custom-scrollbar bg-[#fcf9f1] text-[#23150a] flex flex-col">
+                  {/* Blog Editorial Masthead */}
+                  <div className="p-5 sm:p-7 border-b border-[#e5dac2] bg-gradient-to-b from-[#f6efe0] to-[#fcf9f1] space-y-2">
+                    <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono uppercase tracking-wider text-[#8c5d19] font-bold">
+                      <span>Ach1ev Journal · {blog.categoryName}</span>
+                      <span>{blog.author} · {blog.readMinutes} min read · Page {page.pageNumber} of {blog.pages.length}</span>
+                    </div>
+                    <h4 className="font-serif text-xl sm:text-2xl font-bold text-[#1b0f06] leading-snug">
+                      {blog.blogTitle}
+                    </h4>
+                    <p className="text-xs sm:text-sm text-[#5c422a] leading-relaxed">
+                      {blog.subtitle}
+                    </p>
+
+                    {/* 4-Page Navigation Tabs */}
+                    <div className="pt-2 flex flex-wrap items-center gap-1.5">
+                      {blog.pages.map((p, idx) => (
+                        <button
+                          key={p.pageNumber}
+                          type="button"
+                          onClick={() => setWingBlogPage(idx)}
+                          className={`px-3 py-1 rounded-full text-xs font-bold transition cursor-pointer ${
+                            wingBlogPage === idx
+                              ? 'bg-[#2a180c] text-[#fef7e6] shadow-xs'
+                              : 'bg-[#ede2cb] text-[#4b341e] hover:bg-[#e1d1b0]'
+                          }`}
+                        >
+                          Page {p.pageNumber}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Active Blog Page Content */}
+                  <article className="p-5 sm:p-7 space-y-5 flex-1">
+                    <figure className="rounded-2xl overflow-hidden border border-[#dfd2b7] bg-white shadow-sm">
+                      <img
+                        src={page.image}
+                        alt={page.imageCaption}
+                        className="w-full h-52 sm:h-60 object-cover"
+                      />
+                      <figcaption className="px-4 py-2 text-[11px] text-[#6d5238] bg-[#faf5ea] border-t border-[#ece1ca] italic">
+                        {page.imageCaption}
+                      </figcaption>
+                    </figure>
+
+                    <div className="space-y-3">
+                      <h5 className="font-serif text-lg sm:text-xl font-bold text-[#1f1208]">
+                        {page.title}
+                      </h5>
+                      {page.paragraphs.map((para, pi) => (
+                        <p key={pi} className="text-sm text-[#3d2917] leading-relaxed font-serif">
+                          {para}
+                        </p>
+                      ))}
+                    </div>
+
+                    <blockquote className="p-4 rounded-2xl bg-[#f5ecd8] border-l-4 border-[#9a6a1f] text-sm font-serif italic text-[#2a180c]">
+                      {page.highlightQuote}
+                    </blockquote>
+
+                    {/* Prev / Next Page Bar */}
+                    <div className="flex items-center justify-between pt-2 border-t border-[#e5dac2]">
+                      <button
+                        type="button"
+                        disabled={wingBlogPage === 0}
+                        onClick={() => setWingBlogPage((p) => Math.max(0, p - 1))}
+                        className="px-3.5 py-1.5 rounded-xl bg-[#ede2cb] hover:bg-[#e1d1b0] disabled:opacity-40 text-xs font-bold text-[#2c1a0c] flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed"
+                      >
+                        <ChevronLeft className="w-3.5 h-3.5" />
+                        <span>Previous Page</span>
+                      </button>
+                      <span className="text-xs font-mono text-[#7a5c3e]">
+                        Page {page.pageNumber} / {blog.pages.length}
+                      </span>
+                      <button
+                        type="button"
+                        disabled={wingBlogPage >= blog.pages.length - 1}
+                        onClick={() => setWingBlogPage((p) => Math.min(blog.pages.length - 1, p + 1))}
+                        className="px-3.5 py-1.5 rounded-xl bg-[#2a180c] hover:bg-[#3f2513] disabled:opacity-40 text-xs font-bold text-[#fef7e6] flex items-center gap-1 cursor-pointer disabled:cursor-not-allowed"
+                      >
+                        <span>Next Page</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    {/* Top 5 Websites to Learn More Section (Blog Footer) */}
+                    <section className="pt-4 border-t-2 border-[#e0d3b6] space-y-3">
+                      <div className="flex items-center justify-between">
+                        <h5 className="font-serif text-base font-bold text-[#1f1208] flex items-center gap-2">
+                          <Globe className="w-4 h-4 text-[#9a6a1f]" />
+                          <span>Top 5 Websites to Learn More ({blog.categoryName})</span>
+                        </h5>
+                        <span className="text-[10px] font-mono uppercase text-[#8c5d19] font-bold">
+                          Curated References
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        {blog.topWebsites.slice(0, 5).map((site, si) => (
+                          <a
+                            key={site.url}
+                            href={site.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="p-3 rounded-xl bg-white hover:bg-[#faf2e1] border border-[#e0d3b6] hover:border-[#9a6a1f] transition-all flex items-start justify-between gap-2 group"
+                          >
+                            <div className="min-w-0">
+                              <div className="text-xs font-bold text-[#1f1208] group-hover:text-[#8c5d19] flex items-center gap-1.5">
+                                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[#f2e6cc] text-[#6d4714]">
+                                  #{si + 1}
+                                </span>
+                                <span className="truncate">{site.name}</span>
+                              </div>
+                              <p className="text-[11px] text-[#5e442c] mt-1 leading-snug">
+                                {site.tagline}
+                              </p>
+                            </div>
+                            <ExternalLink className="w-3.5 h-3.5 text-[#8c5d19] shrink-0 mt-0.5" />
+                          </a>
+                        ))}
+                      </div>
+                    </section>
+                  </article>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
       {/* 6. STUDY BREAK EXPIRED MODAL */}
       {isBreakAlarmModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
@@ -4478,11 +5420,15 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({ onBackToStud
                 type="button"
                 onClick={() => {
                   setIsBreakAlarmModalOpen(false);
-                  if (onBackToStudy) onBackToStudy();
+                  if (onReturnToLastReadBook) {
+                    onReturnToLastReadBook();
+                  } else if (onBackToStudy) {
+                    onBackToStudy();
+                  }
                 }}
                 className="flex-1 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 text-xs font-bold shadow-md cursor-pointer"
               >
-                Resume Study Notes
+                Return to Read Book
               </button>
             </div>
           </div>

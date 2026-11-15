@@ -93,6 +93,9 @@ import {
   PenTool,
   RefreshCw,
   UploadCloud,
+  Lock,
+  Unlock,
+  SlidersHorizontal,
 } from 'lucide-react';
 import { Notebook, DesignId, MedicalBook } from '../../types';
 import { getDrivePreviewUrl } from '../../services/googleDriveService';
@@ -499,6 +502,133 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
     left: number;
     top: number;
   } | null>(null);
+
+  // Ruler Lines Customization (spacing, color via RoundColorColumnsPicker, line style)
+  const [rulerSpacingPx, setRulerSpacingPx] = useState<number>(() => {
+    try {
+      const s = Number(localStorage.getItem('achiev_note_ruler_spacing_v1'));
+      return Number.isFinite(s) && s >= 20 && s <= 48 ? s : 28;
+    } catch {
+      return 28;
+    }
+  });
+  const [rulerColor, setRulerColor] = useState<string>(() => {
+    try {
+      return localStorage.getItem('achiev_note_ruler_color_v1') || '#d6c7b0';
+    } catch {
+      return '#d6c7b0';
+    }
+  });
+  const [rulerStyle, setRulerStyle] = useState<'solid' | 'dotted' | 'dashed' | 'double'>(() => {
+    try {
+      const val = localStorage.getItem('achiev_note_ruler_style_v1');
+      if (val === 'dotted' || val === 'dashed' || val === 'double' || val === 'solid') return val;
+    } catch {}
+    return 'solid';
+  });
+  const [isRulerMenuOpen, setIsRulerMenuOpen] = useState<boolean>(false);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('achiev_note_ruler_spacing_v1', String(rulerSpacingPx));
+      localStorage.setItem('achiev_note_ruler_color_v1', rulerColor);
+      localStorage.setItem('achiev_note_ruler_style_v1', rulerStyle);
+    } catch {}
+  }, [rulerSpacingPx, rulerColor, rulerStyle]);
+
+  // Floating Custom Text Boxes on Note Sheet
+  interface NoteFloatingBox {
+    id: string;
+    x: number;
+    y: number;
+    width: number;
+    height: number;
+    text: string;
+    shape: 'rect' | 'rounded' | 'pill' | 'sticky' | 'banner';
+    bgColor: string;
+    textColor: string;
+    locked: boolean;
+  }
+  const boxesStorageKey = `achiev_note_boxes_v1_${notebook?.id || 'draft'}::${activePageIndex}`;
+  const [customBoxes, setCustomBoxes] = useState<NoteFloatingBox[]>(() => {
+    try {
+      const raw = localStorage.getItem(boxesStorageKey);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [activeTextBoxId, setActiveTextBoxId] = useState<string | null>(null);
+  const [boxColorPickerTarget, setBoxColorPickerTarget] = useState<{
+    boxId: string;
+    mode: 'bg' | 'text';
+  } | null>(null);
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(boxesStorageKey);
+      setCustomBoxes(raw ? JSON.parse(raw) : []);
+      setActiveTextBoxId(null);
+      setBoxColorPickerTarget(null);
+    } catch {
+      setCustomBoxes([]);
+    }
+  }, [boxesStorageKey]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(boxesStorageKey, JSON.stringify(customBoxes));
+    } catch {}
+  }, [boxesStorageKey, customBoxes]);
+
+  const handleAddTextBox = () => {
+    const newId = `tb-${Date.now()}`;
+    const newBox: NoteFloatingBox = {
+      id: newId,
+      x: 56 + ((customBoxes.length * 24) % 160),
+      y: 120 + ((customBoxes.length * 32) % 200),
+      width: 240,
+      height: 110,
+      text: 'Type key clinical pearl or callout...',
+      shape: 'rounded',
+      bgColor: '#FEF9C3',
+      textColor: '#1E293B',
+      locked: false,
+    };
+    setCustomBoxes((prev) => [...prev, newBox]);
+    setActiveTextBoxId(newId);
+    showToast('Text Box added — drag to position or lock');
+  };
+
+  // Selected Attached/Inline Image toolbar state (Lock Position + Move + Width + Delete)
+  const [selectedImgEl, setSelectedImgEl] = useState<HTMLImageElement | null>(null);
+  const [selectedImgRect, setSelectedImgRect] = useState<{ left: number; top: number } | null>(null);
+  const [selectedImgLocked, setSelectedImgLocked] = useState<boolean>(false);
+
+  const syncSelectedImgOverlay = useCallback((img: HTMLImageElement | null) => {
+    if (!img || !document.contains(img)) {
+      setSelectedImgEl(null);
+      setSelectedImgRect(null);
+      return;
+    }
+    const r = img.getBoundingClientRect();
+    setSelectedImgRect({
+      left: Math.max(12, Math.min(window.innerWidth - 280, r.left)),
+      top: Math.max(54, r.top - 46),
+    });
+    setSelectedImgLocked(img.dataset.locked === 'true');
+  }, []);
+
+  const clearSelectedImg = useCallback(() => {
+    if (editorRef.current) {
+      editorRef.current.querySelectorAll('img[data-img-selected="true"]').forEach((el) => {
+        el.removeAttribute('data-img-selected');
+      });
+    }
+    setSelectedImgEl(null);
+    setSelectedImgRect(null);
+  }, []);
+
   const ribbonScrollRef = useRef<HTMLDivElement | null>(null);
   const [isAddToolsOpen, setIsAddToolsOpen] = useState(false);
   const [pinnedRibbonTools, setPinnedRibbonTools] = useState<string[]>(() => {
@@ -1371,7 +1501,11 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
     if (res) {
       setResources((prev) => [...prev, res!]);
       showToast(`Attached ${res.title}`);
-      if (attachOpenRightAway) {
+      if (attachType === 'image' && uploadedFileUrl && uploadedFileUrl !== '#') {
+        insertHtmlAtCursor(
+          `<img src="${uploadedFileUrl}" alt="${res.title.replace(/"/g, '&quot;')}" data-locked="false" style="width: 320px; max-width: 100%; border-radius: 10px; display: block; margin: 10px 0; position: relative;" /><p><br></p>`
+        );
+      } else if (attachOpenRightAway) {
         handleOpenResource(res);
       }
     }
@@ -1665,6 +1799,22 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
         showToast('Key pearl callout deleted');
       }
       return;
+    }
+
+    // Image selection inside note canvas (for Lock Position, Drag & Delete Picture)
+    if (target.tagName === 'IMG') {
+      const img = target as HTMLImageElement;
+      if (editorRef.current) {
+        editorRef.current.querySelectorAll('img[data-img-selected="true"]').forEach((el) => {
+          if (el !== img) el.removeAttribute('data-img-selected');
+        });
+      }
+      img.setAttribute('data-img-selected', 'true');
+      setSelectedImgEl(img);
+      syncSelectedImgOverlay(img);
+      return;
+    } else if (selectedImgEl) {
+      clearSelectedImg();
     }
 
     // Active Table & Cell detection
@@ -1974,6 +2124,35 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
 
   const handleEditorPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     const target = e.target as HTMLElement;
+    if (target.tagName === 'IMG') {
+      const img = target as HTMLImageElement;
+      if (img.dataset.locked !== 'true') {
+        e.preventDefault();
+        img.style.position = 'relative';
+        const origX = parseFloat(img.dataset.offsetX || '0') || 0;
+        const origY = parseFloat(img.dataset.offsetY || '0') || 0;
+        const startX = e.clientX;
+        const startY = e.clientY;
+        document.body.style.cursor = 'grabbing';
+        const onImgMove = (ev: PointerEvent) => {
+          const nx = Math.round(origX + (ev.clientX - startX));
+          const ny = Math.round(origY + (ev.clientY - startY));
+          img.dataset.offsetX = String(nx);
+          img.dataset.offsetY = String(ny);
+          img.style.transform = `translate(${nx}px, ${ny}px)`;
+          syncSelectedImgOverlay(img);
+        };
+        const onImgUp = () => {
+          document.body.style.cursor = '';
+          window.removeEventListener('pointermove', onImgMove);
+          window.removeEventListener('pointerup', onImgUp);
+          triggerSave();
+        };
+        window.addEventListener('pointermove', onImgMove);
+        window.addEventListener('pointerup', onImgUp);
+      }
+      return;
+    }
     const hit = detectTableHitZone(e, target);
     if (!hit) return;
 
@@ -3391,6 +3570,104 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                   <AlignJustify className="w-3.5 h-3.5" />
                 </button>
 
+                <span className="an-vsep" />
+                {/* Insert Draggable / Lockable Floating Text Box */}
+                <button
+                  type="button"
+                  className="an-ribbon-feat compact shrink-0"
+                  onClick={handleAddTextBox}
+                  title="Insert customizable Text Box (Lockable, Resizable, Shape & Color)"
+                >
+                  <Square className="w-3.5 h-3.5 text-[#A47C43]" />
+                  <span>Text Box</span>
+                </button>
+
+                {/* Ruler Lines Customization (Line Spacing, Color Picker, Line Style) */}
+                <div className="relative shrink-0">
+                  <button
+                    type="button"
+                    className={`an-ribbon-feat compact shrink-0 ${isRulerMenuOpen ? 'border-[#A47C43] bg-[#A47C43]/15' : ''}`}
+                    onClick={() => setIsRulerMenuOpen((v) => !v)}
+                    title="Customize Ruler Lines (Spacing, Color & Solid/Dotted/Dashed/Double)"
+                  >
+                    <SlidersHorizontal className="w-3.5 h-3.5 text-[#A47C43]" />
+                    <span>Ruler</span>
+                  </button>
+                  {isRulerMenuOpen && (
+                    <div
+                      className="fixed z-50 w-64 p-3.5 rounded-2xl bg-[var(--an-paper)] border border-[var(--an-line)] shadow-2xl space-y-3"
+                      style={{ top: 108, right: 'max(16px, 22vw)' }}
+                      onMouseDown={(e) => e.stopPropagation()}
+                    >
+                      <div className="flex items-center justify-between pb-1.5 border-b border-[var(--an-line)]">
+                        <span className="text-xs font-bold text-[var(--an-ink)]">Ruler Lines Settings</span>
+                        <button
+                          type="button"
+                          onClick={() => setIsRulerMenuOpen(false)}
+                          className="p-0.5 rounded hover:bg-black/10 cursor-pointer"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      <div className="space-y-1">
+                        <div className="flex items-center justify-between text-[11px] font-semibold">
+                          <span>Line Spacing</span>
+                          <span className="font-mono">{rulerSpacingPx}px</span>
+                        </div>
+                        <input
+                          type="range"
+                          min={20}
+                          max={48}
+                          value={rulerSpacingPx}
+                          onChange={(e) => {
+                            setPaperStyle('ruled');
+                            setRulerSpacingPx(Number(e.target.value));
+                          }}
+                          className="w-full accent-[#A47C43] cursor-pointer"
+                        />
+                      </div>
+
+                      <div className="space-y-1">
+                        <span className="text-[11px] font-semibold block">Line Style</span>
+                        <div className="grid grid-cols-4 gap-1">
+                          {(['solid', 'dotted', 'dashed', 'double'] as const).map((st) => (
+                            <button
+                              key={st}
+                              type="button"
+                              onClick={() => {
+                                setPaperStyle('ruled');
+                                setRulerStyle(st);
+                              }}
+                              className={`py-1 rounded-lg text-[10px] font-bold capitalize border cursor-pointer ${
+                                rulerStyle === st
+                                  ? 'bg-[#A47C43] text-white border-[#A47C43]'
+                                  : 'bg-[var(--an-page)] border-[var(--an-line)] text-[var(--an-ink)]'
+                              }`}
+                            >
+                              {st}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <span className="text-[11px] font-semibold block">Ruler Line Color</span>
+                        <RoundColorColumnsPicker
+                          columns={UNIFIED_COLOR_COLUMNS}
+                          selectedColor={rulerColor}
+                          onSelectColor={(c) => {
+                            setPaperStyle('ruled');
+                            setRulerColor(c);
+                          }}
+                          showStandardRow
+                          swatchSizeClass="w-4 h-4"
+                        />
+                      </div>
+                    </div>
+                  )}
+                </div>
+
                 {/* User-Pinned Custom Tools from "Add tools" */}
                 {pinnedRibbonTools.length > 0 && <span className="an-vsep" />}
                 {pinnedRibbonTools.map((tid) => {
@@ -3591,6 +3868,17 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                     : hoverSheetEdge === 'bottom-left'
                     ? 'nesw-resize'
                     : undefined;
+                const h = Math.max(20, rulerSpacingPx);
+                const encColor = encodeURIComponent(rulerColor);
+                const svgLine =
+                  rulerStyle === 'dotted'
+                    ? `<line x1='0' y1='${h - 1}' x2='100' y2='${h - 1}' stroke='${encColor}' stroke-width='1.4' stroke-dasharray='2 5' stroke-linecap='round'/>`
+                    : rulerStyle === 'dashed'
+                      ? `<line x1='0' y1='${h - 1}' x2='100' y2='${h - 1}' stroke='${encColor}' stroke-width='1.3' stroke-dasharray='8 5'/>`
+                      : rulerStyle === 'double'
+                        ? `<line x1='0' y1='${h - 4}' x2='100' y2='${h - 4}' stroke='${encColor}' stroke-width='1'/><line x1='0' y1='${h - 1}' x2='100' y2='${h - 1}' stroke='${encColor}' stroke-width='1'/>`
+                        : `<line x1='0' y1='${h - 1}' x2='100' y2='${h - 1}' stroke='${encColor}' stroke-width='1.1'/>`;
+                const rulerSvgUri = `url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='${h}'>${svgLine}</svg>")`;
                 return (
               <article
                 className={`an-sheet ${isDraggingSheetWidth ? 'is-sheet-resizing' : ''}`}
@@ -3605,6 +3893,9 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                   minWidth: '340px',
                   cursor: sheetCursor,
                   ['--an-nf' as string]: activeFontObj.family,
+                  ['--lh' as string]: `${h}px`,
+                  ['--an-rule-bg' as string]: rulerSvgUri,
+                  ['--an-rule-size' as string]: `100px ${h}px`,
                 } as React.CSSProperties}
                 onMouseMove={(e) => {
                   if (isDraggingSheetWidth) return;
@@ -3870,9 +4161,321 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                   onMouseUp={handleCanvasMouseUp}
                   onBlur={saveRange}
                 />
+
+                {/* Draggable, Resizable, Lockable Custom Text Boxes Overlay */}
+                {customBoxes.map((box) => {
+                  const isActive = activeTextBoxId === box.id;
+                  return (
+                    <div
+                      key={box.id}
+                      className={`an-floating-textbox shape-${box.shape} ${isActive ? 'active' : ''}`}
+                      style={{
+                        left: box.x,
+                        top: box.y,
+                        width: box.width,
+                        minHeight: box.height,
+                        backgroundColor: box.bgColor,
+                        color: box.textColor,
+                        cursor: box.locked ? 'default' : 'move',
+                      }}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveTextBoxId(box.id);
+                      }}
+                      onPointerDown={(e) => {
+                        const targetEl = e.target as HTMLElement;
+                        if (
+                          targetEl.closest('[contenteditable="true"]') ||
+                          targetEl.closest('.an-floating-textbox-controls') ||
+                          targetEl.closest('.an-textbox-resize') ||
+                          box.locked
+                        ) {
+                          return;
+                        }
+                        e.preventDefault();
+                        setActiveTextBoxId(box.id);
+                        const startX = e.clientX;
+                        const startY = e.clientY;
+                        const origX = box.x;
+                        const origY = box.y;
+                        const onMove = (ev: PointerEvent) => {
+                          const nx = Math.max(8, Math.round(origX + (ev.clientX - startX)));
+                          const ny = Math.max(40, Math.round(origY + (ev.clientY - startY)));
+                          setCustomBoxes((prev) =>
+                            prev.map((b) => (b.id === box.id ? { ...b, x: nx, y: ny } : b))
+                          );
+                        };
+                        const onUp = () => {
+                          window.removeEventListener('pointermove', onMove);
+                          window.removeEventListener('pointerup', onUp);
+                        };
+                        window.addEventListener('pointermove', onMove);
+                        window.addEventListener('pointerup', onUp);
+                      }}
+                    >
+                      {isActive && (
+                        <div
+                          className="an-floating-textbox-controls"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setCustomBoxes((prev) =>
+                                prev.map((b) => (b.id === box.id ? { ...b, locked: !b.locked } : b))
+                              )
+                            }
+                            className={`px-1.5 py-0.5 rounded text-[10px] font-bold flex items-center gap-1 cursor-pointer ${
+                              box.locked ? 'bg-amber-600 text-white' : 'bg-black/10 text-[var(--an-ink)]'
+                            }`}
+                            title={box.locked ? 'Unlock Text Box Position' : 'Lock Text Box Position'}
+                          >
+                            {box.locked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
+                            <span>{box.locked ? 'Locked' : 'Lock'}</span>
+                          </button>
+
+                          {/* Size Presets S / M / L / XL */}
+                          {[
+                            { label: 'S', w: 175, h: 80 },
+                            { label: 'M', w: 250, h: 115 },
+                            { label: 'L', w: 340, h: 155 },
+                            { label: 'XL', w: 460, h: 200 },
+                          ].map((sz) => (
+                            <button
+                              key={sz.label}
+                              type="button"
+                              onClick={() =>
+                                setCustomBoxes((prev) =>
+                                  prev.map((b) => (b.id === box.id ? { ...b, width: sz.w, height: sz.h } : b))
+                                )
+                              }
+                              className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold hover:bg-black/10 cursor-pointer"
+                              title={`Set size ${sz.label}`}
+                            >
+                              {sz.label}
+                            </button>
+                          ))}
+
+                          {/* Shape Selector */}
+                          <select
+                            value={box.shape}
+                            onChange={(e) =>
+                              setCustomBoxes((prev) =>
+                                prev.map((b) =>
+                                  b.id === box.id ? { ...b, shape: e.target.value as NoteFloatingBox['shape'] } : b
+                                )
+                              )
+                            }
+                            className="text-[10px] font-semibold bg-transparent border border-[var(--an-line)] rounded px-1 py-0.5 cursor-pointer"
+                            title="Box Shape"
+                          >
+                            <option value="rect">Rect</option>
+                            <option value="rounded">Rounded</option>
+                            <option value="pill">Pill</option>
+                            <option value="sticky">Sticky</option>
+                            <option value="banner">Banner</option>
+                          </select>
+
+                          {/* Round Color Columns Triggers for Bg & Text */}
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setBoxColorPickerTarget((prev) =>
+                                prev?.boxId === box.id && prev.mode === 'bg'
+                                  ? null
+                                  : { boxId: box.id, mode: 'bg' }
+                              )
+                            }
+                            className="px-1.5 py-0.5 rounded text-[10px] font-bold border border-[var(--an-line)] flex items-center gap-1 cursor-pointer"
+                            title="Box Background Color"
+                          >
+                            <span
+                              className="w-2.5 h-2.5 rounded-full border border-black/20"
+                              style={{ backgroundColor: box.bgColor }}
+                            />
+                            <span>Bg</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setBoxColorPickerTarget((prev) =>
+                                prev?.boxId === box.id && prev.mode === 'text'
+                                  ? null
+                                  : { boxId: box.id, mode: 'text' }
+                              )
+                            }
+                            className="px-1.5 py-0.5 rounded text-[10px] font-bold border border-[var(--an-line)] flex items-center gap-1 cursor-pointer"
+                            title="Box Text Color"
+                          >
+                            <span
+                              className="w-2.5 h-2.5 rounded-full border border-black/20"
+                              style={{ backgroundColor: box.textColor }}
+                            />
+                            <span>Txt</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCustomBoxes((prev) => prev.filter((b) => b.id !== box.id));
+                              if (activeTextBoxId === box.id) setActiveTextBoxId(null);
+                              setBoxColorPickerTarget(null);
+                            }}
+                            className="p-1 rounded text-red-600 hover:bg-red-500/15 cursor-pointer"
+                            title="Delete Text Box"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+
+                          {boxColorPickerTarget?.boxId === box.id && (
+                            <div
+                              className="absolute left-0 top-full mt-1.5 p-2.5 rounded-xl bg-[var(--an-paper)] border border-[var(--an-line)] shadow-2xl z-50"
+                              onMouseDown={(e) => e.stopPropagation()}
+                            >
+                              <RoundColorColumnsPicker
+                                columns={
+                                  boxColorPickerTarget.mode === 'bg'
+                                    ? UNIFIED_HIGHLIGHT_COLUMNS
+                                    : UNIFIED_COLOR_COLUMNS
+                                }
+                                selectedColor={
+                                  boxColorPickerTarget.mode === 'bg' ? box.bgColor : box.textColor
+                                }
+                                onSelectColor={(col) => {
+                                  setCustomBoxes((prev) =>
+                                    prev.map((b) =>
+                                      b.id === box.id
+                                        ? boxColorPickerTarget.mode === 'bg'
+                                          ? { ...b, bgColor: col }
+                                          : { ...b, textColor: col }
+                                        : b
+                                    )
+                                  );
+                                  setBoxColorPickerTarget(null);
+                                }}
+                                showStandardRow={boxColorPickerTarget.mode === 'text'}
+                                swatchSizeClass="w-4 h-4"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      )}
+
+                      <div
+                        contentEditable={!box.locked}
+                        suppressContentEditableWarning
+                        onBlur={(e) => {
+                          const nextTxt = e.currentTarget.textContent || '';
+                          setCustomBoxes((prev) =>
+                            prev.map((b) => (b.id === box.id ? { ...b, text: nextTxt } : b))
+                          );
+                        }}
+                        className="outline-none text-xs sm:text-sm leading-relaxed w-full h-full cursor-text"
+                      >
+                        {box.text}
+                      </div>
+
+                      {!box.locked && (
+                        <div
+                          className="an-textbox-resize"
+                          title="Drag corner to resize Text Box"
+                          onPointerDown={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            const sx = e.clientX;
+                            const sy = e.clientY;
+                            const ow = box.width;
+                            const oh = box.height;
+                            const onMove = (ev: PointerEvent) => {
+                              const nw = Math.max(140, Math.min(620, Math.round(ow + (ev.clientX - sx))));
+                              const nh = Math.max(60, Math.min(480, Math.round(oh + (ev.clientY - sy))));
+                              setCustomBoxes((prev) =>
+                                prev.map((b) => (b.id === box.id ? { ...b, width: nw, height: nh } : b))
+                              );
+                            };
+                            const onUp = () => {
+                              window.removeEventListener('pointermove', onMove);
+                              window.removeEventListener('pointerup', onUp);
+                            };
+                            window.addEventListener('pointermove', onMove);
+                            window.addEventListener('pointerup', onUp);
+                          }}
+                        />
+                      )}
+                    </div>
+                  );
+                })}
               </article>
                 );
               })()}
+
+              {/* Selected Attached/Inline Picture Action Bar (Lock Position, Size, Delete Picture) */}
+              {selectedImgEl && selectedImgRect && (
+                <div
+                  className="an-img-float-bar"
+                  style={{ left: selectedImgRect.left, top: selectedImgRect.top }}
+                  onMouseDown={(e) => e.preventDefault()}
+                >
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const nextLocked = !selectedImgLocked;
+                      selectedImgEl.dataset.locked = String(nextLocked);
+                      setSelectedImgLocked(nextLocked);
+                      triggerSave();
+                      showToast(nextLocked ? 'Picture position locked' : 'Picture unlocked — drag to reposition');
+                    }}
+                    className={`px-2 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 cursor-pointer ${
+                      selectedImgLocked ? 'bg-amber-600 text-white' : 'bg-black/10'
+                    }`}
+                    title={selectedImgLocked ? 'Unlock Picture Position' : 'Lock Picture Position'}
+                  >
+                    {selectedImgLocked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
+                    <span>{selectedImgLocked ? 'Locked' : 'Lock Pos'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const cur = selectedImgEl.getBoundingClientRect().width;
+                      selectedImgEl.style.width = `${Math.max(110, Math.round(cur - 40))}px`;
+                      syncSelectedImgOverlay(selectedImgEl);
+                      triggerSave();
+                    }}
+                    className="px-2 py-1 rounded-lg bg-black/10 text-[11px] font-bold cursor-pointer"
+                    title="Decrease image width"
+                  >
+                    Size -
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const cur = selectedImgEl.getBoundingClientRect().width;
+                      selectedImgEl.style.width = `${Math.min(720, Math.round(cur + 40))}px`;
+                      syncSelectedImgOverlay(selectedImgEl);
+                      triggerSave();
+                    }}
+                    className="px-2 py-1 rounded-lg bg-black/10 text-[11px] font-bold cursor-pointer"
+                    title="Increase image width"
+                  >
+                    Size +
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      selectedImgEl.remove();
+                      clearSelectedImg();
+                      triggerSave();
+                      showToast('Picture deleted from note');
+                    }}
+                    className="px-2 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold flex items-center gap-1 cursor-pointer"
+                    title="Delete Picture"
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete</span>
+                  </button>
+                </div>
+              )}
 
               {/* Floating Canvas Context Menu for Text Selection */}
               {canvasSelection.visible && (
@@ -4444,7 +5047,17 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                         const file = e.target.files?.[0];
                         if (file) {
                           setUploadedFileName(file.name);
-                          setUploadedFileUrl(URL.createObjectURL(file));
+                          if (attachType === 'image') {
+                            const reader = new FileReader();
+                            reader.onload = () => {
+                              if (typeof reader.result === 'string') {
+                                setUploadedFileUrl(reader.result);
+                              }
+                            };
+                            reader.readAsDataURL(file);
+                          } else {
+                            setUploadedFileUrl(URL.createObjectURL(file));
+                          }
                         }
                       }}
                     />

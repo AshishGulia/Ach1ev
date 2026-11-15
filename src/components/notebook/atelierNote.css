@@ -1725,8 +1725,8 @@ mark.hit {
 }
 
 .an-sheet[data-paper="ruled"] .an-ed {
-  background-image: repeating-linear-gradient(to bottom, transparent 0 calc(var(--lh) - 1px), var(--an-rule) calc(var(--lh) - 1px) var(--lh));
-  background-size: 100% var(--lh);
+  background-image: var(--an-rule-bg, repeating-linear-gradient(to bottom, transparent 0 calc(var(--lh) - 1px), var(--an-rule) calc(var(--lh) - 1px) var(--lh)));
+  background-size: var(--an-rule-size, 100% var(--lh));
   background-position: 0 -2px;
   background-repeat: repeat-y;
 }
@@ -3031,31 +3031,31 @@ html.dark[data-design="3"] .atelier-note-root,
 
 html[data-design="4"] .atelier-note-root,
 .atelier-note-root[data-atelier-theme="4"] {
-  --an-bg: rgba(234, 251, 252, 0.18);
-  --an-bg2: rgba(224, 245, 248, 0.68);
-  --an-paper: rgba(246, 253, 254, 0.88);
-  --an-page: #f7feff;
-  --an-ink: #2b1f1c;
-  --an-muted: #58423e;
-  --an-line: #98d9e2;
-  --an-brass: #58423e;
-  --an-sage: #0893a6;
-  --an-sage-soft: rgba(33, 218, 239, 0.15);
-  --an-brass-soft: rgba(88, 66, 62, 0.14);
+  --an-bg: rgba(241, 245, 249, 0.35);
+  --an-bg2: rgba(226, 232, 240, 0.78);
+  --an-paper: rgba(248, 250, 252, 0.92);
+  --an-page: #f8fafc;
+  --an-ink: #0f172a;
+  --an-muted: #475569;
+  --an-line: #cbd5e1;
+  --an-brass: #2563eb;
+  --an-sage: #1d4ed8;
+  --an-sage-soft: rgba(37, 99, 235, 0.14);
+  --an-brass-soft: rgba(59, 130, 246, 0.14);
 }
 html.dark[data-design="4"] .atelier-note-root,
 .dark .atelier-note-root[data-atelier-theme="4"] {
-  --an-bg: rgba(18, 13, 12, 0.26);
-  --an-bg2: rgba(26, 19, 17, 0.82);
-  --an-paper: rgba(34, 25, 23, 0.90);
-  --an-page: #1d1412;
-  --an-ink: #e9fbfd;
-  --an-muted: #c6b0ab;
-  --an-line: #6e524c;
-  --an-brass: #d4a373;
-  --an-sage: #21daef;
-  --an-sage-soft: rgba(33, 218, 239, 0.18);
-  --an-brass-soft: rgba(88, 66, 62, 0.24);
+  --an-bg: rgba(19, 22, 28, 0.35);
+  --an-bg2: rgba(26, 30, 38, 0.86);
+  --an-paper: rgba(31, 36, 45, 0.92);
+  --an-page: #181c23;
+  --an-ink: #f1f5f9;
+  --an-muted: #94a3b8;
+  --an-line: #334155;
+  --an-brass: #3b82f6;
+  --an-sage: #60a5fa;
+  --an-sage-soft: rgba(59, 130, 246, 0.18);
+  --an-brass-soft: rgba(96, 165, 250, 0.16);
 }
 
 html[data-design="5"] .atelier-note-root,
@@ -3096,3 +3096,81 @@ html[data-design] .atelier-note-root .an-sheet,
 html[data-design] .atelier-note-root .an-card {
   box-shadow: 0 22px 44px -26px rgba(0, 0, 0, 0.35);
 }
+
+/* Floating Text Box on Note Sheet */
+.an-floating-textbox {
+  position: absolute;
+  z-index: 28;
+  min-width: 140px;
+  min-height: 60px;
+  padding: 10px 12px;
+  box-shadow: 0 10px 24px -10px rgba(0, 0, 0, 0.26);
+  border: 1.5px solid rgba(164, 124, 67, 0.38);
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+.an-floating-textbox.active {
+  border-color: var(--an-brass);
+  box-shadow: 0 14px 30px -10px rgba(0, 0, 0, 0.35), 0 0 0 2px var(--an-brass-soft);
+  z-index: 34;
+}
+.an-floating-textbox.shape-rect { border-radius: 3px; }
+.an-floating-textbox.shape-rounded { border-radius: 14px; }
+.an-floating-textbox.shape-pill { border-radius: 28px; padding: 12px 20px; }
+.an-floating-textbox.shape-sticky {
+  border-radius: 2px 14px 2px 14px;
+  box-shadow: 4px 10px 18px -6px rgba(0, 0, 0, 0.32);
+}
+.an-floating-textbox.shape-banner {
+  border-radius: 10px;
+  border-left: 5px solid var(--an-brass);
+}
+.an-floating-textbox-controls {
+  position: absolute;
+  top: -42px;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 7px;
+  border-radius: 11px;
+  background: var(--an-paper);
+  border: 1px solid var(--an-line);
+  box-shadow: 0 10px 24px -6px rgba(0, 0, 0, 0.32);
+  z-index: 42;
+  white-space: nowrap;
+}
+.an-textbox-resize {
+  position: absolute;
+  right: 3px;
+  bottom: 3px;
+  width: 12px;
+  height: 12px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  opacity: 0.48;
+  cursor: nwse-resize;
+}
+.an-ed img {
+  cursor: pointer;
+  transition: outline 0.12s ease, box-shadow 0.15s ease;
+}
+.an-ed img[data-img-selected="true"] {
+  outline: 2.5px solid var(--an-brass);
+  outline-offset: 2px;
+  box-shadow: 0 12px 26px -8px rgba(0, 0, 0, 0.35);
+}
+.an-img-float-bar {
+  position: fixed;
+  z-index: 95;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 9px;
+  border-radius: 12px;
+  background: var(--an-paper);
+  color: var(--an-ink);
+  border: 1px solid var(--an-line);
+  box-shadow: 0 14px 32px -8px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(10px);
+}
+

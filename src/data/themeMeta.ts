@@ -262,44 +262,44 @@ const kabulLightWall = svgUri(`
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
   <defs>
     <linearGradient id="kblBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#e8fbfd"/>
-      <stop offset="52%" stop-color="#d7f6fa"/>
-      <stop offset="100%" stop-color="#ece2df"/>
+      <stop offset="0%" stop-color="#f1f5f9"/>
+      <stop offset="52%" stop-color="#e2e8f0"/>
+      <stop offset="100%" stop-color="#dbeafe"/>
     </linearGradient>
     <radialGradient id="kblGlow" cx="78%" cy="22%" r="48%">
-      <stop offset="0%" stop-color="#21daef" stop-opacity="0.34"/>
-      <stop offset="60%" stop-color="#58423e" stop-opacity="0.10"/>
-      <stop offset="100%" stop-color="#e8fbfd" stop-opacity="0"/>
+      <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.22"/>
+      <stop offset="60%" stop-color="#64748b" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#f1f5f9" stop-opacity="0"/>
     </radialGradient>
     <filter id="kblBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="24"/></filter>
   </defs>
   <rect width="1600" height="1000" fill="url(#kblBg)"/>
   <rect width="1600" height="1000" fill="url(#kblGlow)"/>
-  <path d="M-80 780 C300 540 700 790 1120 535 C1380 380 1540 490 1700 390 L1700 1060 L-80 1060 Z" fill="#58423e" opacity="0.18"/>
-  <path d="M-50 470 C360 350 760 510 1180 360 C1400 282 1540 340 1680 290" fill="none" stroke="#21daef" stroke-width="2.4" opacity="0.45"/>
-  <ellipse cx="380" cy="260" rx="320" ry="165" transform="rotate(-16 380 260)" fill="#21daef" opacity="0.18" filter="url(#kblBlur)"/>
+  <path d="M-80 780 C300 540 700 790 1120 535 C1380 380 1540 490 1700 390 L1700 1060 L-80 1060 Z" fill="#475569" opacity="0.12"/>
+  <path d="M-50 470 C360 350 760 510 1180 360 C1400 282 1540 340 1680 290" fill="none" stroke="#2563eb" stroke-width="2.4" opacity="0.34"/>
+  <ellipse cx="380" cy="260" rx="320" ry="165" transform="rotate(-16 380 260)" fill="#3b82f6" opacity="0.14" filter="url(#kblBlur)"/>
 </svg>`);
 
 const kabulDarkWall = svgUri(`
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
   <defs>
     <linearGradient id="kbdBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#110b0a"/>
-      <stop offset="56%" stop-color="#231816"/>
-      <stop offset="100%" stop-color="#0b0706"/>
+      <stop offset="0%" stop-color="#111419"/>
+      <stop offset="56%" stop-color="#1b2029"/>
+      <stop offset="100%" stop-color="#0d1015"/>
     </linearGradient>
     <radialGradient id="kbdTurq" cx="76%" cy="28%" r="46%">
-      <stop offset="0%" stop-color="#21daef" stop-opacity="0.32"/>
-      <stop offset="55%" stop-color="#58423e" stop-opacity="0.28"/>
-      <stop offset="100%" stop-color="#110b0a" stop-opacity="0"/>
+      <stop offset="0%" stop-color="#3b82f6" stop-opacity="0.28"/>
+      <stop offset="55%" stop-color="#334155" stop-opacity="0.26"/>
+      <stop offset="100%" stop-color="#111419" stop-opacity="0"/>
     </radialGradient>
     <filter id="kbdBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="28"/></filter>
   </defs>
   <rect width="1600" height="1000" fill="url(#kbdBg)"/>
   <rect width="1600" height="1000" fill="url(#kbdTurq)"/>
-  <path d="M-80 740 C300 475 680 760 1080 505 C1340 345 1500 460 1700 335 L1700 1060 L-80 1060 Z" fill="#58423e" opacity="0.52"/>
-  <path d="M-40 520 C360 390 740 540 1160 380 C1400 288 1540 345 1680 280" fill="none" stroke="#21daef" stroke-width="2" opacity="0.36"/>
-  <ellipse cx="340" cy="240" rx="340" ry="180" transform="rotate(-19 340 240)" fill="#58423e" opacity="0.46" filter="url(#kbdBlur)"/>
+  <path d="M-80 740 C300 475 680 760 1080 505 C1340 345 1500 460 1700 335 L1700 1060 L-80 1060 Z" fill="#1e293b" opacity="0.54"/>
+  <path d="M-40 520 C360 390 740 540 1160 380 C1400 288 1540 345 1680 280" fill="none" stroke="#60a5fa" stroke-width="2" opacity="0.30"/>
+  <ellipse cx="340" cy="240" rx="340" ry="180" transform="rotate(-19 340 240)" fill="#2563eb" opacity="0.22" filter="url(#kbdBlur)"/>
 </svg>`);
 
 const emeraldGoldLightWall = svgUri(`
@@ -597,78 +597,78 @@ export const THEME_META_MAP: Record<ThemeId, ThemeMeta> = {
   },
   '4': {
     id: '4',
-    name: 'Turquoise & Kabul Loft',
-    tagline: 'Bright Turquoise #21DAEF · Kabul Bronze #58423E · Architectural Cove Lighting',
-    lightBg: '#eafbfc',
-    lightSurface: 'rgba(246, 253, 254, 0.88)',
-    lightRaised: 'rgba(235, 227, 224, 0.90)',
-    lightHeader: 'rgba(232, 250, 252, 0.88)',
-    lightBorder: '#98d9e2',
-    lightInk: '#2b1f1c',
-    lightMuted: '#58423e',
-    lightAccent: '#0893a6',
-    lightAccentSoft: 'rgba(33, 218, 239, 0.16)',
-    darkBg: '#120d0c',
-    darkSurface: 'rgba(34, 25, 23, 0.90)',
-    darkRaised: 'rgba(64, 48, 44, 0.92)',
-    darkHeader: 'rgba(24, 18, 16, 0.92)',
-    darkBorder: '#6e524c',
-    darkInk: '#e9fbfd',
-    darkMuted: '#c6b0ab',
-    darkAccent: '#21daef',
-    darkAccentSoft: 'rgba(33, 218, 239, 0.18)',
+    name: 'Slate & Cobalt Loft',
+    tagline: 'Dark Slate Grey #1F242D · Cobalt Blue #2563EB / #3B82F6 · Cool Ice Mist Light',
+    lightBg: '#eef2f7',
+    lightSurface: 'rgba(248, 250, 252, 0.90)',
+    lightRaised: 'rgba(226, 232, 240, 0.92)',
+    lightHeader: 'rgba(241, 245, 249, 0.90)',
+    lightBorder: '#cbd5e1',
+    lightInk: '#1e293b',
+    lightMuted: '#475569',
+    lightAccent: '#2563eb',
+    lightAccentSoft: 'rgba(37, 99, 235, 0.14)',
+    darkBg: '#13161c',
+    darkSurface: 'rgba(24, 28, 36, 0.92)',
+    darkRaised: 'rgba(36, 42, 54, 0.94)',
+    darkHeader: 'rgba(19, 22, 28, 0.92)',
+    darkBorder: '#374151',
+    darkInk: '#f1f5f9',
+    darkMuted: '#94a3b8',
+    darkAccent: '#3b82f6',
+    darkAccentSoft: 'rgba(59, 130, 246, 0.20)',
     shapeName: 'Architectural Loft',
     buttonRadius: '15px 15px 15px 4px',
     lightWallpaperUri: kabulLightWall,
     darkWallpaperUri: kabulDarkWall,
     sidebar: {
       light: {
-        railBg: 'linear-gradient(180deg, rgba(235,252,253,0.90) 0%, rgba(224,247,250,0.88) 58%, rgba(236,228,225,0.92) 100%)',
-        railBorder: '#98d9e2',
-        railText: '#2b1f1c',
-        brandSectionBg: 'linear-gradient(155deg, rgba(246,253,254,0.90) 0%, rgba(215,247,250,0.80) 100%)',
-        navSectionBg: 'linear-gradient(180deg, rgba(232,250,252,0.76) 0%, rgba(236,229,226,0.72) 100%)',
-        thoughtSectionBg: 'linear-gradient(155deg, rgba(225,249,252,0.86) 0%, rgba(235,224,220,0.78) 100%)',
-        footerSectionBg: 'linear-gradient(180deg, rgba(236,228,225,0.86) 0%, rgba(222,211,207,0.92) 100%)',
-        sectionBorder: 'rgba(88,66,62,0.24)',
-        activeBtnBg: 'linear-gradient(145deg, #0ea4b8 0%, #087a8a 52%, #58423e 100%)',
-        activeBtnBorder: '#21daef',
+        railBg: 'linear-gradient(180deg, rgba(248,250,252,0.92) 0%, rgba(241,245,249,0.90) 58%, rgba(226,232,240,0.94) 100%)',
+        railBorder: '#cbd5e1',
+        railText: '#1e293b',
+        brandSectionBg: 'linear-gradient(155deg, rgba(255,255,255,0.92) 0%, rgba(226,232,240,0.82) 100%)',
+        navSectionBg: 'linear-gradient(180deg, rgba(241,245,249,0.78) 0%, rgba(226,232,240,0.72) 100%)',
+        thoughtSectionBg: 'linear-gradient(155deg, rgba(239,246,255,0.88) 0%, rgba(226,232,240,0.80) 100%)',
+        footerSectionBg: 'linear-gradient(180deg, rgba(241,245,249,0.88) 0%, rgba(226,232,240,0.94) 100%)',
+        sectionBorder: 'rgba(51,65,85,0.18)',
+        activeBtnBg: 'linear-gradient(145deg, #2563eb 0%, #1d4ed8 54%, #1e3a8a 100%)',
+        activeBtnBorder: '#60a5fa',
         activeBtnText: '#ffffff',
-        idleBtnBg: 'rgba(255,255,255,0.44)',
-        idleBtnText: '#382a27',
-        activeIconColor: '#d9fbff',
-        idleIconColor: '#58423e',
-        toggleBtnBg: 'linear-gradient(180deg, rgba(235,252,253,0.92) 0%, rgba(224,238,240,0.92) 100%)',
-        toggleBtnText: '#382a27',
-        toggleBtnBorder: '#98d9e2',
-        mutedLabelColor: '#6d544f',
-        thoughtColor: '#2b1f1c',
-        authorColor: '#088d9e',
+        idleBtnBg: 'rgba(255,255,255,0.52)',
+        idleBtnText: '#1e293b',
+        activeIconColor: '#dbeafe',
+        idleIconColor: '#475569',
+        toggleBtnBg: 'linear-gradient(180deg, rgba(248,250,252,0.94) 0%, rgba(226,232,240,0.94) 100%)',
+        toggleBtnText: '#1e293b',
+        toggleBtnBorder: '#cbd5e1',
+        mutedLabelColor: '#64748b',
+        thoughtColor: '#1e293b',
+        authorColor: '#1d4ed8',
         trashTextColor: '#8e242a',
         trashIconColor: '#a62a31',
       },
       dark: {
-        railBg: 'linear-gradient(180deg, rgba(34,25,23,0.92) 0%, rgba(24,18,16,0.94) 58%, rgba(16,11,10,0.96) 100%)',
-        railBorder: '#6e524c',
-        railText: '#e9fbfd',
-        brandSectionBg: 'linear-gradient(155deg, rgba(88,66,62,0.62) 0%, rgba(28,20,18,0.86) 100%)',
-        navSectionBg: 'linear-gradient(180deg, rgba(46,35,32,0.62) 0%, rgba(22,16,15,0.78) 100%)',
-        thoughtSectionBg: 'linear-gradient(155deg, rgba(64,48,44,0.68) 0%, rgba(24,18,16,0.86) 100%)',
-        footerSectionBg: 'linear-gradient(180deg, rgba(40,30,27,0.80) 0%, rgba(18,13,12,0.94) 100%)',
-        sectionBorder: 'rgba(33,218,239,0.22)',
-        activeBtnBg: 'linear-gradient(155deg, #16b8cc 0%, #0b8494 55%, #075c68 100%)',
-        activeBtnBorder: '#21daef',
+        railBg: 'linear-gradient(180deg, rgba(22,26,34,0.94) 0%, rgba(17,20,27,0.96) 58%, rgba(12,15,20,0.98) 100%)',
+        railBorder: '#374151',
+        railText: '#f1f5f9',
+        brandSectionBg: 'linear-gradient(155deg, rgba(36,42,54,0.72) 0%, rgba(20,24,31,0.90) 100%)',
+        navSectionBg: 'linear-gradient(180deg, rgba(30,35,45,0.68) 0%, rgba(18,21,28,0.82) 100%)',
+        thoughtSectionBg: 'linear-gradient(155deg, rgba(34,40,52,0.72) 0%, rgba(20,24,31,0.88) 100%)',
+        footerSectionBg: 'linear-gradient(180deg, rgba(28,33,42,0.82) 0%, rgba(15,18,24,0.96) 100%)',
+        sectionBorder: 'rgba(59,130,246,0.22)',
+        activeBtnBg: 'linear-gradient(155deg, #3b82f6 0%, #2563eb 55%, #1d4ed8 100%)',
+        activeBtnBorder: '#93c5fd',
         activeBtnText: '#ffffff',
-        idleBtnBg: 'linear-gradient(180deg, rgba(72, 54, 50, 0.78) 0%, rgba(42, 31, 29, 0.90) 100%)',
-        idleBtnText: '#d9f8fc',
-        activeIconColor: '#e9fbfd',
-        idleIconColor: '#7be7f5',
-        toggleBtnBg: 'linear-gradient(180deg, #4b3834 0%, #332623 58%, #211816 100%)',
-        toggleBtnText: '#e9fbfd',
-        toggleBtnBorder: '#755851',
-        mutedLabelColor: '#bfa9a4',
-        thoughtColor: '#e9fbfd',
-        authorColor: '#21daef',
+        idleBtnBg: 'linear-gradient(180deg, rgba(43, 50, 64, 0.80) 0%, rgba(27, 31, 41, 0.92) 100%)',
+        idleBtnText: '#e2e8f0',
+        activeIconColor: '#eff6ff',
+        idleIconColor: '#60a5fa',
+        toggleBtnBg: 'linear-gradient(180deg, #2d3544 0%, #202632 58%, #151922 100%)',
+        toggleBtnText: '#f1f5f9',
+        toggleBtnBorder: '#475569',
+        mutedLabelColor: '#94a3b8',
+        thoughtColor: '#f1f5f9',
+        authorColor: '#60a5fa',
         trashTextColor: '#f08285',
         trashIconColor: '#eb6c70',
       },

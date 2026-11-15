@@ -91,7 +91,37 @@ export default function App() {
   const [activeView, setActiveView] = useState<
     'home' | 'read' | 'notebooks' | 'library' | 'roster' | 'recycle-bin' | 'mnemonics' | 'leisure' | 'community' | 'make-note' | 'talk-to-dev' | 'settings'
   >('home');
-  const [settingsInitialTab, setSettingsInitialTab] = useState<SettingsTabId>('designs');
+  const [settingsInitialTab, setSettingsInitialTab] = useState<SettingsTabId>('profile');
+  const [customWallpaperUri, setCustomWallpaperUri] = useState<string>(() => {
+    try {
+      return localStorage.getItem('achiev_custom_wallpaper_v1') || '';
+    } catch {
+      return '';
+    }
+  });
+  const [customWallpaperOpacity, setCustomWallpaperOpacity] = useState<number>(() => {
+    try {
+      const n = Number(localStorage.getItem('achiev_custom_wallpaper_opacity_v1'));
+      return Number.isFinite(n) && n >= 0.1 && n <= 1 ? n : 0.85;
+    } catch {
+      return 0.85;
+    }
+  });
+  useEffect(() => {
+    const syncWallpaper = () => {
+      try {
+        setCustomWallpaperUri(localStorage.getItem('achiev_custom_wallpaper_v1') || '');
+        const n = Number(localStorage.getItem('achiev_custom_wallpaper_opacity_v1'));
+        setCustomWallpaperOpacity(Number.isFinite(n) && n >= 0.1 && n <= 1 ? n : 0.85);
+      } catch {}
+    };
+    window.addEventListener('achiev_wallpaper_changed', syncWallpaper);
+    window.addEventListener('storage', syncWallpaper);
+    return () => {
+      window.removeEventListener('achiev_wallpaper_changed', syncWallpaper);
+      window.removeEventListener('storage', syncWallpaper);
+    };
+  }, []);
   const [currentSubject, setCurrentSubject] = useState<SubjectCourse>('Pharmacology');
   const [userProfile, setUserProfile] = useState<UserProfile>(INITIAL_USER_PROFILE);
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState<boolean>(false);
@@ -959,7 +989,15 @@ export default function App() {
   };
 
   const activeThemeMeta = getThemeMeta(activeDesign);
-  const appWallpaperUri = isDarkMode ? activeThemeMeta.darkWallpaperUri : activeThemeMeta.lightWallpaperUri;
+  const themeWallpaperUri = isDarkMode ? activeThemeMeta.darkWallpaperUri : activeThemeMeta.lightWallpaperUri;
+  const appWallpaperUri = customWallpaperUri || themeWallpaperUri;
+  const appWallpaperOpacity = customWallpaperUri
+    ? customWallpaperOpacity
+    : activeDesign === '1' && !isDarkMode
+      ? 0.96
+      : isDarkMode
+        ? 0.92
+        : 0.9;
 
   if (authLoading) {
     return (
@@ -1009,14 +1047,16 @@ export default function App() {
         <div className="dark-ambient-mesh-1" />
         <div className="dark-ambient-mesh-2" />
       </div>
-      {/* Crisp Theme Marble (Theme 1 Light) & Sober Abstract Backdrops (Themes 1–5 Light & Dark) */}
+      {/* Crisp Theme Marble (Theme 1 Light) & Sober Abstract / Custom Wallpapers */}
       {appWallpaperUri && activeView !== 'leisure' && (
         <div
           className="app-theme-wallpaper"
           aria-hidden="true"
           style={{
             backgroundImage: appWallpaperUri,
-            opacity: activeDesign === '1' && !isDarkMode ? 0.96 : isDarkMode ? 0.92 : 0.9,
+            backgroundSize: customWallpaperUri ? 'cover' : undefined,
+            backgroundPosition: customWallpaperUri ? 'center' : undefined,
+            opacity: appWallpaperOpacity,
           }}
         />
       )}
@@ -1045,7 +1085,7 @@ export default function App() {
         onOpenSettings={() => {
           setIsEditingNote(false);
           setIsSettingsOpen(false);
-          setSettingsInitialTab('designs');
+          setSettingsInitialTab('profile');
           setActiveView('settings');
         }}
         onOpenAIStudioModal={() => setIsAIStudioModalOpen(true)}
@@ -1066,7 +1106,7 @@ export default function App() {
           onOpenSettings={() => {
             setIsEditingNote(false);
             setIsSettingsOpen(false);
-            setSettingsInitialTab('designs');
+            setSettingsInitialTab('profile');
             setActiveView('settings');
           }}
           onOpenCloudSettings={() => {
@@ -1114,7 +1154,7 @@ export default function App() {
               onOpenSettings={() => {
                 setIsEditingNote(false);
                 setIsSettingsOpen(false);
-                setSettingsInitialTab('designs');
+                setSettingsInitialTab('profile');
                 setActiveView('settings');
               }}
               onNavigate={(view) => {
@@ -1227,6 +1267,22 @@ export default function App() {
           {activeView === 'leisure' && (
             <LeisureDashboard
               onBackToStudy={() => setActiveView('home')}
+              onReturnToLastReadBook={() => {
+                try {
+                  const lastBookRaw = localStorage.getItem('achiev_last_read_book_v1');
+                  if (lastBookRaw) {
+                    localStorage.setItem('medden_pending_read_book_v1', lastBookRaw);
+                  } else if (books.length > 0) {
+                    localStorage.setItem(
+                      'medden_pending_read_book_v1',
+                      JSON.stringify({ id: books[0].id, title: books[0].title })
+                    );
+                  }
+                } catch {}
+                setIsEditingNote(false);
+                setIsSettingsOpen(false);
+                setActiveView('read');
+              }}
             />
           )}
 

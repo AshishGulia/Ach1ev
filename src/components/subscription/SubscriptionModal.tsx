@@ -103,16 +103,16 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
               >
                 <span>Annual</span>
                 <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-200 text-amber-950 font-mono">
-                  Save 30%
+                  12-Mo Pass
                 </span>
               </button>
             </div>
           </div>
         </div>
 
-        {/* 4 Tiers Grid + Competitor Pricing Criteria Table */}
+        {/* 3 Tiers Grid + Competitor Pricing Criteria Table */}
         <div className="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {SUBSCRIPTION_TIERS.map((tier) => {
               const isCurrent = activeTier === tier.id;
               const price = billingCycle === 'annual' ? tier.priceAnnual : tier.priceMonthly;
@@ -165,7 +165,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                       </div>
                       {billingCycle === 'annual' && price > 0 && (
                         <span className="text-[10px] text-amber-700 dark:text-amber-400 font-semibold block mt-0.5">
-                          Approx ₹{Math.round(price / 12)} / month billed annually
+                          Only ₹{Math.round(price / 12)} / month billed annually
                         </span>
                       )}
                     </div>

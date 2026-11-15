@@ -200,17 +200,17 @@ export const FEATURE_VIDEO_SERIES: SeriesEpisode[] = [
     epNumber: 'EP 08',
     sidebarSegment: '8. Themes & Leisure',
     title: '5 Scenic Day/Night Themes & Cozy Leisure Reset',
-    subtitle: 'Transform your entire workspace & shelf world across Marble, Twilight Sunset, Oceanic Horizon, Turquoise & Kabul Loft, and Forest Emerald & Gold.',
+    subtitle: 'Transform your entire workspace & shelf world across Marble, Twilight Sunset, Oceanic Horizon, Slate Grey & Cobalt Blue, and Forest Emerald & Gold.',
     durationSec: 10,
     accent: '#84cc16',
     accentSoft: 'rgba(132, 204, 22, 0.2)',
     highlights: [
       '5 signature color combos with Day Sun & Night Moon modes',
-      'Twilight Sunset, Oceanic Horizon, Turquoise & Kabul, Forest Emerald & Gold',
-      'Calming Leisure space with ambient peace sounds',
+      'Twilight Sunset, Oceanic Horizon, Slate Grey & Cobalt, Forest Emerald',
+      'Calming Leisure space with ambient peace sounds & Gemini news',
     ],
     captions: [
-      { atPct: 0, text: 'Switch effortlessly between Marble, Twilight Sunset, Oceanic Horizon, Turquoise & Kabul & Forest Emerald.' },
+      { atPct: 0, text: 'Switch effortlessly between Marble, Twilight Sunset, Oceanic Horizon, Slate Grey & Cobalt & Forest Emerald.' },
       { atPct: 48, text: 'Toggle Day Sun & Night Moon modes—each shelf world adapts plants, lamps & fireflies.' },
     ],
     iconKey: 'themes',
@@ -240,7 +240,7 @@ export const FEATURE_VIDEO_SERIES: SeriesEpisode[] = [
 const SEO_FAQS = [
   {
     q: 'Why is Achiev the cheapest note-making website for medical students?',
-    a: 'Achiev gives MBBS, NEET-PG, USMLE, and nursing students a generous ₹0 Free Scholar plan and Clinical Starter at just ₹60/month (₹599/year)—up to 80% cheaper than GoodNotes, Notability, RemNote, Notion AI, or Evernote, with zero Apple hardware lock-in.',
+    a: 'Achiev gives MBBS, NEET-PG, USMLE, and nursing students a generous ₹0 Free Scholar plan, Clinical Plus at just ₹1,200/year (only ₹100/month), and Residency Pro at ₹3,600/year (only ₹300/month)—up to 80% cheaper than GoodNotes, Notability, RemNote, Notion AI, or Evernote, with zero hardware lock-in.',
   },
   {
     q: 'Can I keep a medical textbook open beside my notes while writing?',
@@ -459,43 +459,43 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
   };
 
   return (
-    <div id="medical-student-seo-guide" className="w-full max-w-6xl mx-auto space-y-14 sm:space-y-16 text-[#23140A]">
-      {/* ═══════════════ 1. SEO HERO VALUE PROPOSITION: CHEAPEST FOR MEDICAL STUDENTS ═══════════════ */}
-      <section aria-labelledby="seo-hero-heading" className="text-center space-y-4 px-1 sm:px-2">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-[#F3E7CC] border border-[#DAC190] text-[#5C3D18] text-[11px] sm:text-xs font-semibold shadow-2xs">
-          <Award className="w-3.5 h-3.5 text-[#9B6A1F] shrink-0" />
-          <span>Rated Best Budget Medical Note-Making Studio · MBBS · NEET-PG · USMLE · Nursing</span>
+    <div id="medical-student-seo-guide" className="w-full max-w-6xl mx-auto space-y-16 sm:space-y-20 text-[#23140A]">
+      {/* ═══════════════ 1. EVERNOTE-INSPIRED ROYAL CREAM SEO HERO ═══════════════ */}
+      <section aria-labelledby="seo-hero-heading" className="text-center space-y-5 px-2 sm:px-6 pt-2">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#EFE4CC] border border-[#D4B87E] text-[#4E3211] text-[11px] sm:text-xs font-semibold shadow-2xs tracking-wide">
+          <Award className="w-3.5 h-3.5 text-[#8E5B13] shrink-0" />
+          <span>Ach1ev · The Royal Medical Study Workspace · MBBS · NEET-PG · USMLE</span>
         </div>
 
         <h1
           id="seo-hero-heading"
-          className="text-2xl sm:text-4xl font-bold tracking-tight text-[#1E1007] font-serif pt-2"
+          className="text-3xl sm:text-5xl font-bold tracking-tight text-[#190D05] font-serif leading-[1.12] max-w-4xl mx-auto"
         >
-          The Cheapest &amp; Best Note-Making Website Built Specifically for Medical Students
+          Tame your textbooks. Settle every clinical idea in one place.
         </h1>
 
-        <p className="max-w-3xl mx-auto text-sm sm:text-base text-[#563D25] leading-relaxed">
-          Stop paying ₹450–₹1,100/month across separate apps for PDF reading, note-taking, flashcards, habit trackers, and cloud sync.
-          <strong className="text-[#8E5B13]"> Achiev (Settle Ideas)</strong> gives medical scholars a complete study workspace starting at{' '}
+        <p className="max-w-3xl mx-auto text-sm sm:text-lg text-[#4E3721] leading-relaxed">
+          Remember everything and tackle MBBS, NEET-PG &amp; USMLE prep without paying ₹450–₹1,100/month across separate apps.
+          <strong className="text-[#8E5B13]"> Ach1ev</strong> unites ruled notes, side-by-side books, Picture-to-Table capture,
+          20-20-20 eye rest alerts, and custom bookshelves starting at{' '}
           <strong className="text-[#0E7752]">₹0 Free Forever</strong> and{' '}
-          <strong className="text-[#0E7752]">₹60/month Pro</strong> — with side-by-side textbook desks, Picture-to-Table conversion,
-          20-20-20 Eye Rest Timer, interactive 3D bookshelves, and Achiever&apos;s Hub community.
+          <strong className="text-[#0E7752]">only ₹100/month (₹1,200/yr)</strong>.
         </p>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 max-w-4xl mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 pt-4 max-w-4xl mx-auto">
           {[
-            { label: 'Starting Price', val: '₹0 Free', sub: 'Starter ₹60/mo (80% Cheaper)' },
-            { label: 'Split Reading + Notes', val: 'Side-by-Side', sub: 'PDF, DOCX & EPUB + Video Dock' },
-            { label: 'Smart AI Tables', val: 'Pic → Table', sub: 'Instant Book Image to Table' },
-            { label: 'Built-In Wellness', val: 'Eye Timer + Cat', sub: '20-20-20 Rest & Living Shelf' },
+            { label: 'Honest Student Price', val: '₹0 · ₹100/mo', sub: 'Annual ₹1,200/yr & ₹3,600/yr Pro' },
+            { label: 'Split Book + Note Desk', val: 'Side-by-Side', sub: 'PDF, DOCX & EPUB + Video Dock' },
+            { label: 'Instant AI Capture', val: 'Pic → Table', sub: 'Book Tables & Floated Text Boxes' },
+            { label: 'Built-In Balance', val: 'Eye Timer + Wing', sub: '20-20-20 Rest & Gemini News' },
           ].map((stat) => (
             <div
               key={stat.label}
-              className="rounded-2xl p-3.5 text-left border border-[#E3D2B1] bg-[#FFFDF8] shadow-[0_6px_20px_rgba(88,58,18,0.06)]"
+              className="rounded-2xl p-4 text-left border border-[#E0CFAF] bg-[#FFFDF8] shadow-[0_8px_24px_rgba(72,46,14,0.06)] hover:border-[#C99B48] transition-colors"
             >
-              <div className="text-[11px] uppercase tracking-wider text-[#8E5B13] font-bold">{stat.label}</div>
-              <div className="text-lg font-bold text-[#1E1007] mt-0.5">{stat.val}</div>
-              <div className="text-[11px] text-[#6B5038] mt-0.5">{stat.sub}</div>
+              <div className="text-[10.5px] uppercase tracking-wider text-[#8E5B13] font-bold">{stat.label}</div>
+              <div className="text-lg font-bold text-[#190D05] mt-1 font-serif">{stat.val}</div>
+              <div className="text-[11px] text-[#6B5038] mt-1">{stat.sub}</div>
             </div>
           ))}
         </div>
@@ -722,29 +722,33 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
           </p>
         </div>
 
-        {/* Achiev Plans Strip */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+        {/* Achiev Plans Strip (3 Expert Tiers: Free, ₹1,200/yr · ₹100/mo, ₹3,600/yr · ₹300/mo) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
           {SUBSCRIPTION_TIERS.map((tier) => (
             <div
               key={tier.id}
-              className={`rounded-2xl p-4 border flex flex-col justify-between ${
+              className={`rounded-2xl p-5 border flex flex-col justify-between transition-all ${
                 tier.highlight
-                  ? 'bg-gradient-to-b from-[#FFF7E1] to-[#F9EED2] border-[#C89336] ring-1 ring-[#D7A648]/35 shadow-[0_12px_28px_rgba(142,91,19,0.12)]'
+                  ? 'bg-gradient-to-b from-[#FFF7E1] to-[#F9EED2] border-[#C89336] ring-1 ring-[#D7A648]/40 shadow-[0_14px_32px_rgba(142,91,19,0.14)]'
                   : 'bg-[#FFFDF8] border-[#E3D2B1] shadow-[0_6px_18px_rgba(78,50,15,0.05)]'
               }`}
             >
               <div>
-                <div className="text-[10px] font-bold uppercase tracking-wider text-[#9B6A1F]">{tier.badge}</div>
-                <h3 className="text-base font-bold text-[#1E1007] mt-1">{tier.name}</h3>
-                <div className="text-2xl font-extrabold text-[#0E7752] mt-1">
-                  {tier.priceMonthly === 0 ? '₹0' : `₹${tier.priceMonthly}`}
-                  <span className="text-xs font-normal text-[#7A5D41]">/month</span>
+                <div className="text-[10.5px] font-bold uppercase tracking-wider text-[#9B6A1F]">{tier.badge}</div>
+                <h3 className="text-lg font-bold text-[#1E1007] mt-1 font-serif">{tier.name}</h3>
+                <div className="flex items-baseline gap-2 mt-1.5">
+                  <span className="text-3xl font-extrabold text-[#0E7752]">
+                    {tier.priceAnnual === 0 ? '₹0' : `₹${tier.priceAnnual.toLocaleString('en-IN')}`}
+                  </span>
+                  <span className="text-xs font-semibold text-[#7A5D41]">
+                    {tier.priceAnnual === 0 ? 'Free Forever' : `/ year · only ₹${tier.priceMonthly}/mo`}
+                  </span>
                 </div>
                 <p className="text-xs text-[#594028] mt-2 leading-relaxed">{tier.description}</p>
               </div>
-              <ul className="mt-3 pt-3 border-t border-[#E6D7B9] space-y-1.5">
-                {tier.features.slice(0, 4).map((f) => (
-                  <li key={f} className="flex items-start gap-1.5 text-[11px] text-[#3C2715]">
+              <ul className="mt-4 pt-3 border-t border-[#E6D7B9] space-y-2">
+                {tier.features.slice(0, 5).map((f) => (
+                  <li key={f} className="flex items-start gap-1.5 text-[11.5px] text-[#3C2715]">
                     <CheckCircle2 className="w-3.5 h-3.5 text-[#0E7752] shrink-0 mt-0.5" />
                     <span>{f}</span>
                   </li>

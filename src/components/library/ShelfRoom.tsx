@@ -163,8 +163,10 @@ export const COVERS = [
 ] as const;
 
 export type UpperDoorType =
+  | 'none'
   | 'fancy-walnut-glass'
   | 'fancy-caramel-glass'
+  | 'arched-glass'
   | 'frameless-glass'
   | 'french-swing'
   | 'bypass-slide'
@@ -203,27 +205,30 @@ export type Look = {
   isWoodDoors?: boolean;
   hasSlideBars?: boolean;
   isClassifiedShutter?: boolean;
+  isCapsule?: boolean;
+  isArched?: boolean;
 };
 
 const LOOK_DARK_CHOCOLATE: Look = {
   name: 'Classic Walnut',
-  frame: '#432515',
-  dark: '#251208',
-  back: '#1c0e06',
-  plank: '#59311c',
+  frame: '#512d18',
+  dark: '#2b1509',
+  back: '#221007',
+  plank: '#653a1f',
   door: 'glass',
-  upperDoorType: 'fancy-walnut-glass',
-  lowerDoorType: 'solid-wood-door',
-  face: '#432515',
+  upperDoorType: 'none',
+  lowerDoorType: 'none',
+  face: '#512d18',
   handle: '#d4af37',
   knob: false,
   light: false,
   grain: 0.44,
   wallType: 'dark-taupe',
-  legs: 'peg-walnut',
-  accentDesc: 'Polished Royal Walnut · Fancy arched glass doors (upper) & solid carved walnut wood doors (lower)',
-  hasUpperDoor: true,
+  legs: 'block-base',
+  accentDesc: 'Polished Royal Walnut · Smooth rounded-corner open bookcase with dark plinth base & zero doors',
+  hasUpperDoor: false,
   hasSlideBars: true,
+  isCapsule: true,
 };
 
 const LOOK_CREAMY_CARAMEL: Look = {
@@ -242,9 +247,10 @@ const LOOK_CREAMY_CARAMEL: Look = {
   grain: 0.32,
   wallType: 'charcoal-slats',
   legs: 'tapered-wood',
-  accentDesc: 'Polished Honey Oak · Fancy filigree lattice glass doors (upper) & solid carved caramel wood doors (lower)',
+  accentDesc: 'Polished Honey Oak · Rounded glass doors (upper), carved solid wood doors (lower) & splayed legs',
   hasUpperDoor: true,
   hasSlideBars: true,
+  isCapsule: true,
 };
 
 const LOOK_VANILLA_WHITE: Look = {
@@ -276,7 +282,7 @@ const LOOK_MOCHA_ESPRESSO: Look = {
   back: '#12141a',
   plank: '#434856',
   door: 'split-glass',
-  upperDoorType: 'flip-up',
+  upperDoorType: 'arched-glass',
   lowerDoorType: 'drop-down',
   face: '#2b2e37',
   handle: '#e5d4bc',
@@ -284,10 +290,11 @@ const LOOK_MOCHA_ESPRESSO: Look = {
   light: false,
   grain: 0,
   wallType: 'warm-taupe',
-  legs: 'metal-pin',
-  accentDesc: 'Non-woody honed basalt slate & champagne steel · Flip-up visor (upper) & drop-down flap (lower)',
+  legs: 'peg-walnut',
+  accentDesc: 'Roman Arched Basalt Slate · Curved arched glass doors (upper), drop-down slate glass (lower) & peg legs',
   hasUpperDoor: true,
   hasSlideBars: true,
+  isArched: true,
 };
 
 const LOOK_VAULT: Look = {
@@ -365,55 +372,7 @@ export const seed = (): AlmirahT[] => [
     id: 'alm-dark-chocolate',
     name: 'Classic Walnut',
     design: 'Dark Chocolate',
-    hasUpperDoor: true,
-    shelves: [
-      mk('Section 1', []),
-      mk('Section 2', []),
-      mk('Section 3', []),
-      mk('Lower Section', []),
-    ],
-  },
-  {
-    id: 'alm-creamy-caramel',
-    name: 'Creamy Caramel',
-    design: 'Creamy Caramel',
-    hasUpperDoor: true,
-    shelves: [
-      mk('Section 1', []),
-      mk('Section 2', []),
-      mk('Section 3', []),
-      mk('Lower Section', []),
-    ],
-  },
-  {
-    id: 'alm-vanilla-white',
-    name: 'Vanilla White',
-    design: 'Vanilla White',
-    hasUpperDoor: true,
-    shelves: [
-      mk('Section 1', []),
-      mk('Section 2', []),
-      mk('Section 3', []),
-      mk('Lower Section', []),
-    ],
-  },
-  {
-    id: 'alm-mocha-espresso',
-    name: 'Mocha Espresso',
-    design: 'Mocha Espresso',
-    hasUpperDoor: true,
-    shelves: [
-      mk('Section 1', []),
-      mk('Section 2', []),
-      mk('Section 3', []),
-      mk('Lower Section', []),
-    ],
-  },
-  {
-    id: 'alm-vault',
-    name: 'Vault',
-    design: 'Vault',
-    hasUpperDoor: true,
+    hasUpperDoor: false,
     shelves: [
       mk('Section 1', []),
       mk('Section 2', []),
@@ -427,12 +386,14 @@ export const KEY = 'medden_shelf_room_v6';
 
 function migrateAlmirah(a: AlmirahT): AlmirahT {
   const isLegacyOnyx = a.design === 'Smoked Onyx' || a.id === 'alm-smoked-onyx';
+  const resolvedDesign = isLegacyOnyx ? 'Vault' : a.design;
+  const designDefaultDoor = LOOKS[resolvedDesign]?.hasUpperDoor ?? true;
   return {
     ...a,
     id: a.id === 'alm-smoked-onyx' ? 'alm-vault' : a.id,
     name: a.name === 'Smoked Onyx' ? 'Vault' : a.name,
-    design: isLegacyOnyx ? 'Vault' : a.design,
-    hasUpperDoor: a.hasUpperDoor !== undefined ? a.hasUpperDoor : true,
+    design: resolvedDesign,
+    hasUpperDoor: resolvedDesign === 'Dark Chocolate' ? false : (a.hasUpperDoor !== undefined ? a.hasUpperDoor : designDefaultDoor),
     shelves: (a.shelves || []).map((s, idx) => {
       const legacyNames = new Set([
         'Lower Vault Section',
@@ -470,7 +431,24 @@ export function useStored(): [AlmirahT[], (next: AlmirahT[]) => void] {
       if (raw !== null) {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          const migrated = (parsed as AlmirahT[]).map(migrateAlmirah);
+          let migrated = (parsed as AlmirahT[]).map(migrateAlmirah);
+          const legacySeedIds = new Set([
+            'alm-dark-chocolate',
+            'alm-creamy-caramel',
+            'alm-vanilla-white',
+            'alm-mocha-espresso',
+            'alm-vault',
+          ]);
+          const isOldFiveSeeds =
+            migrated.length === 5 && migrated.every((m) => legacySeedIds.has(m.id));
+          if (isOldFiveSeeds) {
+            const nonEmptyExtra = migrated
+              .slice(1)
+              .filter((m) =>
+                m.shelves.some((s) => s.books.length > 0 || (s.folders?.length ?? 0) > 0)
+              );
+            migrated = [migrated[0]!, ...nonEmptyExtra];
+          }
           setValue(migrated);
           localStorage.setItem(KEY, JSON.stringify(migrated));
         }
@@ -2640,7 +2618,145 @@ export function CabinetDoors({
     </button>
   );
 
-  // 0A. FANCY DESIGNER WOOD-FRAMED GLASS DOORS (Almirah 1 Cathedral Walnut & Almirah 2 Filigree Caramel Lattice Upper)
+  // 0A-ARCH. STRAIGHT-ON ROMAN ARCHED GLASS DOUBLE DOORS (Almirah 4 Mocha Espresso Silhouette)
+  if (doorKind === 'arched-glass') {
+    const champagne = look.handle || '#e5d4bc';
+    return (
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: open ? 35 : 25,
+          perspective: 1950,
+          overflow: 'visible',
+          pointerEvents: open ? 'none' : 'auto',
+        }}
+      >
+        {(['left', 'right'] as const).map((side) => {
+          const left = side === 'left';
+          return (
+            <div
+              key={side}
+              role="button"
+              tabIndex={0}
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggle();
+              }}
+              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onToggle())}
+              title={open ? 'Click arched glass door to close & lock' : 'Click arched glass door to unlock'}
+              style={{
+                position: 'absolute',
+                top: 0,
+                bottom: 0,
+                width: '50%',
+                [left ? 'left' : 'right']: 0,
+                cursor: 'pointer',
+                pointerEvents: 'auto',
+                transformOrigin: left ? 'left center' : 'right center',
+                transform: `translateX(${open ? (left ? -26 : 26) : 0}px) rotateY(${open ? (left ? -148 : 148) : 0}deg)`,
+                transition: 'transform 0.92s cubic-bezier(0.28, 0.75, 0.25, 1)',
+                padding: 8,
+                background: `linear-gradient(135deg, ${look.frame} 0%, ${look.dark} 100%)`,
+                borderTopLeftRadius: left ? 160 : 2,
+                borderTopRightRadius: left ? 2 : 160,
+                borderBottomLeftRadius: 3,
+                borderBottomRightRadius: 3,
+                boxShadow: `${bevel}, inset 0 0 0 1px rgba(229, 212, 188, 0.16), 0 8px 18px rgba(0,0,0,0.48)`,
+              }}
+            >
+              {/* Inner Curved Crystal Pane + Delicate Cathedral Mullion Ribs */}
+              <div
+                style={{
+                  position: 'relative',
+                  width: '100%',
+                  height: '100%',
+                  backgroundImage: clearTransparentGlassSheen,
+                  backgroundColor: 'rgba(218, 230, 245, 0.065)',
+                  borderTopLeftRadius: left ? 150 : 2,
+                  borderTopRightRadius: left ? 2 : 150,
+                  borderBottomLeftRadius: 2,
+                  borderBottomRightRadius: 2,
+                  overflow: 'hidden',
+                  boxShadow:
+                    'inset 0 0 0 1.5px rgba(255,255,255,0.28), inset 0 3px 12px rgba(0,0,0,0.45)',
+                }}
+              >
+                <svg
+                  viewBox="0 0 160 360"
+                  preserveAspectRatio="none"
+                  style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
+                >
+                  {/* Signature Roman Arch Mullion Curve + Slim Vertical Divider (matching Almira 4 shape) */}
+                  <line x1="78" y1="74" x2="78" y2="356" stroke={look.frame} strokeWidth="5.5" strokeOpacity="0.92" />
+                  <line x1="78" y1="74" x2="78" y2="356" stroke={champagne} strokeWidth="0.9" strokeOpacity="0.32" />
+                  {left ? (
+                    <path
+                      d="M78 356 L78 135 Q78 82 156 76"
+                      fill="none"
+                      stroke={look.frame}
+                      strokeWidth="6"
+                      strokeOpacity="0.95"
+                    />
+                  ) : (
+                    <path
+                      d="M82 356 L82 135 Q82 82 4 76"
+                      fill="none"
+                      stroke={look.frame}
+                      strokeWidth="6"
+                      strokeOpacity="0.95"
+                    />
+                  )}
+                  <path
+                    d={left ? 'M158 6 Q76 14 14 102' : 'M2 6 Q84 14 146 102'}
+                    fill="none"
+                    stroke={champagne}
+                    strokeOpacity="0.28"
+                    strokeWidth="1.2"
+                  />
+                </svg>
+
+                {/* Hinges */}
+                {[24, 58, 88].map((topPct) => (
+                  <span
+                    key={topPct}
+                    style={{
+                      position: 'absolute',
+                      top: `${topPct}%`,
+                      [left ? 'left' : 'right']: 0,
+                      width: 5,
+                      height: 15,
+                      borderRadius: 2,
+                      background: `linear-gradient(180deg, ${champagne}, #78716c)`,
+                      opacity: 0.85,
+                    }}
+                  />
+                ))}
+              </div>
+
+              {/* Vertical Champagne Brass Bar Pull */}
+              <span
+                style={{
+                  position: 'absolute',
+                  top: '45%',
+                  [left ? 'right' : 'left']: 4,
+                  width: 5,
+                  height: 44,
+                  borderRadius: 5,
+                  background: `linear-gradient(180deg, #fffbeb 0%, ${champagne} 55%, #78716c 100%)`,
+                  border: '1px solid rgba(0,0,0,0.45)',
+                  boxShadow: '0 3px 6px rgba(0,0,0,0.6)',
+                }}
+              />
+            </div>
+          );
+        })}
+        {lockToggleBtn}
+      </div>
+    );
+  }
+
+  // 0A. FANCY DESIGNER WOOD-FRAMED GLASS DOORS (Almirah 1 Cathedral Walnut & Almirah 2 Mid-Century Rounded Caramel Upper)
   if (doorKind === 'fancy-walnut-glass' || doorKind === 'fancy-caramel-glass') {
     const isCaramel = doorKind === 'fancy-caramel-glass';
     const doorWoodStyle = getWoodSurfaceStyle(look, 'v', 'door', '135deg');
@@ -2670,7 +2786,7 @@ export function CabinetDoors({
                 onToggle();
               }}
               onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onToggle())}
-              title={open ? 'Click ornate glass door to close & lock' : 'Click fancy glass door to open'}
+              title={open ? 'Click glass door to close & lock' : 'Click glass door to open'}
               style={{
                 position: 'absolute',
                 top: 0,
@@ -2682,12 +2798,13 @@ export function CabinetDoors({
                 transformOrigin: left ? 'left center' : 'right center',
                 transform: `translateX(${open ? (left ? -26 : 26) : 0}px) rotateY(${open ? (left ? -148 : 148) : 0}deg)`,
                 transition: 'transform 0.92s cubic-bezier(0.28, 0.75, 0.25, 1)',
-                padding: 9,
+                padding: isCaramel ? 10 : 9,
+                borderRadius: isCaramel ? (left ? '14px 2px 2px 10px' : '2px 14px 10px 2px') : 2,
                 ...doorWoodStyle,
                 boxShadow: `${bevel}, inset 0 0 0 1px rgba(254, 240, 138, 0.22), 0 8px 18px rgba(0,0,0,0.46)`,
               }}
             >
-              {/* Inner Carved Beveled Brass Inlay Lip Around Crystal Pane */}
+              {/* Inner Carved Beveled Lip Around Clear Glass Pane */}
               <div
                 style={{
                   position: 'relative',
@@ -2695,31 +2812,20 @@ export function CabinetDoors({
                   height: '100%',
                   backgroundImage: clearTransparentGlassSheen,
                   backgroundColor: isCaramel ? 'rgba(248, 250, 255, 0.085)' : 'rgba(218, 238, 255, 0.075)',
-                  borderRadius: 3,
+                  borderRadius: isCaramel ? 12 : 3,
                   overflow: 'hidden',
                   boxShadow:
-                    'inset 0 0 0 1.5px rgba(255,255,255,0.42), inset 0 0 0 3px rgba(212,175,55,0.28), inset 0 3px 12px rgba(0,0,0,0.34)',
+                    'inset 0 0 0 1.5px rgba(255,255,255,0.42), inset 0 0 0 2.5px rgba(212,175,55,0.24), inset 0 3px 12px rgba(0,0,0,0.34)',
                 }}
               >
-                {/* Fancy Architectural Cathedral Arch (Almirah 1) or Diamond Filigree Lattice (Almirah 2) */}
                 {isCaramel ? (
                   <svg
                     viewBox="0 0 160 320"
                     preserveAspectRatio="none"
                     style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
                   >
-                    <rect x="4" y="4" width="152" height="312" rx="18" fill="none" stroke={goldTrim} strokeOpacity="0.48" strokeWidth="1.6" />
-                    <path d="M10 44 Q80 6 150 44" fill="none" stroke={look.frame} strokeWidth="5" strokeOpacity="0.88" />
-                    <path d="M10 44 Q80 6 150 44" fill="none" stroke={goldTrim} strokeWidth="1.2" strokeOpacity="0.6" />
-                    <path d="M10 276 Q80 314 150 276" fill="none" stroke={look.frame} strokeWidth="4" strokeOpacity="0.82" />
-                    {/* Delicate Diamond Mullion Ribs Along Edges */}
-                    <path
-                      d="M4 110 L32 160 L4 210 M156 110 L128 160 L156 210 M80 12 L94 28 L80 44 L66 28 Z"
-                      fill="none"
-                      stroke={goldTrim}
-                      strokeOpacity="0.46"
-                      strokeWidth="1.4"
-                    />
+                    <rect x="4" y="4" width="152" height="312" rx="16" fill="none" stroke={goldTrim} strokeOpacity="0.45" strokeWidth="1.5" />
+                    <path d="M12 22 Q80 6 148 22" fill="none" stroke={goldTrim} strokeWidth="1.1" strokeOpacity="0.45" />
                   </svg>
                 ) : (
                   <svg
@@ -2727,19 +2833,12 @@ export function CabinetDoors({
                     preserveAspectRatio="none"
                     style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }}
                   >
-                    {/* Ornate Gothic/Cathedral Walnut Arch Crown Inside Glass */}
                     <path d="M6 58 Q80 -6 154 58" fill="none" stroke={look.frame} strokeWidth="7" strokeOpacity="0.95" />
                     <path d="M6 58 Q80 -6 154 58" fill="none" stroke={goldTrim} strokeWidth="1.4" strokeOpacity="0.65" />
                     <rect x="5" y="5" width="150" height="310" rx="8" fill="none" stroke={goldTrim} strokeOpacity="0.4" strokeWidth="1.4" />
-                    {/* Corner Carved Filigree Rosettes */}
-                    <circle cx="16" cy="16" r="6" fill="none" stroke={goldTrim} strokeOpacity="0.55" strokeWidth="1.3" />
-                    <circle cx="144" cy="16" r="6" fill="none" stroke={goldTrim} strokeOpacity="0.55" strokeWidth="1.3" />
-                    <circle cx="16" cy="304" r="6" fill="none" stroke={goldTrim} strokeOpacity="0.55" strokeWidth="1.3" />
-                    <circle cx="144" cy="304" r="6" fill="none" stroke={goldTrim} strokeOpacity="0.55" strokeWidth="1.3" />
                   </svg>
                 )}
 
-                {/* Polished Beveled Brass Hinges on Outer Stile */}
                 {[14, 50, 86].map((topPct) => (
                   <span
                     key={topPct}
@@ -2758,18 +2857,20 @@ export function CabinetDoors({
                 ))}
               </div>
 
-              {/* Sculpted Vintage Curved Brass Door Pull */}
+              {/* Sculpted Vertical Wood/Brass Door Grip Pull (matching Almira 2 vertical seam pulls) */}
               <span
                 style={{
                   position: 'absolute',
-                  top: '43%',
+                  top: '41%',
                   [left ? 'right' : 'left']: 4,
-                  width: 6,
-                  height: 44,
+                  width: 7,
+                  height: 48,
                   borderRadius: 6,
-                  background: `linear-gradient(180deg, ${goldTrim} 0%, #d4af37 52%, ${brassDeep} 100%)`,
-                  border: '1px solid rgba(0,0,0,0.45)',
-                  boxShadow: '0 3px 6px rgba(0,0,0,0.62), inset 0 1px 1px rgba(255,255,255,0.65)',
+                  background: isCaramel
+                    ? `linear-gradient(180deg, ${look.plank} 0%, ${look.frame} 55%, ${look.dark} 100%)`
+                    : `linear-gradient(180deg, ${goldTrim} 0%, #d4af37 52%, ${brassDeep} 100%)`,
+                  border: `1px solid ${isCaramel ? 'rgba(254, 240, 138, 0.45)' : 'rgba(0,0,0,0.45)'}`,
+                  boxShadow: '0 3px 6px rgba(0,0,0,0.62), inset 0 1px 1px rgba(255,255,255,0.45)',
                 }}
               />
             </div>
@@ -4189,42 +4290,78 @@ export function Almirah({
         }}
       />
 
-      <div style={{ position: 'relative', boxShadow: shadow, borderRadius: 3 }}>
-        {/* Clean Architectural Cornice Molding */}
-        <div
-          style={{
-            margin: '0 -8px',
-            height: 26,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            position: 'relative',
-            borderRadius: '4px 4px 0 0',
-            boxShadow:
-              look.grain > 0
-                ? '0 5px 10px rgba(0,0,0,.45), inset 0 2px 0 rgba(255,245,220,.45), inset 0 -2px 3px rgba(0,0,0,.35)'
-                : '0 4px 6px rgba(0,0,0,.4), inset 0 2px 0 rgba(255,255,255,.3)',
-            ...wood('90deg'),
-          }}
-        >
+      <div
+        style={{
+          position: 'relative',
+          boxShadow: shadow,
+          borderRadius: look.isArched ? '190px 190px 10px 10px' : look.isCapsule ? 24 : 3,
+        }}
+      >
+        {/* Top Silhouette: Roman Arch Crown (Almirah 4), Flush Capsule Crown (Almirah 1 & 2), or Cornice Molding */}
+        {look.isArched ? (
           <div
             style={{
-              width: '94%',
-              height: 3,
-              borderRadius: 1,
-              background: look.isVault
-                ? 'linear-gradient(90deg, transparent, rgba(203,213,225,0.55), transparent)'
-                : trim.corniceInlay,
-              borderBottom: '1px solid rgba(255,255,255,0.18)',
+              height: 54,
+              borderRadius: '999px 999px 0 0',
+              background: `linear-gradient(180deg, ${look.frame} 0%, ${look.dark} 100%)`,
+              boxShadow: 'inset 0 2px 0 rgba(255,255,255,0.22), inset 0 -3px 6px rgba(0,0,0,0.55)',
+              display: 'flex',
+              alignItems: 'flex-end',
+              justifyContent: 'center',
+              paddingBottom: 6,
+              position: 'relative',
             }}
-          />
-          {look.isVault && (
-            <>
-              <span style={{ position: 'absolute', left: 10, width: 6, height: 6, borderRadius: '50%', background: 'radial-gradient(circle at 30% 30%, #e2e8f0, #475569)', boxShadow: '0 1px 2px rgba(0,0,0,0.85)' }} />
-              <span style={{ position: 'absolute', right: 10, width: 6, height: 6, borderRadius: '50%', background: 'radial-gradient(circle at 30% 30%, #e2e8f0, #475569)', boxShadow: '0 1px 2px rgba(0,0,0,0.85)' }} />
-            </>
-          )}
-        </div>
+          >
+            <div
+              style={{
+                width: '78%',
+                height: 30,
+                borderTopLeftRadius: 999,
+                borderTopRightRadius: 999,
+                background: look.back,
+                borderTop: '2px solid rgba(229,212,188,0.26)',
+                borderLeft: '2px solid rgba(229,212,188,0.2)',
+                borderRight: '2px solid rgba(229,212,188,0.2)',
+                boxShadow: 'inset 0 6px 14px rgba(0,0,0,0.65)',
+              }}
+            />
+          </div>
+        ) : (
+          <div
+            style={{
+              margin: look.isCapsule ? '0' : '0 -8px',
+              height: look.isCapsule ? 20 : 26,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              position: 'relative',
+              borderRadius: look.isCapsule ? '24px 24px 0 0' : '4px 4px 0 0',
+              boxShadow:
+                look.grain > 0
+                  ? '0 5px 10px rgba(0,0,0,.45), inset 0 2px 0 rgba(255,245,220,.45), inset 0 -2px 3px rgba(0,0,0,.35)'
+                  : '0 4px 6px rgba(0,0,0,.4), inset 0 2px 0 rgba(255,255,255,.3)',
+              ...wood('90deg'),
+            }}
+          >
+            <div
+              style={{
+                width: look.isCapsule ? '88%' : '94%',
+                height: 3,
+                borderRadius: 1,
+                background: look.isVault
+                  ? 'linear-gradient(90deg, transparent, rgba(203,213,225,0.55), transparent)'
+                  : trim.corniceInlay,
+                borderBottom: '1px solid rgba(255,255,255,0.18)',
+              }}
+            />
+            {look.isVault && (
+              <>
+                <span style={{ position: 'absolute', left: 10, width: 6, height: 6, borderRadius: '50%', background: 'radial-gradient(circle at 30% 30%, #e2e8f0, #475569)', boxShadow: '0 1px 2px rgba(0,0,0,0.85)' }} />
+                <span style={{ position: 'absolute', right: 10, width: 6, height: 6, borderRadius: '50%', background: 'radial-gradient(circle at 30% 30%, #e2e8f0, #475569)', boxShadow: '0 1px 2px rgba(0,0,0,0.85)' }} />
+              </>
+            )}
+          </div>
+        )}
 
         {/* Almirah Body with Side Stiles and Compartments */}
         <div style={{ display: 'flex', minWidth: 0 }}>
@@ -4326,10 +4463,10 @@ export function Almirah({
         {/* Almirah Bottom Plinth (Touching Floor) with Embedded Switcher & Controls */}
         <div
           style={{
-            margin: '0 -6px',
+            margin: look.isCapsule || look.isArched ? '0' : '0 -6px',
             minHeight: 44,
             padding: '6px 12px',
-            borderRadius: '0 0 4px 4px',
+            borderRadius: look.isCapsule ? '0 0 22px 22px' : look.isArched ? '0 0 10px 10px' : '0 0 4px 4px',
             boxShadow:
               look.grain > 0
                 ? '0 7px 14px rgba(0,0,0,.48), inset 0 2px 0 rgba(255,244,220,0.36), inset 0 -2px 4px rgba(0,0,0,0.45)'
@@ -4407,8 +4544,52 @@ export function Almirah({
           </div>
         </div>
 
-        {/* Feet / Legs on Floor */}
-        {look.legs === 'metal-pin' ? (
+        {/* Feet / Legs / Plinth Base on Floor Matching Uploaded Photos */}
+        {look.legs === 'block-base' ? (
+          <div
+            style={{
+              position: 'relative',
+              margin: '0 30px',
+              height: 15,
+              background: look.isVault
+                ? 'linear-gradient(180deg, #050608 0%, #0d1016 100%)'
+                : 'linear-gradient(180deg, #1b1512 0%, #0f0b09 100%)',
+              borderRadius: '0 0 8px 8px',
+              boxShadow: '0 4px 10px rgba(0,0,0,0.68), inset 0 2px 4px rgba(0,0,0,0.75)',
+            }}
+          />
+        ) : look.legs === 'tapered-wood' ? (
+          <>
+            <div
+              style={{
+                position: 'absolute',
+                bottom: -18,
+                left: 24,
+                width: 13,
+                height: 20,
+                transform: 'rotate(11deg)',
+                transformOrigin: 'top center',
+                ...(look.grain > 0 ? getWoodSurfaceStyle(look, 'v', 'frame', '90deg') : { background: look.dark }),
+                borderRadius: '0 0 5px 5px',
+                boxShadow: 'inset 0 2px 3px rgba(0,0,0,0.45), 0 3px 6px rgba(0,0,0,0.5)',
+              }}
+            />
+            <div
+              style={{
+                position: 'absolute',
+                bottom: -18,
+                right: 24,
+                width: 13,
+                height: 20,
+                transform: 'rotate(-11deg)',
+                transformOrigin: 'top center',
+                ...(look.grain > 0 ? getWoodSurfaceStyle(look, 'v', 'frame', '270deg') : { background: look.dark }),
+                borderRadius: '0 0 5px 5px',
+                boxShadow: 'inset 0 2px 3px rgba(0,0,0,0.45), 0 3px 6px rgba(0,0,0,0.5)',
+              }}
+            />
+          </>
+        ) : look.legs === 'metal-pin' ? (
           <>
             <div style={{ position: 'absolute', bottom: -14, left: 16, width: 8, height: 14, background: '#a1a1aa', borderRadius: '0 0 2px 2px' }} />
             <div style={{ position: 'absolute', bottom: -14, right: 16, width: 8, height: 14, background: '#a1a1aa', borderRadius: '0 0 2px 2px' }} />
@@ -4418,24 +4599,26 @@ export function Almirah({
             <div
               style={{
                 position: 'absolute',
-                bottom: -14,
-                left: 16,
-                width: look.isVault ? 20 : 14,
-                height: 14,
-                ...(look.grain > 0 || look.isVault ? getWoodSurfaceStyle(look, 'v', 'frame', '90deg') : { background: look.dark }),
-                borderRadius: '0 0 4px 4px',
+                bottom: -18,
+                left: 22,
+                width: 15,
+                height: 18,
+                background: look.grain > 0 ? undefined : `linear-gradient(90deg, ${look.frame}, ${look.dark})`,
+                ...(look.grain > 0 ? getWoodSurfaceStyle(look, 'v', 'frame', '90deg') : {}),
+                borderRadius: '0 0 8px 8px',
                 boxShadow: 'inset 0 2px 3px rgba(0,0,0,0.5), 0 2px 5px rgba(0,0,0,0.45)',
               }}
             />
             <div
               style={{
                 position: 'absolute',
-                bottom: -14,
-                right: 16,
-                width: look.isVault ? 20 : 14,
-                height: 14,
-                ...(look.grain > 0 || look.isVault ? getWoodSurfaceStyle(look, 'v', 'frame', '270deg') : { background: look.dark }),
-                borderRadius: '0 0 4px 4px',
+                bottom: -18,
+                right: 22,
+                width: 15,
+                height: 18,
+                background: look.grain > 0 ? undefined : `linear-gradient(90deg, ${look.frame}, ${look.dark})`,
+                ...(look.grain > 0 ? getWoodSurfaceStyle(look, 'v', 'frame', '270deg') : {}),
+                borderRadius: '0 0 8px 8px',
                 boxShadow: 'inset 0 2px 3px rgba(0,0,0,0.5), 0 2px 5px rgba(0,0,0,0.45)',
               }}
             />
@@ -5410,8 +5593,38 @@ export default function ShelfRoom({
                         a={a}
                         idx={idx}
                         totalAlmirahs={data.length}
-                        onPrevAlmirah={() => setAt((i) => (i - 1 + data.length) % data.length)}
-                        onNextAlmirah={() => setAt((i) => (i + 1) % data.length)}
+                        onPrevAlmirah={() => {
+                          if (data.length > 1) {
+                            setAt((i) => (i - 1 + data.length) % data.length);
+                          } else {
+                            const curPos = DESIGNS.indexOf(a.design as DesignName);
+                            const prevPos = (curPos <= 0 ? DESIGNS.length - 1 : curPos - 1);
+                            const nextDesign = DESIGNS[prevPos]!;
+                            const nextLook = LOOKS[nextDesign];
+                            patch(a.id, (x) => ({
+                              ...x,
+                              design: nextDesign,
+                              name: nextLook?.name || nextDesign,
+                              hasUpperDoor: nextLook?.hasUpperDoor ?? true,
+                            }));
+                          }
+                        }}
+                        onNextAlmirah={() => {
+                          if (data.length > 1) {
+                            setAt((i) => (i + 1) % data.length);
+                          } else {
+                            const curPos = DESIGNS.indexOf(a.design as DesignName);
+                            const nextPos = ((curPos < 0 ? 0 : curPos) + 1) % DESIGNS.length;
+                            const nextDesign = DESIGNS[nextPos]!;
+                            const nextLook = LOOKS[nextDesign];
+                            patch(a.id, (x) => ({
+                              ...x,
+                              design: nextDesign,
+                              name: nextLook?.name || nextDesign,
+                              hasUpperDoor: nextLook?.hasUpperDoor ?? true,
+                            }));
+                          }
+                        }}
                         onAddShelf={() => handleAddShelfToAlmirah(a.id)}
                         onOpenNewAlmirah={() => setIsNewAlmirahModalOpen(true)}
                         night={night}
@@ -5916,7 +6129,7 @@ export default function ShelfRoom({
                     id: uid(),
                     name: newAlmirahName.trim(),
                     design: selectedDesign,
-                    hasUpperDoor: true,
+                    hasUpperDoor: LOOKS[selectedDesign]?.hasUpperDoor ?? true,
                     shelves: [
                       mk('Section 1', []),
                       mk('Section 2', []),

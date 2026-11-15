@@ -103,152 +103,28 @@ export interface CommunityPost {
   };
 }
 
-const STARTER_PEERS: StudyPeer[] = [
-  {
-    id: 'peer-aarav',
-    name: 'Aarav Sharma',
-    username: 'aarav_med',
-    role: 'MBBS Year 3',
-    institution: 'AIIMS Study Circle',
-    specialty: 'Pharmacology',
-    avatar: '',
-    status: 'online',
-    connectionState: 'friend',
-    mutualGroups: 2,
-  },
-  {
-    id: 'peer-ananya',
-    name: 'Ananya Verma',
-    username: 'ananya_neuro',
-    role: 'NEET PG Aspirant',
-    institution: 'KEM Scholars',
-    specialty: 'Neuroanatomy',
-    avatar: '',
-    status: 'studying',
-    connectionState: 'incoming_request',
-    mutualGroups: 1,
-  },
-  {
-    id: 'peer-kabir',
-    name: 'Kabir Mehta',
-    username: 'kabir_cardio',
-    role: 'USMLE Step 1 Prep',
-    institution: 'Achiev Cohort',
-    specialty: 'Cardiology',
-    avatar: '',
-    status: 'in-library',
-    connectionState: 'discover',
-    mutualGroups: 1,
-  },
-  {
-    id: 'peer-zoya',
-    name: 'Zoya Khan',
-    username: 'zoya_notes',
-    role: 'Pathology Fellow',
-    institution: 'MAMC Library',
-    specialty: 'Pathology',
-    avatar: '',
-    status: 'online',
-    connectionState: 'discover',
-    mutualGroups: 3,
-  },
-];
+const LEGACY_STARTER_PEER_IDS = new Set([
+  'peer-aarav',
+  'peer-ananya',
+  'peer-kabir',
+  'peer-zoya',
+]);
 
-const STARTER_GROUPS: StudyGroupItem[] = [
-  {
-    id: 'grp-morning-pomodoro',
-    name: '5 AM Deep Focus Study Squad',
-    category: 'Daily Revision',
-    description: 'Synchronized 50/10 study sprints, daily MCQs, and active recall summaries.',
-    membersCount: 42,
-    avatar: '',
-    isJoined: true,
-    lastActive: 'Active now',
-    recentTopic: 'Autonomic Pharmacology & Receptor Agonists',
-    unreadCount: 2,
-  },
-  {
-    id: 'grp-highyield-mnemonics',
-    name: 'Visual Mnemonics & Flowchart Exchange',
-    category: 'Shared Notes',
-    description: 'Share compact memory hooks, flowcharts, and annotated PDF pages with peers.',
-    membersCount: 31,
-    avatar: '',
-    isJoined: false,
-    lastActive: '18m ago',
-    recentTopic: 'Coagulation Cascade Shortcut Flowchart',
-  },
-];
+const LEGACY_STARTER_GROUP_IDS = new Set([
+  'grp-morning-pomodoro',
+  'grp-highyield-mnemonics',
+]);
 
-const STARTER_POSTS: CommunityPost[] = [
-  {
-    id: 'post-hub-1',
-    type: 'mnemonic',
-    title: 'Rapid Recall: Cranial Nerve Parasympathetic Ganglia',
-    author: {
-      name: 'Aarav Sharma',
-      username: 'aarav_med',
-      role: 'MBBS Year 3',
-      hospitalOrCollege: 'Achiev Study Circle',
-      avatar: '',
-      badge: 'Top Contributor',
-    },
-    timeAgo: '14m ago',
-    subject: 'Anatomy',
-    content:
-      'Grouped the four parasympathetic ganglia with their exit nerves and target glands into a 10-second recall matrix so you never mix up Otic vs Submandibular under exam pressure.',
-    tags: ['Anatomy', 'Mnemonic', 'High-Yield'],
-    likes: 18,
-    hasLiked: false,
-    comments: [
-      {
-        id: 'c-1',
-        authorName: 'Zoya Khan',
-        authorUsername: 'zoya_notes',
-        text: 'Saved straight to my quick revision notebook — thank you!',
-        timeAgo: '6m ago',
-      },
-    ],
-    mnemonicData: {
-      acronym: 'C-P-S-O → 3-7-7-9',
-      meaning: 'Ciliary (CN III) · Pterygopalatine (CN VII) · Submandibular (CN VII) · Otic (CN IX)',
-      highYieldExam: 'NEET PG / USMLE',
-    },
-  },
-  {
-    id: 'post-hub-2',
-    type: 'case',
-    title: 'Practice Question: First-Line Drug in Acute Hyperkalemia with ECG Peaked T-Waves',
-    author: {
-      name: 'Ananya Verma',
-      username: 'ananya_neuro',
-      role: 'NEET PG Aspirant',
-      hospitalOrCollege: 'KEM Scholars',
-      avatar: '',
-      badge: 'Study Group Lead',
-    },
-    timeAgo: '1h ago',
-    subject: 'Pharmacology',
-    content:
-      'A patient arrives with K+ 6.9 mEq/L and peaked T-waves on lead II. Which intervention stabilizes the myocardial membrane FIRST before shifting potassium intracellularly?',
-    tags: ['Emergency', 'Pharmacology', 'MCQ'],
-    likes: 27,
-    hasLiked: false,
-    comments: [],
-    casePoll: {
-      question: 'Select the immediate membrane-stabilizing step:',
-      options: [
-        { id: 'a', text: 'IV Calcium Gluconate 10%', votes: 21, isCorrect: true },
-        { id: 'b', text: 'Regular Insulin + 50% Dextrose', votes: 6 },
-        { id: 'c', text: 'Nebulized Albuterol', votes: 2 },
-        { id: 'd', text: 'Oral Potassium Binder', votes: 1 },
-      ],
-      totalVotes: 30,
-      explanation:
-        'IV Calcium Gluconate stabilizes cardiac membrane threshold potential within 1–3 minutes without lowering serum K+. Insulin + glucose follows immediately to shift K+ intracellularly.',
-    },
-  },
-];
+const LEGACY_STARTER_POST_IDS = new Set([
+  'post-hub-1',
+  'post-hub-2',
+]);
+
+const STARTER_PEERS: StudyPeer[] = [];
+
+const STARTER_GROUPS: StudyGroupItem[] = [];
+
+const STARTER_POSTS: CommunityPost[] = [];
 
 interface CommunityViewProps {
   currentSubject: SubjectCourse;
@@ -277,7 +153,9 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
       const saved = localStorage.getItem('achiev_hub_friends_v1') ?? localStorage.getItem('ach1ev_hub_friends_v1');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) {
+          return parsed.filter((p: any) => !LEGACY_STARTER_PEER_IDS.has(p?.id));
+        }
       }
     } catch {}
     return STARTER_PEERS;
@@ -288,7 +166,9 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
       const saved = localStorage.getItem('achiev_hub_groups_v1') ?? localStorage.getItem('ach1ev_hub_groups_v1');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) {
+          return parsed.filter((g: any) => !LEGACY_STARTER_GROUP_IDS.has(g?.id));
+        }
       }
     } catch {}
     return STARTER_GROUPS;
@@ -299,7 +179,9 @@ export const CommunityView: React.FC<CommunityViewProps> = ({
       const saved = localStorage.getItem('achiev_hub_posts_v1') ?? localStorage.getItem('ach1ev_hub_posts_v1');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+        if (Array.isArray(parsed)) {
+          return parsed.filter((p: any) => !LEGACY_STARTER_POST_IDS.has(p?.id));
+        }
       }
     } catch {}
     return STARTER_POSTS;

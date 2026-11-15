@@ -141,8 +141,34 @@ export const ReadStudioView: React.FC<ReadStudioViewProps> = ({
     books[0] ||
     getEmptyMainBook(currentSubject);
   const [mainBook, setMainBook] = useState<MedicalBook>(defaultMainBook);
-  const [mainPageNum, setMainPageNum] = useState<number>(1);
+  const [mainPageNum, setMainPageNum] = useState<number>(() => {
+    const savedPage = (initialPendingRef.current as (MedicalBook & { savedPageNum?: number }) | null)?.savedPageNum;
+    return typeof savedPage === 'number' && savedPage >= 1 ? savedPage : 1;
+  });
   const [isBookClosed, setIsBookClosed] = useState<boolean>(!initialPendingRef.current);
+
+  // Persist last opened book so Leisure break alarm can return straight back to it
+  useEffect(() => {
+    if (isBookClosed || !mainBook || !mainBook.id || mainBook.id.startsWith('empty-')) return;
+    try {
+      const payload = {
+        id: mainBook.id,
+        title: mainBook.title,
+        subject: mainBook.subject,
+        author: mainBook.author,
+        edition: mainBook.edition,
+        coverColor: mainBook.coverColor,
+        bookmarks: mainBook.bookmarks,
+        pdfFileUrl: mainBook.pdfFileUrl,
+        driveFileId: mainBook.driveFileId,
+        storageProvider: mainBook.storageProvider,
+        pages: Array.isArray(mainBook.pages) ? mainBook.pages.slice(0, 60) : [],
+        savedPageNum: mainPageNum,
+        updatedAt: Date.now(),
+      };
+      localStorage.setItem('achiev_last_read_book_v1', JSON.stringify(payload));
+    } catch {}
+  }, [mainBook, mainPageNum, isBookClosed]);
 
   // Attached documents list (initially empty)
   const [attachedDocs, setAttachedDocs] = useState<AttachedDoc[]>([]);

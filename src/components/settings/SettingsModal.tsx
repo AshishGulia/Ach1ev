@@ -58,16 +58,18 @@ import {
   ArrowLeft,
   ArrowRight,
   Menu,
+  Image as ImageIcon,
 } from 'lucide-react';
 
 export type SettingsTabId =
+  | 'profile'
   | 'designs'
+  | 'wallpaper'
   | 'typography'
   | 'cloud-sync'
   | 'import-notes'
   | 'sidebar-buttons'
   | 'customizer'
-  | 'profile'
   | 'languages'
   | 'subscription'
   | 'defaults';
@@ -149,17 +151,17 @@ export const MASTER_EDITIONS: MasterEdition[] = [
   },
   {
     id: '4',
-    title: 'Turquoise & Kabul Loft',
-    badge: 'Theme 4 · Bright Turquoise & Bronze',
-    category: 'Bright Turquoise #21DAEF · Kabul Bronze #58423E',
-    tagline: 'Electric #21DAEF turquoise cove illumination paired with warm architectural #58423E Kabul bronze',
-    description: 'Modern architectural contrast fusing vibrant #21DAEF turquoise clarity with earthy #58423E Kabul bronze stone walls and frosted glass surfaces.',
-    paletteColors: ['#eafbfc', '#21daef', '#0893a6', '#58423e', '#120d0c'],
+    title: 'Slate & Cobalt Loft',
+    badge: 'Theme 4 · Slate Grey & Cobalt Blue',
+    category: 'Slate Grey #cbd5e1 · Cobalt Blue #2563eb · Charcoal #13161c',
+    tagline: 'Architectural slate grey & royal cobalt blue by day, deep gunmetal slate by night',
+    description: 'Clean architectural contrast pairing cool slate grey surfaces and crisp white cards with royal cobalt blue accents in Light mode and deep gunmetal slate (#13161c / #1f242d) in Dark mode.',
+    paletteColors: ['#f1f5f9', '#cbd5e1', '#3b82f6', '#2563eb', '#13161c'],
     keyHighlights: [
-      'Bright Turquoise (#21DAEF) accents over warm #58423E Kabul bronze',
-      'Frosted architectural glass cards & cove-lit dark workspace',
-      'High-contrast turquoise gradient active controls',
-      'Architectural Loft button contours & Shelf mood lighting',
+      'Slate Grey (#f1f5f9) Light Mode & Gunmetal Charcoal (#13161c) Dark Mode',
+      'Cobalt Blue (#2563eb / #3b82f6) interactive controls & glass cards',
+      'Crisp architectural contrast tailored for long anatomy & pathology sessions',
+      'Matching Cobalt & Slate Loft button contours & Shelf ambiance',
     ],
   },
   {
@@ -225,7 +227,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onSelectDesign,
   onOpenAIStudioModal,
   isWorkspaceView = false,
-  initialTab = 'designs',
+  initialTab = 'profile',
   onSyncNow,
   onLogout,
 }) => {
@@ -251,6 +253,71 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
   // Per-theme Light / Dark screenshot preview toggle state
   const [themePreviewModes, setThemePreviewModes] = useState<Record<string, 'light' | 'dark'>>({});
+
+  // Custom Workspace Wallpaper Studio state
+  const [customWallpaper, setCustomWallpaper] = useState<string>(() => {
+    try {
+      return localStorage.getItem('achiev_custom_wallpaper_v1') || '';
+    } catch {
+      return '';
+    }
+  });
+  const [customWallpaperOpacity, setCustomWallpaperOpacity] = useState<number>(() => {
+    try {
+      const n = Number(localStorage.getItem('achiev_custom_wallpaper_opacity_v1'));
+      return Number.isFinite(n) && n >= 0.1 && n <= 1 ? n : 0.85;
+    } catch {
+      return 0.85;
+    }
+  });
+
+  const applyCustomWallpaper = (uri: string, opacityVal: number) => {
+    setCustomWallpaper(uri);
+    setCustomWallpaperOpacity(opacityVal);
+    try {
+      if (uri) {
+        localStorage.setItem('achiev_custom_wallpaper_v1', uri);
+      } else {
+        localStorage.removeItem('achiev_custom_wallpaper_v1');
+      }
+      localStorage.setItem('achiev_custom_wallpaper_opacity_v1', String(opacityVal));
+      window.dispatchEvent(new Event('achiev_wallpaper_changed'));
+    } catch {}
+  };
+
+  const handleUploadWallpaperFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = typeof reader.result === 'string' ? reader.result : '';
+      if (!dataUrl) return;
+      const img = new window.Image();
+      img.onload = () => {
+        const maxDim = 1600;
+        let w = img.width;
+        let h = img.height;
+        if (w > maxDim || h > maxDim) {
+          const ratio = Math.min(maxDim / w, maxDim / h);
+          w = Math.round(w * ratio);
+          h = Math.round(h * ratio);
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, w, h);
+          const compressed = canvas.toDataURL('image/jpeg', 0.84);
+          applyCustomWallpaper(`url("${compressed}")`, customWallpaperOpacity);
+        } else {
+          applyCustomWallpaper(`url("${dataUrl}")`, customWallpaperOpacity);
+        }
+      };
+      img.src = dataUrl;
+    };
+    reader.readAsDataURL(file);
+  };
 
   // Connected Cloud & Drive websites
   interface ConnectedDriveItem {
@@ -772,13 +839,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="flex flex-col items-center gap-1 overflow-y-auto flex-1 w-full py-1 custom-scrollbar">
                 {(
                   [
+                    { id: 'profile', label: 'Student Profile', icon: User },
                     { id: 'designs', label: 'Themes', icon: Palette },
+                    { id: 'wallpaper', label: 'Wallpaper', icon: ImageIcon, iconClass: 'text-amber-600 dark:text-amber-400' },
                     { id: 'typography', label: 'Fonts', icon: Type },
                     { id: 'cloud-sync', label: 'Cloud & Drive', icon: Cloud, iconClass: 'text-amber-600 dark:text-amber-400' },
                     { id: 'import-notes', label: 'Import Notes', icon: UploadCloud, iconClass: 'text-amber-600 dark:text-amber-400' },
                     { id: 'sidebar-buttons', label: 'Sidebar Customizer', icon: SlidersHorizontal, iconClass: 'text-amber-600 dark:text-amber-400' },
                     { id: 'customizer', label: 'Student Customizer', icon: Sparkles, iconClass: 'text-amber-500' },
-                    { id: 'profile', label: 'Student Profile', icon: User },
                     { id: 'languages', label: 'Languages', icon: Globe, iconClass: 'text-amber-600 dark:text-amber-400' },
                     { id: 'subscription', label: 'Plans & Pricing', icon: Crown, iconClass: 'text-amber-500' },
                     { id: 'defaults', label: 'Backup & Reset', icon: RotateCcw },
@@ -855,13 +923,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="rounded-xl p-1 space-y-0.5 bg-stone-100/70 dark:bg-[#1a110b] border border-stone-200/75 dark:border-[#2e1e13]">
                 {(
                   [
+                    { id: 'profile', label: 'Student Profile', icon: User },
                     { id: 'designs', label: 'Themes', icon: Palette },
+                    { id: 'wallpaper', label: 'Wallpaper', icon: ImageIcon, iconClass: 'text-amber-600 dark:text-amber-400' },
                     { id: 'typography', label: 'Fonts', icon: Type },
                     { id: 'cloud-sync', label: 'Cloud & Drive', icon: Cloud, iconClass: 'text-amber-600 dark:text-amber-400' },
                     { id: 'import-notes', label: 'Import Notes', icon: UploadCloud, iconClass: 'text-amber-600 dark:text-amber-400' },
                     { id: 'sidebar-buttons', label: 'Sidebar Customizer', icon: SlidersHorizontal, iconClass: 'text-amber-600 dark:text-amber-400' },
                     { id: 'customizer', label: 'Student Customizer', icon: Sparkles, iconClass: 'text-amber-500' },
-                    { id: 'profile', label: 'Student Profile', icon: User },
                     { id: 'languages', label: 'Languages', icon: Globe, iconClass: 'text-amber-600 dark:text-amber-400' },
                     { id: 'subscription', label: 'Plans & Pricing', icon: Crown, iconClass: 'text-amber-500' },
                     { id: 'defaults', label: 'Backup & Reset', icon: RotateCcw },
@@ -925,13 +994,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 {
                   (
                     {
+                      profile: 'Student Profile',
                       designs: 'Themes',
+                      wallpaper: 'Wallpaper',
                       typography: 'Fonts',
                       'cloud-sync': 'Cloud & Drive',
                       'import-notes': 'Import Notes',
                       'sidebar-buttons': 'Sidebar Customizer',
                       customizer: 'Student Customizer',
-                      profile: 'Student Profile',
                       languages: 'Languages',
                       subscription: 'Plans & Pricing',
                       defaults: 'Backup & Reset',
@@ -1058,6 +1128,151 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           onApply={() => handleSelectEdition(edition.id)}
                         />
                       </div>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* TAB: WALLPAPER STUDIO (CURATED BACKDROPS, CUSTOM IMAGE & OPACITY)         */}
+          {/* ========================================================================= */}
+          {activeTab === 'wallpaper' && (
+            <div className="space-y-5">
+              <div className="pb-2 border-b border-stone-200 dark:border-[#382518] flex flex-wrap items-center justify-between gap-2">
+                <h4 className="text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  <span>Workspace Wallpaper</span>
+                </h4>
+                {customWallpaper && (
+                  <button
+                    type="button"
+                    onClick={() => applyCustomWallpaper('', 0.85)}
+                    className="px-3 py-1 rounded-lg bg-stone-200 dark:bg-[#251a12] hover:bg-stone-300 dark:hover:bg-[#322318] text-xs font-semibold text-stone-800 dark:text-stone-200 cursor-pointer flex items-center gap-1"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    <span>Reset to Theme Default</span>
+                  </button>
+                )}
+              </div>
+
+              {/* Upload Custom Wallpaper Image from Device */}
+              <div className="p-4 rounded-2xl border border-stone-200 dark:border-[#382518] bg-white dark:bg-[#18110c] space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div>
+                    <h5 className="text-sm font-bold text-stone-900 dark:text-stone-100">Custom Image Wallpaper</h5>
+                    <p className="text-xs text-stone-500 dark:text-stone-400">
+                      Upload any high-resolution photo from your device (resized cleanly for instant loading).
+                    </p>
+                  </div>
+                  <label className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold cursor-pointer flex items-center gap-1.5 shadow-sm">
+                    <UploadCloud className="w-4 h-4" />
+                    <span>Upload Wallpaper</span>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleUploadWallpaperFile}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+
+                <div className="pt-2 border-t border-stone-200/80 dark:border-[#2e1e13] flex items-center gap-3">
+                  <span className="text-xs font-semibold text-stone-700 dark:text-stone-300 whitespace-nowrap">
+                    Opacity: {Math.round(customWallpaperOpacity * 100)}%
+                  </span>
+                  <input
+                    type="range"
+                    min={15}
+                    max={100}
+                    value={Math.round(customWallpaperOpacity * 100)}
+                    onChange={(e) =>
+                      applyCustomWallpaper(customWallpaper, Math.max(0.15, Math.min(1, Number(e.target.value) / 100)))
+                    }
+                    className="flex-1 accent-amber-600 cursor-pointer"
+                  />
+                </div>
+              </div>
+
+              {/* Curated Architectural & Atmospheric Wallpapers */}
+              <div className="space-y-2.5">
+                <h5 className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400">
+                  Curated Royal Study Backdrops
+                </h5>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {[
+                    {
+                      id: 'theme-default',
+                      title: 'Theme Default Wallpaper',
+                      desc: 'Matches your active Edition',
+                      uri: '',
+                      preview: 'linear-gradient(135deg, #2a180d 0%, #a47c43 50%, #f6f2ea 100%)',
+                    },
+                    {
+                      id: 'royal-linen',
+                      title: 'Warm Royal Linen Mesh',
+                      desc: 'Soft parchment & golden glow',
+                      uri: 'radial-gradient(circle at 20% 20%, rgba(251,191,36,0.22), transparent 55%), linear-gradient(135deg, #fdfbf7 0%, #f3ead8 55%, #e8d9be 100%)',
+                      preview: 'linear-gradient(135deg, #fdfbf7 0%, #f3ead8 55%, #e8d9be 100%)',
+                    },
+                    {
+                      id: 'obsidian-gold',
+                      title: 'Espresso Library Night',
+                      desc: 'Deep walnut embers & bronze mist',
+                      uri: 'radial-gradient(circle at 80% 18%, rgba(217,119,6,0.22), transparent 48%), linear-gradient(145deg, #0d0704 0%, #24130a 52%, #130905 100%)',
+                      preview: 'linear-gradient(145deg, #0d0704 0%, #24130a 52%, #130905 100%)',
+                    },
+                    {
+                      id: 'emerald-greenhouse',
+                      title: 'Evergreen Forest Mist',
+                      desc: 'Calming botanical canopy depth',
+                      uri: 'radial-gradient(circle at 28% 24%, rgba(212,175,55,0.16), transparent 52%), linear-gradient(145deg, #031511 0%, #063229 50%, #090e0e 100%)',
+                      preview: 'linear-gradient(145deg, #031511 0%, #063229 50%, #090e0e 100%)',
+                    },
+                    {
+                      id: 'slate-cobalt',
+                      title: 'Slate & Cobalt Architectural',
+                      desc: 'Cool slate frost & deep sapphire',
+                      uri: 'radial-gradient(circle at 75% 22%, rgba(59,130,246,0.22), transparent 52%), linear-gradient(145deg, #0f172a 0%, #1e293b 55%, #13161c 100%)',
+                      preview: 'linear-gradient(145deg, #0f172a 0%, #1e293b 55%, #13161c 100%)',
+                    },
+                    {
+                      id: 'twilight-plum',
+                      title: 'Twilight Velvet Horizon',
+                      desc: 'Plum, orchid & warm sunset blush',
+                      uri: 'radial-gradient(circle at 75% 20%, rgba(241,145,109,0.24), transparent 50%), linear-gradient(145deg, #1a1230 0%, #473e66 54%, #241738 100%)',
+                      preview: 'linear-gradient(145deg, #1a1230 0%, #473e66 54%, #241738 100%)',
+                    },
+                  ].map((preset) => {
+                    const isSelected = customWallpaper === preset.uri;
+                    return (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        onClick={() => applyCustomWallpaper(preset.uri, customWallpaperOpacity)}
+                        className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${
+                          isSelected
+                            ? 'border-amber-500 ring-2 ring-amber-500/25 bg-amber-50/60 dark:bg-[#231912]'
+                            : 'border-stone-200 dark:border-[#382518] bg-white dark:bg-[#18110c] hover:border-amber-500/50'
+                        }`}
+                      >
+                        <div
+                          className="h-20 w-full rounded-xl border border-black/10 dark:border-white/10 shadow-inner"
+                          style={{ background: preset.preview }}
+                        />
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="min-w-0">
+                            <div className="text-xs font-bold text-stone-900 dark:text-stone-100 truncate">
+                              {preset.title}
+                            </div>
+                            <div className="text-[10.5px] text-stone-500 dark:text-stone-400 truncate">
+                              {preset.desc}
+                            </div>
+                          </div>
+                          {isSelected && <CheckCircle2 className="w-4 h-4 text-amber-600 shrink-0" />}
+                        </div>
+                      </button>
                     );
                   })}
                 </div>
@@ -2001,7 +2216,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </h4>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {SUBSCRIPTION_TIERS.map((tier) => (
                   <div
                     key={tier.id}
@@ -2015,17 +2230,22 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-stone-100 dark:bg-[#251a12] text-stone-700 dark:text-stone-300 uppercase">
                         {tier.badge}
                       </span>
-                      <h5 className="font-bold text-xs text-stone-900 dark:text-stone-100 mt-2">
+                      <h5 className="font-bold text-sm text-stone-900 dark:text-stone-100 mt-2">
                         {tier.name}
                       </h5>
-                      <div className="my-2 text-base font-black font-mono text-stone-900 dark:text-stone-100">
-                        {tier.priceMonthly === 0 ? '₹0 / Free' : `₹${tier.priceMonthly} / mo`}
+                      <div className="my-2">
+                        <div className="text-lg font-black font-mono text-stone-900 dark:text-stone-100">
+                          {tier.priceAnnual === 0 ? '₹0 / Free' : `₹${tier.priceAnnual.toLocaleString('en-IN')} / yr`}
+                        </div>
+                        <div className="text-[11px] font-mono font-bold text-amber-700 dark:text-amber-400">
+                          {tier.priceMonthly === 0 ? 'Forever Free Core Suite' : `Only ₹${tier.priceMonthly} / month`}
+                        </div>
                       </div>
-                      <p className="text-[10.5px] text-stone-500 dark:text-stone-400 line-clamp-2 mb-3">
+                      <p className="text-[11px] text-stone-500 dark:text-stone-400 line-clamp-2 mb-3">
                         {tier.description}
                       </p>
-                      <ul className="space-y-1.5 text-[10px]">
-                        {tier.features.slice(0, 4).map((f, i) => (
+                      <ul className="space-y-1.5 text-[10.5px]">
+                        {tier.features.slice(0, 6).map((f, i) => (
                           <li key={i} className="flex items-start gap-1.5">
                             <Check className="w-3 h-3 text-amber-600 shrink-0 mt-0.5" />
                             <span className="text-stone-700 dark:text-stone-300">{f}</span>
@@ -2041,13 +2261,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           setSavedFeedback(true);
                           setTimeout(() => setSavedFeedback(false), 1500);
                         }}
-                        className={`mt-4 w-full py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                        className={`mt-4 w-full py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                           tier.highlight
                             ? 'themed-accent-btn bg-amber-600 hover:bg-amber-700 text-white'
                             : 'bg-stone-200 dark:bg-[#251a12] hover:bg-stone-300 dark:hover:bg-[#322318] text-stone-800 dark:text-stone-200'
                         }`}
                       >
-                        {tier.priceMonthly === 0 ? 'Current Free' : 'Select Plan'}
+                        {tier.priceMonthly === 0 ? 'Current Free' : `Select ${tier.name}`}
                       </button>
                     </div>
                   ))}

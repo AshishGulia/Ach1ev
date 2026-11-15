@@ -337,11 +337,11 @@ const THEME_LOOK_OVERRIDES: Record<Exclude<ShelfThemeId, '1'>, Record<string, Th
     Vault: { frame: '#021521', dark: '#010b12', back: '#01070b', plank: '#042233', face: '#02111a', handle: '#7298af' },
   },
   '4': {
-    'Dark Chocolate': { frame: '#44322e', dark: '#291d1b', back: '#17100f', plank: '#58423e', face: '#44322e', handle: '#21daef' },
-    'Creamy Caramel': { frame: '#7d605a', dark: '#58423e', back: '#302321', plank: '#967670', face: '#7d605a', handle: '#e9fbfd' },
-    'Vanilla White': { frame: '#e6f9fb', dark: '#b6e6ec', back: '#f2fcfd', plank: '#cceef3', face: '#f6fdfe', handle: '#58423e' },
-    'Mocha Espresso': { frame: '#2a1f1c', dark: '#17100f', back: '#0f0a09', plank: '#3d2d29', face: '#221816', handle: '#21daef' },
-    Vault: { frame: '#120d0c', dark: '#080505', back: '#040303', plank: '#1d1514', face: '#0e0a09', handle: '#21daef' },
+    'Dark Chocolate': { frame: '#1f242d', dark: '#14171c', back: '#0d1015', plank: '#2c3340', face: '#1f242d', handle: '#60a5fa' },
+    'Creamy Caramel': { frame: '#64748b', dark: '#475569', back: '#1e293b', plank: '#94a3b8', face: '#64748b', handle: '#eff6ff' },
+    'Vanilla White': { frame: '#e2e8f0', dark: '#94a3b8', back: '#f1f5f9', plank: '#cbd5e1', face: '#f8fafc', handle: '#1d4ed8' },
+    'Mocha Espresso': { frame: '#171b22', dark: '#0f1217', back: '#090b0f', plank: '#242b38', face: '#13171e', handle: '#3b82f6' },
+    Vault: { frame: '#0f1217', dark: '#080a0d', back: '#050608', plank: '#181d26', face: '#0c0f14', handle: '#60a5fa' },
   },
   '5': {
     'Dark Chocolate': { frame: '#002a23', dark: '#001a15', back: '#020f0d', plank: '#083b32', face: '#002a23', handle: '#d1a854' },
@@ -1509,47 +1509,51 @@ export const ShelfThemePlant: React.FC<{ night: boolean; themeId: ShelfThemeId }
         </svg>
       );
 
-    /* THEME 4: RAIN-KISSED PEACE LILY & CASCADING POTHOS IN SLATE GLAZED URN */
+    /* THEME 4: RAIN-KISSED PEACE LILY & CASCADING POTHOS IN SLATE COBALT GLAZED URN */
     case '4':
       return (
-        <svg viewBox="0 0 176 232" width="148" height="198" style={{ filter: foliageFilter }}>
+        <svg viewBox="0 0 176 232" width="148" height="198" style={{ filter: `${foliageFilter} drop-shadow(0 12px 18px rgba(0,0,0,0.42))` }}>
           <defs>
             <linearGradient id="t4LilyDark" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#2e6b54" />
-              <stop offset="55%" stopColor="#184736" />
-              <stop offset="100%" stopColor="#0d2b20" />
+              <stop offset="0%" stopColor="#327a5f" />
+              <stop offset="55%" stopColor="#194d3b" />
+              <stop offset="100%" stopColor="#0a241b" />
             </linearGradient>
-            <linearGradient id="t4LilyGloss" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#5ea88a" />
-              <stop offset="50%" stopColor="#2c6e55" />
-              <stop offset="100%" stopColor="#143c2e" />
+            <linearGradient id="t4LilyGloss" x1="0.1" y1="0" x2="0.9" y2="1">
+              <stop offset="0%" stopColor="#6eb898" />
+              <stop offset="48%" stopColor="#2f7559" />
+              <stop offset="100%" stopColor="#11382a" />
             </linearGradient>
             <linearGradient id="t4SlateUrn" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#2b3a4a" />
-              <stop offset="32%" stopColor="#66809c" />
-              <stop offset="68%" stopColor="#465b73" />
-              <stop offset="100%" stopColor="#1d2733" />
+              <stop offset="0%" stopColor="#1e242e" />
+              <stop offset="28%" stopColor="#4b5a73" />
+              <stop offset="58%" stopColor="#2d3748" />
+              <stop offset="100%" stopColor="#12161d" />
             </linearGradient>
+            <radialGradient id="t4SoilGrad" cx="50%" cy="45%" r="55%">
+              <stop offset="0%" stopColor="#2d2219" />
+              <stop offset="100%" stopColor="#140e0a" />
+            </radialGradient>
           </defs>
 
-          {/* Soft floor shadow */}
-          <ellipse cx="88" cy="222" rx="42" ry="7" fill="rgba(0,0,0,0.46)" />
+          <ellipse cx="88" cy="222" rx="44" ry="7.5" fill="rgba(0,0,0,0.52)" />
 
-          {/* Glossy Lance-Shaped Peace Lily Foliage */}
-          <path d="M84 140 C56 122 30 92 26 62 C44 64 72 96 86 138 Z" fill="url(#t4LilyDark)" />
-          <path d="M92 140 C120 122 146 92 150 62 C132 64 104 96 90 138 Z" fill="url(#t4LilyDark)" />
-          <path d="M88 140 C70 100 66 54 88 26 C110 54 106 100 88 140 Z" fill="url(#t4LilyGloss)" />
-          <path d="M84 140 C48 134 22 114 18 92 C40 90 66 110 84 138 Z" fill="url(#t4LilyGloss)" />
-          <path d="M92 140 C128 134 154 114 158 92 C136 90 110 110 92 138 Z" fill="url(#t4LilyGloss)" />
+          {/* Back Foliage + Ambient Occlusion Leaf Shadows */}
+          <path d="M84 142 C54 124 28 92 24 60 C44 63 72 96 86 140 Z" fill="url(#t4LilyDark)" />
+          <path d="M92 142 C122 124 148 92 152 60 C132 63 104 96 90 140 Z" fill="url(#t4LilyDark)" />
+          <path d="M88 142 C68 98 64 52 88 22 C112 52 108 98 88 142 Z" fill="url(#t4LilyGloss)" />
+          <path d="M84 142 C46 136 20 116 16 90 C39 89 67 110 84 140 Z" fill="url(#t4LilyGloss)" />
+          <path d="M92 142 C130 136 156 116 160 90 C137 89 109 110 92 140 Z" fill="url(#t4LilyGloss)" />
 
-          {/* Crisp Midrib Highlights & Wet Rainwater Sheen */}
-          <g fill="none" stroke="rgba(218,247,238,0.42)" strokeWidth="1.2">
-            <path d="M88 134 V36" />
-            <path d="M80 132 Q54 100 32 70" />
-            <path d="M96 132 Q122 100 144 70" />
+          {/* Natural Botanical Midribs + Pinnate Lateral Leaf Veins */}
+          <g fill="none" stroke="rgba(220,250,238,0.42)" strokeWidth="1.05" strokeLinecap="round">
+            <path d="M88 136 V32" />
+            <path d="M88 72 Q79 62 74 54 M88 92 Q78 82 72 72 M88 112 Q80 102 74 92" />
+            <path d="M88 72 Q97 62 102 54 M88 92 Q98 82 104 72 M88 112 Q96 102 102 92" />
+            <path d="M80 134 Q54 100 30 68" />
+            <path d="M96 134 Q122 100 146 68" />
           </g>
 
-          {/* Sculpted White Peace Lily Blooms (Spathe + Golden Spadix) */}
           {[
             { x: 64, y: 48, rot: -16 },
             { x: 112, y: 52, rot: 18 },
@@ -1564,22 +1568,20 @@ export const ShelfThemePlant: React.FC<{ night: boolean; themeId: ShelfThemeId }
             </g>
           ))}
 
-          {/* Glistening Monsoon Dewdrops on Leaves */}
-          <circle cx="44" cy="96" r="2.1" fill="#e0f2fe" opacity="0.88" />
-          <circle cx="132" cy="98" r="2.2" fill="#e0f2fe" opacity="0.85" />
-          <circle cx="84" cy="64" r="1.9" fill="#e0f2fe" opacity="0.9" />
+          <circle cx="44" cy="96" r="2.1" fill="#dbeafe" opacity="0.88" />
+          <circle cx="132" cy="98" r="2.2" fill="#dbeafe" opacity="0.85" />
+          <circle cx="84" cy="64" r="1.9" fill="#dbeafe" opacity="0.9" />
 
-          {/* Fluted Glazed Monsoon Slate Ceramic Urn */}
+          {/* Dark Rich Potting Soil + Glazed Ceramic Rim Specular */}
+          <ellipse cx="88" cy="140" rx="42" ry="7.8" fill="url(#t4SoilGrad)" stroke="#60a5fa" strokeOpacity="0.45" strokeWidth="2" />
           <path d="M46 140 L52 206 Q88 218 124 206 L130 140 Q88 149 46 140 Z" fill="url(#t4SlateUrn)" />
-          <ellipse cx="88" cy="140" rx="42" ry="7.5" fill="#1e293b" stroke="#85a1bd" strokeWidth="2" />
-          {/* Vertical Ceramic Fluting Ribs */}
-          <g stroke="rgba(203,219,235,0.22)" strokeWidth="1.2">
+          <path d="M60 148 L63 206" stroke="rgba(255,255,255,0.18)" strokeWidth="4" strokeLinecap="round" />
+          <g stroke="rgba(147,197,253,0.18)" strokeWidth="1.2">
             {[60, 74, 88, 102, 116].map((x) => (
               <line key={x} x1={x} y1="146" x2={x + (x - 88) * 0.08} y2="210" />
             ))}
           </g>
 
-          {/* Cascading Wet Heart-Leaf Pothos Vines Over Urn Rim */}
           <path d="M54 142 Q42 164 46 186" fill="none" stroke="#296348" strokeWidth="2" />
           <path d="M46 154 C36 156 36 168 46 170 C54 168 54 156 46 154 Z" fill="#46916d" />
           <path d="M45 174 C36 176 37 188 46 189 C53 187 52 175 45 174 Z" fill="#357a59" />
@@ -1591,7 +1593,7 @@ export const ShelfThemePlant: React.FC<{ night: boolean; themeId: ShelfThemeId }
     /* THEME 5: ARCHITECTURAL VARIEGATED SNAKE PLANT IN PEDESTAL PLANTER */
     case '5':
       return (
-        <svg viewBox="0 0 176 232" width="148" height="198" style={{ filter: foliageFilter }}>
+        <svg viewBox="0 0 176 232" width="148" height="198" style={{ filter: `${foliageFilter} drop-shadow(0 12px 18px rgba(0,0,0,0.42))` }}>
           <defs>
             <linearGradient id="t5BladeDark" x1="0" y1="0" x2="1" y2="0">
               <stop offset="0%" stopColor="#7bb05b" />
@@ -1613,19 +1615,15 @@ export const ShelfThemePlant: React.FC<{ night: boolean; themeId: ShelfThemeId }
             </linearGradient>
           </defs>
 
-          {/* Soft floor shadow */}
-          <ellipse cx="88" cy="222" rx="40" ry="7" fill="rgba(0,0,0,0.44)" />
+          <ellipse cx="88" cy="222" rx="42" ry="7.5" fill="rgba(0,0,0,0.48)" />
 
-          {/* Back Shaded Upright Sansevieria Sword Leaves */}
           <path d="M62 146 C54 100 50 56 62 24 C74 56 76 100 76 146 Z" fill="url(#t5BladeDark)" />
           <path d="M100 146 C100 100 104 54 116 28 C126 56 122 102 114 146 Z" fill="url(#t5BladeDark)" />
 
-          {/* Center Tall Sunlit Variegated Sword Leaves with Pistachio-Cream Gold Edges */}
           <path d="M78 148 C74 96 76 42 88 8 C100 42 102 96 98 148 Z" fill="url(#t5BladeBright)" />
           <path d="M48 146 C38 108 32 76 42 48 C54 74 62 108 66 146 Z" fill="url(#t5BladeBright)" />
           <path d="M110 146 C114 110 124 76 134 52 C142 78 134 112 126 146 Z" fill="url(#t5BladeBright)" />
 
-          {/* Natural Sansevieria Horizontal Chevron Mottling Bands */}
           <g stroke="rgba(168,217,139,0.28)" strokeWidth="3" strokeLinecap="round" fill="none">
             <path d="M81 48 Q88 43 95 48" />
             <path d="M79 68 Q88 62 97 68" />
@@ -1637,46 +1635,44 @@ export const ShelfThemePlant: React.FC<{ night: boolean; themeId: ShelfThemeId }
             <path d="M118 106 Q125 102 131 106" />
           </g>
 
-          {/* River Pebbles Bed at Pot Top */}
           <ellipse cx="88" cy="144" rx="36" ry="7" fill={night ? '#1c1e22' : '#dfe8d0'} />
           <ellipse cx="70" cy="144" rx="6" ry="3" fill={night ? '#3c4048' : '#b8c4a6'} />
           <ellipse cx="90" cy="146" rx="7" ry="3" fill={night ? '#2c3038' : '#f2f7ea'} />
           <ellipse cx="106" cy="144" rx="5.5" ry="2.8" fill={night ? '#4a4f59' : '#c9d6b6'} />
 
-          {/* Architectural Ribbed Pedestal Cylinder Planter */}
           <path d="M48 144 L52 204 Q88 214 124 204 L128 144 Q88 153 48 144 Z" fill="url(#t5Pot)" />
+          <path d="M60 150 L62 202" stroke="rgba(255,255,255,0.22)" strokeWidth="4" strokeLinecap="round" />
           <ellipse cx="88" cy="144" rx="40" ry="7" fill="none" stroke={night ? '#a8d98b' : '#7ea862'} strokeWidth="2.2" />
-          {/* Minimalist Pedestal Ring Stand */}
           <rect x="64" y="204" width="48" height="10" rx="2" fill={night ? '#141518' : '#73915a'} />
           <line x1="50" y1="168" x2="126" y2="168" stroke={night ? 'rgba(168,217,139,0.28)' : 'rgba(84,122,58,0.22)'} strokeWidth="1.5" />
         </svg>
       );
 
-    /* THEME 1: FIDDLE-LEAF FIG IN MATTE CREAM STONEWARE PLANTER */
+    /* THEME 1: FIDDLE-LEAF FIG IN MATTE CREAM STONEWARE PLANTER (ULTRA-REALISTIC BOTANICAL) */
     default:
       return (
-        <svg viewBox="0 0 160 220" width="136" height="188" style={{ filter: foliageFilter }}>
+        <svg viewBox="0 0 160 220" width="136" height="188" style={{ filter: `${foliageFilter} drop-shadow(0 12px 18px rgba(0,0,0,0.42))` }}>
           <defs>
             <linearGradient id="figLeafDark" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#3b6e44" />
-              <stop offset="55%" stopColor="#254c2c" />
-              <stop offset="100%" stopColor="#16301b" />
+              <stop offset="0%" stopColor="#3d7346" />
+              <stop offset="55%" stopColor="#234a2b" />
+              <stop offset="100%" stopColor="#122817" />
             </linearGradient>
             <linearGradient id="figLeafMid" x1="0" y1="0" x2="0.8" y2="1">
-              <stop offset="0%" stopColor="#588e5b" />
-              <stop offset="55%" stopColor="#35663b" />
-              <stop offset="100%" stopColor="#1f4124" />
+              <stop offset="0%" stopColor="#5d955f" />
+              <stop offset="55%" stopColor="#35683c" />
+              <stop offset="100%" stopColor="#1b3c21" />
             </linearGradient>
             <linearGradient id="figLeafLight" x1="0.1" y1="0" x2="0.9" y2="1">
-              <stop offset="0%" stopColor="#72a76f" />
-              <stop offset="60%" stopColor="#467a48" />
-              <stop offset="100%" stopColor="#284e2b" />
+              <stop offset="0%" stopColor="#7bb377" />
+              <stop offset="58%" stopColor="#467c49" />
+              <stop offset="100%" stopColor="#254c28" />
             </linearGradient>
             <linearGradient id="ceramicPotGrad" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#a89882" />
-              <stop offset="28%" stopColor="#ede3d4" />
+              <stop offset="0%" stopColor="#a08f78" />
+              <stop offset="28%" stopColor="#f5ede0" />
               <stop offset="62%" stopColor="#d8cab4" />
-              <stop offset="100%" stopColor="#85745f" />
+              <stop offset="100%" stopColor="#7d6c56" />
             </linearGradient>
             <linearGradient id="woodStandGrad" x1="0" y1="0" x2="1" y2="0">
               <stop offset="0%" stopColor="#472b19" />
@@ -1685,7 +1681,7 @@ export const ShelfThemePlant: React.FC<{ night: boolean; themeId: ShelfThemeId }
             </linearGradient>
           </defs>
 
-          <ellipse cx="80" cy="212" rx="42" ry="7" fill="rgba(0,0,0,0.45)" />
+          <ellipse cx="80" cy="212" rx="44" ry="7.5" fill="rgba(0,0,0,0.48)" />
           <path d="M54 176 L46 210 L53 210 L62 178 Z" fill="url(#woodStandGrad)" />
           <path d="M106 176 L114 210 L107 210 L98 178 Z" fill="url(#woodStandGrad)" />
           <rect x="46" y="185" width="68" height="5" rx="2.5" fill="url(#woodStandGrad)" />
@@ -1705,10 +1701,14 @@ export const ShelfThemePlant: React.FC<{ night: boolean; themeId: ShelfThemeId }
           <path d="M82 114 C110 122 128 108 124 92 C120 76 94 82 82 102 C79 107 79 112 82 114 Z" fill="url(#figLeafLight)" />
           <path d="M79 84 C64 74 62 52 78 44 C94 38 100 62 84 82 C81 85 80 86 79 84 Z" fill="url(#figLeafLight)" />
 
-          <g fill="none" stroke="rgba(228, 245, 218, 0.34)" strokeWidth="1.1" strokeLinecap="round">
+          {/* Detailed Midribs & Pinnate Side Veins for Hyper-Realism */}
+          <g fill="none" stroke="rgba(232, 248, 222, 0.38)" strokeWidth="1.05" strokeLinecap="round">
             <path d="M78 50 Q76 30 70 15" />
+            <path d="M75 34 Q66 28 62 22 M75 34 Q82 26 86 21" />
             <path d="M62 74 Q42 54 30 39" />
+            <path d="M46 58 Q36 56 30 50 M52 64 Q48 48 45 40" />
             <path d="M97 68 Q116 48 128 33" />
+            <path d="M112 52 Q122 50 128 44 M106 58 Q110 42 113 34" />
             <path d="M75 89 Q50 78 29 67" />
             <path d="M85 90 Q112 78 129 66" />
             <path d="M76 109 Q56 100 40 91" />
@@ -1717,7 +1717,10 @@ export const ShelfThemePlant: React.FC<{ night: boolean; themeId: ShelfThemeId }
           </g>
 
           <ellipse cx="80" cy="136" rx="34" ry="7" fill="#2c1d13" />
+          <ellipse cx="68" cy="136" rx="5" ry="2.2" fill="#4f3b2c" />
+          <ellipse cx="90" cy="137" rx="6" ry="2.4" fill="#3a2a1e" />
           <path d="M44 136 L49 182 Q80 192 111 182 L116 136 Q80 144 44 136 Z" fill="url(#ceramicPotGrad)" />
+          <path d="M56 142 L59 179" stroke="rgba(255,255,255,0.28)" strokeWidth="4" strokeLinecap="round" />
           <ellipse cx="80" cy="136" rx="36" ry="7.5" fill="none" stroke="#efe6d8" strokeWidth="2.4" />
           <path d="M47 166 Q80 175 113 166" fill="none" stroke="rgba(110,92,70,0.28)" strokeWidth="1.2" />
         </svg>
