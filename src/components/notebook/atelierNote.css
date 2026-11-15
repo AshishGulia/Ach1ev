@@ -2973,118 +2973,118 @@ html.dark .an-ed .an-hand-underline {
    ========================================================================= */
 html[data-design="2"] .atelier-note-root,
 .atelier-note-root[data-atelier-theme="2"] {
-  --an-bg: rgba(235, 242, 231, 0.18);
-  --an-bg2: rgba(223, 235, 217, 0.68);
-  --an-paper: rgba(247, 251, 244, 0.88);
-  --an-page: #fdfef9;
-  --an-ink: #17261b;
-  --an-muted: #46614d;
-  --an-line: #c4d5bf;
-  --an-brass: #7a5c32;
-  --an-sage: #2f6b43;
-  --an-sage-soft: rgba(47, 107, 67, 0.14);
-  --an-brass-soft: rgba(122, 92, 50, 0.14);
+  --an-bg: rgba(253, 243, 245, 0.18);
+  --an-bg2: rgba(245, 215, 219, 0.68);
+  --an-paper: rgba(255, 247, 249, 0.88);
+  --an-page: #fff9fa;
+  --an-ink: #2a1d3d;
+  --an-muted: #473e66;
+  --an-line: #e2becb;
+  --an-brass: #c95d38;
+  --an-sage: #7d5382;
+  --an-sage-soft: rgba(189, 131, 184, 0.16);
+  --an-brass-soft: rgba(241, 145, 109, 0.16);
 }
 html.dark[data-design="2"] .atelier-note-root,
 .dark .atelier-note-root[data-atelier-theme="2"] {
-  --an-bg: rgba(3, 6, 4, 0.28);
-  --an-bg2: rgba(5, 9, 7, 0.84);
-  --an-paper: rgba(7, 12, 9, 0.92);
-  --an-page: #070c09;
-  --an-ink: #e3f0e6;
-  --an-muted: #93b39c;
-  --an-line: #17261c;
-  --an-brass: #c49b57;
-  --an-sage: #63c287;
-  --an-sage-soft: rgba(99, 194, 135, 0.18);
-  --an-brass-soft: rgba(196, 155, 87, 0.16);
+  --an-bg: rgba(16, 13, 29, 0.28);
+  --an-bg2: rgba(22, 18, 42, 0.84);
+  --an-paper: rgba(26, 22, 48, 0.92);
+  --an-page: #18132d;
+  --an-ink: #f8e8ec;
+  --an-muted: #cfaed0;
+  --an-line: #473e66;
+  --an-brass: #f1916d;
+  --an-sage: #bd83b8;
+  --an-sage-soft: rgba(189, 131, 184, 0.18);
+  --an-brass-soft: rgba(241, 145, 109, 0.18);
 }
 
 html[data-design="3"] .atelier-note-root,
 .atelier-note-root[data-atelier-theme="3"] {
-  --an-bg: rgba(244, 239, 230, 0.18);
-  --an-bg2: rgba(232, 224, 210, 0.68);
-  --an-paper: rgba(252, 249, 243, 0.88);
-  --an-page: #fffdf8;
-  --an-ink: #152736;
-  --an-muted: #4c6578;
-  --an-line: #d4cab8;
-  --an-brass: #b07d4f;
-  --an-sage: #1c637a;
-  --an-sage-soft: rgba(28, 99, 122, 0.14);
-  --an-brass-soft: rgba(176, 125, 79, 0.14);
+  --an-bg: rgba(234, 255, 255, 0.18);
+  --an-bg2: rgba(194, 232, 255, 0.68);
+  --an-paper: rgba(246, 254, 255, 0.88);
+  --an-page: #f9feff;
+  --an-ink: #042a41;
+  --an-muted: #365c73;
+  --an-line: #9cc5de;
+  --an-brass: #7298af;
+  --an-sage: #004671;
+  --an-sage-soft: rgba(0, 70, 113, 0.14);
+  --an-brass-soft: rgba(114, 152, 175, 0.16);
 }
 html.dark[data-design="3"] .atelier-note-root,
 .dark .atelier-note-root[data-atelier-theme="3"] {
-  --an-bg: rgba(7, 18, 29, 0.22);
-  --an-bg2: rgba(9, 22, 35, 0.76);
-  --an-paper: rgba(12, 27, 41, 0.88);
-  --an-page: #102030;
-  --an-ink: #e6eff5;
-  --an-muted: #98bdd2;
-  --an-line: #1f415d;
-  --an-brass: #d4a373;
-  --an-sage: #4fb0cc;
-  --an-sage-soft: rgba(79, 176, 204, 0.18);
-  --an-brass-soft: rgba(212, 163, 115, 0.16);
+  --an-bg: rgba(2, 21, 33, 0.24);
+  --an-bg2: rgba(3, 30, 48, 0.80);
+  --an-paper: rgba(4, 42, 65, 0.90);
+  --an-page: #042438;
+  --an-ink: #eaffff;
+  --an-muted: #9fc6de;
+  --an-line: #1d5678;
+  --an-brass: #c2e8ff;
+  --an-sage: #72b8db;
+  --an-sage-soft: rgba(114, 184, 219, 0.18);
+  --an-brass-soft: rgba(194, 232, 255, 0.16);
 }
 
 html[data-design="4"] .atelier-note-root,
 .atelier-note-root[data-atelier-theme="4"] {
-  --an-bg: rgba(231, 237, 243, 0.18);
-  --an-bg2: rgba(218, 228, 238, 0.68);
-  --an-paper: rgba(244, 248, 252, 0.86);
-  --an-page: #f9fcff;
-  --an-ink: #182230;
-  --an-muted: #4b5e76;
-  --an-line: #c4d0de;
-  --an-brass: #9e6530;
-  --an-sage: #365578;
-  --an-sage-soft: rgba(54, 85, 120, 0.14);
-  --an-brass-soft: rgba(158, 101, 48, 0.14);
+  --an-bg: rgba(234, 251, 252, 0.18);
+  --an-bg2: rgba(224, 245, 248, 0.68);
+  --an-paper: rgba(246, 253, 254, 0.88);
+  --an-page: #f7feff;
+  --an-ink: #2b1f1c;
+  --an-muted: #58423e;
+  --an-line: #98d9e2;
+  --an-brass: #58423e;
+  --an-sage: #0893a6;
+  --an-sage-soft: rgba(33, 218, 239, 0.15);
+  --an-brass-soft: rgba(88, 66, 62, 0.14);
 }
 html.dark[data-design="4"] .atelier-note-root,
 .dark .atelier-note-root[data-atelier-theme="4"] {
-  --an-bg: rgba(9, 15, 24, 0.22);
-  --an-bg2: rgba(12, 20, 32, 0.76);
-  --an-paper: rgba(15, 23, 36, 0.88);
-  --an-page: #131c2b;
-  --an-ink: #e6edf6;
-  --an-muted: #99aec9;
-  --an-line: #2c3f5b;
-  --an-brass: #d9934c;
-  --an-sage: #7ea5d6;
-  --an-sage-soft: rgba(126, 165, 214, 0.18);
-  --an-brass-soft: rgba(217, 147, 76, 0.16);
+  --an-bg: rgba(18, 13, 12, 0.26);
+  --an-bg2: rgba(26, 19, 17, 0.82);
+  --an-paper: rgba(34, 25, 23, 0.90);
+  --an-page: #1d1412;
+  --an-ink: #e9fbfd;
+  --an-muted: #c6b0ab;
+  --an-line: #6e524c;
+  --an-brass: #d4a373;
+  --an-sage: #21daef;
+  --an-sage-soft: rgba(33, 218, 239, 0.18);
+  --an-brass-soft: rgba(88, 66, 62, 0.24);
 }
 
 html[data-design="5"] .atelier-note-root,
 .atelier-note-root[data-atelier-theme="5"] {
-  --an-bg: rgba(245, 248, 238, 0.18);
-  --an-bg2: rgba(238, 244, 226, 0.68);
-  --an-paper: rgba(248, 251, 242, 0.76);
-  --an-page: #fdfef9;
-  --an-ink: #1e2b18;
-  --an-muted: #566b4c;
-  --an-line: #d7e3c5;
-  --an-brass: #578440;
-  --an-sage: #67944d;
-  --an-sage-soft: rgba(87, 132, 64, 0.14);
-  --an-brass-soft: rgba(103, 148, 77, 0.14);
+  --an-bg: rgba(245, 237, 226, 0.20);
+  --an-bg2: rgba(232, 216, 198, 0.68);
+  --an-paper: rgba(252, 248, 242, 0.88);
+  --an-page: #fdfaf5;
+  --an-ink: #002a23;
+  --an-muted: #2b5248;
+  --an-line: #cab095;
+  --an-brass: #b48735;
+  --an-sage: #002a23;
+  --an-sage-soft: rgba(0, 42, 35, 0.13);
+  --an-brass-soft: rgba(209, 168, 84, 0.16);
 }
 html.dark[data-design="5"] .atelier-note-root,
 .dark .atelier-note-root[data-atelier-theme="5"] {
-  --an-bg: rgba(4, 4, 5, 0.24);
-  --an-bg2: rgba(11, 11, 13, 0.8);
-  --an-paper: rgba(11, 11, 13, 0.9);
-  --an-page: #0a0a0c;
-  --an-ink: #eef4ea;
-  --an-muted: #9aa498;
-  --an-line: #27282e;
-  --an-brass: #e5eed6;
-  --an-sage: #d7e4c4;
-  --an-sage-soft: rgba(229, 238, 214, 0.14);
-  --an-brass-soft: rgba(229, 238, 214, 0.14);
+  --an-bg: rgba(9, 14, 14, 0.28);
+  --an-bg2: rgba(5, 26, 22, 0.84);
+  --an-paper: rgba(5, 32, 27, 0.92);
+  --an-page: #061c18;
+  --an-ink: #f2e7d9;
+  --an-muted: #d8c2aa;
+  --an-line: #134c40;
+  --an-brass: #d1a854;
+  --an-sage: #d8c2aa;
+  --an-sage-soft: rgba(216, 194, 170, 0.15);
+  --an-brass-soft: rgba(209, 168, 84, 0.18);
 }
 
 html[data-design] .atelier-note-root .an-top {

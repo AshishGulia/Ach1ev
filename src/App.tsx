@@ -99,8 +99,10 @@ export default function App() {
   // In-Notebook Active Note Editor View (when student opens a notebook directly)
   const [isEditingNote, setIsEditingNote] = useState<boolean>(false);
 
-  // Left vertical column sidebar open/hide state
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(true);
+  // Left vertical column sidebar open/hide state (auto-collapsed on mobile for clean fast viewport)
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(() =>
+    typeof window !== 'undefined' ? window.innerWidth >= 768 : true
+  );
 
   // Data Collections
   const [optionSlabs, setOptionSlabs] = useState<OptionSlab[]>(() => {

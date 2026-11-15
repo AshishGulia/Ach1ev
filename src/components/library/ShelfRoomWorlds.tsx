@@ -323,32 +323,32 @@ export interface ThemeLookTint {
 
 const THEME_LOOK_OVERRIDES: Record<Exclude<ShelfThemeId, '1'>, Record<string, ThemeLookTint>> = {
   '2': {
-    'Dark Chocolate': { frame: '#322318', dark: '#1d140d', back: '#141a14', plank: '#433020', face: '#322318', handle: '#c8a96a' },
-    'Creamy Caramel': { frame: '#8f7451', dark: '#634d33', back: '#3b3325', plank: '#a3865f', face: '#8f7451', handle: '#f3ecd8' },
-    'Vanilla White': { frame: '#eae7dc', dark: '#c5c2b2', back: '#dee0d4', plank: '#dbd8cb', face: '#f2f0e8', handle: '#526050' },
-    'Mocha Espresso': { frame: '#2d3a33', dark: '#18211c', back: '#101713', plank: '#3d4d44', face: '#27332c', handle: '#d7cdb6' },
-    Vault: { frame: '#0b0e0c', dark: '#040605', back: '#020302', plank: '#111613', face: '#080a09', handle: '#b99c58' },
+    'Dark Chocolate': { frame: '#393152', dark: '#211b33', back: '#141124', plank: '#473e66', face: '#393152', handle: '#f1916d' },
+    'Creamy Caramel': { frame: '#9e6e98', dark: '#6d476c', back: '#3d2a42', plank: '#bd83b8', face: '#9e6e98', handle: '#f5d7db' },
+    'Vanilla White': { frame: '#f5d7db', dark: '#d7b4be', back: '#fdf0f2', plank: '#ebd0d6', face: '#fdf4f6', handle: '#473e66' },
+    'Mocha Espresso': { frame: '#2a2240', dark: '#171226', back: '#100d1c', plank: '#3c3259', face: '#231c36', handle: '#f1916d' },
+    Vault: { frame: '#100d1d', dark: '#07050f', back: '#040308', plank: '#1a152e', face: '#0d0a17', handle: '#f1916d' },
   },
   '3': {
-    'Dark Chocolate': { frame: '#594230', dark: '#38281c', back: '#22282d', plank: '#6d533d', face: '#594230', handle: '#e6c88a' },
-    'Creamy Caramel': { frame: '#c9b18e', dark: '#937c5d', back: '#5d5342', plank: '#d6c1a2', face: '#c9b18e', handle: '#fdf9ee' },
-    'Vanilla White': { frame: '#f5f2eb', dark: '#d8d2c6', back: '#ece9e2', plank: '#e7e3da', face: '#faf8f3', handle: '#4e6f7a' },
-    'Mocha Espresso': { frame: '#2d3f4c', dark: '#19252e', back: '#111a21', plank: '#3c5363', face: '#263642', handle: '#e8dec8' },
-    Vault: { frame: '#0a0e12', dark: '#040608', back: '#020305', plank: '#11171d', face: '#070a0d', handle: '#d4b46a' },
+    'Dark Chocolate': { frame: '#163c54', dark: '#0a2233', back: '#041724', plank: '#265370', face: '#163c54', handle: '#c2e8ff' },
+    'Creamy Caramel': { frame: '#557d96', dark: '#365c73', back: '#1d394a', plank: '#7298af', face: '#557d96', handle: '#eaffff' },
+    'Vanilla White': { frame: '#eaffff', dark: '#b3dcf2', back: '#f0fcff', plank: '#c2e8ff', face: '#f5feff', handle: '#004671' },
+    'Mocha Espresso': { frame: '#042a41', dark: '#021826', back: '#01101a', plank: '#004671', face: '#032236', handle: '#c2e8ff' },
+    Vault: { frame: '#021521', dark: '#010b12', back: '#01070b', plank: '#042233', face: '#02111a', handle: '#7298af' },
   },
   '4': {
-    'Dark Chocolate': { frame: '#362620', dark: '#1e1410', back: '#151921', plank: '#47332b', face: '#362620', handle: '#d5a865' },
-    'Creamy Caramel': { frame: '#b38862', dark: '#7c593c', back: '#44352a', plank: '#c29973', face: '#b38862', handle: '#f6ead8' },
-    'Vanilla White': { frame: '#eceae6', dark: '#c8c6c0', back: '#dfe1e2', plank: '#dbd9d4', face: '#f2f1ed', handle: '#526273' },
-    'Mocha Espresso': { frame: '#2d3440', dark: '#191e26', back: '#11151b', plank: '#3d4654', face: '#262c36', handle: '#e2cfb4' },
-    Vault: { frame: '#0b0d11', dark: '#040507', back: '#020204', plank: '#11141a', face: '#08090c', handle: '#c99f52' },
+    'Dark Chocolate': { frame: '#44322e', dark: '#291d1b', back: '#17100f', plank: '#58423e', face: '#44322e', handle: '#21daef' },
+    'Creamy Caramel': { frame: '#7d605a', dark: '#58423e', back: '#302321', plank: '#967670', face: '#7d605a', handle: '#e9fbfd' },
+    'Vanilla White': { frame: '#e6f9fb', dark: '#b6e6ec', back: '#f2fcfd', plank: '#cceef3', face: '#f6fdfe', handle: '#58423e' },
+    'Mocha Espresso': { frame: '#2a1f1c', dark: '#17100f', back: '#0f0a09', plank: '#3d2d29', face: '#221816', handle: '#21daef' },
+    Vault: { frame: '#120d0c', dark: '#080505', back: '#040303', plank: '#1d1514', face: '#0e0a09', handle: '#21daef' },
   },
   '5': {
-    'Dark Chocolate': { frame: '#181a18', dark: '#0c0d0c', back: '#060706', plank: '#242923', face: '#181a18', handle: '#a8d98b' },
-    'Creamy Caramel': { frame: '#9ab088', dark: '#6d825d', back: '#3e4d33', plank: '#b0c49e', face: '#9ab088', handle: '#f4faee' },
-    'Vanilla White': { frame: '#edf6e4', dark: '#c7dcba', back: '#e2efd7', plank: '#d7e8ca', face: '#f5fbf0', handle: '#4a8235' },
-    'Mocha Espresso': { frame: '#121316', dark: '#070809', back: '#030304', plank: '#1d1f23', face: '#0e0f12', handle: '#c7e8b0' },
-    Vault: { frame: '#070809', dark: '#020203', back: '#010102', plank: '#0d0e11', face: '#050607', handle: '#a8d98b' },
+    'Dark Chocolate': { frame: '#002a23', dark: '#001a15', back: '#020f0d', plank: '#083b32', face: '#002a23', handle: '#d1a854' },
+    'Creamy Caramel': { frame: '#b3987c', dark: '#80684f', back: '#3b3228', plank: '#d8c2aa', face: '#b3987c', handle: '#fff6e5' },
+    'Vanilla White': { frame: '#efe3d4', dark: '#cbb399', back: '#f8f2ea', plank: '#d8c2aa', face: '#f6ede2', handle: '#002a23' },
+    'Mocha Espresso': { frame: '#06211c', dark: '#03120f', back: '#020a09', plank: '#0a332b', face: '#041a16', handle: '#d1a854' },
+    Vault: { frame: '#090e0e', dark: '#040707', back: '#020404', plank: '#0d1716', face: '#060a0a', handle: '#d1a854' },
   },
 };
 
@@ -374,13 +374,13 @@ export interface ThemeAlmirahTrim {
 export function getThemeAlmirahTrim(themeId: ShelfThemeId): ThemeAlmirahTrim {
   switch (themeId) {
     case '2':
-      return { accentHex: '#5ca376', corniceInlay: 'linear-gradient(90deg, transparent, rgba(114,196,138,0.45), transparent)', plinthAccentBg: '#2f6b43', plinthText: '#f4fbf6' };
+      return { accentHex: '#f1916d', corniceInlay: 'linear-gradient(90deg, transparent, rgba(241,145,109,0.48), transparent)', plinthAccentBg: '#473e66', plinthText: '#f8e8ec' };
     case '3':
-      return { accentHex: '#4fb0cc', corniceInlay: 'linear-gradient(90deg, transparent, rgba(125,211,252,0.5), transparent)', plinthAccentBg: '#1c637a', plinthText: '#f4fbfd' };
+      return { accentHex: '#7298af', corniceInlay: 'linear-gradient(90deg, transparent, rgba(194,232,255,0.50), transparent)', plinthAccentBg: '#004671', plinthText: '#eaffff' };
     case '4':
-      return { accentHex: '#7ea5d6', corniceInlay: 'linear-gradient(90deg, transparent, rgba(147,197,253,0.45), transparent)', plinthAccentBg: '#365578', plinthText: '#f3f7fc' };
+      return { accentHex: '#21daef', corniceInlay: 'linear-gradient(90deg, transparent, rgba(33,218,239,0.52), transparent)', plinthAccentBg: '#58423e', plinthText: '#e9fbfd' };
     case '5':
-      return { accentHex: '#a8d98b', corniceInlay: 'linear-gradient(90deg, transparent, rgba(168,217,139,0.5), transparent)', plinthAccentBg: '#27292c', plinthText: '#eef7e8' };
+      return { accentHex: '#d1a854', corniceInlay: 'linear-gradient(90deg, transparent, rgba(209,168,84,0.52), transparent)', plinthAccentBg: '#002a23', plinthText: '#f2e7d9' };
     default:
       return { accentHex: '#d4af37', corniceInlay: 'linear-gradient(90deg, transparent, rgba(212,175,55,0.42), transparent)', plinthAccentBg: '#b4742a', plinthText: '#1b1108' };
   }

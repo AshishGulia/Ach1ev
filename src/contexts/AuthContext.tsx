@@ -122,7 +122,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     localOtp?: string;
     expiresAt?: number;
   } | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const hasCachedSupabaseSession = (() => {
+    if (typeof window === 'undefined') return false;
+    try {
+      for (let i = 0; i < localStorage.length; i += 1) {
+        const k = localStorage.key(i);
+        if (k && k.startsWith('sb-') && k.endsWith('-auth-token') && localStorage.getItem(k)) {
+          return true;
+        }
+      }
+    } catch {}
+    return false;
+  })();
+  const [isLoading, setIsLoading] = useState<boolean>(
+    () => isSupabaseConfigured() && hasCachedSupabaseSession
+  );
   const [supabaseReady, setSupabaseReady] = useState<boolean>(() => isSupabaseConfigured());
   const [isGuestMode, setIsGuestMode] = useState<boolean>(() => {
     if (typeof window === 'undefined') return false;
@@ -220,12 +234,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     let mounted = true;
-    setIsLoading(true);
+    // Fast-fail safety timer so slow mobile networks never stall initial render
+    const loadingSafetyTimer = window.setTimeout(() => {
+      if (mounted) setIsLoading(false);
+    }, 1200);
 
     supabase.auth
       .getSession()
       .then(({ data }) => {
         if (!mounted) return;
+        window.clearTimeout(loadingSafetyTimer);
         const sess = data.session ?? null;
         setSession(sess);
         setUser(sess?.user ?? null);
@@ -248,6 +266,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsLoading(false);
       })
       .catch(() => {
+        window.clearTimeout(loadingSafetyTimer);
         if (mounted) setIsLoading(false);
       });
 

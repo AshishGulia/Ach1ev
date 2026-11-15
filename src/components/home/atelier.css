@@ -1293,102 +1293,102 @@ html.dark .atelier-sticky,
 
 html[data-design="2"] .atelier-root,
 .atelier-root[data-atelier-theme="2"] {
-  --at-bg: rgba(235, 242, 231, 0.18);
-  --at-paper: rgba(247, 251, 244, 0.84);
-  --at-ink: #17261b;
-  --at-muted: #46614d;
-  --at-line: #c4d5bf;
-  --at-brass: #7a5c32;
-  --at-sage: #2f6b43;
-  --at-sage-soft: rgba(47, 107, 67, 0.14);
-  --at-brass-soft: rgba(122, 92, 50, 0.14);
+  --at-bg: rgba(253, 243, 245, 0.18);
+  --at-paper: rgba(255, 247, 249, 0.86);
+  --at-ink: #2a1d3d;
+  --at-muted: #473e66;
+  --at-line: #e2becb;
+  --at-brass: #c95d38;
+  --at-sage: #7d5382;
+  --at-sage-soft: rgba(189, 131, 184, 0.16);
+  --at-brass-soft: rgba(241, 145, 109, 0.16);
 }
 html.dark[data-design="2"] .atelier-root,
 .dark .atelier-root[data-atelier-theme="2"] {
-  --at-bg: rgba(3, 6, 4, 0.28);
-  --at-paper: rgba(6, 11, 8, 0.9);
-  --at-ink: #e3f0e6;
-  --at-muted: #93b39c;
-  --at-line: #17261c;
-  --at-brass: #c49b57;
-  --at-sage: #63c287;
-  --at-sage-soft: rgba(99, 194, 135, 0.18);
-  --at-brass-soft: rgba(196, 155, 87, 0.16);
+  --at-bg: rgba(16, 13, 29, 0.28);
+  --at-paper: rgba(26, 22, 48, 0.90);
+  --at-ink: #f8e8ec;
+  --at-muted: #cfaed0;
+  --at-line: #473e66;
+  --at-brass: #f1916d;
+  --at-sage: #bd83b8;
+  --at-sage-soft: rgba(189, 131, 184, 0.18);
+  --at-brass-soft: rgba(241, 145, 109, 0.18);
 }
 
 html[data-design="3"] .atelier-root,
 .atelier-root[data-atelier-theme="3"] {
-  --at-bg: rgba(244, 239, 230, 0.18);
-  --at-paper: rgba(252, 249, 243, 0.84);
-  --at-ink: #152736;
-  --at-muted: #4c6578;
-  --at-line: #d4cab8;
-  --at-brass: #b07d4f;
-  --at-sage: #1c637a;
-  --at-sage-soft: rgba(28, 99, 122, 0.14);
-  --at-brass-soft: rgba(176, 125, 79, 0.14);
+  --at-bg: rgba(234, 255, 255, 0.18);
+  --at-paper: rgba(246, 254, 255, 0.86);
+  --at-ink: #042a41;
+  --at-muted: #365c73;
+  --at-line: #9cc5de;
+  --at-brass: #7298af;
+  --at-sage: #004671;
+  --at-sage-soft: rgba(0, 70, 113, 0.14);
+  --at-brass-soft: rgba(114, 152, 175, 0.16);
 }
 html.dark[data-design="3"] .atelier-root,
 .dark .atelier-root[data-atelier-theme="3"] {
-  --at-bg: rgba(7, 18, 29, 0.22);
-  --at-paper: rgba(12, 27, 41, 0.84);
-  --at-ink: #e6eff5;
-  --at-muted: #98bdd2;
-  --at-line: #1f415d;
-  --at-brass: #d4a373;
-  --at-sage: #4fb0cc;
-  --at-sage-soft: rgba(79, 176, 204, 0.18);
-  --at-brass-soft: rgba(212, 163, 115, 0.16);
+  --at-bg: rgba(2, 21, 33, 0.24);
+  --at-paper: rgba(4, 42, 65, 0.88);
+  --at-ink: #eaffff;
+  --at-muted: #9fc6de;
+  --at-line: #1d5678;
+  --at-brass: #c2e8ff;
+  --at-sage: #72b8db;
+  --at-sage-soft: rgba(114, 184, 219, 0.18);
+  --at-brass-soft: rgba(194, 232, 255, 0.16);
 }
 
 html[data-design="4"] .atelier-root,
 .atelier-root[data-atelier-theme="4"] {
-  --at-bg: rgba(231, 237, 243, 0.18);
-  --at-paper: rgba(244, 248, 252, 0.82);
-  --at-ink: #182230;
-  --at-muted: #4b5e76;
-  --at-line: #c4d0de;
-  --at-brass: #9e6530;
-  --at-sage: #365578;
-  --at-sage-soft: rgba(54, 85, 120, 0.14);
-  --at-brass-soft: rgba(158, 101, 48, 0.14);
+  --at-bg: rgba(234, 251, 252, 0.18);
+  --at-paper: rgba(246, 253, 254, 0.86);
+  --at-ink: #2b1f1c;
+  --at-muted: #58423e;
+  --at-line: #98d9e2;
+  --at-brass: #58423e;
+  --at-sage: #0893a6;
+  --at-sage-soft: rgba(33, 218, 239, 0.15);
+  --at-brass-soft: rgba(88, 66, 62, 0.14);
 }
 html.dark[data-design="4"] .atelier-root,
 .dark .atelier-root[data-atelier-theme="4"] {
-  --at-bg: rgba(9, 15, 24, 0.22);
-  --at-paper: rgba(15, 23, 36, 0.84);
-  --at-ink: #e6edf6;
-  --at-muted: #99aec9;
-  --at-line: #2c3f5b;
-  --at-brass: #d9934c;
-  --at-sage: #7ea5d6;
-  --at-sage-soft: rgba(126, 165, 214, 0.18);
-  --at-brass-soft: rgba(217, 147, 76, 0.16);
+  --at-bg: rgba(18, 13, 12, 0.26);
+  --at-paper: rgba(34, 25, 23, 0.90);
+  --at-ink: #e9fbfd;
+  --at-muted: #c6b0ab;
+  --at-line: #6e524c;
+  --at-brass: #d4a373;
+  --at-sage: #21daef;
+  --at-sage-soft: rgba(33, 218, 239, 0.18);
+  --at-brass-soft: rgba(88, 66, 62, 0.24);
 }
 
 html[data-design="5"] .atelier-root,
 .atelier-root[data-atelier-theme="5"] {
-  --at-bg: rgba(245, 248, 238, 0.18);
-  --at-paper: rgba(248, 251, 242, 0.76);
-  --at-ink: #1e2b18;
-  --at-muted: #566b4c;
-  --at-line: #d7e3c5;
-  --at-brass: #578440;
-  --at-sage: #67944d;
-  --at-sage-soft: rgba(87, 132, 64, 0.14);
-  --at-brass-soft: rgba(103, 148, 77, 0.14);
+  --at-bg: rgba(245, 237, 226, 0.20);
+  --at-paper: rgba(252, 248, 242, 0.86);
+  --at-ink: #002a23;
+  --at-muted: #2b5248;
+  --at-line: #cab095;
+  --at-brass: #b48735;
+  --at-sage: #002a23;
+  --at-sage-soft: rgba(0, 42, 35, 0.13);
+  --at-brass-soft: rgba(209, 168, 84, 0.16);
 }
 html.dark[data-design="5"] .atelier-root,
 .dark .atelier-root[data-atelier-theme="5"] {
-  --at-bg: rgba(4, 4, 5, 0.24);
-  --at-paper: rgba(11, 11, 13, 0.88);
-  --at-ink: #eef4ea;
-  --at-muted: #9aa498;
-  --at-line: #27282e;
-  --at-brass: #e5eed6;
-  --at-sage: #d7e4c4;
-  --at-sage-soft: rgba(229, 238, 214, 0.14);
-  --at-brass-soft: rgba(229, 238, 214, 0.14);
+  --at-bg: rgba(9, 14, 14, 0.28);
+  --at-paper: rgba(5, 32, 27, 0.90);
+  --at-ink: #f2e7d9;
+  --at-muted: #d8c2aa;
+  --at-line: #134c40;
+  --at-brass: #d1a854;
+  --at-sage: #d8c2aa;
+  --at-sage-soft: rgba(216, 194, 170, 0.15);
+  --at-brass-soft: rgba(209, 168, 84, 0.18);
 }
 
 /* Backdrop blur on cards across Themes 1..5 so marble & abstract wallpaper glow subtly behind */

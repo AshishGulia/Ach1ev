@@ -153,206 +153,208 @@ const espressoDarkWall = svgUri(`
   <ellipse cx="1220" cy="240" rx="340" ry="180" transform="rotate(-14 1220 240)" fill="#3b1b0b" opacity="0.45" filter="url(#edBlur)"/>
 </svg>`);
 
-const forestLightWall = svgUri(`
+const twilightLightWall = svgUri(`
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
   <defs>
-    <linearGradient id="flBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#e8f2e4"/>
-      <stop offset="48%" stop-color="#d7e8d1"/>
-      <stop offset="100%" stop-color="#c3dcc0"/>
+    <linearGradient id="twlBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fdf4f6"/>
+      <stop offset="48%" stop-color="#f5d7db"/>
+      <stop offset="100%" stop-color="#edd0df"/>
     </linearGradient>
-    <radialGradient id="flSun" cx="78%" cy="16%" r="52%">
-      <stop offset="0%" stop-color="#fffde8" stop-opacity="0.95"/>
-      <stop offset="52%" stop-color="#d6eccb" stop-opacity="0.42"/>
-      <stop offset="100%" stop-color="#c3dcc0" stop-opacity="0"/>
+    <radialGradient id="twlSun" cx="80%" cy="18%" r="50%">
+      <stop offset="0%" stop-color="#f1916d" stop-opacity="0.45"/>
+      <stop offset="55%" stop-color="#bd83b8" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#f5d7db" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="flRib1" x1="0%" y1="0%" x2="100%" y2="40%">
-      <stop offset="0%" stop-color="#5d9668" stop-opacity="0.42"/>
-      <stop offset="55%" stop-color="#3f7a4c" stop-opacity="0.30"/>
-      <stop offset="100%" stop-color="#8ec191" stop-opacity="0.14"/>
+    <linearGradient id="twlRib" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#473e66" stop-opacity="0.22"/>
+      <stop offset="55%" stop-color="#bd83b8" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#f1916d" stop-opacity="0.26"/>
     </linearGradient>
-    <linearGradient id="flRib2" x1="100%" y1="0%" x2="15%" y2="100%">
-      <stop offset="0%" stop-color="#aad096" stop-opacity="0.58"/>
-      <stop offset="100%" stop-color="#356843" stop-opacity="0.22"/>
-    </linearGradient>
-    <filter id="flBlur" x="-15%" y="-15%" width="130%" height="130%"><feGaussianBlur stdDeviation="22"/></filter>
+    <filter id="twlBlur" x="-15%" y="-15%" width="130%" height="130%"><feGaussianBlur stdDeviation="24"/></filter>
   </defs>
-  <rect width="1600" height="1000" fill="url(#flBg)"/>
-  <rect width="1600" height="1000" fill="url(#flSun)"/>
-  <path d="M-80 280 C240 110 490 360 870 205 C1190 78 1380 260 1680 105 L1680 -60 L-80 -60 Z" fill="url(#flRib2)" filter="url(#flBlur)"/>
-  <path d="M-60 720 C220 510 510 830 890 605 C1180 435 1390 620 1680 475 L1680 1080 L-60 1080 Z" fill="url(#flRib1)"/>
-  <path d="M180 1040 C420 790 760 880 1060 660 C1280 498 1450 560 1660 410 L1660 1040 Z" fill="#2f663f" opacity="0.22"/>
-  <path d="M-60 490 C310 350 680 540 1080 350 C1340 228 1500 320 1680 230" fill="none" stroke="#ffffff" stroke-width="2.2" opacity="0.45"/>
-  <ellipse cx="260" cy="640" rx="280" ry="180" transform="rotate(-18 260 640)" fill="#78b080" opacity="0.30" filter="url(#flBlur)"/>
-  <ellipse cx="1220" cy="280" rx="340" ry="150" transform="rotate(14 1220 280)" fill="#d6e9be" opacity="0.58" filter="url(#flBlur)"/>
+  <rect width="1600" height="1000" fill="url(#twlBg)"/>
+  <rect width="1600" height="1000" fill="url(#twlSun)"/>
+  <path d="M-80 740 C260 510 600 800 980 540 C1280 335 1470 500 1690 360 L1690 1060 L-80 1060 Z" fill="url(#twlRib)"/>
+  <path d="M-60 440 C340 290 700 490 1120 310 C1380 198 1520 290 1690 210" fill="none" stroke="#ffffff" stroke-width="2.2" opacity="0.52"/>
+  <ellipse cx="280" cy="240" rx="320" ry="170" transform="rotate(-14 280 240)" fill="#bd83b8" opacity="0.24" filter="url(#twlBlur)"/>
 </svg>`);
 
-const forestDarkWall = svgUri(`
+const twilightDarkWall = svgUri(`
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
   <defs>
-    <linearGradient id="fdBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#020403"/>
-      <stop offset="52%" stop-color="#040906"/>
-      <stop offset="100%" stop-color="#010202"/>
+    <linearGradient id="twdBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0b1326"/>
+      <stop offset="52%" stop-color="#171630"/>
+      <stop offset="100%" stop-color="#0d0b1a"/>
     </linearGradient>
-    <radialGradient id="fdGlow" cx="24%" cy="22%" r="52%">
-      <stop offset="0%" stop-color="#1e4d2f" stop-opacity="0.46"/>
-      <stop offset="100%" stop-color="#020403" stop-opacity="0"/>
+    <radialGradient id="twdGlow" cx="76%" cy="22%" r="52%">
+      <stop offset="0%" stop-color="#f1916d" stop-opacity="0.34"/>
+      <stop offset="48%" stop-color="#bd83b8" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#171630" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="fdWave" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#0d2919" stop-opacity="0.62"/>
-      <stop offset="60%" stop-color="#19442a" stop-opacity="0.34"/>
-      <stop offset="100%" stop-color="#377a50" stop-opacity="0.16"/>
+    <linearGradient id="twdArc" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#473e66" stop-opacity="0.56"/>
+      <stop offset="60%" stop-color="#bd83b8" stop-opacity="0.24"/>
+      <stop offset="100%" stop-color="#f1916d" stop-opacity="0.18"/>
     </linearGradient>
-    <filter id="fdBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="28"/></filter>
+    <filter id="twdBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="28"/></filter>
   </defs>
-  <rect width="1600" height="1000" fill="url(#fdBg)"/>
-  <rect width="1600" height="1000" fill="url(#fdGlow)"/>
-  <path d="M-80 860 C260 600 580 790 920 515 C1210 285 1420 430 1690 215 L1690 1060 L-80 1060 Z" fill="url(#fdWave)"/>
-  <path d="M420 -80 C680 180 940 90 1240 310 C1420 440 1560 360 1690 470 L1690 -80 Z" fill="#0d2617" opacity="0.58" filter="url(#fdBlur)"/>
-  <path d="M-40 620 C340 460 690 610 1120 390 C1380 258 1520 330 1690 250" fill="none" stroke="#5bb37d" stroke-width="1.6" opacity="0.22"/>
-  <ellipse cx="1180" cy="740" rx="360" ry="200" transform="rotate(-12 1180 740)" fill="#1a4228" opacity="0.28" filter="url(#fdBlur)"/>
+  <rect width="1600" height="1000" fill="url(#twdBg)"/>
+  <rect width="1600" height="1000" fill="url(#twdGlow)"/>
+  <path d="M-80 820 C280 560 620 770 1000 495 C1280 290 1460 420 1690 235 L1690 1060 L-80 1060 Z" fill="url(#twdArc)"/>
+  <path d="M-40 540 C360 390 740 570 1160 365 C1400 248 1540 320 1690 250" fill="none" stroke="#f5d7db" stroke-width="1.6" opacity="0.22"/>
+  <ellipse cx="320" cy="240" rx="340" ry="180" transform="rotate(-14 320 240)" fill="#473e66" opacity="0.46" filter="url(#twdBlur)"/>
 </svg>`);
 
-const beachLightWall = svgUri(`
+const oceanicLightWall = svgUri(`
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
   <defs>
-    <linearGradient id="blBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ddeef5"/>
-      <stop offset="48%" stop-color="#f3ece0"/>
-      <stop offset="100%" stop-color="#e6d4b7"/>
+    <linearGradient id="oclBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#eaffff"/>
+      <stop offset="50%" stop-color="#d7f3ff"/>
+      <stop offset="100%" stop-color="#c2e8ff"/>
     </linearGradient>
-    <radialGradient id="blSun" cx="80%" cy="22%" r="46%">
-      <stop offset="0%" stop-color="#fff8da" stop-opacity="0.96"/>
-      <stop offset="55%" stop-color="#e3f0f5" stop-opacity="0.38"/>
-      <stop offset="100%" stop-color="#f3ece0" stop-opacity="0"/>
+    <radialGradient id="oclSun" cx="82%" cy="18%" r="48%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="55%" stop-color="#c2e8ff" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#eaffff" stop-opacity="0"/>
     </radialGradient>
-    <linearGradient id="blSurf" x1="0%" y1="0%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#4b9eb5" stop-opacity="0.44"/>
-      <stop offset="55%" stop-color="#7bbfcf" stop-opacity="0.36"/>
-      <stop offset="100%" stop-color="#c49f70" stop-opacity="0.28"/>
+    <linearGradient id="oclSurf" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7298af" stop-opacity="0.34"/>
+      <stop offset="55%" stop-color="#365c73" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#004671" stop-opacity="0.16"/>
     </linearGradient>
-    <filter id="blBlur" x="-15%" y="-15%" width="130%" height="130%"><feGaussianBlur stdDeviation="22"/></filter>
+    <filter id="oclBlur" x="-15%" y="-15%" width="130%" height="130%"><feGaussianBlur stdDeviation="22"/></filter>
   </defs>
-  <rect width="1600" height="1000" fill="url(#blBg)"/>
-  <rect width="1600" height="1000" fill="url(#blSun)"/>
-  <path d="M-100 540 C260 385 560 660 980 445 C1260 305 1440 460 1700 315 L1700 1060 L-100 1060 Z" fill="url(#blSurf)"/>
-  <path d="M-80 760 C340 605 680 860 1120 675 C1380 568 1520 660 1700 585 L1700 1060 L-80 1060 Z" fill="#d9be94" opacity="0.54" filter="url(#blBlur)"/>
-  <path d="M-40 435 C380 315 760 515 1190 365 C1420 285 1560 345 1700 290" fill="none" stroke="#ffffff" stroke-width="3" opacity="0.58"/>
-  <ellipse cx="320" cy="220" rx="340" ry="170" transform="rotate(-14 320 220)" fill="#8ac6d8" opacity="0.36" filter="url(#blBlur)"/>
+  <rect width="1600" height="1000" fill="url(#oclBg)"/>
+  <rect width="1600" height="1000" fill="url(#oclSun)"/>
+  <path d="M-100 580 C260 410 580 680 990 465 C1270 320 1450 475 1700 335 L1700 1060 L-100 1060 Z" fill="url(#oclSurf)"/>
+  <path d="M-80 790 C340 635 700 870 1140 695 C1390 595 1530 680 1700 610 L1700 1060 L-80 1060 Z" fill="#7298af" opacity="0.28" filter="url(#oclBlur)"/>
+  <path d="M-40 435 C380 315 760 515 1190 365 C1420 285 1560 345 1700 290" fill="none" stroke="#ffffff" stroke-width="2.6" opacity="0.65"/>
+  <ellipse cx="320" cy="220" rx="340" ry="170" transform="rotate(-14 320 220)" fill="#c2e8ff" opacity="0.58" filter="url(#oclBlur)"/>
 </svg>`);
 
-const beachDarkWall = svgUri(`
+const oceanicDarkWall = svgUri(`
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
   <defs>
-    <linearGradient id="bdBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#05111e"/>
-      <stop offset="55%" stop-color="#0a2135"/>
-      <stop offset="100%" stop-color="#040d17"/>
+    <linearGradient id="ocdBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#021826"/>
+      <stop offset="52%" stop-color="#042a41"/>
+      <stop offset="100%" stop-color="#01121d"/>
     </linearGradient>
-    <radialGradient id="bdMoon" cx="76%" cy="20%" r="48%">
-      <stop offset="0%" stop-color="#56b2d4" stop-opacity="0.52"/>
-      <stop offset="100%" stop-color="#05111e" stop-opacity="0"/>
+    <radialGradient id="ocdMoon" cx="76%" cy="20%" r="48%">
+      <stop offset="0%" stop-color="#7298af" stop-opacity="0.46"/>
+      <stop offset="55%" stop-color="#004671" stop-opacity="0.34"/>
+      <stop offset="100%" stop-color="#021826" stop-opacity="0"/>
     </radialGradient>
-    <filter id="bdBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="26"/></filter>
+    <filter id="ocdBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="26"/></filter>
   </defs>
-  <rect width="1600" height="1000" fill="url(#bdBg)"/>
-  <rect width="1600" height="1000" fill="url(#bdMoon)"/>
-  <path d="M-80 620 C280 425 640 730 1040 495 C1320 335 1480 480 1700 355 L1700 1060 L-80 1060 Z" fill="#175978" opacity="0.56"/>
-  <path d="M-60 820 C360 675 760 900 1180 715 C1420 615 1560 720 1700 655 L1700 1060 L-60 1060 Z" fill="#0f3a52" opacity="0.72" filter="url(#bdBlur)"/>
-  <path d="M-40 500 C360 365 760 555 1190 385 C1420 295 1560 360 1700 300" fill="none" stroke="#6ecae8" stroke-width="2" opacity="0.28"/>
-  <ellipse cx="360" cy="280" rx="300" ry="160" transform="rotate(19 360 280)" fill="#2e88ad" opacity="0.30" filter="url(#bdBlur)"/>
+  <rect width="1600" height="1000" fill="url(#ocdBg)"/>
+  <rect width="1600" height="1000" fill="url(#ocdMoon)"/>
+  <path d="M-80 640 C280 445 640 740 1040 505 C1320 345 1480 490 1700 365 L1700 1060 L-80 1060 Z" fill="#004671" opacity="0.58"/>
+  <path d="M-60 830 C360 685 760 905 1180 725 C1420 625 1560 730 1700 665 L1700 1060 L-60 1060 Z" fill="#365c73" opacity="0.42" filter="url(#ocdBlur)"/>
+  <path d="M-40 500 C360 365 760 555 1190 385 C1420 295 1560 360 1700 300" fill="none" stroke="#c2e8ff" stroke-width="1.8" opacity="0.28"/>
+  <ellipse cx="360" cy="280" rx="300" ry="160" transform="rotate(19 360 280)" fill="#365c73" opacity="0.32" filter="url(#ocdBlur)"/>
 </svg>`);
 
-const rainLightWall = svgUri(`
+const kabulLightWall = svgUri(`
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
   <defs>
-    <linearGradient id="rlBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#e3ebf4"/>
-      <stop offset="52%" stop-color="#d5e0ec"/>
-      <stop offset="100%" stop-color="#c4d1e2"/>
+    <linearGradient id="kblBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e8fbfd"/>
+      <stop offset="52%" stop-color="#d7f6fa"/>
+      <stop offset="100%" stop-color="#ece2df"/>
     </linearGradient>
-    <radialGradient id="rlChai" cx="82%" cy="68%" r="44%">
-      <stop offset="0%" stop-color="#edc08e" stop-opacity="0.60"/>
-      <stop offset="55%" stop-color="#dfcbb6" stop-opacity="0.24"/>
-      <stop offset="100%" stop-color="#c4d1e2" stop-opacity="0"/>
+    <radialGradient id="kblGlow" cx="78%" cy="22%" r="48%">
+      <stop offset="0%" stop-color="#21daef" stop-opacity="0.34"/>
+      <stop offset="60%" stop-color="#58423e" stop-opacity="0.10"/>
+      <stop offset="100%" stop-color="#e8fbfd" stop-opacity="0"/>
     </radialGradient>
-    <filter id="rlBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="24"/></filter>
+    <filter id="kblBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="24"/></filter>
   </defs>
-  <rect width="1600" height="1000" fill="url(#rlBg)"/>
-  <rect width="1600" height="1000" fill="url(#rlChai)"/>
-  <path d="M-80 180 C340 40 620 340 1020 150 C1300 20 1490 190 1700 80 L1700 -80 L-80 -80 Z" fill="#9fb7d1" opacity="0.52" filter="url(#rlBlur)"/>
-  <path d="M-80 860 C280 555 720 820 1120 555 C1380 385 1540 500 1700 405 L1700 1060 L-80 1060 Z" fill="#859fba" opacity="0.42"/>
-  <path d="M-50 470 C360 350 760 510 1180 360 C1400 282 1540 340 1680 290" fill="none" stroke="#ffffff" stroke-width="2.4" opacity="0.46"/>
-  <ellipse cx="420" cy="460" rx="340" ry="170" transform="rotate(-24 420 460)" fill="#ffffff" opacity="0.48" filter="url(#rlBlur)"/>
+  <rect width="1600" height="1000" fill="url(#kblBg)"/>
+  <rect width="1600" height="1000" fill="url(#kblGlow)"/>
+  <path d="M-80 780 C300 540 700 790 1120 535 C1380 380 1540 490 1700 390 L1700 1060 L-80 1060 Z" fill="#58423e" opacity="0.18"/>
+  <path d="M-50 470 C360 350 760 510 1180 360 C1400 282 1540 340 1680 290" fill="none" stroke="#21daef" stroke-width="2.4" opacity="0.45"/>
+  <ellipse cx="380" cy="260" rx="320" ry="165" transform="rotate(-16 380 260)" fill="#21daef" opacity="0.18" filter="url(#kblBlur)"/>
 </svg>`);
 
-const rainDarkWall = svgUri(`
+const kabulDarkWall = svgUri(`
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
   <defs>
-    <linearGradient id="rdBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#080f19"/>
-      <stop offset="56%" stop-color="#0e1828"/>
-      <stop offset="100%" stop-color="#050a12"/>
+    <linearGradient id="kbdBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#110b0a"/>
+      <stop offset="56%" stop-color="#231816"/>
+      <stop offset="100%" stop-color="#0b0706"/>
     </linearGradient>
-    <radialGradient id="rdLantern" cx="79%" cy="32%" r="42%">
-      <stop offset="0%" stop-color="#dd9046" stop-opacity="0.40"/>
-      <stop offset="60%" stop-color="#6b4a2f" stop-opacity="0.18"/>
-      <stop offset="100%" stop-color="#0e1828" stop-opacity="0"/>
+    <radialGradient id="kbdTurq" cx="76%" cy="28%" r="46%">
+      <stop offset="0%" stop-color="#21daef" stop-opacity="0.32"/>
+      <stop offset="55%" stop-color="#58423e" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#110b0a" stop-opacity="0"/>
     </radialGradient>
-    <filter id="rdBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="28"/></filter>
+    <filter id="kbdBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="28"/></filter>
   </defs>
-  <rect width="1600" height="1000" fill="url(#rdBg)"/>
-  <rect width="1600" height="1000" fill="url(#rdLantern)"/>
-  <path d="M-80 740 C300 475 680 760 1080 505 C1340 345 1500 460 1700 335 L1700 1060 L-80 1060 Z" fill="#1c2f4c" opacity="0.72"/>
-  <path d="M-40 520 C360 390 740 540 1160 380 C1400 288 1540 345 1680 280" fill="none" stroke="#8cb2e6" stroke-width="1.8" opacity="0.24"/>
-  <ellipse cx="340" cy="240" rx="340" ry="180" transform="rotate(-19 340 240)" fill="#2a4366" opacity="0.52" filter="url(#rdBlur)"/>
-  <ellipse cx="1220" cy="280" rx="190" ry="140" fill="#e0994f" opacity="0.18" filter="url(#rdBlur)"/>
+  <rect width="1600" height="1000" fill="url(#kbdBg)"/>
+  <rect width="1600" height="1000" fill="url(#kbdTurq)"/>
+  <path d="M-80 740 C300 475 680 760 1080 505 C1340 345 1500 460 1700 335 L1700 1060 L-80 1060 Z" fill="#58423e" opacity="0.52"/>
+  <path d="M-40 520 C360 390 740 540 1160 380 C1400 288 1540 345 1680 280" fill="none" stroke="#21daef" stroke-width="2" opacity="0.36"/>
+  <ellipse cx="340" cy="240" rx="340" ry="180" transform="rotate(-19 340 240)" fill="#58423e" opacity="0.46" filter="url(#kbdBlur)"/>
 </svg>`);
 
-const pistachioLightWall = svgUri(`
+const emeraldGoldLightWall = svgUri(`
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
   <defs>
-    <linearGradient id="plBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#fbfcf6"/>
-      <stop offset="52%" stop-color="#f1f6e6"/>
-      <stop offset="100%" stop-color="#e3eed2"/>
+    <linearGradient id="eglBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#f7f1e8"/>
+      <stop offset="50%" stop-color="#ebe0d0"/>
+      <stop offset="100%" stop-color="#d8c2aa"/>
     </linearGradient>
-    <linearGradient id="plSweep" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#c3dba2" stop-opacity="0.52"/>
-      <stop offset="55%" stop-color="#d9eac0" stop-opacity="0.38"/>
-      <stop offset="100%" stop-color="#f8fbf2" stop-opacity="0.25"/>
+    <radialGradient id="eglSun" cx="78%" cy="18%" r="50%">
+      <stop offset="0%" stop-color="#fff8e8" stop-opacity="0.92"/>
+      <stop offset="55%" stop-color="#d8c2aa" stop-opacity="0.40"/>
+      <stop offset="100%" stop-color="#ebe0d0" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="eglSweep" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#002a23" stop-opacity="0.22"/>
+      <stop offset="55%" stop-color="#0f4d40" stop-opacity="0.16"/>
+      <stop offset="100%" stop-color="#c49a45" stop-opacity="0.18"/>
     </linearGradient>
-    <filter id="plBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="24"/></filter>
+    <filter id="eglBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="24"/></filter>
   </defs>
-  <rect width="1600" height="1000" fill="url(#plBg)"/>
-  <path d="M-80 680 C280 425 640 730 1060 445 C1340 260 1500 410 1700 275 L1700 1060 L-80 1060 Z" fill="url(#plSweep)"/>
-  <path d="M-60 360 C340 230 720 420 1150 250 C1400 152 1540 225 1680 170" fill="none" stroke="#8cb56a" stroke-width="2" opacity="0.30"/>
-  <ellipse cx="320" cy="240" rx="340" ry="180" transform="rotate(-14 320 240)" fill="#e7f1d4" opacity="0.80" filter="url(#plBlur)"/>
-  <ellipse cx="1200" cy="240" rx="300" ry="160" transform="rotate(18 1200 240)" fill="#ffffff" opacity="0.72" filter="url(#plBlur)"/>
-  <ellipse cx="860" cy="780" rx="380" ry="170" fill="#cbe0ac" opacity="0.40" filter="url(#plBlur)"/>
+  <rect width="1600" height="1000" fill="url(#eglBg)"/>
+  <rect width="1600" height="1000" fill="url(#eglSun)"/>
+  <path d="M-80 680 C280 425 640 730 1060 445 C1340 260 1500 410 1700 275 L1700 1060 L-80 1060 Z" fill="url(#eglSweep)"/>
+  <path d="M-60 360 C340 230 720 420 1150 250 C1400 152 1540 225 1680 170" fill="none" stroke="#b48735" stroke-width="2" opacity="0.34"/>
+  <ellipse cx="320" cy="240" rx="340" ry="180" transform="rotate(-14 320 240)" fill="#d8c2aa" opacity="0.58" filter="url(#eglBlur)"/>
+  <ellipse cx="1180" cy="240" rx="300" ry="160" transform="rotate(18 1180 240)" fill="#ffffff" opacity="0.56" filter="url(#eglBlur)"/>
 </svg>`);
 
-const obsidianDarkWall = svgUri(`
+const emeraldGoldDarkWall = svgUri(`
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1000" preserveAspectRatio="xMidYMid slice">
   <defs>
-    <linearGradient id="obBg" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#030304"/>
-      <stop offset="55%" stop-color="#08090b"/>
-      <stop offset="100%" stop-color="#020203"/>
+    <linearGradient id="egdBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#040c0b"/>
+      <stop offset="52%" stop-color="#002a23"/>
+      <stop offset="100%" stop-color="#090e0e"/>
     </linearGradient>
-    <linearGradient id="obArc" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#17191c" stop-opacity="0.78"/>
-      <stop offset="60%" stop-color="#222624" stop-opacity="0.46"/>
-      <stop offset="100%" stop-color="#363d34" stop-opacity="0.22"/>
+    <radialGradient id="egdGold" cx="76%" cy="22%" r="48%">
+      <stop offset="0%" stop-color="#d1a854" stop-opacity="0.28"/>
+      <stop offset="55%" stop-color="#002a23" stop-opacity="0.32"/>
+      <stop offset="100%" stop-color="#090e0e" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="egdArc" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#002a23" stop-opacity="0.82"/>
+      <stop offset="60%" stop-color="#0b463b" stop-opacity="0.45"/>
+      <stop offset="100%" stop-color="#c49a45" stop-opacity="0.22"/>
     </linearGradient>
-    <filter id="obBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="28"/></filter>
+    <filter id="egdBlur" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur stdDeviation="28"/></filter>
   </defs>
-  <rect width="1600" height="1000" fill="url(#obBg)"/>
-  <path d="M-80 740 C300 475 680 760 1080 485 C1340 310 1500 430 1700 295 L1700 1060 L-80 1060 Z" fill="url(#obArc)"/>
-  <path d="M-40 460 C380 320 760 510 1190 340 C1420 248 1560 315 1680 260" fill="none" stroke="#b9c9a3" stroke-width="1.5" opacity="0.20"/>
-  <ellipse cx="340" cy="260" rx="340" ry="180" transform="rotate(-16 340 260)" fill="#202226" opacity="0.58" filter="url(#obBlur)"/>
-  <ellipse cx="1180" cy="260" rx="280" ry="160" transform="rotate(20 1180 260)" fill="#2b302a" opacity="0.40" filter="url(#obBlur)"/>
+  <rect width="1600" height="1000" fill="url(#egdBg)"/>
+  <rect width="1600" height="1000" fill="url(#egdGold)"/>
+  <path d="M-80 740 C300 475 680 760 1080 485 C1340 310 1500 430 1700 295 L1700 1060 L-80 1060 Z" fill="url(#egdArc)"/>
+  <path d="M-40 460 C380 320 760 510 1190 340 C1420 248 1560 315 1680 260" fill="none" stroke="#d1a854" stroke-width="1.6" opacity="0.30"/>
+  <ellipse cx="340" cy="260" rx="340" ry="180" transform="rotate(-16 340 260)" fill="#002a23" opacity="0.62" filter="url(#egdBlur)"/>
 </svg>`);
 
 export const THEME_META_MAP: Record<ThemeId, ThemeMeta> = {
@@ -437,157 +439,157 @@ export const THEME_META_MAP: Record<ThemeId, ThemeMeta> = {
   },
   '2': {
     id: '2',
-    name: 'Forest Sanctuary',
-    tagline: 'Moss Pine Woodland · Blurred Canopy Wallpaper · Leaf-Contour Buttons',
-    lightBg: '#ebf2e7',
-    lightSurface: 'rgba(247, 251, 244, 0.86)',
-    lightRaised: 'rgba(227, 237, 222, 0.88)',
-    lightHeader: 'rgba(242, 248, 238, 0.84)',
-    lightBorder: '#bfd1ba',
-    lightInk: '#17261b',
-    lightMuted: '#46614d',
-    lightAccent: '#2f6b43',
-    lightAccentSoft: 'rgba(47, 107, 67, 0.14)',
-    darkBg: '#030604',
-    darkSurface: 'rgba(6, 11, 8, 0.92)',
-    darkRaised: 'rgba(11, 19, 14, 0.94)',
-    darkHeader: 'rgba(4, 8, 6, 0.92)',
-    darkBorder: '#17261c',
-    darkInk: '#e3f0e6',
-    darkMuted: '#93b39c',
-    darkAccent: '#63c287',
-    darkAccentSoft: 'rgba(99, 194, 135, 0.16)',
-    shapeName: 'Leaf Contour',
+    name: 'Twilight Sunset',
+    tagline: 'Twilight Plum #473E66 · Orchid Mauve #BD83B8 · Rose Blush #F5D7DB · Coral Peach #F1916D',
+    lightBg: '#fdf3f5',
+    lightSurface: 'rgba(255, 247, 249, 0.88)',
+    lightRaised: 'rgba(245, 215, 219, 0.90)',
+    lightHeader: 'rgba(253, 241, 244, 0.88)',
+    lightBorder: '#e2becb',
+    lightInk: '#2a1d3d',
+    lightMuted: '#473e66',
+    lightAccent: '#c95d38',
+    lightAccentSoft: 'rgba(241, 145, 109, 0.16)',
+    darkBg: '#100d1d',
+    darkSurface: 'rgba(26, 22, 48, 0.90)',
+    darkRaised: 'rgba(45, 37, 80, 0.92)',
+    darkHeader: 'rgba(18, 14, 34, 0.92)',
+    darkBorder: '#473e66',
+    darkInk: '#f8e8ec',
+    darkMuted: '#cfaed0',
+    darkAccent: '#f1916d',
+    darkAccentSoft: 'rgba(241, 145, 109, 0.18)',
+    shapeName: 'Sunset Contour',
     buttonRadius: '15px 4px 15px 4px',
-    lightWallpaperUri: forestLightWall,
-    darkWallpaperUri: forestDarkWall,
+    lightWallpaperUri: twilightLightWall,
+    darkWallpaperUri: twilightDarkWall,
     sidebar: {
       light: {
-        railBg: 'linear-gradient(180deg, rgba(235,244,230,0.88) 0%, rgba(220,234,215,0.88) 58%, rgba(206,223,200,0.92) 100%)',
-        railBorder: '#bdd0b8',
-        railText: '#17261b',
-        brandSectionBg: 'linear-gradient(155deg, rgba(244,250,240,0.86) 0%, rgba(215,232,209,0.78) 100%)',
-        navSectionBg: 'linear-gradient(180deg, rgba(232,243,227,0.72) 0%, rgba(214,230,208,0.68) 100%)',
-        thoughtSectionBg: 'linear-gradient(155deg, rgba(223,238,217,0.85) 0%, rgba(198,220,192,0.76) 100%)',
-        footerSectionBg: 'linear-gradient(180deg, rgba(216,232,211,0.82) 0%, rgba(195,217,188,0.88) 100%)',
-        sectionBorder: 'rgba(72,122,84,0.24)',
-        activeBtnBg: 'linear-gradient(145deg, #326443 0%, #234930 100%)',
-        activeBtnBorder: '#3f7c54',
+        railBg: 'linear-gradient(180deg, rgba(253,242,245,0.90) 0%, rgba(245,215,219,0.88) 58%, rgba(235,204,224,0.92) 100%)',
+        railBorder: '#dfb9c8',
+        railText: '#2a1d3d',
+        brandSectionBg: 'linear-gradient(155deg, rgba(255,248,250,0.90) 0%, rgba(245,215,219,0.80) 100%)',
+        navSectionBg: 'linear-gradient(180deg, rgba(252,238,242,0.78) 0%, rgba(244,218,229,0.72) 100%)',
+        thoughtSectionBg: 'linear-gradient(155deg, rgba(248,225,232,0.86) 0%, rgba(232,202,226,0.78) 100%)',
+        footerSectionBg: 'linear-gradient(180deg, rgba(245,215,219,0.84) 0%, rgba(232,198,218,0.90) 100%)',
+        sectionBorder: 'rgba(71,62,102,0.22)',
+        activeBtnBg: 'linear-gradient(145deg, #473e66 0%, #7d5382 58%, #c9684b 100%)',
+        activeBtnBorder: '#8d5b8c',
         activeBtnText: '#ffffff',
-        idleBtnBg: 'rgba(255,255,255,0.34)',
-        idleBtnText: '#233b29',
-        activeIconColor: '#bbf7d0',
-        idleIconColor: '#366645',
-        toggleBtnBg: 'linear-gradient(180deg, rgba(230,242,224,0.92) 0%, rgba(208,226,201,0.92) 100%)',
-        toggleBtnText: '#27442f',
-        toggleBtnBorder: '#a9c4a2',
-        mutedLabelColor: '#4c7056',
-        thoughtColor: '#1d3222',
-        authorColor: '#2f6942',
+        idleBtnBg: 'rgba(255,255,255,0.42)',
+        idleBtnText: '#382a52',
+        activeIconColor: '#ffd4c2',
+        idleIconColor: '#694e80',
+        toggleBtnBg: 'linear-gradient(180deg, rgba(253,240,243,0.92) 0%, rgba(245,215,219,0.92) 100%)',
+        toggleBtnText: '#3b2d56',
+        toggleBtnBorder: '#d7b2c3',
+        mutedLabelColor: '#6d5480',
+        thoughtColor: '#2d2042',
+        authorColor: '#b95331',
         trashTextColor: '#8c2228',
         trashIconColor: '#a3282f',
       },
       dark: {
-        railBg: 'linear-gradient(180deg, rgba(5,10,7,0.94) 0%, rgba(3,6,4,0.96) 58%, rgba(1,3,2,0.98) 100%)',
-        railBorder: '#132017',
-        railText: '#e3f0e6',
-        brandSectionBg: 'linear-gradient(155deg, rgba(10,18,13,0.76) 0%, rgba(4,8,5,0.88) 100%)',
-        navSectionBg: 'linear-gradient(180deg, rgba(8,14,10,0.62) 0%, rgba(4,7,5,0.78) 100%)',
-        thoughtSectionBg: 'linear-gradient(155deg, rgba(10,18,13,0.76) 0%, rgba(4,8,5,0.88) 100%)',
-        footerSectionBg: 'linear-gradient(180deg, rgba(7,12,9,0.8) 0%, rgba(3,5,4,0.94) 100%)',
-        sectionBorder: 'rgba(99,194,135,0.16)',
-        activeBtnBg: 'linear-gradient(155deg, #439162 0%, #316e49 52%, #235235 100%)',
-        activeBtnBorder: '#6fd195',
+        railBg: 'linear-gradient(180deg, rgba(22,19,44,0.94) 0%, rgba(16,13,32,0.96) 58%, rgba(11,9,22,0.98) 100%)',
+        railBorder: '#473e66',
+        railText: '#f8e8ec',
+        brandSectionBg: 'linear-gradient(155deg, rgba(44,36,74,0.72) 0%, rgba(20,16,38,0.88) 100%)',
+        navSectionBg: 'linear-gradient(180deg, rgba(32,26,56,0.62) 0%, rgba(16,13,30,0.78) 100%)',
+        thoughtSectionBg: 'linear-gradient(155deg, rgba(44,36,74,0.72) 0%, rgba(18,15,35,0.88) 100%)',
+        footerSectionBg: 'linear-gradient(180deg, rgba(28,22,48,0.80) 0%, rgba(12,10,24,0.94) 100%)',
+        sectionBorder: 'rgba(189,131,184,0.22)',
+        activeBtnBg: 'linear-gradient(155deg, #e07651 0%, #b86292 52%, #6d4785 100%)',
+        activeBtnBorder: '#f1916d',
         activeBtnText: '#ffffff',
-        idleBtnBg: 'linear-gradient(180deg, rgba(19, 28, 22, 0.74) 0%, rgba(10, 16, 12, 0.88) 100%)',
-        idleBtnText: '#d4e8da',
-        activeIconColor: '#dcfce7',
-        idleIconColor: '#84b896',
-        toggleBtnBg: 'linear-gradient(180deg, #16211a 0%, #0e1611 58%, #080d0a 100%)',
-        toggleBtnText: '#dff0e4',
-        toggleBtnBorder: '#243a2b',
-        mutedLabelColor: '#769c82',
-        thoughtColor: '#dff0e4',
-        authorColor: '#74d198',
-        trashTextColor: '#f08285',
-        trashIconColor: '#eb6c70',
+        idleBtnBg: 'linear-gradient(180deg, rgba(50, 42, 82, 0.78) 0%, rgba(28, 22, 50, 0.90) 100%)',
+        idleBtnText: '#f5d7db',
+        activeIconColor: '#fff1eb',
+        idleIconColor: '#d4a3d0',
+        toggleBtnBg: 'linear-gradient(180deg, #352b59 0%, #241d40 58%, #161129 100%)',
+        toggleBtnText: '#f5d7db',
+        toggleBtnBorder: '#5d4f88',
+        mutedLabelColor: '#bd83b8',
+        thoughtColor: '#f5d7db',
+        authorColor: '#f1916d',
+        trashTextColor: '#f5989b',
+        trashIconColor: '#f17c80',
       },
     },
   },
   '3': {
     id: '3',
-    name: 'Coastal Beach Balcony',
-    tagline: 'Sea Glass & Sand Dune · Blurred Surf Backdrop · Worn Pebble Buttons',
-    lightBg: '#f4efe6',
-    lightSurface: 'rgba(252, 249, 243, 0.86)',
-    lightRaised: 'rgba(235, 227, 212, 0.88)',
-    lightHeader: 'rgba(248, 244, 236, 0.84)',
-    lightBorder: '#cdc3b0',
-    lightInk: '#152736',
-    lightMuted: '#4c6578',
-    lightAccent: '#1c637a',
-    lightAccentSoft: 'rgba(28, 99, 122, 0.14)',
-    darkBg: '#07121d',
-    darkSurface: 'rgba(12, 27, 41, 0.86)',
-    darkRaised: 'rgba(19, 41, 61, 0.88)',
-    darkHeader: 'rgba(9, 21, 33, 0.86)',
-    darkBorder: '#1f415d',
-    darkInk: '#e6eff5',
-    darkMuted: '#98bdd2',
-    darkAccent: '#4fb0cc',
-    darkAccentSoft: 'rgba(79, 176, 204, 0.16)',
-    shapeName: 'Coastal Pebble',
+    name: 'Oceanic Horizon',
+    tagline: 'Ice Mist #EAFFFF · Glacial Sky #C2E8FF · Cerulean #7298AF · Abyssal Navy #042A41 · Deep Ocean #004671',
+    lightBg: '#f0fcff',
+    lightSurface: 'rgba(246, 254, 255, 0.88)',
+    lightRaised: 'rgba(194, 232, 255, 0.78)',
+    lightHeader: 'rgba(234, 255, 255, 0.88)',
+    lightBorder: '#9cc5de',
+    lightInk: '#042a41',
+    lightMuted: '#365c73',
+    lightAccent: '#004671',
+    lightAccentSoft: 'rgba(0, 70, 113, 0.13)',
+    darkBg: '#021521',
+    darkSurface: 'rgba(4, 42, 65, 0.88)',
+    darkRaised: 'rgba(6, 59, 92, 0.90)',
+    darkHeader: 'rgba(3, 30, 48, 0.90)',
+    darkBorder: '#1d5678',
+    darkInk: '#eaffff',
+    darkMuted: '#9fc6de',
+    darkAccent: '#7ec8eb',
+    darkAccentSoft: 'rgba(194, 232, 255, 0.16)',
+    shapeName: 'Oceanic Pebble',
     buttonRadius: '13px 19px 11px 17px',
-    lightWallpaperUri: beachLightWall,
-    darkWallpaperUri: beachDarkWall,
+    lightWallpaperUri: oceanicLightWall,
+    darkWallpaperUri: oceanicDarkWall,
     sidebar: {
       light: {
-        railBg: 'linear-gradient(180deg, rgba(246,241,231,0.88) 0%, rgba(235,228,214,0.88) 58%, rgba(224,214,196,0.92) 100%)',
-        railBorder: '#cfc2ad',
-        railText: '#152736',
-        brandSectionBg: 'linear-gradient(155deg, rgba(252,248,240,0.88) 0%, rgba(228,238,242,0.78) 100%)',
-        navSectionBg: 'linear-gradient(180deg, rgba(242,237,226,0.74) 0%, rgba(224,230,226,0.68) 100%)',
-        thoughtSectionBg: 'linear-gradient(155deg, rgba(233,241,244,0.84) 0%, rgba(227,217,199,0.78) 100%)',
-        footerSectionBg: 'linear-gradient(180deg, rgba(232,223,207,0.84) 0%, rgba(218,207,188,0.9) 100%)',
-        sectionBorder: 'rgba(42,108,130,0.22)',
-        activeBtnBg: 'linear-gradient(145deg, #1d5c73 0%, #134152 100%)',
-        activeBtnBorder: '#2a7791',
-        activeBtnText: '#ffffff',
-        idleBtnBg: 'rgba(255,255,255,0.34)',
-        idleBtnText: '#234054',
-        activeIconColor: '#bae6fd',
-        idleIconColor: '#24667d',
-        toggleBtnBg: 'linear-gradient(180deg, rgba(242,238,229,0.92) 0%, rgba(224,218,204,0.92) 100%)',
-        toggleBtnText: '#1d4457',
-        toggleBtnBorder: '#bfb49f',
-        mutedLabelColor: '#486d80',
-        thoughtColor: '#193040',
-        authorColor: '#1d647a',
+        railBg: 'linear-gradient(180deg, rgba(234,255,255,0.90) 0%, rgba(214,244,255,0.88) 58%, rgba(194,232,255,0.92) 100%)',
+        railBorder: '#9cc5de',
+        railText: '#042a41',
+        brandSectionBg: 'linear-gradient(155deg, rgba(248,255,255,0.90) 0%, rgba(194,232,255,0.78) 100%)',
+        navSectionBg: 'linear-gradient(180deg, rgba(234,255,255,0.76) 0%, rgba(206,238,255,0.70) 100%)',
+        thoughtSectionBg: 'linear-gradient(155deg, rgba(224,248,255,0.86) 0%, rgba(194,232,255,0.78) 100%)',
+        footerSectionBg: 'linear-gradient(180deg, rgba(212,240,255,0.86) 0%, rgba(186,224,248,0.92) 100%)',
+        sectionBorder: 'rgba(54,92,115,0.22)',
+        activeBtnBg: 'linear-gradient(145deg, #004671 0%, #042a41 100%)',
+        activeBtnBorder: '#1f6a96',
+        activeBtnText: '#eaffff',
+        idleBtnBg: 'rgba(255,255,255,0.44)',
+        idleBtnText: '#042a41',
+        activeIconColor: '#c2e8ff',
+        idleIconColor: '#365c73',
+        toggleBtnBg: 'linear-gradient(180deg, rgba(234,255,255,0.94) 0%, rgba(194,232,255,0.92) 100%)',
+        toggleBtnText: '#042a41',
+        toggleBtnBorder: '#8db8d4',
+        mutedLabelColor: '#365c73',
+        thoughtColor: '#042a41',
+        authorColor: '#004671',
         trashTextColor: '#8e242a',
         trashIconColor: '#a62a31',
       },
       dark: {
-        railBg: 'linear-gradient(180deg, rgba(12,26,41,0.88) 0%, rgba(8,19,31,0.9) 58%, rgba(5,12,21,0.94) 100%)',
-        railBorder: '#1d3c56',
-        railText: '#e6eff5',
-        brandSectionBg: 'linear-gradient(155deg, rgba(22,52,77,0.72) 0%, rgba(10,27,42,0.82) 100%)',
-        navSectionBg: 'linear-gradient(180deg, rgba(16,40,60,0.58) 0%, rgba(9,23,36,0.7) 100%)',
-        thoughtSectionBg: 'linear-gradient(155deg, rgba(21,49,73,0.72) 0%, rgba(10,26,40,0.84) 100%)',
-        footerSectionBg: 'linear-gradient(180deg, rgba(15,36,54,0.76) 0%, rgba(7,18,29,0.9) 100%)',
-        sectionBorder: 'rgba(79,176,204,0.22)',
-        activeBtnBg: 'linear-gradient(155deg, #3c8fbd 0%, #2b6f96 52%, #1d5270 100%)',
-        activeBtnBorder: '#6cc5f0',
-        activeBtnText: '#ffffff',
-        idleBtnBg: 'linear-gradient(180deg, rgba(22, 55, 75, 0.68) 0%, rgba(11, 29, 41, 0.84) 100%)',
-        idleBtnText: '#d3ecf8',
-        activeIconColor: '#e0f7ff',
-        idleIconColor: '#8fd4ed',
-        toggleBtnBg: 'linear-gradient(180deg, #173b52 0%, #102b3c 58%, #0a1c28 100%)',
-        toggleBtnText: '#e0f3fc',
-        toggleBtnBorder: '#275c7d',
-        mutedLabelColor: '#76abc4',
-        thoughtColor: '#deecf5',
-        authorColor: '#73c7e0',
+        railBg: 'linear-gradient(180deg, rgba(4,42,65,0.92) 0%, rgba(3,30,48,0.94) 58%, rgba(2,18,30,0.96) 100%)',
+        railBorder: '#1d5678',
+        railText: '#eaffff',
+        brandSectionBg: 'linear-gradient(155deg, rgba(0,70,113,0.68) 0%, rgba(4,34,54,0.84) 100%)',
+        navSectionBg: 'linear-gradient(180deg, rgba(4,42,65,0.58) 0%, rgba(2,24,38,0.74) 100%)',
+        thoughtSectionBg: 'linear-gradient(155deg, rgba(6,52,80,0.70) 0%, rgba(3,28,44,0.86) 100%)',
+        footerSectionBg: 'linear-gradient(180deg, rgba(4,38,60,0.78) 0%, rgba(2,20,33,0.92) 100%)',
+        sectionBorder: 'rgba(114,152,175,0.24)',
+        activeBtnBg: 'linear-gradient(155deg, #2b7ea8 0%, #00588c 52%, #004671 100%)',
+        activeBtnBorder: '#72b8db',
+        activeBtnText: '#eaffff',
+        idleBtnBg: 'linear-gradient(180deg, rgba(16, 66, 98, 0.72) 0%, rgba(6, 36, 56, 0.88) 100%)',
+        idleBtnText: '#c2e8ff',
+        activeIconColor: '#eaffff',
+        idleIconColor: '#98c7e0',
+        toggleBtnBg: 'linear-gradient(180deg, #0d4b70 0%, #06324d 58%, #042133 100%)',
+        toggleBtnText: '#eaffff',
+        toggleBtnBorder: '#286f99',
+        mutedLabelColor: '#7298af',
+        thoughtColor: '#eaffff',
+        authorColor: '#c2e8ff',
         trashTextColor: '#f08285',
         trashIconColor: '#eb6c70',
       },
@@ -595,78 +597,78 @@ export const THEME_META_MAP: Record<ThemeId, ThemeMeta> = {
   },
   '4': {
     id: '4',
-    name: 'Cozy Rainy Monsoon',
-    tagline: 'Rain Slate & Warm Chai · Rain Watermarks & Frosted Balcony · Teardrop Buttons',
-    lightBg: '#e7edf3',
-    lightSurface: 'rgba(244, 248, 252, 0.84)',
-    lightRaised: 'rgba(223, 232, 241, 0.88)',
-    lightHeader: 'rgba(238, 244, 250, 0.82)',
-    lightBorder: '#bac8d8',
-    lightInk: '#182230',
-    lightMuted: '#4b5e76',
-    lightAccent: '#365578',
-    lightAccentSoft: 'rgba(54, 85, 120, 0.14)',
-    darkBg: '#090f18',
-    darkSurface: 'rgba(15, 23, 36, 0.84)',
-    darkRaised: 'rgba(23, 35, 54, 0.88)',
-    darkHeader: 'rgba(11, 18, 29, 0.85)',
-    darkBorder: '#2c3f5b',
-    darkInk: '#e6edf6',
-    darkMuted: '#99aec9',
-    darkAccent: '#7ea5d6',
-    darkAccentSoft: 'rgba(126, 165, 214, 0.16)',
-    shapeName: 'Monsoon Teardrop',
+    name: 'Turquoise & Kabul Loft',
+    tagline: 'Bright Turquoise #21DAEF · Kabul Bronze #58423E · Architectural Cove Lighting',
+    lightBg: '#eafbfc',
+    lightSurface: 'rgba(246, 253, 254, 0.88)',
+    lightRaised: 'rgba(235, 227, 224, 0.90)',
+    lightHeader: 'rgba(232, 250, 252, 0.88)',
+    lightBorder: '#98d9e2',
+    lightInk: '#2b1f1c',
+    lightMuted: '#58423e',
+    lightAccent: '#0893a6',
+    lightAccentSoft: 'rgba(33, 218, 239, 0.16)',
+    darkBg: '#120d0c',
+    darkSurface: 'rgba(34, 25, 23, 0.90)',
+    darkRaised: 'rgba(64, 48, 44, 0.92)',
+    darkHeader: 'rgba(24, 18, 16, 0.92)',
+    darkBorder: '#6e524c',
+    darkInk: '#e9fbfd',
+    darkMuted: '#c6b0ab',
+    darkAccent: '#21daef',
+    darkAccentSoft: 'rgba(33, 218, 239, 0.18)',
+    shapeName: 'Architectural Loft',
     buttonRadius: '15px 15px 15px 4px',
-    lightWallpaperUri: rainLightWall,
-    darkWallpaperUri: rainDarkWall,
+    lightWallpaperUri: kabulLightWall,
+    darkWallpaperUri: kabulDarkWall,
     sidebar: {
       light: {
-        railBg: 'linear-gradient(180deg, rgba(234,240,247,0.88) 0%, rgba(221,230,241,0.88) 58%, rgba(208,220,234,0.92) 100%)',
-        railBorder: '#b6c5d6',
-        railText: '#182230',
-        brandSectionBg: 'linear-gradient(155deg, rgba(244,248,253,0.86) 0%, rgba(217,228,240,0.78) 100%)',
-        navSectionBg: 'linear-gradient(180deg, rgba(232,239,247,0.72) 0%, rgba(214,225,238,0.68) 100%)',
-        thoughtSectionBg: 'linear-gradient(155deg, rgba(228,236,246,0.84) 0%, rgba(209,221,235,0.76) 100%)',
-        footerSectionBg: 'linear-gradient(180deg, rgba(218,228,240,0.84) 0%, rgba(201,214,230,0.9) 100%)',
-        sectionBorder: 'rgba(72,102,138,0.24)',
-        activeBtnBg: 'linear-gradient(145deg, #354e6d 0%, #24364d 100%)',
-        activeBtnBorder: '#4d6f96',
+        railBg: 'linear-gradient(180deg, rgba(235,252,253,0.90) 0%, rgba(224,247,250,0.88) 58%, rgba(236,228,225,0.92) 100%)',
+        railBorder: '#98d9e2',
+        railText: '#2b1f1c',
+        brandSectionBg: 'linear-gradient(155deg, rgba(246,253,254,0.90) 0%, rgba(215,247,250,0.80) 100%)',
+        navSectionBg: 'linear-gradient(180deg, rgba(232,250,252,0.76) 0%, rgba(236,229,226,0.72) 100%)',
+        thoughtSectionBg: 'linear-gradient(155deg, rgba(225,249,252,0.86) 0%, rgba(235,224,220,0.78) 100%)',
+        footerSectionBg: 'linear-gradient(180deg, rgba(236,228,225,0.86) 0%, rgba(222,211,207,0.92) 100%)',
+        sectionBorder: 'rgba(88,66,62,0.24)',
+        activeBtnBg: 'linear-gradient(145deg, #0ea4b8 0%, #087a8a 52%, #58423e 100%)',
+        activeBtnBorder: '#21daef',
         activeBtnText: '#ffffff',
-        idleBtnBg: 'rgba(255,255,255,0.38)',
-        idleBtnText: '#2c3d52',
-        activeIconColor: '#fde68a',
-        idleIconColor: '#456082',
-        toggleBtnBg: 'linear-gradient(180deg, rgba(233,240,248,0.92) 0%, rgba(213,223,235,0.92) 100%)',
-        toggleBtnText: '#2f4157',
-        toggleBtnBorder: '#aebfd2',
-        mutedLabelColor: '#566b85',
-        thoughtColor: '#1f2b3c',
-        authorColor: '#8d5b2d',
+        idleBtnBg: 'rgba(255,255,255,0.44)',
+        idleBtnText: '#382a27',
+        activeIconColor: '#d9fbff',
+        idleIconColor: '#58423e',
+        toggleBtnBg: 'linear-gradient(180deg, rgba(235,252,253,0.92) 0%, rgba(224,238,240,0.92) 100%)',
+        toggleBtnText: '#382a27',
+        toggleBtnBorder: '#98d9e2',
+        mutedLabelColor: '#6d544f',
+        thoughtColor: '#2b1f1c',
+        authorColor: '#088d9e',
         trashTextColor: '#8e242a',
         trashIconColor: '#a62a31',
       },
       dark: {
-        railBg: 'linear-gradient(180deg, rgba(16,24,38,0.88) 0%, rgba(11,17,28,0.9) 58%, rgba(7,12,20,0.94) 100%)',
-        railBorder: '#2a3d58',
-        railText: '#e6edf6',
-        brandSectionBg: 'linear-gradient(155deg, rgba(30,45,68,0.72) 0%, rgba(14,23,36,0.82) 100%)',
-        navSectionBg: 'linear-gradient(180deg, rgba(23,35,54,0.58) 0%, rgba(12,20,32,0.7) 100%)',
-        thoughtSectionBg: 'linear-gradient(155deg, rgba(34,47,68,0.72) 0%, rgba(15,24,36,0.84) 100%)',
-        footerSectionBg: 'linear-gradient(180deg, rgba(21,32,49,0.76) 0%, rgba(10,16,26,0.9) 100%)',
-        sectionBorder: 'rgba(126,165,214,0.22)',
-        activeBtnBg: 'linear-gradient(155deg, #4e73ab 0%, #3a5887 52%, #2a4166 100%)',
-        activeBtnBorder: '#86aee6',
+        railBg: 'linear-gradient(180deg, rgba(34,25,23,0.92) 0%, rgba(24,18,16,0.94) 58%, rgba(16,11,10,0.96) 100%)',
+        railBorder: '#6e524c',
+        railText: '#e9fbfd',
+        brandSectionBg: 'linear-gradient(155deg, rgba(88,66,62,0.62) 0%, rgba(28,20,18,0.86) 100%)',
+        navSectionBg: 'linear-gradient(180deg, rgba(46,35,32,0.62) 0%, rgba(22,16,15,0.78) 100%)',
+        thoughtSectionBg: 'linear-gradient(155deg, rgba(64,48,44,0.68) 0%, rgba(24,18,16,0.86) 100%)',
+        footerSectionBg: 'linear-gradient(180deg, rgba(40,30,27,0.80) 0%, rgba(18,13,12,0.94) 100%)',
+        sectionBorder: 'rgba(33,218,239,0.22)',
+        activeBtnBg: 'linear-gradient(155deg, #16b8cc 0%, #0b8494 55%, #075c68 100%)',
+        activeBtnBorder: '#21daef',
         activeBtnText: '#ffffff',
-        idleBtnBg: 'linear-gradient(180deg, rgba(30, 45, 69, 0.68) 0%, rgba(15, 24, 38, 0.84) 100%)',
-        idleBtnText: '#d6e3f8',
-        activeIconColor: '#e6f0ff',
-        idleIconColor: '#9ec0eb',
-        toggleBtnBg: 'linear-gradient(180deg, #20314b 0%, #152134 58%, #0f1826 100%)',
-        toggleBtnText: '#e3ecfc',
-        toggleBtnBorder: '#344f78',
-        mutedLabelColor: '#849ebe',
-        thoughtColor: '#e2eaf5',
-        authorColor: '#eab676',
+        idleBtnBg: 'linear-gradient(180deg, rgba(72, 54, 50, 0.78) 0%, rgba(42, 31, 29, 0.90) 100%)',
+        idleBtnText: '#d9f8fc',
+        activeIconColor: '#e9fbfd',
+        idleIconColor: '#7be7f5',
+        toggleBtnBg: 'linear-gradient(180deg, #4b3834 0%, #332623 58%, #211816 100%)',
+        toggleBtnText: '#e9fbfd',
+        toggleBtnBorder: '#755851',
+        mutedLabelColor: '#bfa9a4',
+        thoughtColor: '#e9fbfd',
+        authorColor: '#21daef',
         trashTextColor: '#f08285',
         trashIconColor: '#eb6c70',
       },
@@ -674,80 +676,80 @@ export const THEME_META_MAP: Record<ThemeId, ThemeMeta> = {
   },
   '5': {
     id: '5',
-    name: 'Pistachio & Obsidian',
-    tagline: 'Creamish Pista Soft Glass (Light) & Obsidian Black (Dark) · Cream-Pista Dark Buttons',
-    lightBg: '#f5f8ee',
-    lightSurface: 'rgba(248, 251, 242, 0.74)',
-    lightRaised: 'rgba(238, 245, 226, 0.74)',
-    lightHeader: 'rgba(248, 251, 242, 0.74)',
-    lightBorder: 'rgba(196, 214, 168, 0.8)',
-    lightInk: '#1e2b18',
-    lightMuted: '#566b4c',
-    lightAccent: '#578440',
-    lightAccentSoft: 'rgba(87, 132, 64, 0.14)',
-    darkBg: '#040405',
-    darkSurface: 'rgba(11, 11, 13, 0.9)',
-    darkRaised: 'rgba(19, 19, 23, 0.92)',
-    darkHeader: 'rgba(8, 8, 10, 0.9)',
-    darkBorder: '#27282e',
-    darkInk: '#eef4ea',
-    darkMuted: '#9aa498',
-    darkAccent: '#e5eed6',
-    darkAccentSoft: 'rgba(229, 238, 214, 0.14)',
-    shapeName: 'Pistachio Tab',
+    name: 'Forest Emerald & Gold',
+    tagline: 'Deep Forest #002a23 · Champagne #d8c2aa · Brushed Gold · Obsidian #090e0e',
+    lightBg: '#f5ede2',
+    lightSurface: 'rgba(252, 248, 242, 0.88)',
+    lightRaised: 'rgba(216, 194, 170, 0.72)',
+    lightHeader: 'rgba(246, 238, 227, 0.88)',
+    lightBorder: '#cab095',
+    lightInk: '#002a23',
+    lightMuted: '#2b5248',
+    lightAccent: '#002a23',
+    lightAccentSoft: 'rgba(0, 42, 35, 0.12)',
+    darkBg: '#090e0e',
+    darkSurface: 'rgba(5, 32, 27, 0.90)',
+    darkRaised: 'rgba(0, 42, 35, 0.94)',
+    darkHeader: 'rgba(6, 18, 16, 0.92)',
+    darkBorder: '#134c40',
+    darkInk: '#f2e7d9',
+    darkMuted: '#d8c2aa',
+    darkAccent: '#d1a854',
+    darkAccentSoft: 'rgba(209, 168, 84, 0.16)',
+    shapeName: 'Emerald Tab',
     buttonRadius: '8px 14px 8px 14px',
-    lightWallpaperUri: pistachioLightWall,
-    darkWallpaperUri: obsidianDarkWall,
+    lightWallpaperUri: emeraldGoldLightWall,
+    darkWallpaperUri: emeraldGoldDarkWall,
     sidebar: {
       light: {
-        railBg: 'linear-gradient(180deg, rgba(249,252,244,0.76) 0%, rgba(240,247,230,0.74) 58%, rgba(231,241,216,0.78) 100%)',
-        railBorder: 'rgba(196, 214, 168, 0.8)',
-        railText: '#1e2b18',
-        brandSectionBg: 'linear-gradient(155deg, rgba(252,253,249,0.76) 0%, rgba(239,246,227,0.72) 100%)',
-        navSectionBg: 'linear-gradient(180deg, rgba(248,251,242,0.72) 0%, rgba(236,244,223,0.7) 100%)',
-        thoughtSectionBg: 'linear-gradient(155deg, rgba(245,250,236,0.74) 0%, rgba(233,242,218,0.72) 100%)',
-        footerSectionBg: 'linear-gradient(180deg, rgba(240,247,230,0.74) 0%, rgba(229,239,213,0.78) 100%)',
-        sectionBorder: 'rgba(87,132,64,0.2)',
-        activeBtnBg: 'linear-gradient(145deg, #54833d 0%, #3d632b 100%)',
-        activeBtnBorder: '#689c4f',
-        activeBtnText: '#ffffff',
+        railBg: 'linear-gradient(180deg, rgba(248,242,233,0.90) 0%, rgba(235,222,206,0.88) 58%, rgba(216,194,170,0.90) 100%)',
+        railBorder: '#c8ad8f',
+        railText: '#002a23',
+        brandSectionBg: 'linear-gradient(155deg, rgba(253,250,245,0.90) 0%, rgba(232,216,198,0.80) 100%)',
+        navSectionBg: 'linear-gradient(180deg, rgba(246,238,227,0.76) 0%, rgba(228,211,192,0.72) 100%)',
+        thoughtSectionBg: 'linear-gradient(155deg, rgba(242,232,218,0.86) 0%, rgba(222,202,179,0.78) 100%)',
+        footerSectionBg: 'linear-gradient(180deg, rgba(234,220,202,0.84) 0%, rgba(216,194,170,0.90) 100%)',
+        sectionBorder: 'rgba(0,42,35,0.20)',
+        activeBtnBg: 'linear-gradient(145deg, #003b31 0%, #002a23 100%)',
+        activeBtnBorder: '#b48735',
+        activeBtnText: '#f5ead9',
         idleBtnBg: 'rgba(255,255,255,0.44)',
-        idleBtnText: '#25371e',
-        activeIconColor: '#edf7e0',
-        idleIconColor: '#527d3b',
-        toggleBtnBg: 'linear-gradient(180deg, rgba(245,249,236,0.76) 0%, rgba(231,240,214,0.72) 100%)',
-        toggleBtnText: '#25371e',
-        toggleBtnBorder: '#c5d6ac',
-        mutedLabelColor: '#5f7653',
-        thoughtColor: '#21331a',
-        authorColor: '#487632',
+        idleBtnText: '#002a23',
+        activeIconColor: '#e4c173',
+        idleIconColor: '#1f4f45',
+        toggleBtnBg: 'linear-gradient(180deg, rgba(248,242,233,0.92) 0%, rgba(227,211,191,0.92) 100%)',
+        toggleBtnText: '#002a23',
+        toggleBtnBorder: '#bfa17f',
+        mutedLabelColor: '#365e54',
+        thoughtColor: '#002a23',
+        authorColor: '#986e22',
         trashTextColor: '#8e242a',
         trashIconColor: '#a62a31',
       },
       dark: {
-        railBg: 'linear-gradient(180deg, rgba(10,10,12,0.94) 0%, rgba(6,6,8,0.96) 58%, rgba(2,2,3,0.98) 100%)',
-        railBorder: '#24252a',
-        railText: '#eef4ea',
-        brandSectionBg: 'linear-gradient(155deg, rgba(22,22,26,0.76) 0%, rgba(10,10,12,0.88) 100%)',
-        navSectionBg: 'linear-gradient(180deg, rgba(16,16,19,0.64) 0%, rgba(8,8,10,0.78) 100%)',
-        thoughtSectionBg: 'linear-gradient(155deg, rgba(20,21,24,0.76) 0%, rgba(10,10,12,0.88) 100%)',
-        footerSectionBg: 'linear-gradient(180deg, rgba(15,15,18,0.82) 0%, rgba(6,6,8,0.94) 100%)',
-        sectionBorder: 'rgba(229,238,214,0.16)',
-        activeBtnBg: 'linear-gradient(155deg, rgba(250, 252, 245, 0.88) 0%, rgba(237, 244, 224, 0.82) 52%, rgba(220, 232, 200, 0.76) 100%)',
-        activeBtnBorder: 'rgba(255, 255, 255, 0.9)',
-        activeBtnText: '#070a06',
-        idleBtnBg: 'linear-gradient(180deg, rgba(221, 230, 207, 0.72) 0%, rgba(196, 211, 174, 0.66) 100%)',
-        idleBtnText: '#0f160d',
-        activeIconColor: '#0c140a',
-        idleIconColor: '#182414',
-        toggleBtnBg: 'linear-gradient(180deg, rgba(221, 230, 207, 0.74) 0%, rgba(201, 214, 182, 0.7) 58%, rgba(182, 198, 160, 0.66) 100%)',
-        toggleBtnText: '#0f160d',
-        toggleBtnBorder: 'rgba(221, 230, 207, 0.76)',
-        mutedLabelColor: '#98a196',
-        thoughtColor: '#e9efe6',
-        authorColor: '#dce8c8',
-        trashTextColor: '#5e0b15',
-        trashIconColor: '#6f0f1b',
+        railBg: 'linear-gradient(180deg, rgba(4,34,28,0.94) 0%, rgba(4,22,19,0.96) 58%, rgba(6,12,12,0.98) 100%)',
+        railBorder: '#134c40',
+        railText: '#f2e7d9',
+        brandSectionBg: 'linear-gradient(155deg, rgba(0,42,35,0.82) 0%, rgba(6,14,13,0.90) 100%)',
+        navSectionBg: 'linear-gradient(180deg, rgba(0,36,30,0.68) 0%, rgba(7,15,14,0.82) 100%)',
+        thoughtSectionBg: 'linear-gradient(155deg, rgba(0,42,35,0.78) 0%, rgba(8,16,15,0.88) 100%)',
+        footerSectionBg: 'linear-gradient(180deg, rgba(0,32,27,0.84) 0%, rgba(6,11,11,0.95) 100%)',
+        sectionBorder: 'rgba(209,168,84,0.22)',
+        activeBtnBg: 'linear-gradient(155deg, #d8b15e 0%, #b48632 55%, #8c621d 100%)',
+        activeBtnBorder: '#ecd08c',
+        activeBtnText: '#090e0e',
+        idleBtnBg: 'linear-gradient(180deg, rgba(8, 56, 46, 0.78) 0%, rgba(3, 30, 25, 0.90) 100%)',
+        idleBtnText: '#d8c2aa',
+        activeIconColor: '#090e0e',
+        idleIconColor: '#d1a854',
+        toggleBtnBg: 'linear-gradient(180deg, #064035 0%, #032a23 58%, #021a16 100%)',
+        toggleBtnText: '#e8d8c5',
+        toggleBtnBorder: '#1c5f51',
+        mutedLabelColor: '#b5a28c',
+        thoughtColor: '#f2e7d9',
+        authorColor: '#d1a854',
+        trashTextColor: '#f28b8d',
+        trashIconColor: '#ee6f73',
       },
     },
   },

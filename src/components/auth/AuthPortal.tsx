@@ -125,6 +125,20 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
   const [submitting, setSubmitting] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [showShowcase, setShowShowcase] = useState<boolean>(false);
+
+  useEffect(() => {
+    if (isModal) return;
+    const activate = () => setShowShowcase(true);
+    const ric = (globalThis as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number; cancelIdleCallback?: (id: number) => void }).requestIdleCallback;
+    const cic = (globalThis as { cancelIdleCallback?: (id: number) => void }).cancelIdleCallback;
+    if (typeof ric === 'function') {
+      const id = ric(activate, { timeout: 600 });
+      return () => cic?.(id);
+    }
+    const timer = globalThis.setTimeout(activate, 180);
+    return () => globalThis.clearTimeout(timer);
+  }, [isModal]);
 
   useEffect(() => {
     if (resendCooldown <= 0) return;
@@ -296,58 +310,52 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
         </div>
       )}
 
-      {/* Top Dark Login Screen Viewport (fills screen height leaving only a subtle bottom peek of the cream showcase) */}
+      {/* Top Dark Login Screen Viewport (fills screen height leaving only a subtle bottom peek of the brown->cream merge) */}
       <div
         className={
           isModal
             ? 'relative z-10 w-full max-w-4xl grid grid-cols-1 lg:grid-cols-12 gap-6 items-center'
-            : 'relative w-full min-h-[calc(100dvh-46px)] sm:min-h-[calc(100dvh-54px)] flex items-center justify-center px-4 sm:px-8 py-4 sm:py-6 overflow-hidden shrink-0'
+            : 'relative w-full min-h-[calc(100dvh-64px)] sm:min-h-[calc(100dvh-76px)] flex items-center justify-center px-3.5 sm:px-8 py-4 sm:py-6 overflow-hidden shrink-0'
         }
         style={
           isModal
             ? undefined
             : {
                 background:
-                  'radial-gradient(ellipse 85% 75% at 22% 24%, #261209 0%, #150904 52%, #0c0402 100%)',
+                  'radial-gradient(ellipse 85% 75% at 22% 24%, #261209 0%, #150904 56%, #0c0402 100%)',
               }
         }
       >
-        {/* Ambient Subtle Warm Orbs softly dispersed inside dark login hero */}
+        {/* Lightweight zero-blur ambient warmth for fast mobile GPU rendering */}
         {!isModal && (
-          <div className="absolute inset-0 pointer-events-none overflow-hidden" aria-hidden="true">
-            <div
-              className="absolute -top-28 -left-20 w-[480px] h-[480px] rounded-full blur-3xl animate-pulse bg-[#5c2d16] opacity-15"
-              style={{ animationDuration: '9s' }}
-            />
-            <div
-              className="absolute top-1/4 right-[8%] w-[380px] h-[380px] rounded-full blur-3xl animate-pulse bg-[#6b3a1c] opacity-15"
-              style={{ animationDuration: '11s' }}
-            />
-            <div
-              className="absolute -bottom-32 -right-16 w-[500px] h-[500px] rounded-full blur-3xl animate-pulse bg-[#3d1c0d] opacity-20"
-              style={{ animationDuration: '12s' }}
-            />
-          </div>
+          <div
+            className="absolute inset-0 pointer-events-none"
+            aria-hidden="true"
+            style={{
+              background:
+                'radial-gradient(circle at 14% 16%, rgba(120, 62, 28, 0.22) 0%, transparent 45%), radial-gradient(circle at 86% 28%, rgba(138, 78, 36, 0.16) 0%, transparent 42%)',
+            }}
+          />
         )}
 
       {/* Simple Clean Split Layout: Brand Logo & Name Beside Bevelled Frosted-Glass Login Box */}
-      <div className={isModal ? 'contents' : 'relative z-10 w-full max-w-4xl grid grid-cols-1 lg:grid-cols-12 gap-6 items-center my-auto'}>
+      <div className={isModal ? 'contents' : 'relative z-10 w-full max-w-4xl grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-center my-auto'}>
         {/* Left: Frameless Brand Panel */}
-        <div className="lg:col-span-5 flex flex-col items-center lg:items-start justify-center text-center lg:text-left p-4 sm:p-6 relative">
+        <div className="lg:col-span-5 flex flex-col items-center lg:items-start justify-center text-center lg:text-left px-2 py-2 sm:p-6 relative">
           <div className="flex flex-col items-center lg:items-start gap-2 w-full">
-            <div className="relative flex items-center justify-center lg:justify-start mb-1.5 select-none max-w-full">
+            <div className="relative flex items-center justify-center lg:justify-start mb-1 select-none max-w-full">
               <div
                 aria-hidden="true"
-                className="pointer-events-none absolute -inset-x-12 -inset-y-8 rounded-full blur-2xl opacity-50"
+                className="pointer-events-none absolute -inset-x-10 -inset-y-6 rounded-full opacity-55"
                 style={{
                   background:
-                    'radial-gradient(ellipse 70% 65% at 50% 50%, rgba(10, 4, 1, 0.45) 0%, rgba(22, 10, 4, 0.18) 54%, transparent 82%)',
+                    'radial-gradient(ellipse 70% 65% at 50% 50%, rgba(10, 4, 1, 0.48) 0%, rgba(22, 10, 4, 0.16) 56%, transparent 82%)',
                 }}
               />
               <div
                 className="relative z-10 max-w-full"
                 style={{
-                  filter: 'drop-shadow(0 10px 28px rgba(10, 4, 1, 0.34))',
+                  filter: 'drop-shadow(0 10px 24px rgba(10, 4, 1, 0.34))',
                 }}
               >
                 <img
@@ -371,7 +379,8 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
             {!isModal && (
               <a
                 href="#medical-student-seo-guide"
-                className="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-400/25 text-[11px] font-semibold text-amber-200 transition-colors"
+                onClick={() => setShowShowcase(true)}
+                className="mt-1.5 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-400/25 text-[11px] font-semibold text-amber-200 transition-colors"
               >
                 <Film className="w-3.5 h-3.5 text-amber-300" />
                 <span>Cheapest Medical Note App · Watch 9-Part Tour ↓</span>
@@ -382,10 +391,10 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
 
         {/* Right: Borderless Frosted-Glass Bevelled Login Box (Always Dark) */}
         <div
-          className="lg:col-span-7 rounded-3xl p-6 sm:p-8 backdrop-blur-2xl backdrop-saturate-150 flex flex-col justify-between transition-all"
+          className="lg:col-span-7 rounded-3xl p-4 sm:p-8 backdrop-blur-xl backdrop-saturate-150 flex flex-col justify-between transition-all"
           style={{
             background:
-              'linear-gradient(160deg, rgba(36, 18, 10, 0.62) 0%, rgba(18, 8, 4, 0.5) 100%)',
+              'linear-gradient(160deg, rgba(36, 18, 10, 0.68) 0%, rgba(18, 8, 4, 0.56) 100%)',
             boxShadow:
               'inset 0 1.5px 1px rgba(255, 224, 178, 0.14), inset 0 -2px 6px rgba(0, 0, 0, 0.45), 0 24px 60px rgba(0, 0, 0, 0.55)',
           }}
@@ -894,18 +903,32 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
       </div>
 
       {!isModal && (
-        <section
-          aria-label="Achiev Medical Study Guide & Tour"
-          className="w-full relative z-10 border-t border-[#E2D1B0] px-4 sm:px-8 pt-3.5 sm:pt-4 pb-14 sm:pb-16 text-[#23140A]"
-          style={{
-            background: 'linear-gradient(180deg, #FCF9F1 0%, #F7EFE0 52%, #F1E6CE 100%)',
-            boxShadow: 'inset 0 1px 0 rgba(255, 255, 255, 0.85)',
-          }}
-        >
-          <Suspense fallback={<div className="w-full max-w-6xl mx-auto mt-6 h-48 rounded-3xl bg-[#EFE4CC]/60 animate-pulse" />}>
-            <FeatureVideoSeriesShowcase />
-          </Suspense>
-        </section>
+        <>
+          {/* Silky Multi-Stop Color Merge: Deep Espresso Brown -> Warm Bronze -> Champagne Latte -> Whitish Royal Cream */}
+          <div
+            aria-hidden="true"
+            className="w-full h-20 sm:h-24 relative z-10 pointer-events-none shrink-0"
+            style={{
+              background:
+                'linear-gradient(180deg, #0c0402 0%, #1d0d06 16%, #3f2213 34%, #724e35 54%, #ad8a68 72%, #dfc9a8 87%, #f5ebd8 95%, #FCF9F1 100%)',
+            }}
+          />
+          <section
+            aria-label="Achiev Medical Study Guide & Tour"
+            className="w-full relative z-10 px-4 sm:px-8 pt-2 sm:pt-3 pb-14 sm:pb-16 text-[#23140A]"
+            style={{
+              background: 'linear-gradient(180deg, #FCF9F1 0%, #F7EFE0 52%, #F1E6CE 100%)',
+            }}
+          >
+            {showShowcase ? (
+              <Suspense fallback={<div className="w-full max-w-6xl mx-auto mt-4 h-48 rounded-3xl bg-[#EFE4CC]/60 animate-pulse" />}>
+                <FeatureVideoSeriesShowcase />
+              </Suspense>
+            ) : (
+              <div className="w-full max-w-6xl mx-auto h-32" />
+            )}
+          </section>
+        </>
       )}
     </div>
   );
