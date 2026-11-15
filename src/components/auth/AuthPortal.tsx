@@ -271,8 +271,8 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
     <div
       className={`${
         isModal
-          ? 'fixed inset-0 z-50 bg-black/55 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto'
-          : 'min-h-screen w-full relative overflow-y-auto flex flex-col items-center p-4 sm:p-8'
+          ? 'fixed inset-0 z-50 bg-black/55 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto overflow-x-hidden'
+          : 'min-h-screen w-full relative overflow-y-auto overflow-x-hidden flex flex-col items-center p-4 sm:p-8'
       } transition-colors duration-300 text-[#efe4d4]`}
       style={{
         background:
@@ -324,17 +324,29 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                     'radial-gradient(ellipse 70% 65% at 50% 50%, rgba(10, 4, 1, 0.45) 0%, rgba(22, 10, 4, 0.18) 54%, transparent 82%)',
                 }}
               />
-              <img
-                src={ACHIEV_LOCKUP_URL}
-                alt="Achiev — Settle Ideas"
-                draggable={false}
-                fetchPriority="high"
-                decoding="sync"
-                className="relative z-10 h-[81px] sm:h-[99px] max-w-full w-auto object-contain select-none pointer-events-none"
+              <div
+                className="relative z-10 max-w-full"
                 style={{
                   filter: 'drop-shadow(0 10px 28px rgba(10, 4, 1, 0.34))',
                 }}
-              />
+              >
+                <div className="relative w-[241px] sm:w-[295px] max-w-full aspect-[1845/620] overflow-hidden select-none pointer-events-none">
+                  <img
+                    src={ACHIEV_LOCKUP_URL}
+                    alt="Achiev — Settle Ideas"
+                    draggable={false}
+                    fetchPriority="high"
+                    decoding="sync"
+                    className="absolute max-w-none select-none pointer-events-none"
+                    style={{
+                      width: '144.4986%',
+                      height: '258.0645%',
+                      left: '-24.9864%',
+                      top: '-75.3226%',
+                    }}
+                  />
+                </div>
+              </div>
             </div>
 
             <p
