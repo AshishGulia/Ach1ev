@@ -233,21 +233,21 @@ const LOOK_DARK_CHOCOLATE: Look = {
 
 const LOOK_CREAMY_CARAMEL: Look = {
   name: 'Creamy Caramel',
-  frame: '#c88b4e',
-  dark: '#8a5828',
-  back: '#5c3b1c',
-  plank: '#d69c60',
+  frame: '#613a21',
+  dark: '#381e0f',
+  back: '#432717',
+  plank: '#74472a',
   door: 'glass',
   upperDoorType: 'fancy-caramel-glass',
   lowerDoorType: 'solid-wood-door',
-  face: '#c88b4e',
-  handle: '#fef3c7',
+  face: '#5a341c',
+  handle: '#4b2a17',
   knob: true,
   light: false,
-  grain: 0.32,
+  grain: 0.40,
   wallType: 'charcoal-slats',
   legs: 'tapered-wood',
-  accentDesc: 'Polished Honey Oak · Rounded glass doors (upper), carved solid wood doors (lower) & splayed legs',
+  accentDesc: 'Warm Polished Walnut · Rounded bezel glass doors (upper), carved walnut doors (lower) & splayed legs',
   hasUpperDoor: true,
   hasSlideBars: true,
   isCapsule: true,
@@ -376,7 +376,6 @@ export const seed = (): AlmirahT[] => [
     shelves: [
       mk('Section 1', []),
       mk('Section 2', []),
-      mk('Section 3', []),
       mk('Lower Section', []),
     ],
   },
@@ -394,32 +393,41 @@ function migrateAlmirah(a: AlmirahT): AlmirahT {
     name: a.name === 'Smoked Onyx' ? 'Vault' : a.name,
     design: resolvedDesign,
     hasUpperDoor: resolvedDesign === 'Dark Chocolate' ? false : (a.hasUpperDoor !== undefined ? a.hasUpperDoor : designDefaultDoor),
-    shelves: (a.shelves || []).map((s, idx) => {
-      const legacyNames = new Set([
-        'Lower Vault Section',
-        'Lower Classified Section',
-        'Lower Espresso Bay',
-        'Lower Security Bay',
-        'Vault Chamber 1',
-        'Vault Chamber 2',
-        'Vault Chamber 3',
-      ]);
-      const folderList = Array.isArray(s.folders) ? s.folders : [];
-      if (legacyNames.has(s.name)) {
+    shelves: (a.shelves || [])
+      .filter(
+        (s) =>
+          !(
+            s.name === 'Section 3' &&
+            (!s.books || s.books.length === 0) &&
+            (!s.folders || s.folders.length === 0)
+          )
+      )
+      .map((s, idx) => {
+        const legacyNames = new Set([
+          'Lower Vault Section',
+          'Lower Classified Section',
+          'Lower Espresso Bay',
+          'Lower Security Bay',
+          'Vault Chamber 1',
+          'Vault Chamber 2',
+          'Vault Chamber 3',
+        ]);
+        const folderList = Array.isArray(s.folders) ? s.folders : [];
+        if (legacyNames.has(s.name)) {
+          return {
+            id: s.id,
+            name: s.name.startsWith('Lower') ? 'Lower Section' : `Section ${idx + 1}`,
+            books: s.books || [],
+            folders: folderList,
+          };
+        }
         return {
           id: s.id,
-          name: s.name.startsWith('Lower') ? 'Lower Section' : `Section ${idx + 1}`,
+          name: s.name,
           books: s.books || [],
           folders: folderList,
         };
-      }
-      return {
-        id: s.id,
-        name: s.name,
-        books: s.books || [],
-        folders: folderList,
-      };
-    }),
+      }),
   };
 }
 
@@ -576,7 +584,7 @@ export function getWoodSurfaceStyle(
     };
   }
 
-  const isCaramelOak = look.name === 'Creamy Caramel' || look.grain <= 0.34;
+  const isCaramelOak = look.grain <= 0.34;
   const imgFile = isCaramelOak
     ? orientation === 'v'
       ? 'wood-oak-v.jpg'
@@ -3425,6 +3433,7 @@ function ShelfRow({
   lit,
   open,
   renderDoors,
+  isClassifiedBottom = false,
   onMoveShelf,
   onRenameShelf,
   onAddBook,
@@ -3449,6 +3458,7 @@ function ShelfRow({
   lit: boolean;
   open: boolean;
   renderDoors: boolean;
+  isClassifiedBottom?: boolean;
   onMoveShelf: (i: number, d: -1 | 1) => void;
   onRenameShelf: (shelfId: string, newName: string) => void;
   onAddBook: (shelfId: string) => void;
@@ -3514,7 +3524,7 @@ function ShelfRow({
     <div
       style={{
         position: 'relative',
-        padding: '8px 12px 0',
+        padding: isClassifiedBottom ? '24px 12px 0' : '8px 12px 0',
         minWidth: 0,
         outline: isDragOver ? '2px dashed rgba(245, 158, 11, 0.9)' : 'none',
         outlineOffset: -3,
@@ -4146,6 +4156,7 @@ export function Compartment({
             lit={lit}
             open={open}
             renderDoors={hasInteractiveDoor}
+            isClassifiedBottom={isBottomShutter && look.lowerDoorType === 'classified-shutter'}
             onMoveShelf={onMoveShelf}
             onRenameShelf={onRenameShelf}
             onAddBook={onAddBook}
@@ -4186,6 +4197,7 @@ export function Almirah({
   onNextAlmirah,
   onAddShelf,
   onOpenNewAlmirah,
+  onRenameAlmirah,
   night,
   lit,
   openMap,
@@ -4212,6 +4224,7 @@ export function Almirah({
   onNextAlmirah: () => void;
   onAddShelf: () => void;
   onOpenNewAlmirah: () => void;
+  onRenameAlmirah?: (newName: string) => void;
   night: boolean;
   lit: boolean;
   openMap: Record<string, boolean>;
@@ -4231,6 +4244,12 @@ export function Almirah({
   onDropBookToFolder?: (targetShelfId: string, folderId: string, explicitSource?: { fromShelfId: string; bookId: string }) => void;
   themeId?: ShelfThemeId;
 }) {
+  const [isEditingBannerName, setIsEditingBannerName] = useState(false);
+  const [bannerDraftName, setBannerDraftName] = useState(a.name);
+  useEffect(() => {
+    setBannerDraftName(a.name);
+  }, [a.name]);
+
   const look = getThemeAdaptedLook(LOOKS[a.design] ?? LOOKS['Dark Chocolate']!, themeId);
   const hasUpperDoor = a.hasUpperDoor !== undefined ? a.hasUpperDoor : (look.hasUpperDoor ?? true);
   const bottom = a.shelves[a.shelves.length - 1];
@@ -4289,6 +4308,116 @@ export function Almirah({
           filter: 'blur(5px)',
         }}
       />
+
+      {/* Polished Stand Nameplate Banner Sitting Cleanly on Top of the Almirah */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          marginBottom: -1,
+          position: 'relative',
+          zIndex: 14,
+          pointerEvents: 'auto',
+        }}
+      >
+        <div
+          style={{
+            minWidth: 168,
+            maxWidth: '72%',
+            padding: '5px 18px',
+            borderRadius: '10px 10px 4px 4px',
+            border: `1.5px solid ${trim.accentHex}70`,
+            boxShadow:
+              '0 6px 14px rgba(0,0,0,0.42), inset 0 1.5px 0 rgba(255,244,220,0.34), inset 0 -1px 2px rgba(0,0,0,0.35)',
+            display: 'inline-flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+            ...wood('90deg'),
+          }}
+        >
+          {isEditingBannerName ? (
+            <input
+              type="text"
+              autoFocus
+              value={bannerDraftName}
+              onChange={(e) => setBannerDraftName(e.target.value)}
+              onBlur={() => {
+                const cleaned = bannerDraftName.trim();
+                if (cleaned && cleaned !== a.name) onRenameAlmirah?.(cleaned);
+                else setBannerDraftName(a.name);
+                setIsEditingBannerName(false);
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  const cleaned = bannerDraftName.trim();
+                  if (cleaned && cleaned !== a.name) onRenameAlmirah?.(cleaned);
+                  setIsEditingBannerName(false);
+                } else if (e.key === 'Escape') {
+                  setBannerDraftName(a.name);
+                  setIsEditingBannerName(false);
+                }
+              }}
+              style={{
+                background: 'rgba(0,0,0,0.32)',
+                color: look.light ? '#291a0d' : '#fdf6e7',
+                border: `1px solid ${trim.accentHex}`,
+                borderRadius: 5,
+                padding: '1px 7px',
+                fontSize: 12,
+                fontWeight: 700,
+                textAlign: 'center',
+                outline: 'none',
+                width: 150,
+              }}
+            />
+          ) : (
+            <button
+              type="button"
+              onClick={() => {
+                setBannerDraftName(a.name);
+                setIsEditingBannerName(true);
+              }}
+              title="Click to name / rename this Almirah"
+              className="flex items-center gap-1.5 cursor-pointer hover:opacity-90 transition"
+              style={{
+                color: look.light ? '#2d1c0d' : '#faeed7',
+                fontFamily: 'Georgia, serif',
+                fontSize: 12.5,
+                fontWeight: 700,
+                letterSpacing: '0.03em',
+                textShadow: look.light ? 'none' : '0 1px 2px rgba(0,0,0,0.65)',
+              }}
+            >
+              <span style={{ color: trim.accentHex, fontSize: 10 }}>✦</span>
+              <span className="truncate max-w-[200px]">{a.name}</span>
+              <Pencil className="w-2.5 h-2.5 opacity-60 shrink-0" />
+            </button>
+          )}
+        </div>
+        {/* Small Polished Support Pedestals Under Banner */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', width: 96, height: 5 }}>
+          <span
+            style={{
+              width: 12,
+              height: 5,
+              background: look.dark,
+              borderLeft: `1px solid ${trim.accentHex}55`,
+              borderRight: `1px solid ${trim.accentHex}55`,
+            }}
+          />
+          <span
+            style={{
+              width: 12,
+              height: 5,
+              background: look.dark,
+              borderLeft: `1px solid ${trim.accentHex}55`,
+              borderRight: `1px solid ${trim.accentHex}55`,
+            }}
+          />
+        </div>
+      </div>
 
       <div
         style={{
@@ -4974,57 +5103,131 @@ export function AddBookModal({
 
 export function Mini({ design, themeId = '1' }: { design: string; themeId?: ShelfThemeId }) {
   const l = getThemeAdaptedLook(LOOKS[design] ?? LOOKS['Dark Chocolate']!, themeId);
+  const topRadius = l.isArched ? '24px 24px 3px 3px' : l.isCapsule ? '9px 9px 7px 7px' : '3px';
+  const showGlassUpper = l.upperDoorType !== 'none';
   return (
     <span
       style={{
         display: 'flex',
-        gap: 1.5,
-        padding: 3,
-        width: 38,
-        height: 52,
-        boxSizing: 'border-box',
+        flexDirection: 'column',
+        alignItems: 'center',
         margin: '0 auto',
-        ...(l.grain > 0 || l.isVault
-          ? getWoodSurfaceStyle(l, 'v', 'frame', '180deg')
-          : { background: `linear-gradient(180deg, ${l.frame}, ${l.dark})` }),
-        boxShadow: '1px 2px 4px rgba(0,0,0,.4)',
-        borderRadius: 2,
+        flexShrink: 0,
       }}
     >
-      {[0, 1].map((k) => (
+      <span
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 2,
+          padding: 3.5,
+          width: 48,
+          height: 62,
+          boxSizing: 'border-box',
+          ...(l.grain > 0 || l.isVault
+            ? getWoodSurfaceStyle(l, 'v', 'frame', '180deg')
+            : { background: `linear-gradient(180deg, ${l.frame}, ${l.dark})` }),
+          boxShadow: '1px 3px 6px rgba(0,0,0,.42)',
+          borderRadius: topRadius,
+          border: `1px solid ${l.dark}`,
+          overflow: 'hidden',
+        }}
+      >
+        {/* Upper 2 Sections Preview */}
         <span
-          key={k}
           style={{
-            flex: 1,
+            flex: 1.55,
+            display: 'flex',
+            gap: 1.5,
             position: 'relative',
-            ...(l.isVault
-              ? getWoodSurfaceStyle(l, 'panel', 'door', '135deg')
-              : {
-                  background:
-                    l.door === 'glass' || l.door === 'split-glass' || l.door === 'translucent-glass'
-                      ? 'linear-gradient(115deg, rgba(255,255,255,.36), rgba(255,255,255,.07))'
-                      : l.face,
-                }),
-            boxShadow: `inset 0 0 0 1px ${l.dark}`,
           }}
         >
-          {l.isVault && k === 0 && (
+          {[0, 1].map((k) => (
             <span
+              key={k}
               style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: 8,
-                height: 8,
-                borderRadius: '50%',
-                border: '1.5px solid #94a3b8',
-                background: '#d4af37',
+                flex: 1,
+                position: 'relative',
+                borderRadius: l.isArched
+                  ? k === 0
+                    ? '16px 0 1px 1px'
+                    : '0 16px 1px 1px'
+                  : l.isCapsule
+                    ? 3
+                    : 1.5,
+                ...(l.isVault
+                  ? getWoodSurfaceStyle(l, 'panel', 'door', '135deg')
+                  : {
+                      background: showGlassUpper
+                        ? 'linear-gradient(125deg, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0.12) 55%, rgba(0,0,0,0.18) 100%)'
+                        : l.back,
+                    }),
+                boxShadow: `inset 0 0 0 1px ${l.dark}`,
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-evenly',
+                padding: '2px 2px',
               }}
-            />
+            >
+              {!l.isVault && (
+                <span style={{ height: 1.5, width: '100%', background: l.plank, opacity: 0.78 }} />
+              )}
+              {l.isVault && k === 0 && (
+                <span
+                  style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: 8,
+                    height: 8,
+                    borderRadius: '50%',
+                    border: '1.5px solid #94a3b8',
+                    background: '#d4af37',
+                  }}
+                />
+              )}
+            </span>
+          ))}
+        </span>
+
+        {/* Lower Single Section Preview */}
+        <span
+          style={{
+            flex: 0.9,
+            borderRadius: l.isCapsule ? '2px 2px 5px 5px' : 1.5,
+            position: 'relative',
+            ...(l.lowerDoorType === 'classified-shutter'
+              ? {
+                  background:
+                    'repeating-linear-gradient(180deg, #475569 0px, #475569 2.5px, #1e293b 2.5px, #1e293b 4.5px)',
+                }
+              : l.lowerDoorType === 'drop-down'
+                ? {
+                    background: `linear-gradient(180deg, rgba(255,255,255,0.22), ${l.face})`,
+                  }
+                : getWoodSurfaceStyle(l, 'panel', 'door', '135deg')),
+            boxShadow: `inset 0 0 0 1px ${l.dark}`,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {l.lowerDoorType === 'solid-wood-door' && (
+            <span style={{ width: 1.5, height: '82%', background: l.dark, opacity: 0.75 }} />
           )}
         </span>
-      ))}
+      </span>
+
+      {/* Mini Legs / Plinth Footprint */}
+      {l.legs === 'block-base' ? (
+        <span style={{ width: 34, height: 3, background: l.dark, borderRadius: '0 0 2px 2px' }} />
+      ) : (
+        <span style={{ display: 'flex', justifyContent: 'space-between', width: 36, paddingTop: 0.5 }}>
+          <span style={{ width: 3.5, height: 5, background: l.dark, transform: 'rotate(8deg)', borderRadius: '0 0 2px 2px' }} />
+          <span style={{ width: 3.5, height: 5, background: l.dark, transform: 'rotate(-8deg)', borderRadius: '0 0 2px 2px' }} />
+        </span>
+      )}
     </span>
   );
 }
@@ -5627,6 +5830,7 @@ export default function ShelfRoom({
                         }}
                         onAddShelf={() => handleAddShelfToAlmirah(a.id)}
                         onOpenNewAlmirah={() => setIsNewAlmirahModalOpen(true)}
+                        onRenameAlmirah={(newName) => patch(a.id, (x) => ({ ...x, name: newName }))}
                         night={night}
                         lit={lit}
                         openMap={openMap}
@@ -6113,72 +6317,56 @@ export default function ShelfRoom({
       {isNewAlmirahModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm animate-fadeIn">
           <div className="w-full max-w-md bg-[#faf6ee] dark:bg-[#18110c] border border-[#d6c7b0] dark:border-[#382518] rounded-2xl p-6 shadow-2xl text-[#1c140e] dark:text-[#efe4d4] max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-bold text-[#1c140e] dark:text-[#efe4d4] mb-1 flex items-center gap-2">
+            <h3 className="text-lg font-bold text-[#1c140e] dark:text-[#efe4d4] mb-3 flex items-center gap-2">
               <FolderPlus className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-              <span>Add New Almirah / Bookcase</span>
+              <span>Add New Almirah</span>
             </h3>
-            <p className="text-xs text-[#6f5d4d] dark:text-[#a69079] mb-4">
-              Select one of the 5 color-finish styles and name your new bookcase.
-            </p>
 
             <form
               onSubmit={(e) => {
                 e.preventDefault();
-                if (newAlmirahName.trim()) {
-                  const newAlmirah: AlmirahT = {
-                    id: uid(),
-                    name: newAlmirahName.trim(),
-                    design: selectedDesign,
-                    hasUpperDoor: LOOKS[selectedDesign]?.hasUpperDoor ?? true,
-                    shelves: [
-                      mk('Section 1', []),
-                      mk('Section 2', []),
-                      mk('Section 3', []),
-                      mk('Lower Section', []),
-                    ],
-                  };
-                  save([...data, newAlmirah]);
-                  setAt(data.length);
-                  setNewAlmirahName('');
-                  setIsNewAlmirahModalOpen(false);
-                }
+                const autoName =
+                  newAlmirahName.trim() || LOOKS[selectedDesign]?.name || selectedDesign;
+                const newAlmirah: AlmirahT = {
+                  id: uid(),
+                  name: autoName,
+                  design: selectedDesign,
+                  hasUpperDoor: LOOKS[selectedDesign]?.hasUpperDoor ?? true,
+                  shelves: [
+                    mk('Section 1', []),
+                    mk('Section 2', []),
+                    mk('Lower Section', []),
+                  ],
+                };
+                save([...data, newAlmirah]);
+                setAt(data.length);
+                setNewAlmirahName('');
+                setIsNewAlmirahModalOpen(false);
               }}
               className="space-y-4"
             >
-              <div>
-                <label className="block text-xs font-bold text-[#4a3728] dark:text-[#d8c7b0] mb-1">Bookcase Name</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g. Surgical Operative Library"
-                  value={newAlmirahName}
-                  onChange={(e) => setNewAlmirahName(e.target.value)}
-                  className="w-full px-3 py-2 text-xs bg-white dark:bg-[#110c09] border border-[#d6c7b0] dark:border-[#382518] rounded-lg text-[#1c140e] dark:text-[#efe4d4] focus:outline-none focus:border-amber-500"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold text-[#4a3728] dark:text-[#d8c7b0] mb-1.5">Finish & Door Mechanism</label>
-                <div className="grid grid-cols-1 gap-2">
-                  {DESIGNS.map((d) => (
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                {DESIGNS.map((d) => {
+                  const isSelected = selectedDesign === d;
+                  return (
                     <button
                       key={d}
                       type="button"
                       onClick={() => setSelectedDesign(d)}
-                      className={`flex items-center gap-3 p-2.5 rounded-xl border text-left transition cursor-pointer ${
-                        selectedDesign === d
-                          ? 'border-amber-500 bg-amber-500/12 text-amber-800 dark:text-amber-300'
-                          : 'border-[#d6c7b0] dark:border-[#382518] bg-white dark:bg-[#140e0a]/70 text-[#6f5d4d] dark:text-[#a69079] hover:text-[#1c140e] dark:hover:text-[#efe4d4]'
+                      aria-pressed={isSelected}
+                      className={`flex flex-col items-center justify-center gap-2 p-3 rounded-xl border-2 text-center transition-all cursor-pointer ${
+                        isSelected
+                          ? '!bg-[#8f5f2c] !text-white !border-[#d4af37] shadow-lg scale-[1.02]'
+                          : 'border-[#d6c7b0] dark:border-[#382518] bg-white dark:bg-[#140e0a]/70 text-[#4a3728] dark:text-[#d8c7b0] hover:border-amber-500/60'
                       }`}
                     >
                       <Mini design={d} themeId={themeId} />
-                      <div className="min-w-0">
-                        <p className="text-xs font-semibold">{LOOKS[d]?.name}</p>
-                        <p className="text-[10px] text-[#6f5d4d] dark:text-[#a69079]">{LOOKS[d]?.accentDesc}</p>
-                      </div>
+                      <p className={`text-xs font-bold leading-tight ${isSelected ? 'text-white' : ''}`}>
+                        {LOOKS[d]?.name}
+                      </p>
                     </button>
-                  ))}
-                </div>
+                  );
+                })}
               </div>
 
               <div className="flex justify-end gap-2 pt-2">
@@ -6191,7 +6379,7 @@ export default function ShelfRoom({
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-lg bg-amber-600 hover:bg-amber-500 text-white dark:text-[#110c09] text-xs font-bold cursor-pointer"
+                  className="px-4 py-2 rounded-lg bg-[#8f5f2c] hover:bg-[#784b18] text-white text-xs font-bold shadow-md cursor-pointer"
                 >
                   Create Almirah
                 </button>

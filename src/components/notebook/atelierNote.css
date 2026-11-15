@@ -1546,6 +1546,8 @@ mark.hit {
   min-height: 100%;
   padding: 34px 52px 60px 64px;
   position: relative;
+  display: flex;
+  flex-direction: column;
   --lh: 30px;
   box-sizing: border-box;
   transition: box-shadow 0.15s ease;
@@ -1724,11 +1726,16 @@ mark.hit {
   background: var(--an-brass-soft);
 }
 
-.an-sheet[data-paper="ruled"] .an-ed {
-  background-image: var(--an-rule-bg, repeating-linear-gradient(to bottom, transparent 0 calc(var(--lh) - 1px), var(--an-rule) calc(var(--lh) - 1px) var(--lh)));
+.an-sheet[data-paper="ruled"] {
+  background-image: var(--an-rule-bg, repeating-linear-gradient(to bottom, transparent 0px, transparent calc(var(--lh) - 1px), var(--an-rule) calc(var(--lh) - 1px), var(--an-rule) var(--lh)));
   background-size: var(--an-rule-size, 100% var(--lh));
-  background-position: 0 -2px;
-  background-repeat: repeat-y;
+  background-position: 0 34px;
+  background-repeat: repeat;
+}
+
+.an-sheet[data-paper="ruled"] .an-ed {
+  background: transparent !important;
+  flex: 1;
 }
 
 .an-sheet[data-paper="ruled"] .an-ed > p,

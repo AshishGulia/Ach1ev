@@ -60,6 +60,8 @@ import {
   UploadCloud,
   AlertCircle,
   Palette,
+  FolderPlus,
+  Folder,
 } from 'lucide-react';
 
 export interface MedicalImageItem {
@@ -158,6 +160,51 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
   const [driveUploadError, setDriveUploadError] = useState<string | null>(null);
   const [driveUploadStatus, setDriveUploadStatus] = useState<string | null>(null);
   const [showInlineDriveReader, setShowInlineDriveReader] = useState(true);
+
+  // Library Folders (matching MnemonicDashboard + New Folder UX)
+  const [libFolders, setLibFolders] = useState<{ id: string; name: string }[]>(() => {
+    try {
+      const saved = localStorage.getItem('achiev_library_folders_v1');
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [libFolderMap, setLibFolderMap] = useState<Record<string, string>>(() => {
+    try {
+      const saved = localStorage.getItem('achiev_library_folder_map_v1');
+      return saved ? JSON.parse(saved) : {};
+    } catch {
+      return {};
+    }
+  });
+  const [isCreatingLibFolder, setIsCreatingLibFolder] = useState(false);
+  const [newLibFolderName, setNewLibFolderName] = useState('');
+  const [activeLibFolderId, setActiveLibFolderId] = useState<string>('all');
+
+  const handleCreateLibFolder = () => {
+    const trimmed = newLibFolderName.trim();
+    if (!trimmed) return;
+    const id = `lib-fld-${Date.now().toString(36)}`;
+    const next = [...libFolders, { id, name: trimmed }];
+    setLibFolders(next);
+    setActiveLibFolderId(id);
+    setNewLibFolderName('');
+    setIsCreatingLibFolder(false);
+    try {
+      localStorage.setItem('achiev_library_folders_v1', JSON.stringify(next));
+    } catch {}
+  };
+
+  const handleAssignBookToLibFolder = (bookId: string, folderId: string) => {
+    const next = { ...libFolderMap };
+    if (!folderId) delete next[bookId];
+    else next[bookId] = folderId;
+    setLibFolderMap(next);
+    try {
+      localStorage.setItem('achiev_library_folder_map_v1', JSON.stringify(next));
+    } catch {}
+  };
 
   const cloudUploadedBooks = books.filter(
     (b) => b.isUserUploaded || b.storageProvider === 'google_drive' || b.driveFileId
@@ -988,6 +1035,53 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
               <span className="text-[11px] font-mono text-[#5c4835] dark:text-amber-200/70 font-semibold px-1 mr-1">
                 Total: {sections.reduce((a, s) => a + s.count, 0) + cloudUploadedBooks.length} books
               </span>
+
+              {isCreatingLibFolder ? (
+                <div className="flex items-center gap-1">
+                  <input
+                    type="text"
+                    autoFocus
+                    value={newLibFolderName}
+                    onChange={(e) => setNewLibFolderName(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleCreateLibFolder();
+                      if (e.key === 'Escape') {
+                        setIsCreatingLibFolder(false);
+                        setNewLibFolderName('');
+                      }
+                    }}
+                    placeholder="Folder name..."
+                    className="px-2 py-1 rounded-lg border border-amber-700/40 bg-white dark:bg-[#1a120d] text-xs outline-none"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleCreateLibFolder}
+                    className="px-2.5 py-1 rounded-lg bg-[#8f5f2c] text-white text-xs font-semibold cursor-pointer"
+                  >
+                    Save
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsCreatingLibFolder(false);
+                      setNewLibFolderName('');
+                    }}
+                    className="px-2 py-1 rounded-lg border border-stone-300 dark:border-[#382518] text-xs cursor-pointer"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setIsCreatingLibFolder(true)}
+                  className="shelfwise-btn shelfwise-btn-ghost flex items-center gap-1.5"
+                  title="Create a Library folder"
+                >
+                  <FolderPlus className="w-4 h-4 text-amber-500" />
+                  <span>+ New Folder</span>
+                </button>
+              )}
 
               {/* Library Button */}
               <button
@@ -2027,13 +2121,91 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                 </button>
               </div>
 
-              {/* Metrics Strip */}
+              {/* Metrics & + New Folder Strip */}
               <div className={`px-6 py-2.5 border-b flex flex-wrap items-center justify-between gap-3 text-xs ${headerClass}`} style={headerStyle}>
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3 flex-wrap">
                   <span className="flex items-center gap-1.5 font-semibold">
                     <Layers className="w-3.5 h-3.5" style={{ color: isHeritage ? '#d97706' : themeAccent }} />
                     <span>Subject Sections: <strong>{activeSubjectSectionCount}</strong></span>
                   </span>
+                  {libFolders.length > 0 && (
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <button
+                        type="button"
+                        onClick={() => setActiveLibFolderId('all')}
+                        className={`px-2.5 py-1 rounded-full text-[11px] font-semibold cursor-pointer border ${
+                          activeLibFolderId === 'all'
+                            ? 'bg-amber-600 text-white border-amber-600'
+                            : 'border-black/15 dark:border-white/15 opacity-80 hover:opacity-100'
+                        }`}
+                      >
+                        All Folders
+                      </button>
+                      {libFolders.map((fld) => (
+                        <button
+                          key={fld.id}
+                          type="button"
+                          onClick={() => setActiveLibFolderId(fld.id)}
+                          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold cursor-pointer border ${
+                            activeLibFolderId === fld.id
+                              ? 'bg-amber-600 text-white border-amber-600'
+                              : 'border-black/15 dark:border-white/15 opacity-85 hover:opacity-100'
+                          }`}
+                        >
+                          <Folder className="w-3 h-3" />
+                          <span>{fld.name}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {isCreatingLibFolder ? (
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="text"
+                        autoFocus
+                        value={newLibFolderName}
+                        onChange={(e) => setNewLibFolderName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') handleCreateLibFolder();
+                          if (e.key === 'Escape') {
+                            setIsCreatingLibFolder(false);
+                            setNewLibFolderName('');
+                          }
+                        }}
+                        placeholder="Folder name..."
+                        className="px-2.5 py-1 rounded-lg border border-black/20 dark:border-white/20 bg-white dark:bg-black/30 text-xs outline-none"
+                      />
+                      <button
+                        type="button"
+                        onClick={handleCreateLibFolder}
+                        className="px-2.5 py-1 rounded-lg bg-amber-600 text-white text-xs font-semibold cursor-pointer"
+                      >
+                        Save
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setIsCreatingLibFolder(false);
+                          setNewLibFolderName('');
+                        }}
+                        className="px-2 py-1 rounded-lg border border-black/20 dark:border-white/20 text-xs cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setIsCreatingLibFolder(true)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl border border-amber-600/40 bg-amber-500/15 hover:bg-amber-500/25 text-xs font-semibold cursor-pointer"
+                    >
+                      <FolderPlus className="w-3.5 h-3.5 text-amber-500" />
+                      <span>+ New Folder</span>
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -2065,7 +2237,9 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                 )}
                 {SUBJECT_SECTIONS.map((sec, sIdx) => {
                   const secBooks = allCatalogBooks.filter(
-                    (b) => b.subject.toLowerCase() === sec.subject.toLowerCase()
+                    (b) =>
+                      b.subject.toLowerCase() === sec.subject.toLowerCase() &&
+                      (activeLibFolderId === 'all' || libFolderMap[b.id] === activeLibFolderId)
                   );
                   if (secBooks.length === 0) return null;
                   return (
@@ -2136,20 +2310,39 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                               </div>
                             </div>
 
-                            <div className="mt-2.5 pt-2 border-t border-black/10 dark:border-white/10 flex items-center justify-between text-[9.5px] font-mono opacity-85">
+                            <div className="mt-2.5 pt-2 border-t border-black/10 dark:border-white/10 flex items-center justify-between gap-1.5 text-[9.5px] font-mono opacity-85">
                               <span>Opened: {bk.readCount || 0}×</span>
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setEditingLibBook(bk);
-                                }}
-                                title="Edit Book Cover Monogram / 100 Icons / Colors"
-                                className="themed-soft-pill px-2 py-0.5 rounded-md bg-amber-500/15 hover:bg-amber-500/30 border border-amber-500/35 text-amber-800 dark:text-amber-300 font-semibold flex items-center gap-1 cursor-pointer transition"
-                              >
-                                <Palette className="w-2.5 h-2.5" />
-                                <span>Cover</span>
-                              </button>
+                              <div className="flex items-center gap-1">
+                                {libFolders.length > 0 && (
+                                  <select
+                                    value={libFolderMap[bk.id] || ''}
+                                    onClick={(e) => e.stopPropagation()}
+                                    onChange={(e) => {
+                                      e.stopPropagation();
+                                      handleAssignBookToLibFolder(bk.id, e.target.value);
+                                    }}
+                                    title="Assign book to folder"
+                                    className="px-1.5 py-0.5 rounded-md border border-black/15 dark:border-white/20 bg-transparent text-[9.5px] outline-none cursor-pointer"
+                                  >
+                                    <option value="">No folder</option>
+                                    {libFolders.map((f) => (
+                                      <option key={f.id} value={f.id}>{f.name}</option>
+                                    ))}
+                                  </select>
+                                )}
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setEditingLibBook(bk);
+                                  }}
+                                  title="Edit Book Cover Monogram / 100 Icons / Colors"
+                                  className="themed-soft-pill px-2 py-0.5 rounded-md bg-amber-500/15 hover:bg-amber-500/30 border border-amber-500/35 text-amber-800 dark:text-amber-300 font-semibold flex items-center gap-1 cursor-pointer transition"
+                                >
+                                  <Palette className="w-2.5 h-2.5" />
+                                  <span>Cover</span>
+                                </button>
+                              </div>
                             </div>
                           </div>
                         ))}

@@ -3,8 +3,6 @@ import {
   GitBranch,
   Plus,
   Search,
-  ZoomIn,
-  ZoomOut,
   Maximize2,
   Minimize2,
   Minus,
@@ -286,8 +284,7 @@ export const FlowchartStudio: React.FC<FlowchartStudioProps> = ({
     typeof document !== 'undefined' ? document.documentElement.classList.contains('dark') : false
   );
 
-  // Batch Box Add Count (1..10) for sideways / below additions
-  const [addBoxCount, setAddBoxCount] = useState<number>(1);
+  const addBoxCount = 1;
   // Popover state for level / column color picker on canvas
   const [activeColorPopover, setActiveColorPopover] = useState<{
     kind: 'level' | 'column';
@@ -311,6 +308,7 @@ export const FlowchartStudio: React.FC<FlowchartStudioProps> = ({
   }, []);
 
   const canvasPaneRef = useRef<HTMLDivElement | null>(null);
+  const touchPinchRef = useRef<{ dist: number; startZoom: number } | null>(null);
   const [zoomLevel, setZoomLevel] = useState<number>(100);
   const [isFullscreen, setIsFullscreen] = useState(false);
 
@@ -639,8 +637,8 @@ export const FlowchartStudio: React.FC<FlowchartStudioProps> = ({
 
   return (
     <div
-      className={`flex flex-col h-full w-full bg-[#fcfbf8] dark:bg-[#110c09] text-stone-900 dark:text-[#efe4d4] select-text overflow-hidden ${
-        isFullscreen ? 'fixed inset-0 z-50' : 'relative'
+      className={`flex flex-col bg-[#fcfbf8] dark:bg-[#110c09] text-stone-900 dark:text-[#efe4d4] select-text overflow-hidden ${
+        isFullscreen ? 'fixed inset-0 z-[120] w-screen h-screen' : 'relative h-full w-full'
       }`}
     >
       <style>{`
@@ -655,41 +653,125 @@ export const FlowchartStudio: React.FC<FlowchartStudioProps> = ({
       `}</style>
 
       {/* ========================================================================= */}
-      {/* 1. TOP STUDIO HEADER BAR                                                  */}
+      {/* SINGLE UNIFIED FLOWCHART RIBBON                                           */}
       {/* ========================================================================= */}
-      <header className="px-4 py-2.5 border-b border-stone-200/90 dark:border-[#382518] bg-[#f8f6f0] dark:bg-[#140e0a] flex items-center justify-between gap-2 shrink-0 shadow-2xs flex-wrap">
-        <div className="flex items-center gap-2 flex-wrap">
+      <header className="px-3 sm:px-4 py-2 border-b border-stone-200/90 dark:border-[#382518] bg-[#f8f6f0] dark:bg-[#140e0a] flex items-center justify-between gap-2 shrink-0 shadow-2xs flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap min-w-0">
           {onBackToLibrary && (
             <button
               type="button"
               onClick={onBackToLibrary}
-              className="p-1.5 rounded-xl bg-stone-200/70 dark:bg-stone-800 hover:bg-stone-300 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+              className="p-1.5 rounded-xl bg-stone-200/70 dark:bg-stone-800 hover:bg-stone-300 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer shrink-0"
             >
               <ArrowRight className="w-3.5 h-3.5 rotate-180" />
               <span className="hidden sm:inline">Back to Shelf</span>
             </button>
           )}
-          <button
-            type="button"
-            onClick={() => setNewChartModalOpen(true)}
-            className="themed-accent-btn px-3 py-1.5 rounded-xl bg-[#A47C43] hover:bg-[#8e6834] text-white text-xs font-semibold flex items-center gap-1.5 shadow-2xs cursor-pointer"
-          >
-            <Plus className="w-3.5 h-3.5" />
-            <span>New Flowchart</span>
-          </button>
-        </div>
-
-        <div className="flex items-center gap-2.5">
+          {activeChart && (
+            <span className="font-serif font-bold text-sm sm:text-base text-stone-900 dark:text-[#efe4d4] truncate max-w-[160px] sm:max-w-[220px]" title={activeChart.title}>
+              {activeChart.title}
+            </span>
+          )}
+          {geminiFeedback && (
+            <span className="text-[11px] font-sans font-normal text-amber-600 dark:text-amber-300 animate-pulse">
+              {geminiFeedback}
+            </span>
+          )}
           {infoBanner && (
-            <span className="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-800 dark:text-amber-200 text-xs font-semibold">
+            <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-800 dark:text-amber-200 text-[11px] font-semibold">
               {infoBanner}
             </span>
+          )}
+          <div className="relative min-w-[140px] max-w-[210px] flex-1">
+            <Search className="w-3.5 h-3.5 text-stone-400 dark:text-[#a69079] absolute left-2.5 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              placeholder={activeViewMode === 'tree' ? 'Search boxes...' : 'Search info...'}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-white dark:bg-[#1a120d] border border-stone-300/80 dark:border-[#382518] rounded-xl pl-8 pr-6 py-1 text-xs text-stone-900 dark:text-[#efe4d4] outline-none focus:border-amber-500 shadow-2xs"
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 dark:hover:text-[#efe4d4] cursor-pointer p-0.5"
+                title="Clear search"
+              >
+                <X className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+          {activeChart && (
+            <div className="flex items-center gap-0.5 bg-stone-200/70 dark:bg-[#211711] p-0.5 rounded-xl shrink-0 border border-stone-300/80 dark:border-[#382518]">
+              <button
+                type="button"
+                onClick={() => setActiveViewMode('tree')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer ${
+                  activeViewMode === 'tree'
+                    ? 'bg-white dark:bg-[#efe4d4] text-stone-900 dark:text-[#110c09] shadow-xs'
+                    : 'text-stone-600 dark:text-[#a69079] hover:text-stone-900 dark:hover:text-[#efe4d4]'
+                }`}
+              >
+                <GitBranch className="w-3.5 h-3.5" />
+                <span>Tree</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setActiveViewMode('info')}
+                className={`px-2.5 py-1 rounded-lg text-xs font-semibold flex items-center gap-1 transition-all cursor-pointer ${
+                  activeViewMode === 'info'
+                    ? 'bg-white dark:bg-[#efe4d4] text-stone-900 dark:text-[#110c09] shadow-xs'
+                    : 'text-stone-600 dark:text-[#a69079] hover:text-stone-900 dark:hover:text-[#efe4d4]'
+                }`}
+              >
+                <BookOpen className="w-3.5 h-3.5" />
+                <span>Info</span>
+                <span className="text-[10px] font-mono px-1 rounded-full bg-stone-300/70 dark:bg-[#382518] text-stone-800 dark:text-[#d8c7b0]">
+                  {activeChart.nodes.length}
+                </span>
+              </button>
+            </div>
+          )}
+
+          {activeChart && activeViewMode === 'info' && (
+            <div className="flex items-center gap-1 flex-wrap">
+              <button
+                type="button"
+                onClick={() => setInfoLevelFilter('all')}
+                className={`px-2 py-1 rounded-lg text-[11px] font-mono font-semibold cursor-pointer ${
+                  infoLevelFilter === 'all'
+                    ? 'themed-accent-btn bg-[#5c351c] text-white dark:bg-[#a47c43]'
+                    : 'bg-white dark:bg-[#1a120d] text-stone-600 dark:text-[#a69079] border border-stone-300 dark:border-[#382518]'
+                }`}
+              >
+                All
+              </button>
+              {levelNumbers.map((lvl) => (
+                <button
+                  key={lvl}
+                  type="button"
+                  onClick={() => setInfoLevelFilter(lvl)}
+                  className={`px-2 py-1 rounded-lg text-[11px] font-mono font-semibold cursor-pointer ${
+                    infoLevelFilter === lvl
+                      ? 'themed-accent-btn bg-[#5c351c] text-white dark:bg-[#a47c43]'
+                      : 'bg-white dark:bg-[#1a120d] text-stone-600 dark:text-[#a69079] border border-stone-300 dark:border-[#382518]'
+                  }`}
+                >
+                  L{lvl}
+                </button>
+              ))}
+            </div>
           )}
 
           <button
             type="button"
             onClick={handleGeminiExpand}
-            className="px-3 py-1.5 rounded-full bg-gradient-to-r from-amber-500/15 via-[#A47C43]/20 to-[#8f5f2c]/15 hover:from-amber-500/25 text-stone-800 dark:text-amber-200 border border-amber-500/30 text-xs font-semibold flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer"
+            className="px-2.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/15 via-[#A47C43]/20 to-[#8f5f2c]/15 hover:from-amber-500/25 text-stone-800 dark:text-amber-200 border border-amber-500/30 text-xs font-semibold flex items-center gap-1 transition-all shadow-2xs cursor-pointer"
           >
             <Sparkles className="w-3.5 h-3.5 text-amber-500" />
             <span>Fill next level</span>
@@ -700,7 +782,7 @@ export const FlowchartStudio: React.FC<FlowchartStudioProps> = ({
             <button
               type="button"
               onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
-              className="px-3.5 py-1.5 rounded-full bg-[#1e2530] text-white hover:bg-stone-800 dark:bg-stone-100 dark:text-[#110c09] dark:hover:bg-white text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+              className="px-3 py-1.5 rounded-full bg-[#1e2530] text-white hover:bg-stone-800 dark:bg-stone-100 dark:text-[#110c09] dark:hover:bg-white text-xs font-semibold flex items-center gap-1 shadow-xs transition-colors cursor-pointer"
             >
               <Download className="w-3.5 h-3.5" />
               <span>Export</span>
@@ -782,214 +864,61 @@ export const FlowchartStudio: React.FC<FlowchartStudioProps> = ({
           <button
             type="button"
             onClick={() => setIsFullscreen(!isFullscreen)}
-            className="p-1.5 rounded-xl border border-stone-300 dark:border-stone-700 hover:bg-stone-200 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-300 transition-colors cursor-pointer"
-            title="Toggle Fullscreen"
+            className="p-1.5 rounded-xl border border-stone-300 dark:border-stone-700 hover:bg-stone-200 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-300 transition-colors cursor-pointer flex items-center gap-1 text-xs font-semibold"
+            title={isFullscreen ? 'Exit Fullscreen Canvas' : 'Expand Canvas Fullscreen'}
           >
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setNewChartModalOpen(true)}
+            className="themed-accent-btn px-3 py-1.5 rounded-xl bg-[#A47C43] hover:bg-[#8e6834] text-white text-xs font-semibold flex items-center gap-1 shadow-2xs cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>New Flowchart</span>
           </button>
         </div>
       </header>
 
       {/* ========================================================================= */}
-      {/* 2. WORKSPACE + ENDLESS SCROLLBAR CANVAS                                   */}
+      {/* 2. WORKSPACE + ENDLESS SCROLLBAR & PINCH-ZOOMABLE CANVAS                  */}
       {/* ========================================================================= */}
       <div className="flex-1 flex overflow-hidden relative">
         <main
           ref={canvasPaneRef}
           className="flex-1 min-w-0 flex flex-col bg-[#fcfbf8] dark:bg-[#0e0907] overflow-hidden relative"
         >
-          {/* Chart Header Bar */}
-          {activeChart ? (
-            <div className="px-4 sm:px-6 py-3 border-b border-stone-200/80 dark:border-[#382518] bg-[#fdfdfb] dark:bg-[#140e0a] flex flex-wrap items-center justify-between gap-3 shrink-0">
-              <div className="min-w-0 flex-1">
-                <h1 className="font-serif font-bold tracking-tight text-xl sm:text-2xl text-stone-900 dark:text-[#efe4d4] flex items-center gap-2 flex-wrap">
-                  <span className="truncate">{activeChart.title}</span>
-                  {geminiFeedback && (
-                    <span className="text-xs font-sans font-normal text-amber-600 dark:text-amber-300 animate-pulse">
-                      {geminiFeedback}
-                    </span>
-                  )}
-                </h1>
-                <p className="text-xs text-stone-500 dark:text-[#a69079] line-clamp-1">
-                  {activeChart.subtitle} · Endless canvas (scroll horizontally & vertically)
-                </p>
-              </div>
-
-              {/* View Switcher Tabs (Tree vs Info) */}
-              <div className="flex items-center gap-1 bg-stone-200/70 dark:bg-[#211711] p-1 rounded-xl shrink-0 border border-stone-300/80 dark:border-[#382518]">
-                <button
-                  type="button"
-                  onClick={() => setActiveViewMode('tree')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
-                    activeViewMode === 'tree'
-                      ? 'bg-white dark:bg-[#efe4d4] text-stone-900 dark:text-[#110c09] shadow-xs'
-                      : 'text-stone-600 dark:text-[#a69079] hover:text-stone-900 dark:hover:text-[#efe4d4]'
-                  }`}
-                >
-                  <GitBranch className="w-3.5 h-3.5" />
-                  <span>Tree</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setActiveViewMode('info')}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
-                    activeViewMode === 'info'
-                      ? 'bg-white dark:bg-[#efe4d4] text-stone-900 dark:text-[#110c09] shadow-xs'
-                      : 'text-stone-600 dark:text-[#a69079] hover:text-stone-900 dark:hover:text-[#efe4d4]'
-                  }`}
-                >
-                  <BookOpen className="w-3.5 h-3.5" />
-                  <span>Info</span>
-                  <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-stone-300/70 dark:bg-[#382518] text-stone-800 dark:text-[#d8c7b0]">
-                    {activeChart.nodes.length}
-                  </span>
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="px-6 py-3 border-b border-stone-200/80 dark:border-[#382518] bg-[#fdfdfb] dark:bg-[#140e0a] flex items-center justify-between gap-3 shrink-0">
-              <div>
-                <h1 className="font-serif font-bold text-lg text-stone-900 dark:text-[#efe4d4]">
-                  Flowchart Studio
-                </h1>
-                <p className="text-xs text-stone-500 dark:text-[#a69079]">
-                  Unlimited levels, per-level &amp; per-column color coding, endless scrollable canvas
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setNewChartModalOpen(true)}
-                className="themed-accent-btn px-3.5 py-1.5 rounded-full bg-[#A47C43] hover:bg-[#8e6834] text-white text-xs font-semibold flex items-center gap-1.5 shadow-xs cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>New Flowchart</span>
-              </button>
-            </div>
-          )}
-
-          {/* Sub-Header: Search + Box Add Count Selector (1..N) + Zoom */}
-          <div className="px-4 sm:px-6 py-2 border-b border-stone-200/70 dark:border-[#352317] bg-stone-50/75 dark:bg-[#120c08] flex flex-wrap items-center justify-between gap-2.5 shrink-0 text-xs">
-            {/* Search Input */}
-            <div className="relative flex-1 min-w-[180px] max-w-xs">
-              <Search className="w-3.5 h-3.5 text-stone-400 dark:text-[#a69079] absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder={
-                  activeViewMode === 'tree'
-                    ? 'Search boxes, phrases, text...'
-                    : 'Search info cards...'
-                }
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white dark:bg-[#1a120d] border border-stone-300/80 dark:border-[#382518] rounded-xl pl-8 pr-7 py-1.5 text-xs text-stone-900 dark:text-[#efe4d4] outline-none focus:border-amber-500 shadow-2xs"
-              />
-              {searchQuery && (
-                <button
-                  type="button"
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-700 dark:hover:text-[#efe4d4] cursor-pointer p-0.5"
-                  title="Clear search"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              )}
-            </div>
-
-            {/* Number of Boxes to Add (Sideways or Below) */}
-            <div className="flex items-center gap-2 flex-wrap bg-white dark:bg-[#1a120d] border border-stone-300/80 dark:border-[#382518] rounded-xl px-2.5 py-1">
-              <span className="text-[11px] font-semibold text-stone-600 dark:text-[#bfa992]">
-                Boxes per +Side/+Below click:
-              </span>
-              <div className="flex items-center gap-1">
-                {[1, 2, 3, 4, 5].map((cnt) => (
-                  <button
-                    key={cnt}
-                    type="button"
-                    onClick={() => setAddBoxCount(cnt)}
-                    className={`w-6 h-6 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
-                      addBoxCount === cnt
-                        ? 'themed-accent-btn bg-[#A47C43] text-white shadow-xs'
-                        : 'bg-stone-100 dark:bg-[#231912] text-stone-700 dark:text-[#d8c7b0] hover:bg-stone-200 dark:hover:bg-[#322318]'
-                    }`}
-                  >
-                    {cnt}
-                  </button>
-                ))}
-                <input
-                  type="number"
-                  min={1}
-                  max={12}
-                  value={addBoxCount}
-                  onChange={(e) => setAddBoxCount(Math.max(1, Math.min(12, Number(e.target.value) || 1)))}
-                  className="w-11 px-1.5 py-0.5 rounded-lg bg-stone-100 dark:bg-[#231912] border border-stone-300 dark:border-[#382518] text-center font-mono text-[11px] font-bold outline-none"
-                  title="Custom number of boxes to add"
-                />
-              </div>
-            </div>
-
-            {/* Right Controls: Zoom or Info Filter */}
-            {activeViewMode === 'tree' ? (
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1 bg-white dark:bg-[#1a120d] border border-stone-300 dark:border-[#382518] rounded-xl p-1">
-                  <button
-                    type="button"
-                    onClick={() => setZoomLevel((z) => Math.max(50, z - 15))}
-                    className="p-1 rounded text-stone-500 dark:text-[#a69079] hover:text-stone-900 dark:hover:text-[#efe4d4] cursor-pointer"
-                    title="Zoom Out"
-                  >
-                    <ZoomOut className="w-3.5 h-3.5" />
-                  </button>
-                  <span className="text-[11px] font-mono px-1 font-semibold min-w-[36px] text-center">
-                    {zoomLevel}%
-                  </span>
-                  <button
-                    type="button"
-                    onClick={() => setZoomLevel((z) => Math.min(160, z + 15))}
-                    className="p-1 rounded text-stone-500 dark:text-[#a69079] hover:text-stone-900 dark:hover:text-[#efe4d4] cursor-pointer"
-                    title="Zoom In"
-                  >
-                    <ZoomIn className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="flex items-center gap-1.5 flex-wrap">
-                <button
-                  type="button"
-                  onClick={() => setInfoLevelFilter('all')}
-                  className={`px-2.5 py-1 rounded-lg text-xs font-mono font-semibold cursor-pointer ${
-                    infoLevelFilter === 'all'
-                      ? 'themed-accent-btn bg-[#5c351c] text-white dark:bg-[#a47c43]'
-                      : 'bg-white dark:bg-[#1a120d] text-stone-600 dark:text-[#a69079] border border-stone-300 dark:border-[#382518]'
-                  }`}
-                >
-                  All levels
-                </button>
-                {levelNumbers.map((lvl) => (
-                  <button
-                    key={lvl}
-                    type="button"
-                    onClick={() => setInfoLevelFilter(lvl)}
-                    className={`px-2.5 py-1 rounded-lg text-xs font-mono font-semibold cursor-pointer ${
-                      infoLevelFilter === lvl
-                        ? 'themed-accent-btn bg-[#5c351c] text-white dark:bg-[#a47c43]'
-                        : 'bg-white dark:bg-[#1a120d] text-stone-600 dark:text-[#a69079] border border-stone-300 dark:border-[#382518]'
-                    }`}
-                  >
-                    L{lvl}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          {/* ===================================================================== */}
-          {/* ENDLESS SCROLLBAR CANVAS (Both Horizontal & Vertical Overflow)        */}
-          {/* ===================================================================== */}
           <div
             className="flex-1 overflow-auto p-6 relative custom-scrollbar bg-[#f8f5ee] dark:bg-[#0e0907]"
-            style={{ overflowX: 'auto', overflowY: 'auto' }}
+            style={{ overflowX: 'auto', overflowY: 'auto', touchAction: 'pan-x pan-y pinch-zoom' }}
+            onTouchStart={(e) => {
+              if (e.touches.length === 2) {
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                touchPinchRef.current = { dist: Math.hypot(dx, dy), startZoom: zoomLevel };
+              }
+            }}
+            onTouchMove={(e) => {
+              if (e.touches.length === 2 && touchPinchRef.current) {
+                const dx = e.touches[0].clientX - e.touches[1].clientX;
+                const dy = e.touches[0].clientY - e.touches[1].clientY;
+                const d = Math.hypot(dx, dy);
+                if (touchPinchRef.current.dist > 0) {
+                  const next = Math.round(touchPinchRef.current.startZoom * (d / touchPinchRef.current.dist));
+                  setZoomLevel(Math.max(45, Math.min(220, next)));
+                }
+              }
+            }}
+            onTouchEnd={() => {
+              touchPinchRef.current = null;
+            }}
+            onWheel={(e) => {
+              if (e.ctrlKey || e.metaKey) {
+                e.preventDefault();
+                setZoomLevel((z) => Math.max(45, Math.min(220, Math.round(z - e.deltaY * 0.2))));
+              }
+            }}
           >
             {!activeChart ? (
               <div className="h-full flex items-center justify-center p-6">

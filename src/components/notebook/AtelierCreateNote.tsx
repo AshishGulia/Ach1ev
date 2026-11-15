@@ -2,7 +2,6 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import './atelierNote.css';
 import {
   Feather,
-  LayoutGrid,
   PenLine,
   Calendar,
   Brain,
@@ -13,7 +12,6 @@ import {
   Square,
   Columns2,
   Columns3,
-  Rows2,
   Cloud,
   Paperclip,
   Sparkles,
@@ -91,7 +89,6 @@ import {
   Subscript,
   Superscript,
   PenTool,
-  RefreshCw,
   UploadCloud,
   Lock,
   Unlock,
@@ -282,16 +279,6 @@ const TOOL_GROUPS: Array<{
       { id: 'print', icon: Printer, label: 'Print / Save PDF' },
     ],
   },
-  {
-    category: 'Layout & View',
-    items: [
-      { id: 'layout-focus', icon: Square, label: 'Focus note only' },
-      { id: 'layout-split', icon: Columns2, label: 'Split view (1 doc + note)' },
-      { id: 'layout-triple', icon: Columns3, label: 'Triple view (2 docs + note)' },
-      { id: 'layout-stacked', icon: LayoutGrid, label: 'Stacked view (top docs)' },
-      { id: 'sync', icon: RefreshCw, label: 'Toggle scroll sync' },
-    ],
-  },
 ];
 
 const NOTE_FONT_OPTIONS: Array<{
@@ -454,7 +441,6 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
     };
   }, []);
   const [layout, setLayout] = useState<'split' | 'triple' | 'stacked' | 'focus'>('focus');
-  const [isMoreLayoutsOpen, setIsMoreLayoutsOpen] = useState<boolean>(false);
   const [mobileTab, setMobileTab] = useState<string>('note');
   const [paperStyle, setPaperStyle] = useState<'ruled' | 'plain' | 'grid' | 'dot'>('ruled');
   const [fontStyle, setFontStyle] = useState<string>(() => {
@@ -2815,7 +2801,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
           />
         </div>
 
-        {/* Layout Switcher Segments - Focus default & Split front, others in More menu */}
+        {/* Layout Switcher Segments - Focus & Split */}
         <div className="an-seg layouts" role="group" aria-label="Workspace layout">
           <button
             aria-pressed={layout === 'focus'}
@@ -2839,49 +2825,6 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
             <Columns2 className="w-4 h-4" />
             <span>Split</span>
           </button>
-          
-          {/* More Layouts Dropdown (Triple & Stacked hidden inside) */}
-          <div className="relative inline-block">
-            <button
-              type="button"
-              aria-pressed={layout === 'triple' || layout === 'stacked'}
-              onClick={() => setIsMoreLayoutsOpen(!isMoreLayoutsOpen)}
-              title="More workspace layouts (Triple & Stacked)"
-            >
-              <LayoutGrid className="w-3.5 h-3.5" />
-              <span>{layout === 'triple' ? 'Triple' : layout === 'stacked' ? 'Stacked' : 'Layouts'}</span>
-              <ChevronDown className="w-3 h-3 opacity-70 ml-0.5" />
-            </button>
-
-            {isMoreLayoutsOpen && (
-              <div className="an-more-layouts-menu animate-in fade-in slide-in-from-top-1 duration-150">
-                <button
-                  type="button"
-                  className={`an-menu-item ${layout === 'triple' ? 'active' : ''}`}
-                  onClick={() => {
-                    setLayout('triple');
-                    setMaximizedWindowId(null);
-                    setIsMoreLayoutsOpen(false);
-                  }}
-                >
-                  <Columns3 className="w-3.5 h-3.5" />
-                  <span>Triple View</span>
-                </button>
-                <button
-                  type="button"
-                  className={`an-menu-item ${layout === 'stacked' ? 'active' : ''}`}
-                  onClick={() => {
-                    setLayout('stacked');
-                    setMaximizedWindowId(null);
-                    setIsMoreLayoutsOpen(false);
-                  }}
-                >
-                  <Rows2 className="w-3.5 h-3.5" />
-                  <span>Stacked View</span>
-                </button>
-              </div>
-            )}
-          </div>
         </div>
 
         {/* Open Book Button in Header */}
@@ -3582,16 +3525,16 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                   <span>Text Box</span>
                 </button>
 
-                {/* Ruler Lines Customization (Line Spacing, Color Picker, Line Style) */}
+                {/* Lines Customization (Line Spacing, Color Picker, Line Style) */}
                 <div className="relative shrink-0">
                   <button
                     type="button"
                     className={`an-ribbon-feat compact shrink-0 ${isRulerMenuOpen ? 'border-[#A47C43] bg-[#A47C43]/15' : ''}`}
                     onClick={() => setIsRulerMenuOpen((v) => !v)}
-                    title="Customize Ruler Lines (Spacing, Color & Solid/Dotted/Dashed/Double)"
+                    title="Customize Lines (Spacing, Color & Solid/Dotted/Dashed/Double)"
                   >
                     <SlidersHorizontal className="w-3.5 h-3.5 text-[#A47C43]" />
-                    <span>Ruler</span>
+                    <span>Lines</span>
                   </button>
                   {isRulerMenuOpen && (
                     <div
@@ -3600,7 +3543,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                       onMouseDown={(e) => e.stopPropagation()}
                     >
                       <div className="flex items-center justify-between pb-1.5 border-b border-[var(--an-line)]">
-                        <span className="text-xs font-bold text-[var(--an-ink)]">Ruler Lines Settings</span>
+                        <span className="text-xs font-bold text-[var(--an-ink)]">Lines Settings</span>
                         <button
                           type="button"
                           onClick={() => setIsRulerMenuOpen(false)}
@@ -3652,7 +3595,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                       </div>
 
                       <div className="space-y-1.5">
-                        <span className="text-[11px] font-semibold block">Ruler Line Color</span>
+                        <span className="text-[11px] font-semibold block">Line Color</span>
                         <RoundColorColumnsPicker
                           columns={UNIFIED_COLOR_COLUMNS}
                           selectedColor={rulerColor}
@@ -3868,17 +3811,19 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                     : hoverSheetEdge === 'bottom-left'
                     ? 'nesw-resize'
                     : undefined;
-                const h = Math.max(20, rulerSpacingPx);
+                const h = Math.max(20, Math.round(rulerSpacingPx));
                 const encColor = encodeURIComponent(rulerColor);
-                const svgLine =
-                  rulerStyle === 'dotted'
-                    ? `<line x1='0' y1='${h - 1}' x2='100' y2='${h - 1}' stroke='${encColor}' stroke-width='1.4' stroke-dasharray='2 5' stroke-linecap='round'/>`
-                    : rulerStyle === 'dashed'
-                      ? `<line x1='0' y1='${h - 1}' x2='100' y2='${h - 1}' stroke='${encColor}' stroke-width='1.3' stroke-dasharray='8 5'/>`
-                      : rulerStyle === 'double'
-                        ? `<line x1='0' y1='${h - 4}' x2='100' y2='${h - 4}' stroke='${encColor}' stroke-width='1'/><line x1='0' y1='${h - 1}' x2='100' y2='${h - 1}' stroke='${encColor}' stroke-width='1'/>`
-                        : `<line x1='0' y1='${h - 1}' x2='100' y2='${h - 1}' stroke='${encColor}' stroke-width='1.1'/>`;
-                const rulerSvgUri = `url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='${h}'>${svgLine}</svg>")`;
+                const ruleBg =
+                  rulerStyle === 'solid'
+                    ? `repeating-linear-gradient(to bottom, transparent 0px, transparent ${h - 1}px, ${rulerColor} ${h - 1}px, ${rulerColor} ${h}px)`
+                    : rulerStyle === 'double'
+                      ? `repeating-linear-gradient(to bottom, transparent 0px, transparent ${h - 4}px, ${rulerColor} ${h - 4}px, ${rulerColor} ${h - 3}px, transparent ${h - 3}px, transparent ${h - 1}px, ${rulerColor} ${h - 1}px, ${rulerColor} ${h}px)`
+                      : `url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='96' height='${h}' shape-rendering='crispEdges'>${
+                          rulerStyle === 'dotted'
+                            ? `<line x1='0' y1='${h - 1}' x2='96' y2='${h - 1}' stroke='${encColor}' stroke-width='1' stroke-dasharray='2 4'/>`
+                            : `<line x1='0' y1='${h - 1}' x2='96' y2='${h - 1}' stroke='${encColor}' stroke-width='1' stroke-dasharray='7 5'/>`
+                        }</svg>")`;
+                const ruleSize = rulerStyle === 'solid' || rulerStyle === 'double' ? `100% ${h}px` : `96px ${h}px`;
                 return (
               <article
                 className={`an-sheet ${isDraggingSheetWidth ? 'is-sheet-resizing' : ''}`}
@@ -3894,8 +3839,8 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                   cursor: sheetCursor,
                   ['--an-nf' as string]: activeFontObj.family,
                   ['--lh' as string]: `${h}px`,
-                  ['--an-rule-bg' as string]: rulerSvgUri,
-                  ['--an-rule-size' as string]: `100px ${h}px`,
+                  ['--an-rule-bg' as string]: ruleBg,
+                  ['--an-rule-size' as string]: ruleSize,
                 } as React.CSSProperties}
                 onMouseMove={(e) => {
                   if (isDraggingSheetWidth) return;
