@@ -883,16 +883,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="flex flex-col items-center gap-1 overflow-y-auto flex-1 w-full py-1 custom-scrollbar">
                 {(
                   [
-                    { id: 'profile', label: 'Student Profile', icon: User },
+                    { id: 'profile', label: 'Profile', icon: User },
                     { id: 'designs', label: 'Themes', icon: Palette },
                     { id: 'wallpaper', label: 'Wallpaper', icon: ImageIcon, iconClass: 'text-amber-600 dark:text-amber-400' },
                     { id: 'typography', label: 'Fonts', icon: Type },
-                    { id: 'cloud-sync', label: 'Cloud & Drive', icon: Cloud, iconClass: 'text-amber-600 dark:text-amber-400' },
+                    { id: 'cloud-sync', label: 'Cloud', icon: Cloud, iconClass: 'text-amber-600 dark:text-amber-400' },
                     { id: 'import-notes', label: 'Import Notes', icon: UploadCloud, iconClass: 'text-amber-600 dark:text-amber-400' },
-                    { id: 'sidebar-buttons', label: 'Sidebar Customizer', icon: SlidersHorizontal, iconClass: 'text-amber-600 dark:text-amber-400' },
-                    { id: 'customizer', label: 'Student Customizer', icon: Sparkles, iconClass: 'text-amber-500' },
+                    { id: 'sidebar-buttons', label: 'Sidebar', icon: SlidersHorizontal, iconClass: 'text-amber-600 dark:text-amber-400' },
+                    { id: 'customizer', label: 'Goals', icon: Sparkles, iconClass: 'text-amber-500' },
                     { id: 'languages', label: 'Languages', icon: Globe, iconClass: 'text-amber-600 dark:text-amber-400' },
-                    { id: 'subscription', label: 'Plans & Pricing', icon: Crown, iconClass: 'text-amber-500' },
+                    { id: 'subscription', label: 'Plans', icon: Crown, iconClass: 'text-amber-500' },
                     { id: 'defaults', label: 'Backup & Reset', icon: RotateCcw },
                   ] as Array<{ id: SettingsTabId; label: string; icon: React.ComponentType<any>; iconClass?: string }>
                 ).map((tab) => {
@@ -937,17 +937,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 : 'hidden sm:flex sm:w-48'
             }`}
           >
-            {/* Top Arrow Action Matching Main Dashboard Sidebar (No "Back" label) */}
-            <div className="pb-1.5 border-b border-stone-200/80 dark:border-[#382518] shrink-0 flex items-center justify-end gap-1">
+            {/* Top Full-Width Arrow Action Matching Main Dashboard Sidebar (No "Back" label) */}
+            <div className="pb-1.5 border-b border-stone-200/80 dark:border-[#382518] shrink-0">
               {onClose && (
                 <button
                   type="button"
                   onClick={onClose}
                   title="Return to Dashboard"
                   aria-label="Return to Dashboard"
-                  className="hidden sm:flex w-8 h-8 rounded-xl items-center justify-center transition-all hover:brightness-110 active:scale-[0.95] cursor-pointer bg-stone-200/75 hover:bg-stone-300/80 dark:bg-[#241911] dark:hover:bg-[#312116] text-stone-800 dark:text-[#efe4d4] border border-stone-300/80 dark:border-[#3e291b]"
+                  className="hidden sm:flex w-full group items-center justify-center py-1.5 rounded-xl transition-all hover:brightness-110 active:scale-[0.97] cursor-pointer bg-stone-200/75 hover:bg-stone-300/80 dark:bg-[#241911] dark:hover:bg-[#312116] text-stone-800 dark:text-[#efe4d4] border border-stone-300/80 dark:border-[#3e291b] shadow-2xs"
                 >
-                  <ArrowLeft className="w-4 h-4 stroke-[2.2]" />
+                  <ArrowLeft className="w-3.5 h-3.5 stroke-[2.2] transition-transform duration-200 group-hover:-translate-x-1" />
                 </button>
               )}
               <button
@@ -955,9 +955,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 onClick={() => setIsMobileSidebarOpen(false)}
                 title="Collapse Settings Sidebar"
                 aria-label="Collapse Settings Sidebar"
-                className="sm:hidden w-8 h-8 rounded-xl flex items-center justify-center bg-stone-200/75 hover:bg-stone-300/80 dark:bg-[#241911] dark:hover:bg-[#312116] text-stone-700 dark:text-[#efe4d4] border border-stone-300/80 dark:border-[#3e291b] cursor-pointer shrink-0"
+                className="sm:hidden w-full group flex items-center justify-center py-1.5 rounded-xl bg-stone-200/75 hover:bg-stone-300/80 dark:bg-[#241911] dark:hover:bg-[#312116] text-stone-700 dark:text-[#efe4d4] border border-stone-300/80 dark:border-[#3e291b] cursor-pointer transition-all"
               >
-                <ArrowLeft className="w-4 h-4 stroke-[2.2]" />
+                <ArrowLeft className="w-3.5 h-3.5 stroke-[2.2] transition-transform duration-200 group-hover:-translate-x-1" />
               </button>
             </div>
 
@@ -966,16 +966,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="rounded-xl p-1 space-y-0.5 bg-stone-100/70 dark:bg-[#1a110b] border border-stone-200/75 dark:border-[#2e1e13]">
                 {(
                   [
-                    { id: 'profile', label: 'Student Profile', icon: User },
+                    { id: 'profile', label: 'Profile', icon: User },
                     { id: 'designs', label: 'Themes', icon: Palette },
                     { id: 'wallpaper', label: 'Wallpaper', icon: ImageIcon, iconClass: 'text-amber-600 dark:text-amber-400' },
                     { id: 'typography', label: 'Fonts', icon: Type },
-                    { id: 'cloud-sync', label: 'Cloud & Drive', icon: Cloud, iconClass: 'text-amber-600 dark:text-amber-400' },
+                    { id: 'cloud-sync', label: 'Cloud', icon: Cloud, iconClass: 'text-amber-600 dark:text-amber-400' },
                     { id: 'import-notes', label: 'Import Notes', icon: UploadCloud, iconClass: 'text-amber-600 dark:text-amber-400' },
-                    { id: 'sidebar-buttons', label: 'Sidebar Customizer', icon: SlidersHorizontal, iconClass: 'text-amber-600 dark:text-amber-400' },
-                    { id: 'customizer', label: 'Student Customizer', icon: Sparkles, iconClass: 'text-amber-500' },
+                    { id: 'sidebar-buttons', label: 'Sidebar', icon: SlidersHorizontal, iconClass: 'text-amber-600 dark:text-amber-400' },
+                    { id: 'customizer', label: 'Goals', icon: Sparkles, iconClass: 'text-amber-500' },
                     { id: 'languages', label: 'Languages', icon: Globe, iconClass: 'text-amber-600 dark:text-amber-400' },
-                    { id: 'subscription', label: 'Plans & Pricing', icon: Crown, iconClass: 'text-amber-500' },
+                    { id: 'subscription', label: 'Plans', icon: Crown, iconClass: 'text-amber-500' },
                     { id: 'defaults', label: 'Backup & Reset', icon: RotateCcw },
                   ] as Array<{ id: SettingsTabId; label: string; icon: React.ComponentType<any>; iconClass?: string }>
                 ).map((tab) => {
@@ -1037,16 +1037,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 {
                   (
                     {
-                      profile: 'Student Profile',
+                      profile: 'Profile',
                       designs: 'Themes',
                       wallpaper: 'Wallpaper',
                       typography: 'Fonts',
-                      'cloud-sync': 'Cloud & Drive',
+                      'cloud-sync': 'Cloud',
                       'import-notes': 'Import Notes',
-                      'sidebar-buttons': 'Sidebar Customizer',
-                      customizer: 'Student Customizer',
+                      'sidebar-buttons': 'Sidebar',
+                      customizer: 'Goals',
                       languages: 'Languages',
-                      subscription: 'Plans & Pricing',
+                      subscription: 'Plans',
                       defaults: 'Backup & Reset',
                     } as Record<SettingsTabId, string>
                   )[activeTab]
@@ -1412,7 +1412,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="pb-2 border-b border-stone-200 dark:border-[#382518]">
                 <h4 className="text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
                   <Cloud className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                  <span>Cloud &amp; Drive</span>
+                  <span>Cloud</span>
                 </h4>
               </div>
 
@@ -2311,7 +2311,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="pb-2 border-b border-stone-200 dark:border-[#382518]">
                 <h4 className="text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
                   <SlidersHorizontal className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                  <span>Sidebar Customizer</span>
+                  <span>Sidebar</span>
                 </h4>
               </div>
 
@@ -2373,7 +2373,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="pb-2 border-b border-stone-200 dark:border-[#382518]">
                 <h4 className="text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
                   <Crown className="w-4 h-4 text-amber-500" />
-                  <span>Plans &amp; Pricing</span>
+                  <span>Plans</span>
                 </h4>
               </div>
 
@@ -2544,7 +2544,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="pb-2 border-b border-stone-200 dark:border-[#382518]">
                 <h4 className="text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
                   <Sparkles className="w-4 h-4 text-amber-500" />
-                  <span>Student Customizer</span>
+                  <span>Goals</span>
                 </h4>
               </div>
 
@@ -2716,7 +2716,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="pb-2 border-b border-stone-200 dark:border-[#382518]">
                 <h4 className="text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
                   <User className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                  <span>Student Profile</span>
+                  <span>Profile</span>
                 </h4>
               </div>
 

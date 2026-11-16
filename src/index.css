@@ -759,7 +759,7 @@ html[data-design]:not([data-design="1"]) :is(
   .an-btn.primary,
   .an-btn-primary,
   .an-paper-mini-pills button.active
-):not(.shelf-world-root):not(.shelf-world-root *):not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not([class*="bg-red-"]) {
+):not(.shelf-world-root):not(.shelf-world-root *):not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not([class*="bg-red-"]):not(.an-note-ribbon .an-ribbon-scroll *) {
   background: var(--th-btn-active-bg) !important;
   color: var(--th-btn-active-ink, #ffffff) !important;
   border-color: var(--th-btn-active-border, transparent) !important;
@@ -781,7 +781,7 @@ html[data-design]:not([data-design="1"]) :is(
   .rs-tab.active *,
   .an-btn.primary *,
   .an-paper-mini-pills button.active *
-):not(.shelf-world-root):not(.shelf-world-root *) {
+):not(.shelf-world-root):not(.shelf-world-root *):not(.an-note-ribbon .an-ribbon-scroll *) {
   color: var(--th-btn-active-ink, #ffffff) !important;
 }
 
@@ -860,8 +860,8 @@ html.dark button {
   text-rendering: optimizeLegibility;
 }
 
-button[class*="bg-"]:not([class*="bg-transparent"]):not([class*="bg-none"]):not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del),
-button[class*="border"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del),
+button[class*="bg-"]:not([class*="bg-transparent"]):not([class*="bg-none"]):not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.an-note-ribbon .an-ribbon-scroll button),
+button[class*="border"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.an-note-ribbon .an-ribbon-scroll button),
 .atelier-btn,
 .atelier-day[aria-pressed="true"],
 .atelier-seg button[aria-pressed="true"],
@@ -882,8 +882,8 @@ button[class*="border"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-bt
     inset 0 1px 0 rgba(255, 255, 255, 0.28);
 }
 
-.dark button[class*="bg-"]:not([class*="bg-transparent"]):not([class*="bg-none"]):not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del),
-.dark button[class*="border"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del),
+.dark button[class*="bg-"]:not([class*="bg-transparent"]):not([class*="bg-none"]):not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.an-note-ribbon .an-ribbon-scroll button),
+.dark button[class*="border"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.an-note-ribbon .an-ribbon-scroll button),
 .dark .atelier-btn,
 .dark .atelier-day[aria-pressed="true"],
 .dark .atelier-seg button[aria-pressed="true"],
@@ -905,8 +905,8 @@ button[class*="border"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-bt
     inset 0 1px 0 rgba(255, 255, 255, 0.12);
 }
 
-button[class*="bg-"]:not([class*="bg-transparent"]):not([class*="bg-none"]):not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):hover,
-button[class*="border"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):hover,
+button[class*="bg-"]:not([class*="bg-transparent"]):not([class*="bg-none"]):not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.an-note-ribbon .an-ribbon-scroll button):hover,
+button[class*="border"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.an-note-ribbon .an-ribbon-scroll button):hover,
 .atelier-btn:hover,
 .an-btn:hover,
 .an-btn-primary:hover,
@@ -921,8 +921,8 @@ button[class*="border"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-bt
     inset 0 1px 0 rgba(255, 255, 255, 0.36);
 }
 
-.dark button[class*="bg-"]:not([class*="bg-transparent"]):not([class*="bg-none"]):not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):hover,
-.dark button[class*="border"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):hover,
+.dark button[class*="bg-"]:not([class*="bg-transparent"]):not([class*="bg-none"]):not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.an-note-ribbon .an-ribbon-scroll button):hover,
+.dark button[class*="border"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.an-note-ribbon .an-ribbon-scroll button):hover,
 .dark .atelier-btn:hover,
 .dark .an-btn:hover,
 .dark .an-btn-primary:hover,
@@ -1103,9 +1103,44 @@ html[data-design="3"] :is(.atelier-btn, .atelier-log, .an-btn, .an-btn-primary, 
     0 5px 12px -4px rgba(61, 33, 43, 0.16) !important;
 }
 
-/* Theme 4 — Muted Slate & Cobalt: Crisp Sharp 90° Right-Angle Corners on ALL Buttons */
-html[data-design="4"] button:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del),
-html[data-design="4"] :is(.atelier-btn, .atelier-log, .an-btn, .an-btn-primary, .read-attach-btn, .read-icon-btn, .read-tab, .shelfwise-btn, .shelfwise-seg-btn, .rs-btn, .rs-tab) {
+/* Theme 4 — Muted Slate & Cobalt: Crisp Sharp 90° Right-Angle Corners on ALL Buttons & Controls */
+html[data-design="4"] button:not([data-swatch]):not([role="switch"]):not(.joystick-btn):not(.atelier-tr-del),
+html[data-design="4"] [role="button"]:not([data-swatch]):not([role="switch"]),
+html[data-design="4"] :is(
+  .atelier-btn,
+  .atelier-log,
+  .atelier-seg,
+  .atelier-seg button,
+  .atelier-chip,
+  .atelier-day,
+  .an-btn,
+  .an-btn-primary,
+  .an-select-sm,
+  .an-seg,
+  .an-seg button,
+  .an-atabs button,
+  .an-pill,
+  .an-dock-pill,
+  .an-color-split,
+  .an-paper-mini-pills,
+  .an-paper-mini-pills button,
+  .an-ribbon-slide-btn,
+  .an-icon-btn,
+  .an-ribbon-feat,
+  .read-attach-btn,
+  .read-icon-btn,
+  .read-tab,
+  .read-tab-item,
+  .shelfwise-btn,
+  .shelfwise-sec-item,
+  .shelfwise-seg-btn,
+  .rs-btn,
+  .rs-chip,
+  .rs-tab,
+  .themed-accent-btn,
+  .themed-tab-active,
+  .raw-icon-btn
+) {
   border-radius: 0px !important;
 }
 
@@ -1779,7 +1814,7 @@ html.dark :is(
   .rs-chip,
   .rs-tab,
   .rs-btn
-):not([aria-pressed="true"]):not([aria-selected="true"]):not(.active):not(.primary):not(.themed-accent-btn):not(.themed-tab-active):not(.shelfwise-btn-primary):not(.an-btn-primary):not(.atelier-btn-ink):not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.atelier-bell):not(.sidebar-trash-btn):not(.atelier-sticky button):not(.shelf-world-root):not(.shelf-world-root *) {
+):not([aria-pressed="true"]):not([aria-selected="true"]):not(.active):not(.primary):not(.themed-accent-btn):not(.themed-tab-active):not(.shelfwise-btn-primary):not(.an-btn-primary):not(.atelier-btn-ink):not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.atelier-bell):not(.sidebar-trash-btn):not(.atelier-sticky button):not(.shelf-world-root):not(.shelf-world-root *):not(.an-note-ribbon .an-ribbon-scroll *):not(.an-note-ribbon .an-ribbon-scroll button) {
   background-color: transparent !important;
   background-image: var(--th-btn-idle-bg) !important;
   border-color: var(--th-btn-idle-border, var(--th-border)) !important;
@@ -1816,7 +1851,7 @@ html.dark :is(
   .rs-chip,
   .rs-tab,
   .rs-btn
-):not([aria-pressed="true"]):not([aria-selected="true"]):not([data-selected="true"]):not([aria-current="page"]):not([aria-current="true"]):not(.active):not(.primary):not(.themed-accent-btn):not(.themed-tab-active):not(.shelfwise-btn-primary):not(.an-btn-primary):not(.atelier-btn-ink):not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.atelier-bell):not(.sidebar-trash-btn):not(.atelier-sticky button):not(.shelf-world-root):not(.shelf-world-root *) * {
+):not([aria-pressed="true"]):not([aria-selected="true"]):not([data-selected="true"]):not([aria-current="page"]):not([aria-current="true"]):not(.active):not(.primary):not(.themed-accent-btn):not(.themed-tab-active):not(.shelfwise-btn-primary):not(.an-btn-primary):not(.atelier-btn-ink):not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.atelier-bell):not(.sidebar-trash-btn):not(.atelier-sticky button):not(.shelf-world-root):not(.shelf-world-root *):not(.an-note-ribbon .an-ribbon-scroll *):not(.an-note-ribbon .an-ribbon-scroll button) * {
   color: var(--th-btn-idle-ink) !important;
   text-shadow: none !important;
 }
@@ -1887,7 +1922,7 @@ html.dark :is(
   button[class*="dark:bg-\[\#f0e5d5\]"],
   button[class*="dark:bg-\[\#f5ead9\]"],
   button[class*="dark:bg-\[\#e8be82\]"]
-):not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.atelier-bell):not([class*="bg-red-"]):not(.atelier-sticky button):not(.shelf-world-root):not(.shelf-world-root *) {
+):not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.atelier-bell):not([class*="bg-red-"]):not(.atelier-sticky button):not(.shelf-world-root):not(.shelf-world-root *):not(.an-note-ribbon .an-ribbon-scroll *) {
   background-color: transparent !important;
   background-image: var(--th-btn-active-bg) !important;
   border-color: var(--th-btn-active-border, rgba(255, 255, 255, 0.35)) !important;
@@ -1952,8 +1987,39 @@ html.dark :is(
   button[class*="dark:bg-\[\#f0e5d5\]"],
   button[class*="dark:bg-\[\#f5ead9\]"],
   button[class*="dark:bg-\[\#e8be82\]"]
-):not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.atelier-bell):not([class*="bg-red-"]):not(.atelier-sticky button):not(.shelf-world-root):not(.shelf-world-root *) * {
+):not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.atelier-bell):not([class*="bg-red-"]):not(.atelier-sticky button):not(.shelf-world-root):not(.shelf-world-root *):not(.an-note-ribbon .an-ribbon-scroll *) * {
   color: var(--th-btn-active-ink) !important;
   text-shadow: none !important;
+}
+
+/* Create Note Ribbon: Plain Flat Formatting Controls Across All 10 Themes (Light & Dark) */
+.an-note-ribbon .an-ribbon-scroll :is(
+  button,
+  .an-icon-btn,
+  .an-ribbon-feat,
+  .an-color-split,
+  .an-color-main,
+  .an-color-arrow,
+  .an-select-sm,
+  .an-paper-mini-pills,
+  .an-paper-mini-pills button
+) {
+  background: transparent !important;
+  background-image: none !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.an-note-ribbon .an-ribbon-scroll :is(
+  button,
+  .an-icon-btn,
+  .an-ribbon-feat,
+  .an-color-main,
+  .an-color-arrow,
+  .an-paper-mini-pills button
+):hover {
+  background: color-mix(in srgb, var(--an-brass, #A47C43) 12%, transparent) !important;
+  box-shadow: none !important;
+  filter: none !important;
 }
 

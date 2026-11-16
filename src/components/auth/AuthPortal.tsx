@@ -6,7 +6,7 @@ import {
   saveRuntimeGoogleClientId,
   prefetchGoogleOAuth,
 } from '../../services/googleDriveService';
-import { ACHIEV_LOCKUP_URL } from '../common/AchievBrand';
+import { AchievBrand } from '../common/AchievBrand';
 import {
   Database,
   Eye,
@@ -25,8 +25,8 @@ import {
   RotateCcw,
 } from 'lucide-react';
 
-const FeatureVideoSeriesShowcase = React.lazy(
-  () => import('../landing/FeatureVideoSeriesShowcase')
+const ProductDemoShowcase = React.lazy(
+  () => import('../landing/productDemo/ProductDemoShowcase')
 );
 
 interface AuthPortalProps {
@@ -165,7 +165,19 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
     setSubmitting(provider);
     const { error } = await signInWithSocial(provider, false);
     setSubmitting(null);
-    if (error) setErrorMsg(error);
+    if (error) {
+      const providerUrl =
+        provider === 'google'
+          ? 'https://accounts.google.com/signin'
+          : provider === 'apple'
+          ? 'https://account.apple.com/sign-in'
+          : 'https://login.microsoftonline.com/';
+      if (typeof window !== 'undefined' && (window.self === window.top || provider !== 'google')) {
+        window.location.assign(providerUrl);
+        return;
+      }
+      setErrorMsg(error);
+    }
   };
 
   const cleanedDigits = phoneDigits.replace(/[^\d]/g, '').replace(/^0+/, '');
@@ -357,14 +369,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                   filter: 'drop-shadow(0 12px 26px rgba(10, 4, 1, 0.36))',
                 }}
               >
-                <img
-                  src={ACHIEV_LOCKUP_URL}
-                  alt="Achiev — Settle Ideas"
-                  draggable={false}
-                  fetchPriority="high"
-                  decoding="sync"
-                  className="w-[235px] sm:w-[292px] max-w-full h-auto object-contain select-none pointer-events-none"
-                />
+                <AchievBrand variant="lockup" />
               </div>
             </div>
 
@@ -377,9 +382,10 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
           </div>
         </div>
 
-        {/* Right: Compact Borderless Frosted-Glass Login Card Positioned Breathably Lower */}
+        {/* Right: Compact Borderless Frosted-Glass Login Card Positioned Breathably Lower + External Skip Link */}
+        <div className="lg:col-span-7 lg:mt-14 w-full max-w-md mx-auto flex flex-col items-center">
         <div
-          className="lg:col-span-7 lg:mt-10 rounded-3xl p-4 sm:p-6 backdrop-blur-xl backdrop-saturate-150 flex flex-col justify-between transition-all max-w-xl w-full mx-auto"
+          className="rounded-3xl p-4 sm:p-6 backdrop-blur-xl backdrop-saturate-150 flex flex-col justify-between transition-all w-full"
           style={{
             background:
               'linear-gradient(160deg, rgba(38, 19, 10, 0.72) 0%, rgba(18, 8, 4, 0.58) 100%)',
@@ -471,89 +477,54 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
               </div>
             )}
 
-            {/* Multi-Provider Social Auth Buttons (Drive checkbox removed — Drive connects inside Cloud & Drive) */}
+            {/* Icon-Only Social Auth Row (Google · Apple · Microsoft Logos) */}
             {mode !== 'forgot' && (
-              <div className="space-y-2.5 mb-3">
-                <div className="flex flex-col gap-2">
+              <div className="mb-3.5">
+                <div className="flex items-center justify-center gap-3">
                   <button
                     type="button"
                     disabled={!!submitting}
                     onClick={() => handleSocialAuth('google')}
-                    className="flex items-center justify-center gap-2.5 py-2.5 px-4 rounded-xl text-xs font-semibold transition-all cursor-pointer hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 text-[#efe4d4]"
+                    aria-label="Sign in with Google"
+                    title="Google"
+                    className="w-12 h-11 rounded-xl flex items-center justify-center transition-all cursor-pointer hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 text-[#efe4d4]"
                     style={{
                       background: 'linear-gradient(180deg, rgba(48, 30, 20, 0.85) 0%, rgba(28, 17, 11, 0.9) 100%)',
                       boxShadow: 'inset 0 1px 0 rgba(255,224,178,0.16), inset 0 -1.5px 0 rgba(0,0,0,0.45), 0 4px 12px rgba(0,0,0,0.28)',
                     }}
                   >
                     <GoogleLogo />
-                    <span>{submitting === 'google' ? 'Connecting...' : 'Continue with Google'}</span>
                   </button>
 
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      disabled={!!submitting}
-                      onClick={() => handleSocialAuth('apple')}
-                      className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-semibold transition-all cursor-pointer hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 text-[#efe4d4]"
-                      style={{
-                        background: 'linear-gradient(180deg, rgba(48, 30, 20, 0.85) 0%, rgba(28, 17, 11, 0.9) 100%)',
-                        boxShadow: 'inset 0 1px 0 rgba(255,224,178,0.16), inset 0 -1.5px 0 rgba(0,0,0,0.45), 0 4px 12px rgba(0,0,0,0.28)',
-                      }}
-                    >
-                      <AppleLogo />
-                      <span>{submitting === 'apple' ? 'Connecting...' : 'Apple'}</span>
-                    </button>
+                  <button
+                    type="button"
+                    disabled={!!submitting}
+                    onClick={() => handleSocialAuth('apple')}
+                    aria-label="Sign in with Apple"
+                    title="Apple"
+                    className="w-12 h-11 rounded-xl flex items-center justify-center transition-all cursor-pointer hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 text-[#efe4d4]"
+                    style={{
+                      background: 'linear-gradient(180deg, rgba(48, 30, 20, 0.85) 0%, rgba(28, 17, 11, 0.9) 100%)',
+                      boxShadow: 'inset 0 1px 0 rgba(255,224,178,0.16), inset 0 -1.5px 0 rgba(0,0,0,0.45), 0 4px 12px rgba(0,0,0,0.28)',
+                    }}
+                  >
+                    <AppleLogo />
+                  </button>
 
-                    <button
-                      type="button"
-                      disabled={!!submitting}
-                      onClick={() => handleSocialAuth('azure')}
-                      className="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs font-semibold transition-all cursor-pointer hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 text-[#efe4d4]"
-                      style={{
-                        background: 'linear-gradient(180deg, rgba(48, 30, 20, 0.85) 0%, rgba(28, 17, 11, 0.9) 100%)',
-                        boxShadow: 'inset 0 1px 0 rgba(255,224,178,0.16), inset 0 -1.5px 0 rgba(0,0,0,0.45), 0 4px 12px rgba(0,0,0,0.28)',
-                      }}
-                    >
-                      <MicrosoftLogo />
-                      <span>{submitting === 'azure' ? 'Connecting...' : 'Microsoft'}</span>
-                    </button>
-                  </div>
-                </div>
-
-                {/* Auth Method Switcher: Email & Password vs Contact Number + OTP */}
-                <div className="pt-1">
-                  <div className="grid grid-cols-2 gap-1 p-1 rounded-xl bg-[#120a06]/80 border border-[#3d2517]">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setAuthMethod('email');
-                        setErrorMsg(null);
-                      }}
-                      className={`py-1.5 px-3 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                        authMethod === 'email'
-                          ? 'bg-[#e8cfab] text-[#110c09] shadow-xs'
-                          : 'text-[#bfa78a] hover:text-[#efe4d4]'
-                      }`}
-                    >
-                      <Mail className="w-3.5 h-3.5" />
-                      <span>Email &amp; Password</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setAuthMethod('phone');
-                        setErrorMsg(null);
-                      }}
-                      className={`py-1.5 px-3 rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
-                        authMethod === 'phone'
-                          ? 'bg-[#e8cfab] text-[#110c09] shadow-xs'
-                          : 'text-[#bfa78a] hover:text-[#efe4d4]'
-                      }`}
-                    >
-                      <Phone className="w-3.5 h-3.5 shrink-0" />
-                      <span>Contact No. + OTP</span>
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    disabled={!!submitting}
+                    onClick={() => handleSocialAuth('azure')}
+                    aria-label="Sign in with Microsoft"
+                    title="Microsoft"
+                    className="w-12 h-11 rounded-xl flex items-center justify-center transition-all cursor-pointer hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50 text-[#efe4d4]"
+                    style={{
+                      background: 'linear-gradient(180deg, rgba(48, 30, 20, 0.85) 0%, rgba(28, 17, 11, 0.9) 100%)',
+                      boxShadow: 'inset 0 1px 0 rgba(255,224,178,0.16), inset 0 -1.5px 0 rgba(0,0,0,0.45), 0 4px 12px rgba(0,0,0,0.28)',
+                    }}
+                  >
+                    <MicrosoftLogo />
+                  </button>
                 </div>
               </div>
             )}
@@ -686,57 +657,46 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                   </div>
                 )}
 
-                <button
-                  type="submit"
-                  disabled={!!submitting}
-                  className="group relative overflow-hidden w-full py-2.5 px-4 rounded-xl text-[#1b1007] font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 disabled:opacity-50"
-                  style={{
-                    background:
-                      'linear-gradient(135deg, #f6dea3 0%, #dca952 44%, #ecc774 72%, #b67d29 100%)',
-                    boxShadow:
-                      'inset 0 1.5px 0 rgba(255, 250, 232, 0.85), inset 0 -2px 2px rgba(105, 62, 12, 0.35), 0 10px 26px -4px rgba(218, 165, 76, 0.45)',
-                    border: '1px solid rgba(255, 235, 185, 0.65)',
-                  }}
-                >
-                  <span
-                    aria-hidden="true"
-                    className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700"
+                <div className="flex justify-center pt-1">
+                  <button
+                    type="submit"
+                    disabled={!!submitting}
+                    className="group relative overflow-hidden w-1/2 min-w-[160px] py-2.5 px-4 rounded-xl text-[#1b1007] font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 disabled:opacity-50"
                     style={{
                       background:
-                        'linear-gradient(110deg, transparent 25%, rgba(255,255,255,0.48) 50%, transparent 75%)',
+                        'linear-gradient(135deg, #f6dea3 0%, #dca952 44%, #ecc774 72%, #b67d29 100%)',
+                      boxShadow:
+                        'inset 0 1.5px 0 rgba(255, 250, 232, 0.85), inset 0 -2px 2px rgba(105, 62, 12, 0.35), 0 10px 26px -4px rgba(218, 165, 76, 0.45)',
+                      border: '1px solid rgba(255, 235, 185, 0.65)',
                     }}
-                  />
-                  {mode === 'forgot' ? (
-                    <>
-                      <KeyRound className="w-4 h-4 relative z-10" />
-                      <span className="relative z-10">{submitting === 'email' ? 'Sending Reset Link...' : 'Send Reset Link'}</span>
-                    </>
-                  ) : (
-                    <>
-                      <span className="relative z-10">
-                        {submitting === 'email'
-                          ? 'Authenticating...'
-                          : mode === 'signin'
-                          ? 'Sign In'
-                          : 'Create Account'}
-                      </span>
-                      <ArrowRight className="w-4 h-4 relative z-10" />
-                    </>
-                  )}
-                </button>
-
-                {!isModal && mode !== 'forgot' && (
-                  <div className="pt-1 text-center">
-                    <button
-                      type="button"
-                      onClick={() => window.dispatchEvent(new CustomEvent('achiev_skip_create_note'))}
-                      className="inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-semibold text-[#f3d9a8] hover:text-white underline underline-offset-4 decoration-amber-400/80 hover:decoration-amber-200 transition-colors cursor-pointer"
-                    >
-                      <span>Skip and create note</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                )}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700"
+                      style={{
+                        background:
+                          'linear-gradient(110deg, transparent 25%, rgba(255,255,255,0.48) 50%, transparent 75%)',
+                      }}
+                    />
+                    {mode === 'forgot' ? (
+                      <>
+                        <KeyRound className="w-4 h-4 relative z-10" />
+                        <span className="relative z-10">{submitting === 'email' ? 'Sending...' : 'Send Reset Link'}</span>
+                      </>
+                    ) : (
+                      <>
+                        <span className="relative z-10">
+                          {submitting === 'email'
+                            ? 'Authenticating...'
+                            : mode === 'signin'
+                            ? 'Sign In'
+                            : 'Create Account'}
+                        </span>
+                        <ArrowRight className="w-4 h-4 relative z-10" />
+                      </>
+                    )}
+                  </button>
+                </div>
 
                 {mode === 'forgot' && (
                   <button
@@ -865,53 +825,88 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                   </div>
                 )}
 
-                <button
-                  type="submit"
-                  disabled={!!submitting}
-                  className="group relative overflow-hidden w-full py-2.5 px-4 rounded-xl text-[#1b1007] font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 disabled:opacity-50"
-                  style={{
-                    background:
-                      'linear-gradient(135deg, #f6dea3 0%, #dca952 44%, #ecc774 72%, #b67d29 100%)',
-                    boxShadow:
-                      'inset 0 1.5px 0 rgba(255, 250, 232, 0.85), inset 0 -2px 2px rgba(105, 62, 12, 0.35), 0 10px 26px -4px rgba(218, 165, 76, 0.45)',
-                    border: '1px solid rgba(255, 235, 185, 0.65)',
-                  }}
-                >
-                  <span
-                    aria-hidden="true"
-                    className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700"
+                <div className="flex justify-center pt-1">
+                  <button
+                    type="submit"
+                    disabled={!!submitting}
+                    className="group relative overflow-hidden w-1/2 min-w-[160px] py-2.5 px-4 rounded-xl text-[#1b1007] font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 disabled:opacity-50"
                     style={{
                       background:
-                        'linear-gradient(110deg, transparent 25%, rgba(255,255,255,0.48) 50%, transparent 75%)',
+                        'linear-gradient(135deg, #f6dea3 0%, #dca952 44%, #ecc774 72%, #b67d29 100%)',
+                      boxShadow:
+                        'inset 0 1.5px 0 rgba(255, 250, 232, 0.85), inset 0 -2px 2px rgba(105, 62, 12, 0.35), 0 10px 26px -4px rgba(218, 165, 76, 0.45)',
+                      border: '1px solid rgba(255, 235, 185, 0.65)',
                     }}
-                  />
-                  <span className="relative z-10">
-                    {submitting === 'phone-send'
-                      ? 'Sending SMS OTP...'
-                      : submitting === 'phone-verify'
-                      ? 'Verifying OTP...'
-                      : otpSent
-                      ? 'Verify OTP & Enter Achiev'
-                      : 'Send OTP'}
-                  </span>
-                  <ArrowRight className="w-4 h-4 relative z-10" />
-                </button>
-
-                {!isModal && (
-                  <div className="pt-1 text-center">
-                    <button
-                      type="button"
-                      onClick={() => window.dispatchEvent(new CustomEvent('achiev_skip_create_note'))}
-                      className="inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-semibold text-[#f3d9a8] hover:text-white underline underline-offset-4 decoration-amber-400/80 hover:decoration-amber-200 transition-colors cursor-pointer"
-                    >
-                      <span>Skip and create note</span>
-                      <ArrowRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                )}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="pointer-events-none absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700"
+                      style={{
+                        background:
+                          'linear-gradient(110deg, transparent 25%, rgba(255,255,255,0.48) 50%, transparent 75%)',
+                      }}
+                    />
+                    <span className="relative z-10">
+                      {submitting === 'phone-send'
+                        ? 'Sending...'
+                        : submitting === 'phone-verify'
+                        ? 'Verifying...'
+                        : otpSent
+                        ? 'Verify OTP'
+                        : 'Send OTP'}
+                    </span>
+                    <ArrowRight className="w-4 h-4 relative z-10" />
+                  </button>
+                </div>
               </form>
             )}
+
+            {/* LAST OPTION BELOW EMAIL: Contact Number + OTP Switcher */}
+            {mode !== 'forgot' && (
+              <div className="mt-3.5 pt-3 border-t border-[#4b2d1b]/60 flex items-center justify-center">
+                {authMethod === 'email' ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAuthMethod('phone');
+                      setErrorMsg(null);
+                    }}
+                    className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-[#e8cfab] hover:text-white transition-colors cursor-pointer"
+                  >
+                    <Phone className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Or continue with Contact Number</span>
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAuthMethod('email');
+                      setErrorMsg(null);
+                    }}
+                    className="inline-flex items-center gap-1.5 text-[11.5px] font-semibold text-[#e8cfab] hover:text-white transition-colors cursor-pointer"
+                  >
+                    <Mail className="w-3.5 h-3.5 text-amber-400" />
+                    <span>Back to Email Sign In</span>
+                  </button>
+                )}
+              </div>
+            )}
           </div>
+        </div>
+
+        {/* Outside & Below Login Box: Skip and create note */}
+        {!isModal && (
+          <div className="mt-4 text-center">
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new CustomEvent('achiev_skip_create_note'))}
+              className="inline-flex items-center gap-1.5 text-xs sm:text-[13.5px] font-semibold text-[#f3d9a8] hover:text-white underline underline-offset-4 decoration-amber-400/80 hover:decoration-amber-200 transition-colors cursor-pointer"
+            >
+              <span>Skip and create note</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
         </div>
       </div>
       </div>
@@ -964,7 +959,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
             <div className="relative z-10">
               {showShowcase ? (
                 <Suspense fallback={<div className="w-full max-w-6xl mx-auto mt-4 h-48 rounded-3xl bg-[#E8D2AA]/60 animate-pulse" />}>
-                  <FeatureVideoSeriesShowcase />
+                  <ProductDemoShowcase />
                 </Suspense>
               ) : (
                 <div className="w-full max-w-6xl mx-auto h-32" />

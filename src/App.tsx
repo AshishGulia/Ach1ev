@@ -30,7 +30,7 @@ import { WindowsHeader } from './components/common/WindowsHeader';
 import { AuthPortal } from './components/auth/AuthPortal';
 import type { SettingsTabId } from './components/settings/SettingsModal';
 import type { DeletedItem } from './components/recycle/RecycleBinView';
-import { ACHIEV_LOCKUP_URL } from './components/common/AchievBrand';
+import { AchievBrand } from './components/common/AchievBrand';
 
 const MyDenHome = lazy(() => import('./components/home/MyDenHome').then((m) => ({ default: m.MyDenHome })));
 const NotebookShelfView = lazy(() => import('./components/notebook/NotebookShelfView').then((m) => ({ default: m.NotebookShelfView })));
@@ -1071,12 +1071,7 @@ export default function App() {
             filter: 'drop-shadow(0 14px 36px rgba(10, 4, 1, 0.38))',
           }}
         >
-          <img
-            src={ACHIEV_LOCKUP_URL}
-            alt="Achiev — Settle Ideas"
-            draggable={false}
-            className="w-[min(72vw,432px)] h-auto object-contain select-none pointer-events-none"
-          />
+          <AchievBrand variant="lockup" />
         </div>
         <p className="text-xs font-mono opacity-75">Initializing Achiev Cloud Workspace...</p>
       </div>

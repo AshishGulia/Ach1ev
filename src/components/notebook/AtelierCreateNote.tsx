@@ -2896,7 +2896,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
             }
             showToast('Note saved to your Achiev account!');
           }}
-          className="an-btn primary px-4 py-2 text-xs sm:text-[13px] font-bold flex items-center gap-2 shadow-md cursor-pointer shrink-0"
+          className="an-btn primary px-5 py-2.5 text-sm font-extrabold tracking-wide flex items-center gap-2 shadow-lg ring-1 ring-amber-400/35 cursor-pointer shrink-0"
           title="Save note to your account"
         >
           <Cloud className="w-4 h-4" />
@@ -3356,7 +3356,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
               <div className="an-ribbon-scroll" ref={ribbonScrollRef}>
                 <button
                   type="button"
-                  className="an-ribbon-feat primary-front"
+                  className="an-ribbon-feat"
                   title="Insert interactive tick box / checklist"
                   onClick={() =>
                     insertHtmlAtCursor(
@@ -3429,21 +3429,21 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                 </select>
 
                 {/* Base Text Size Controls */}
-                <div className="inline-flex items-center rounded-[9px] border border-[var(--an-line)] bg-[var(--an-page)] overflow-hidden h-[28px] shrink-0" title="Adjust paper text size">
+                <div className="inline-flex items-center overflow-hidden h-[28px] shrink-0" title="Adjust paper text size">
                   <button
                     type="button"
-                    className="px-1.5 h-full text-[11px] font-bold hover:bg-[var(--an-bg)] transition-colors"
+                    className="an-ribbon-feat compact px-1.5 h-full text-[11px] font-bold"
                     onClick={() => setEditorFontSizePx((s) => Math.max(12, +(s - 1).toFixed(1)))}
                     title="Decrease note text size"
                   >
                     A-
                   </button>
-                  <span className="px-1.5 text-[10px] font-mono text-[var(--an-muted)] border-x border-[var(--an-line)] leading-[26px]">
+                  <span className="px-1 text-[10px] font-mono text-[var(--an-muted)] leading-[26px]">
                     {Math.round(editorFontSizePx)}
                   </span>
                   <button
                     type="button"
-                    className="px-1.5 h-full text-[11px] font-bold hover:bg-[var(--an-bg)] transition-colors"
+                    className="an-ribbon-feat compact px-1.5 h-full text-[11px] font-bold"
                     onClick={() => setEditorFontSizePx((s) => Math.min(26, +(s + 1).toFixed(1)))}
                     title="Increase note text size"
                   >
@@ -3595,7 +3595,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                 <div className="relative shrink-0">
                   <button
                     type="button"
-                    className={`an-ribbon-feat compact shrink-0 ${isRulerMenuOpen ? 'border-[#A47C43] bg-[#A47C43]/15' : ''}`}
+                    className={`an-ribbon-feat compact shrink-0 ${isRulerMenuOpen ? 'text-[#A47C43] font-semibold' : ''}`}
                     onClick={() => setIsRulerMenuOpen((v) => !v)}
                     title="Customize Lines (Spacing, Color & Solid/Dotted/Dashed/Double)"
                   >
@@ -4244,28 +4244,6 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                             {box.locked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
                             <span>{box.locked ? 'Locked' : 'Lock'}</span>
                           </button>
-
-                          {/* Size Presets S / M / L / XL */}
-                          {[
-                            { label: 'S', w: 175, h: 80 },
-                            { label: 'M', w: 250, h: 115 },
-                            { label: 'L', w: 340, h: 155 },
-                            { label: 'XL', w: 460, h: 200 },
-                          ].map((sz) => (
-                            <button
-                              key={sz.label}
-                              type="button"
-                              onClick={() =>
-                                setCustomBoxes((prev) =>
-                                  prev.map((b) => (b.id === box.id ? { ...b, width: sz.w, height: sz.h } : b))
-                                )
-                              }
-                              className="px-1.5 py-0.5 rounded text-[10px] font-mono font-bold hover:bg-black/10 cursor-pointer"
-                              title={`Set size ${sz.label}`}
-                            >
-                              {sz.label}
-                            </button>
-                          ))}
 
                           {/* Shape Selector */}
                           <select

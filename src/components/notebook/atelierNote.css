@@ -1186,55 +1186,63 @@ mark.hit {
 .an-paper-mini-pills {
   display: inline-flex;
   align-items: center;
-  background: var(--an-bg);
-  border: 1px solid var(--an-line);
-  border-radius: 8px;
-  padding: 2px;
+  background: transparent;
+  border: none;
+  padding: 0;
   gap: 2px;
 }
 
 .an-paper-mini-pills button {
-  padding: 3px 8px;
-  border-radius: 6px;
+  padding: 3px 6px;
+  border-radius: 4px;
   font-size: 10.5px;
   font-weight: 600;
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
   color: var(--an-muted);
-  transition: all 0.14s ease;
+  transition: color 0.14s ease, background-color 0.14s ease;
 }
 
 .an-paper-mini-pills button:hover {
   color: var(--an-ink);
+  background: color-mix(in srgb, var(--an-brass) 12%, transparent) !important;
 }
 
 .an-paper-mini-pills button.active {
-  background: var(--an-brass);
-  color: #fff;
+  background: transparent !important;
+  color: var(--an-brass) !important;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  font-weight: 700;
 }
 
 .an-ribbon-feat {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 6px 10px;
-  border-radius: 8px;
+  padding: 5px 8px;
+  border-radius: 6px;
   border: none !important;
   background: transparent !important;
+  background-image: none !important;
   box-shadow: none !important;
   color: var(--an-ink);
   font-size: 12px;
   font-weight: 500;
   white-space: nowrap;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: color 0.15s ease, background-color 0.15s ease;
 }
 
 .an-ribbon-feat:hover {
-  background: color-mix(in srgb, var(--an-brass) 14%, transparent) !important;
+  background: color-mix(in srgb, var(--an-brass) 12%, transparent) !important;
   color: var(--an-brass);
+  box-shadow: none !important;
 }
 
 .an-ribbon-feat.primary-front {
-  background: var(--an-sage-soft) !important;
+  background: transparent !important;
   color: var(--an-ink);
 }
 
@@ -1252,6 +1260,14 @@ mark.hit {
   background-position: calc(100% - 7px) 50%;
   background-size: 11px 11px;
   background-repeat: no-repeat;
+}
+
+.an-note-ribbon .an-ribbon-scroll .an-select-sm {
+  border: none !important;
+  background-color: transparent !important;
+  box-shadow: none !important;
+  border-radius: 6px;
+  padding: 4px 20px 4px 6px !important;
 }
 
 .an-sw {
