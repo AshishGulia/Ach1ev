@@ -645,7 +645,7 @@ export const ReadStudioView: React.FC<ReadStudioViewProps> = ({
 
   // Watermark study desk view when main book is closed per user request
   const renderBlankDeskView = () => (
-    <div className="themed-workspace-surface relative flex-1 flex flex-col items-center justify-center p-8 bg-[#fbf9f4] dark:bg-[#110c09] overflow-hidden select-none min-h-[480px]">
+    <div className="themed-workspace-surface relative flex-1 flex flex-col items-center justify-center p-8 bg-transparent overflow-hidden select-none min-h-[480px]">
       {/* Watermark Illustration: Cute child studying at a desk with lamp & books */}
       <div className="absolute inset-0 flex items-center justify-center opacity-15 dark:opacity-10 pointer-events-none">
         <svg
@@ -1215,7 +1215,7 @@ export const ReadStudioView: React.FC<ReadStudioViewProps> = ({
               /* BOOK / DOUBLE PAGE SPREAD VIEW */
               <div className={`read-pane-content ${fontSize} flex flex-col md:flex-row gap-0 overflow-y-auto`}>
                 {/* Left Page */}
-                <div className="flex-1 p-6 md:p-8 border-b md:border-b-0 md:border-r relative" style={{ backgroundColor: 'var(--rs-surface)', borderColor: 'var(--rs-border)' }}>
+                <div className="flex-1 p-6 md:p-8 border-b md:border-b-0 md:border-r relative" style={{ backgroundColor: 'color-mix(in srgb, var(--rs-surface) 74%, transparent)', backdropFilter: 'blur(10px)', borderColor: 'var(--rs-border)' }}>
                   <div className="absolute top-3 right-4 flex items-center gap-2">
                     <button
                       type="button"
@@ -1262,7 +1262,7 @@ export const ReadStudioView: React.FC<ReadStudioViewProps> = ({
                 <div className="hidden md:block w-3 bg-gradient-to-r from-stone-300/40 via-stone-400/20 to-stone-300/40 dark:from-black/50 dark:via-black/20 dark:to-black/50 shrink-0 pointer-events-none" />
 
                 {/* Right Page */}
-                <div className="flex-1 p-6 md:p-8 relative" style={{ backgroundColor: 'var(--rs-surface)' }}>
+                <div className="flex-1 p-6 md:p-8 relative" style={{ backgroundColor: 'color-mix(in srgb, var(--rs-surface) 74%, transparent)', backdropFilter: 'blur(10px)' }}>
                   {mainBook.pages[mainPageNum] ? (
                     <>
                       <div className="absolute top-3 right-4 flex items-center gap-2">

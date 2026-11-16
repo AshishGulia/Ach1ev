@@ -6,7 +6,6 @@ import {
   Maximize2,
   Minimize2,
   Minus,
-  Download,
   Sparkles,
   Trash2,
   Check,
@@ -16,13 +15,10 @@ import {
   Paperclip,
   Eye,
   Sliders,
-  ChevronDown,
   ChevronUp,
   BookOpen,
   ArrowRight,
   ArrowDown,
-  FileSpreadsheet,
-  Presentation,
   Users,
   Palette,
   Columns,
@@ -313,7 +309,6 @@ export const FlowchartStudio: React.FC<FlowchartStudioProps> = ({
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   // Modals & Popovers
-  const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
   const [newChartModalOpen, setNewChartModalOpen] = useState(false);
   const [photoPickerOpen, setPhotoPickerOpen] = useState(false);
   const [docUploadOpen, setDocUploadOpen] = useState(false);
@@ -321,7 +316,6 @@ export const FlowchartStudio: React.FC<FlowchartStudioProps> = ({
   const [newDocForm, setNewDocForm] = useState({ name: '', size: '1.2 MB', type: 'pdf' as const });
   const [newPhotoInput, setNewPhotoInput] = useState('');
   const [newNoteText, setNewNoteText] = useState('');
-  const [geminiFeedback, setGeminiFeedback] = useState<string | null>(null);
 
   const saveCharts = (updatedCharts: StudioFlowchart[]) => {
     setCharts(updatedCharts);
@@ -601,35 +595,6 @@ export const FlowchartStudio: React.FC<FlowchartStudioProps> = ({
     setInspectorDrawerOpen(true);
   };
 
-  const handleGeminiExpand = () => {
-    if (!activeChart || !activeNode) {
-      setNewChartModalOpen(true);
-      return;
-    }
-    setGeminiFeedback('Generating next boxes...');
-    setTimeout(() => {
-      handleAddBoxes(activeNode, 'below', addBoxCount);
-      setGeminiFeedback('Next level boxes added!');
-      setTimeout(() => setGeminiFeedback(null), 2600);
-    }, 650);
-  };
-
-  const handleExport = (format: string) => {
-    setExportDropdownOpen(false);
-    if (!activeChart) return;
-    if (format === 'JSON') {
-      const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(activeChart, null, 2));
-      const downloadAnchor = document.createElement('a');
-      downloadAnchor.setAttribute('href', dataStr);
-      downloadAnchor.setAttribute('download', `${activeChart.title.replace(/\s+/g, '_')}.json`);
-      document.body.appendChild(downloadAnchor);
-      downloadAnchor.click();
-      downloadAnchor.remove();
-    } else {
-      window.print();
-    }
-  };
-
   // Dynamic unlimited levels 1..N
   const chartNodes = activeChart?.nodes || [];
   const levelNumbers: number[] = Array.from(new Set(chartNodes.map((n) => n.level))).sort((a, b) => a - b);
@@ -670,11 +635,6 @@ export const FlowchartStudio: React.FC<FlowchartStudioProps> = ({
           {activeChart && (
             <span className="font-serif font-bold text-sm sm:text-base text-stone-900 dark:text-[#efe4d4] truncate max-w-[160px] sm:max-w-[220px]" title={activeChart.title}>
               {activeChart.title}
-            </span>
-          )}
-          {geminiFeedback && (
-            <span className="text-[11px] font-sans font-normal text-amber-600 dark:text-amber-300 animate-pulse">
-              {geminiFeedback}
             </span>
           )}
           {infoBanner && (
@@ -767,99 +727,6 @@ export const FlowchartStudio: React.FC<FlowchartStudioProps> = ({
               ))}
             </div>
           )}
-
-          <button
-            type="button"
-            onClick={handleGeminiExpand}
-            className="px-2.5 py-1.5 rounded-full bg-gradient-to-r from-amber-500/15 via-[#A47C43]/20 to-[#8f5f2c]/15 hover:from-amber-500/25 text-stone-800 dark:text-amber-200 border border-amber-500/30 text-xs font-semibold flex items-center gap-1 transition-all shadow-2xs cursor-pointer"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-            <span>Fill next level</span>
-          </button>
-
-          {/* Export Dropdown */}
-          <div className="relative">
-            <button
-              type="button"
-              onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
-              className="px-3 py-1.5 rounded-full bg-[#1e2530] text-white hover:bg-stone-800 dark:bg-stone-100 dark:text-[#110c09] dark:hover:bg-white text-xs font-semibold flex items-center gap-1 shadow-xs transition-colors cursor-pointer"
-            >
-              <Download className="w-3.5 h-3.5" />
-              <span>Export</span>
-              <ChevronDown className="w-3 h-3 opacity-70" />
-            </button>
-
-            {exportDropdownOpen && (
-              <div className="absolute right-0 mt-1.5 w-56 rounded-2xl bg-[#18110c] border border-[#382518] shadow-2xl p-2 z-50 text-[#efe4d4] text-xs space-y-1">
-                <button
-                  type="button"
-                  onClick={() => handleExport('PDF')}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-[#2a1d14] text-left cursor-pointer"
-                >
-                  <FileText className="w-4 h-4 text-[#c94a4f]" />
-                  <div>
-                    <div className="font-semibold text-xs">PDF</div>
-                    <div className="text-[10px] text-[#a69079]">Tree + full details</div>
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleExport('Word')}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-[#2a1d14] text-left cursor-pointer"
-                >
-                  <FileText className="w-4 h-4 text-blue-400" />
-                  <div>
-                    <div className="font-semibold text-xs">Word</div>
-                    <div className="text-[10px] text-[#a69079]">.docx document format</div>
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleExport('PowerPoint')}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-[#2a1d14] text-left cursor-pointer"
-                >
-                  <Presentation className="w-4 h-4 text-amber-400" />
-                  <div>
-                    <div className="font-semibold text-xs">PowerPoint</div>
-                    <div className="text-[10px] text-[#a69079]">Editable tree + slides</div>
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleExport('Excel')}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-[#2a1d14] text-left cursor-pointer"
-                >
-                  <FileSpreadsheet className="w-4 h-4 text-amber-400" />
-                  <div>
-                    <div className="font-semibold text-xs">Excel</div>
-                    <div className="text-[10px] text-[#a69079]">Nodes, tree & steps</div>
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleExport('PNG image')}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-[#2a1d14] text-left cursor-pointer"
-                >
-                  <ImageIcon className="w-4 h-4 text-purple-400" />
-                  <div>
-                    <div className="font-semibold text-xs">PNG image</div>
-                    <div className="text-[10px] text-[#a69079]">High resolution snapshot</div>
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleExport('JSON')}
-                  className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl hover:bg-[#2a1d14] text-left cursor-pointer border-t border-[#382518] mt-1 pt-1.5"
-                >
-                  <Download className="w-4 h-4 text-[#a69079]" />
-                  <div>
-                    <div className="font-semibold text-xs">JSON Backup</div>
-                    <div className="text-[10px] text-[#a69079]">Raw flowchart dataset</div>
-                  </div>
-                </button>
-              </div>
-            )}
-          </div>
 
           <button
             type="button"
@@ -1540,15 +1407,7 @@ export const FlowchartStudio: React.FC<FlowchartStudioProps> = ({
                       <div className="text-[10px] font-mono font-bold uppercase text-amber-700 dark:text-amber-400">
                         Quick Actions
                       </div>
-                      <div className="grid grid-cols-2 gap-2 text-xs">
-                        <button
-                          type="button"
-                          onClick={handleAddChildNode}
-                          className="p-2 rounded-xl bg-white dark:bg-[#1a120d] border border-amber-400/40 dark:border-[#4b3322] hover:bg-amber-50 dark:hover:bg-[#2b1e15] text-stone-800 dark:text-[#efe4d4] font-semibold flex items-center justify-center gap-1.5 cursor-pointer"
-                        >
-                          <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-                          <span>Fill next level</span>
-                        </button>
+                      <div className="grid grid-cols-1 gap-2 text-xs">
                         <button
                           type="button"
                           onClick={() => setActiveViewMode('info')}

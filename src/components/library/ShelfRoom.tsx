@@ -233,21 +233,21 @@ const LOOK_DARK_CHOCOLATE: Look = {
 
 const LOOK_CREAMY_CARAMEL: Look = {
   name: 'Creamy Caramel',
-  frame: '#613a21',
-  dark: '#381e0f',
-  back: '#432717',
-  plank: '#74472a',
+  frame: '#9b6234',
+  dark: '#5e3516',
+  back: '#7a4923',
+  plank: '#b47642',
   door: 'glass',
   upperDoorType: 'fancy-caramel-glass',
   lowerDoorType: 'solid-wood-door',
-  face: '#5a341c',
+  face: '#8e572b',
   handle: '#4b2a17',
   knob: true,
   light: false,
-  grain: 0.40,
+  grain: 0.28,
   wallType: 'charcoal-slats',
   legs: 'tapered-wood',
-  accentDesc: 'Warm Polished Walnut · Rounded bezel glass doors (upper), carved walnut doors (lower) & splayed legs',
+  accentDesc: 'Caramel Honey Teak · Distinct warm CSS wood grain, crystal clear glass doors (upper) & solid carved doors (lower)',
   hasUpperDoor: true,
   hasSlideBars: true,
   isCapsule: true,
@@ -578,9 +578,49 @@ export function getWoodSurfaceStyle(
   }
 
   if (look.grain <= 0) {
-    const baseA = variant === 'plank' ? look.plank : look.frame;
+    const baseA = variant === 'plank' ? look.plank : variant === 'back' ? look.back : look.frame;
     return {
+      backgroundColor: baseA,
       backgroundImage: `${grain(look.grain, look.name === 'Mocha Espresso')}linear-gradient(${gradDir}, ${baseA}, ${look.dark})`,
+      backgroundSize: '100% 100%',
+      backgroundRepeat: 'no-repeat',
+      backgroundPosition: 'center',
+    };
+  }
+
+  /* Almira 2 (Creamy Caramel): Dedicated layered CSS wood-grain texture distinct from Almira 1 walnut */
+  if (look.name === 'Creamy Caramel') {
+    const isVert = orientation === 'v';
+    const isPanel = orientation === 'panel';
+    const fiberAngle = isVert ? '90deg' : isPanel ? '14deg' : '0deg';
+    const ringBg =
+      'radial-gradient(ellipse 36% 78% at 32% 48%, rgba(92,44,14,0.16) 0%, rgba(168,98,42,0.08) 42%, transparent 72%), radial-gradient(ellipse 42% 84% at 74% 58%, rgba(84,40,12,0.15) 0%, rgba(235,178,108,0.10) 45%, transparent 74%)';
+    const fineFibers = `repeating-linear-gradient(${fiberAngle}, rgba(74,34,10,0.13) 0px, rgba(74,34,10,0.13) 2px, rgba(244,196,136,0.10) 2px, rgba(244,196,136,0.10) 5px, rgba(132,74,28,0.09) 5px, rgba(132,74,28,0.09) 9px, transparent 9px, transparent 15px)`;
+    const softPlanks = `repeating-linear-gradient(${fiberAngle}, rgba(56,24,6,0.10) 0px, transparent 3px, rgba(255,222,175,0.07) 18px, transparent 34px)`;
+    if (variant === 'back') {
+      return {
+        backgroundColor: look.back,
+        backgroundImage: `linear-gradient(180deg, rgba(46,20,6,0.52) 0%, rgba(122,73,35,0.22) 38%, rgba(46,20,6,0.56) 100%), ${ringBg}, ${fineFibers}`,
+        backgroundSize: '100% 100%, 260px 220px, 100% 100%',
+        backgroundRepeat: 'no-repeat, repeat, no-repeat',
+        backgroundPosition: 'center, center, center',
+      };
+    }
+    if (variant === 'plank') {
+      return {
+        backgroundColor: look.plank,
+        backgroundImage: `linear-gradient(180deg, rgba(255,244,224,0.38) 0%, rgba(255,228,186,0.12) 22%, transparent 50%, rgba(56,26,8,0.34) 100%), ${fineFibers}, ${softPlanks}`,
+        backgroundSize: '100% 100%, 100% 100%, 100% 100%',
+        backgroundRepeat: 'no-repeat, no-repeat, no-repeat',
+        backgroundPosition: 'center, center, center',
+      };
+    }
+    return {
+      backgroundColor: look.frame,
+      backgroundImage: `linear-gradient(${gradDir}, rgba(255,242,216,0.22) 0%, transparent 45%, rgba(52,22,6,0.28) 100%), ${ringBg}, ${fineFibers}, ${softPlanks}`,
+      backgroundSize: '100% 100%, 240px 260px, 100% 100%, 100% 100%',
+      backgroundRepeat: 'no-repeat, repeat, no-repeat, no-repeat',
+      backgroundPosition: 'center, center, center, center',
     };
   }
 
@@ -762,46 +802,46 @@ export const CSS = `
 .sh-almirah-wrap {
   position: relative;
   margin: 0 auto;
-  width: min(34rem, 62%);
+  width: min(23.8rem, 44%);
   pointer-events: auto;
   transition: filter .7s, width .25s ease;
 }
 
 .sh-stile {
-  width: 26px;
+  width: 19px;
   flex: none;
 }
 
 .sh-world-shell {
-  min-height: 750px;
-  padding-top: 56px;
+  min-height: 540px;
+  padding-top: 40px;
 }
 
 @media (max-width: 768px) {
   .sh-world-shell {
-    min-height: 580px !important;
-    padding-top: 68px !important;
+    min-height: 430px !important;
+    padding-top: 44px !important;
   }
   .sh-celestial-orb {
-    top: 18px !important;
-    transform: scale(0.72);
+    top: 14px !important;
+    transform: scale(0.62);
     transform-origin: top center;
   }
   .sh-almirah-wrap {
-    width: 97% !important;
+    width: 70% !important;
   }
   .sh-stile {
-    width: 11px !important;
+    width: 9px !important;
   }
   .sh-room-lamp {
     left: 1.5% !important;
-    transform: scale(0.55);
+    transform: scale(0.46);
     transform-origin: bottom left;
     opacity: 0.72;
   }
   .sh-room-plant {
     right: -2% !important;
-    transform: scale(0.58);
+    transform: scale(0.48);
     transform-origin: bottom right;
     opacity: 0.78;
   }
@@ -2189,7 +2229,7 @@ export function DukaanRollingShutter({
           cursor: 'pointer',
           pointerEvents: 'auto',
           transform: open ? 'translateY(-100%)' : 'translateY(0%)',
-          transition: 'transform 1.05s cubic-bezier(0.22, 1, 0.36, 1)',
+          transition: 'transform 1.65s cubic-bezier(0.22, 1, 0.36, 1)',
           display: 'flex',
           flexDirection: 'column',
           boxShadow: open ? '0 12px 24px rgba(0,0,0,0.65)' : 'none',
@@ -2312,7 +2352,7 @@ export function BankVaultDoor({
           pointerEvents: 'auto',
           transformOrigin: 'left center',
           transform: `translateX(${open ? -28 : 0}px) rotateY(${open ? -150 : 0}deg)`,
-          transition: 'transform 1.05s cubic-bezier(0.2, 0.8, 0.25, 1)',
+          transition: 'transform 1.75s cubic-bezier(0.22, 1, 0.36, 1)',
           boxShadow: open ? '0 18px 40px rgba(0,0,0,0.88)' : 'none',
         }}
       >
@@ -2663,7 +2703,7 @@ export function CabinetDoors({
                 pointerEvents: 'auto',
                 transformOrigin: left ? 'left center' : 'right center',
                 transform: `translateX(${open ? (left ? -26 : 26) : 0}px) rotateY(${open ? (left ? -148 : 148) : 0}deg)`,
-                transition: 'transform 0.92s cubic-bezier(0.28, 0.75, 0.25, 1)',
+                transition: 'transform 1.5s cubic-bezier(0.22, 1, 0.36, 1)',
                 padding: 8,
                 background: `linear-gradient(135deg, ${look.frame} 0%, ${look.dark} 100%)`,
                 borderTopLeftRadius: left ? 160 : 2,
@@ -2805,25 +2845,28 @@ export function CabinetDoors({
                 pointerEvents: 'auto',
                 transformOrigin: left ? 'left center' : 'right center',
                 transform: `translateX(${open ? (left ? -26 : 26) : 0}px) rotateY(${open ? (left ? -148 : 148) : 0}deg)`,
-                transition: 'transform 0.92s cubic-bezier(0.28, 0.75, 0.25, 1)',
+                transition: 'transform 1.5s cubic-bezier(0.22, 1, 0.36, 1)',
                 padding: isCaramel ? 10 : 9,
                 borderRadius: isCaramel ? (left ? '14px 2px 2px 10px' : '2px 14px 10px 2px') : 2,
                 ...doorWoodStyle,
                 boxShadow: `${bevel}, inset 0 0 0 1px rgba(254, 240, 138, 0.22), 0 8px 18px rgba(0,0,0,0.46)`,
               }}
             >
-              {/* Inner Carved Beveled Lip Around Clear Glass Pane */}
+              {/* Inner Carved Beveled Lip Around Crystal-Clear Glass Pane */}
               <div
                 style={{
                   position: 'relative',
                   width: '100%',
                   height: '100%',
-                  backgroundImage: clearTransparentGlassSheen,
-                  backgroundColor: isCaramel ? 'rgba(248, 250, 255, 0.085)' : 'rgba(218, 238, 255, 0.075)',
+                  backgroundImage: isCaramel
+                    ? 'linear-gradient(126deg, rgba(255,255,255,0.18) 0%, transparent 18%, rgba(255,255,255,0.12) 44%, transparent 52%, rgba(255,255,255,0.09) 76%, transparent 94%)'
+                    : clearTransparentGlassSheen,
+                  backgroundColor: isCaramel ? 'rgba(255, 255, 255, 0.015)' : 'rgba(218, 238, 255, 0.075)',
                   borderRadius: isCaramel ? 12 : 3,
                   overflow: 'hidden',
-                  boxShadow:
-                    'inset 0 0 0 1.5px rgba(255,255,255,0.42), inset 0 0 0 2.5px rgba(212,175,55,0.24), inset 0 3px 12px rgba(0,0,0,0.34)',
+                  boxShadow: isCaramel
+                    ? 'inset 0 0 0 1.5px rgba(255,255,255,0.34), inset 0 0 0 2.5px rgba(212,175,55,0.22)'
+                    : 'inset 0 0 0 1.5px rgba(255,255,255,0.42), inset 0 0 0 2.5px rgba(212,175,55,0.24), inset 0 3px 12px rgba(0,0,0,0.34)',
                 }}
               >
                 {isCaramel ? (
@@ -2928,7 +2971,7 @@ export function CabinetDoors({
                 pointerEvents: 'auto',
                 transformOrigin: left ? 'left center' : 'right center',
                 transform: `translateX(${open ? (left ? -24 : 24) : 0}px) rotateY(${open ? (left ? -146 : 146) : 0}deg)`,
-                transition: 'transform 0.9s cubic-bezier(0.28, 0.75, 0.25, 1)',
+                transition: 'transform 1.5s cubic-bezier(0.22, 1, 0.36, 1)',
                 padding: 10,
                 ...doorWoodStyle,
                 boxShadow: `${bevel}, inset 0 0 0 1px ${look.dark}, 0 8px 18px rgba(0,0,0,0.48)`,
@@ -3021,7 +3064,7 @@ export function CabinetDoors({
                 pointerEvents: 'auto',
                 transformOrigin: left ? 'left center' : 'right center',
                 transform: `translateX(${open ? (left ? -26 : 26) : 0}px) rotateY(${open ? (left ? -148 : 148) : 0}deg)`,
-                transition: 'transform 0.9s cubic-bezier(0.28, 0.75, 0.25, 1)',
+                transition: 'transform 1.5s cubic-bezier(0.22, 1, 0.36, 1)',
                 ...(isWoodDoor
                   ? {
                       padding: 7,
@@ -3128,7 +3171,7 @@ export function CabinetDoors({
                 cursor: 'pointer',
                 pointerEvents: 'auto',
                 transform: open ? `translateX(${shift})` : 'translateX(0%)',
-                transition: 'transform 0.85s cubic-bezier(0.22, 1, 0.36, 1)',
+                transition: 'transform 1.45s cubic-bezier(0.22, 1, 0.36, 1)',
                 ...(isWoodDoor
                   ? {
                       padding: 7,
@@ -3220,7 +3263,7 @@ export function CabinetDoors({
                 pointerEvents: 'auto',
                 transformOrigin: left ? 'left center' : 'right center',
                 transform: open ? `translateX(${left ? '-100%' : '100%'}) scaleX(0.05)` : 'translateX(0%) scaleX(1)',
-                transition: 'transform 0.8s cubic-bezier(0.25, 0.9, 0.3, 1)',
+                transition: 'transform 1.65s cubic-bezier(0.22, 1, 0.36, 1)',
                 border: `7px solid ${look.frame}`,
                 backgroundImage: glassSheen,
                 backgroundColor: 'rgba(255, 255, 255, 0.04)',
@@ -3294,7 +3337,7 @@ export function CabinetDoors({
                 ? 'translateY(-100%) rotateX(78deg)'
                 : 'translateY(100%) rotateX(-78deg)'
               : 'translateY(0%) rotateX(0deg)',
-            transition: 'transform 0.9s cubic-bezier(0.25, 0.85, 0.3, 1)',
+            transition: 'transform 1.45s cubic-bezier(0.22, 1, 0.36, 1)',
             border: `8px solid ${look.frame}`,
             backgroundImage: glassSheen,
             backgroundColor: isFlipUp ? 'rgba(180, 120, 60, 0.08)' : 'rgba(60, 35, 22, 0.14)',
@@ -3355,7 +3398,7 @@ export function CabinetDoors({
               cursor: 'pointer',
               pointerEvents: 'auto',
               transform: open ? `translateX(${left ? '-100%' : '100%'})` : 'translateX(0%)',
-              transition: 'transform 0.9s cubic-bezier(0.22, 1, 0.36, 1)',
+              transition: 'transform 1.5s cubic-bezier(0.22, 1, 0.36, 1)',
               border: '5px solid #121418',
               ...bunkerSteel,
               boxShadow:
@@ -3665,7 +3708,7 @@ function ShelfRow({
             <button
               type="button"
               onClick={() => onCreateFolder(shelf.id)}
-              className="px-2 py-0.5 rounded text-[10px] font-bold flex items-center gap-1 hover:brightness-110 active:translate-y-px transition cursor-pointer"
+              className="p-1.5 rounded-lg flex items-center justify-center hover:brightness-110 active:translate-y-px transition cursor-pointer"
               style={{
                 background: look.light ? 'rgba(180,83,9,0.16)' : 'rgba(245,158,11,0.22)',
                 color: look.light ? '#78350f' : '#fde68a',
@@ -3673,10 +3716,10 @@ function ShelfRow({
                 boxShadow:
                   '0 2px 5px rgba(0,0,0,0.42), 0 1px 2px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.22)',
               }}
+              aria-label="Create custom folder in this section"
               title="Create a custom folder inside this section"
             >
-              <FolderPlus className="w-3 h-3" />
-              <span>Create Folder</span>
+              <FolderPlus className="w-4 h-4" />
             </button>
             <button
               type="button"
@@ -3735,10 +3778,10 @@ function ShelfRow({
             minWidth: 0,
             display: 'flex',
             alignItems: 'flex-end',
-            gap: 10,
-            minHeight: 132,
+            gap: 8,
+            minHeight: 100,
             overflowX: 'auto',
-            padding: '8px 4px 8px',
+            padding: '6px 4px 6px',
           }}
         >
           {/* Empty Shelf Visual Guide */}
@@ -3749,13 +3792,13 @@ function ShelfRow({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                minHeight: 98,
+                minHeight: 74,
                 borderRadius: 6,
                 border: `1px dashed ${look.light ? 'rgba(80,60,40,0.22)' : 'rgba(255,235,205,0.18)'}`,
                 color: mutedInk,
-                fontSize: 10.5,
+                fontSize: 10,
                 fontStyle: 'italic',
-                padding: '0 10px',
+                padding: '0 8px',
                 textAlign: 'center',
               }}
             >
@@ -3766,7 +3809,7 @@ function ShelfRow({
           {/* Prominent Front-Cover Book Thumbnails (Logo-Only Default or Concise Name) */}
           {shelf.books.map((b, n) => {
             const c = COVER[b.cover] ?? COVER.Amber!;
-            const bookHeight = 108 + ((n + shelfIdx) % 3) * 4;
+            const bookHeight = 82 + ((n + shelfIdx) % 3) * 3;
             const hasCustomBg = Boolean(b.thumbnail?.bgColor);
             const isPicked = pickedBook?.book.id === b.id && pickedBook?.fromShelfId === shelf.id;
             return (
@@ -3790,7 +3833,7 @@ function ShelfRow({
                 className={`sh-book-item group ${isPicked ? 'ring-2 ring-amber-400 opacity-75 scale-95' : ''}`}
                 style={{
                   flex: 'none',
-                  width: 78,
+                  width: 60,
                   height: bookHeight,
                   display: 'flex',
                   flexDirection: 'column',
@@ -3798,7 +3841,7 @@ function ShelfRow({
                   padding: '6px 6px 6px 10px',
                   boxSizing: 'border-box',
                   borderRadius: '2px 5px 5px 2px',
-                  background: hasCustomBg
+                  backgroundImage: hasCustomBg
                     ? `linear-gradient(145deg, ${b.thumbnail!.bgColor} 0%, rgba(15,12,10,0.42) 100%)`
                     : `linear-gradient(145deg, ${c.from} 0%, ${c.to} 100%)`,
                   backgroundColor: b.thumbnail?.bgColor || c.from,
@@ -3927,9 +3970,9 @@ function ShelfRow({
           title="Upload Document (PDF, Word, EPUB, Notes, Drive)"
           style={{
             flex: 'none',
-            width: 66,
-            height: 108,
-            marginBottom: 8,
+            width: 56,
+            height: 82,
+            marginBottom: 6,
             borderRadius: 5,
             border: `1.5px dashed ${look.light ? '#785a3a' : '#d4af37'}`,
             background: look.light ? 'rgba(120,90,58,0.1)' : 'rgba(255,255,255,0.08)',
@@ -4122,10 +4165,15 @@ export function Compartment({
                 };
               })()
             : {
-                background:
+                backgroundColor: look.back,
+                backgroundImage:
                   night && lit
-                    ? `radial-gradient(ellipse at 50% 0%, rgba(254,240,138,0.58), transparent 75%), ${look.back}`
-                    : look.back,
+                    ? 'radial-gradient(ellipse at 50% 0%, rgba(254,240,138,0.58), transparent 75%)'
+                    : 'none',
+                backgroundSize: '100% 100%',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'center',
+                filter: 'none',
               }),
           boxShadow:
             'inset 0 10px 22px rgba(0,0,0,0.48), inset 10px 0 16px rgba(0,0,0,0.3), inset -10px 0 16px rgba(0,0,0,0.3)',
@@ -4698,7 +4746,15 @@ export function Almirah({
                 height: 20,
                 transform: 'rotate(11deg)',
                 transformOrigin: 'top center',
-                ...(look.grain > 0 ? getWoodSurfaceStyle(look, 'v', 'frame', '90deg') : { background: look.dark }),
+                ...(look.grain > 0
+                  ? getWoodSurfaceStyle(look, 'v', 'frame', '90deg')
+                  : {
+                      backgroundColor: look.dark,
+                      backgroundImage: 'none',
+                      backgroundSize: '100% 100%',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'center',
+                    }),
                 borderRadius: '0 0 5px 5px',
                 boxShadow: 'inset 0 2px 3px rgba(0,0,0,0.45), 0 3px 6px rgba(0,0,0,0.5)',
               }}
@@ -4712,7 +4768,15 @@ export function Almirah({
                 height: 20,
                 transform: 'rotate(-11deg)',
                 transformOrigin: 'top center',
-                ...(look.grain > 0 ? getWoodSurfaceStyle(look, 'v', 'frame', '270deg') : { background: look.dark }),
+                ...(look.grain > 0
+                  ? getWoodSurfaceStyle(look, 'v', 'frame', '270deg')
+                  : {
+                      backgroundColor: look.dark,
+                      backgroundImage: 'none',
+                      backgroundSize: '100% 100%',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'center',
+                    }),
                 borderRadius: '0 0 5px 5px',
                 boxShadow: 'inset 0 2px 3px rgba(0,0,0,0.45), 0 3px 6px rgba(0,0,0,0.5)',
               }}
@@ -4720,8 +4784,8 @@ export function Almirah({
           </>
         ) : look.legs === 'metal-pin' ? (
           <>
-            <div style={{ position: 'absolute', bottom: -14, left: 16, width: 8, height: 14, background: '#a1a1aa', borderRadius: '0 0 2px 2px' }} />
-            <div style={{ position: 'absolute', bottom: -14, right: 16, width: 8, height: 14, background: '#a1a1aa', borderRadius: '0 0 2px 2px' }} />
+            <div style={{ position: 'absolute', bottom: -14, left: 16, width: 8, height: 14, backgroundColor: '#a1a1aa', borderRadius: '0 0 2px 2px' }} />
+            <div style={{ position: 'absolute', bottom: -14, right: 16, width: 8, height: 14, backgroundColor: '#a1a1aa', borderRadius: '0 0 2px 2px' }} />
           </>
         ) : (
           <>
@@ -4732,8 +4796,15 @@ export function Almirah({
                 left: 22,
                 width: 15,
                 height: 18,
-                background: look.grain > 0 ? undefined : `linear-gradient(90deg, ${look.frame}, ${look.dark})`,
-                ...(look.grain > 0 ? getWoodSurfaceStyle(look, 'v', 'frame', '90deg') : {}),
+                ...(look.grain > 0
+                  ? getWoodSurfaceStyle(look, 'v', 'frame', '90deg')
+                  : {
+                      backgroundColor: look.dark,
+                      backgroundImage: `linear-gradient(90deg, ${look.frame}, ${look.dark})`,
+                      backgroundSize: '100% 100%',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'center',
+                    }),
                 borderRadius: '0 0 8px 8px',
                 boxShadow: 'inset 0 2px 3px rgba(0,0,0,0.5), 0 2px 5px rgba(0,0,0,0.45)',
               }}
@@ -4745,8 +4816,15 @@ export function Almirah({
                 right: 22,
                 width: 15,
                 height: 18,
-                background: look.grain > 0 ? undefined : `linear-gradient(90deg, ${look.frame}, ${look.dark})`,
-                ...(look.grain > 0 ? getWoodSurfaceStyle(look, 'v', 'frame', '270deg') : {}),
+                ...(look.grain > 0
+                  ? getWoodSurfaceStyle(look, 'v', 'frame', '270deg')
+                  : {
+                      backgroundColor: look.dark,
+                      backgroundImage: `linear-gradient(90deg, ${look.frame}, ${look.dark})`,
+                      backgroundSize: '100% 100%',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'center',
+                    }),
                 borderRadius: '0 0 8px 8px',
                 boxShadow: 'inset 0 2px 3px rgba(0,0,0,0.5), 0 2px 5px rgba(0,0,0,0.45)',
               }}
@@ -5126,7 +5204,13 @@ export function Mini({ design, themeId = '1' }: { design: string; themeId?: Shel
           boxSizing: 'border-box',
           ...(l.grain > 0 || l.isVault
             ? getWoodSurfaceStyle(l, 'v', 'frame', '180deg')
-            : { background: `linear-gradient(180deg, ${l.frame}, ${l.dark})` }),
+            : {
+                backgroundColor: l.frame,
+                backgroundImage: `linear-gradient(180deg, ${l.frame}, ${l.dark})`,
+                backgroundSize: '100% 100%',
+                backgroundRepeat: 'no-repeat',
+                backgroundPosition: 'center',
+              }),
           boxShadow: '1px 3px 6px rgba(0,0,0,.42)',
           borderRadius: topRadius,
           border: `1px solid ${l.dark}`,
@@ -5158,9 +5242,13 @@ export function Mini({ design, themeId = '1' }: { design: string; themeId?: Shel
                 ...(l.isVault
                   ? getWoodSurfaceStyle(l, 'panel', 'door', '135deg')
                   : {
-                      background: showGlassUpper
+                      backgroundColor: showGlassUpper ? 'transparent' : l.back,
+                      backgroundImage: showGlassUpper
                         ? 'linear-gradient(125deg, rgba(255,255,255,0.42) 0%, rgba(255,255,255,0.12) 55%, rgba(0,0,0,0.18) 100%)'
-                        : l.back,
+                        : 'none',
+                      backgroundSize: '100% 100%',
+                      backgroundRepeat: 'no-repeat',
+                      backgroundPosition: 'center',
                     }),
                 boxShadow: `inset 0 0 0 1px ${l.dark}`,
                 display: 'flex',
@@ -5170,7 +5258,7 @@ export function Mini({ design, themeId = '1' }: { design: string; themeId?: Shel
               }}
             >
               {!l.isVault && (
-                <span style={{ height: 1.5, width: '100%', background: l.plank, opacity: 0.78 }} />
+                <span style={{ height: 1.5, width: '100%', backgroundColor: l.plank, opacity: 0.78 }} />
               )}
               {l.isVault && k === 0 && (
                 <span
@@ -5183,7 +5271,7 @@ export function Mini({ design, themeId = '1' }: { design: string; themeId?: Shel
                     height: 8,
                     borderRadius: '50%',
                     border: '1.5px solid #94a3b8',
-                    background: '#d4af37',
+                    backgroundColor: '#d4af37',
                   }}
                 />
               )}
@@ -5199,12 +5287,20 @@ export function Mini({ design, themeId = '1' }: { design: string; themeId?: Shel
             position: 'relative',
             ...(l.lowerDoorType === 'classified-shutter'
               ? {
-                  background:
+                  backgroundColor: '#1e293b',
+                  backgroundImage:
                     'repeating-linear-gradient(180deg, #475569 0px, #475569 2.5px, #1e293b 2.5px, #1e293b 4.5px)',
+                  backgroundSize: '100% 100%',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundPosition: 'center',
                 }
               : l.lowerDoorType === 'drop-down'
                 ? {
-                    background: `linear-gradient(180deg, rgba(255,255,255,0.22), ${l.face})`,
+                    backgroundColor: l.face,
+                    backgroundImage: `linear-gradient(180deg, rgba(255,255,255,0.22), ${l.face})`,
+                    backgroundSize: '100% 100%',
+                    backgroundRepeat: 'no-repeat',
+                    backgroundPosition: 'center',
                   }
                 : getWoodSurfaceStyle(l, 'panel', 'door', '135deg')),
             boxShadow: `inset 0 0 0 1px ${l.dark}`,

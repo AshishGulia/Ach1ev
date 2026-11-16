@@ -1022,67 +1022,8 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
         {/* Main View Area */}
         <main className="shelfwise-main">
           {/* Top Window Bar */}
-          <header className="shelfwise-header">
-            <div className="flex items-center gap-2">
-              <span className="themed-soft-pill text-base font-serif font-bold text-[#2b2118] dark:text-amber-100 flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#ede3d2] dark:bg-black/40 border border-[#b8975a]/45 dark:border-amber-900/40">
-                <BookOpen className="w-4 h-4 text-[#8e622a] dark:text-amber-300" />
-                <span>Shelf</span>
-              </span>
-            </div>
-
-            <div className="flex flex-wrap items-center gap-2">
-              {/* Subtle Total Books count */}
-              <span className="text-[11px] font-mono text-[#5c4835] dark:text-amber-200/70 font-semibold px-1 mr-1">
-                Total: {sections.reduce((a, s) => a + s.count, 0) + cloudUploadedBooks.length} books
-              </span>
-
-              {isCreatingLibFolder ? (
-                <div className="flex items-center gap-1">
-                  <input
-                    type="text"
-                    autoFocus
-                    value={newLibFolderName}
-                    onChange={(e) => setNewLibFolderName(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleCreateLibFolder();
-                      if (e.key === 'Escape') {
-                        setIsCreatingLibFolder(false);
-                        setNewLibFolderName('');
-                      }
-                    }}
-                    placeholder="Folder name..."
-                    className="px-2 py-1 rounded-lg border border-amber-700/40 bg-white dark:bg-[#1a120d] text-xs outline-none"
-                  />
-                  <button
-                    type="button"
-                    onClick={handleCreateLibFolder}
-                    className="px-2.5 py-1 rounded-lg bg-[#8f5f2c] text-white text-xs font-semibold cursor-pointer"
-                  >
-                    Save
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setIsCreatingLibFolder(false);
-                      setNewLibFolderName('');
-                    }}
-                    className="px-2 py-1 rounded-lg border border-stone-300 dark:border-[#382518] text-xs cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                </div>
-              ) : (
-                <button
-                  type="button"
-                  onClick={() => setIsCreatingLibFolder(true)}
-                  className="shelfwise-btn shelfwise-btn-ghost flex items-center gap-1.5"
-                  title="Create a Library folder"
-                >
-                  <FolderPlus className="w-4 h-4 text-amber-500" />
-                  <span>+ New Folder</span>
-                </button>
-              )}
-
+          <header className="shelfwise-header justify-end">
+            <div className="flex flex-wrap items-center gap-2 ml-auto">
               {/* Library Button */}
               <button
                 type="button"
@@ -2160,7 +2101,11 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                   )}
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2.5">
+                  <span className="text-[11px] font-mono text-[#5c4835] dark:text-amber-200/75 font-semibold px-1">
+                    Total: {sections.reduce((a, s) => a + s.count, 0) + cloudUploadedBooks.length} books
+                  </span>
+
                   {isCreatingLibFolder ? (
                     <div className="flex items-center gap-1.5">
                       <input
@@ -2200,10 +2145,11 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                     <button
                       type="button"
                       onClick={() => setIsCreatingLibFolder(true)}
-                      className="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl border border-amber-600/40 bg-amber-500/15 hover:bg-amber-500/25 text-xs font-semibold cursor-pointer"
+                      aria-label="Create new folder"
+                      title="Create new folder"
+                      className="inline-flex items-center justify-center p-2 rounded-xl border border-amber-600/40 bg-amber-500/15 hover:bg-amber-500/25 cursor-pointer"
                     >
-                      <FolderPlus className="w-3.5 h-3.5 text-amber-500" />
-                      <span>+ New Folder</span>
+                      <FolderPlus className="w-5 h-5 text-amber-500" />
                     </button>
                   )}
                 </div>

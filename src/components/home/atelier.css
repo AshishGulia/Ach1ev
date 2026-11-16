@@ -1,7 +1,7 @@
 /* Notist — Atelier My Space Dashboard Styles */
 :root {
-  --at-bg: rgba(247, 243, 236, 0.16);
-  --at-paper: rgba(253, 250, 244, 0.84);
+  --at-bg: transparent;
+  --at-paper: rgba(253, 250, 244, 0.80);
   --at-ink: #1E2622;
   --at-muted: #6F726B;
   --at-line: #E3DBCF;
@@ -18,8 +18,8 @@
 .dark .atelier-root,
 [data-theme="dark"] .atelier-root,
 html.dark .atelier-root {
-  --at-bg: rgba(8, 4, 2, 0.24);
-  --at-paper: rgba(17, 8, 4, 0.88);
+  --at-bg: transparent;
+  --at-paper: rgba(17, 8, 4, 0.82);
   --at-ink: #f0e5d5;
   --at-muted: #a69079;
   --at-line: #2d180d;
@@ -1309,8 +1309,8 @@ html.dark .atelier-sticky,
 
 html[data-design="2"] .atelier-root,
 .atelier-root[data-atelier-theme="2"] {
-  --at-bg: rgba(253, 243, 245, 0.18);
-  --at-paper: rgba(255, 247, 249, 0.86);
+  --at-bg: transparent;
+  --at-paper: rgba(255, 247, 249, 0.82);
   --at-ink: #2a1d3d;
   --at-muted: #473e66;
   --at-line: #e2becb;
@@ -1321,8 +1321,8 @@ html[data-design="2"] .atelier-root,
 }
 html.dark[data-design="2"] .atelier-root,
 .dark .atelier-root[data-atelier-theme="2"] {
-  --at-bg: rgba(16, 13, 29, 0.28);
-  --at-paper: rgba(26, 22, 48, 0.90);
+  --at-bg: transparent;
+  --at-paper: rgba(26, 22, 48, 0.84);
   --at-ink: #f8e8ec;
   --at-muted: #cfaed0;
   --at-line: #473e66;
@@ -1334,8 +1334,8 @@ html.dark[data-design="2"] .atelier-root,
 
 html[data-design="3"] .atelier-root,
 .atelier-root[data-atelier-theme="3"] {
-  --at-bg: rgba(234, 255, 255, 0.18);
-  --at-paper: rgba(246, 254, 255, 0.86);
+  --at-bg: transparent;
+  --at-paper: rgba(246, 254, 255, 0.82);
   --at-ink: #042a41;
   --at-muted: #365c73;
   --at-line: #9cc5de;
@@ -1346,8 +1346,8 @@ html[data-design="3"] .atelier-root,
 }
 html.dark[data-design="3"] .atelier-root,
 .dark .atelier-root[data-atelier-theme="3"] {
-  --at-bg: rgba(2, 21, 33, 0.24);
-  --at-paper: rgba(4, 42, 65, 0.88);
+  --at-bg: transparent;
+  --at-paper: rgba(4, 42, 65, 0.82);
   --at-ink: #eaffff;
   --at-muted: #9fc6de;
   --at-line: #1d5678;
@@ -1359,8 +1359,8 @@ html.dark[data-design="3"] .atelier-root,
 
 html[data-design="4"] .atelier-root,
 .atelier-root[data-atelier-theme="4"] {
-  --at-bg: rgba(238, 242, 247, 0.22);
-  --at-paper: rgba(248, 250, 252, 0.90);
+  --at-bg: transparent;
+  --at-paper: rgba(248, 250, 252, 0.84);
   --at-ink: #1e293b;
   --at-muted: #475569;
   --at-line: #cbd5e1;
@@ -1371,8 +1371,8 @@ html[data-design="4"] .atelier-root,
 }
 html.dark[data-design="4"] .atelier-root,
 .dark .atelier-root[data-atelier-theme="4"] {
-  --at-bg: rgba(19, 22, 28, 0.28);
-  --at-paper: rgba(26, 31, 40, 0.92);
+  --at-bg: transparent;
+  --at-paper: rgba(26, 31, 40, 0.86);
   --at-ink: #f1f5f9;
   --at-muted: #94a3b8;
   --at-line: #374151;
@@ -1384,8 +1384,8 @@ html.dark[data-design="4"] .atelier-root,
 
 html[data-design="5"] .atelier-root,
 .atelier-root[data-atelier-theme="5"] {
-  --at-bg: rgba(245, 237, 226, 0.20);
-  --at-paper: rgba(252, 248, 242, 0.86);
+  --at-bg: transparent;
+  --at-paper: rgba(252, 248, 242, 0.82);
   --at-ink: #002a23;
   --at-muted: #2b5248;
   --at-line: #cab095;
@@ -1396,8 +1396,8 @@ html[data-design="5"] .atelier-root,
 }
 html.dark[data-design="5"] .atelier-root,
 .dark .atelier-root[data-atelier-theme="5"] {
-  --at-bg: rgba(9, 14, 14, 0.28);
-  --at-paper: rgba(5, 32, 27, 0.90);
+  --at-bg: transparent;
+  --at-paper: rgba(5, 32, 27, 0.84);
   --at-ink: #f2e7d9;
   --at-muted: #d8c2aa;
   --at-line: #134c40;
@@ -1407,13 +1407,13 @@ html.dark[data-design="5"] .atelier-root,
   --at-brass-soft: rgba(209, 168, 84, 0.18);
 }
 
-/* Backdrop blur on cards across Themes 1..5 so marble & abstract wallpaper glow subtly behind */
+/* Backdrop blur on cards across Themes 1..5 so marble & abstract wallpaper glow clearly behind */
 html[data-design] .atelier-root {
-  background: var(--at-bg);
+  background: transparent;
 }
 html[data-design] .atelier-root .atelier-card {
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
 html[data-design] .atelier-root .atelier-top {
   background: transparent;

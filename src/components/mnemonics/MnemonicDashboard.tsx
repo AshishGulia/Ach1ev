@@ -639,10 +639,11 @@ export const MnemonicDashboard: React.FC<MnemonicDashboardProps> = ({
                   <button
                     type="button"
                     onClick={() => setIsCreatingFolder(true)}
-                    className="source-button !py-1.5 !px-3 !text-xs"
+                    aria-label="Create new folder"
+                    title="Create new folder"
+                    className="source-button !p-2"
                   >
-                    <FolderPlus size={14} />
-                    <span>+ New Folder</span>
+                    <FolderPlus size={18} />
                   </button>
                 )}
                 <span>{filteredItems.length} saved</span>

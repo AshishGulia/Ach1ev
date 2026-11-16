@@ -1,147 +1,102 @@
 import React, { useEffect, useState } from 'react';
-import { ChevronLeft, ChevronRight, Film, Pause, Play } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { DEMO_SCENES } from './productDemoData';
 import { LaptopFrame, TabletFrame } from './ProductDemoDevices';
 
-const SCENE_MS = 7000;
-const TICK_MS = 100;
+const SCENE_MS = 6500;
 
-const KEYFRAMES = '@keyframes pdsFade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}';
+const SHOWCASE_CSS = `
+  @keyframes pdsFade {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+  .pds-arrow-col,
+  .pds-arrow-col:hover,
+  .pds-arrow-col:active,
+  .pds-arrow-col:focus,
+  .pds-arrow-col:focus-visible {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    outline: none !important;
+    transform: none !important;
+    filter: none !important;
+    -webkit-tap-highlight-color: transparent !important;
+  }
+`;
 
-const prefersReducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+const prefersReducedMotion = () =>
+  typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 export const ProductDemoShowcase: React.FC = () => {
   const [sceneIndex, setSceneIndex] = useState(0);
-  const [elapsedMs, setElapsedMs] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(() => !prefersReducedMotion());
 
   const total = DEMO_SCENES.length;
   const scene = DEMO_SCENES[sceneIndex]!;
-  const progress = Math.min(1, elapsedMs / SCENE_MS);
 
   useEffect(() => {
-    if (!isPlaying) return;
-    const id = window.setInterval(() => setElapsedMs((ms) => ms + TICK_MS), TICK_MS);
+    if (prefersReducedMotion()) return;
+    const id = window.setInterval(() => {
+      setSceneIndex((i) => (i + 1) % total);
+    }, SCENE_MS);
     return () => window.clearInterval(id);
-  }, [isPlaying]);
+  }, [sceneIndex, total]);
 
-  useEffect(() => {
-    if (elapsedMs < SCENE_MS) return;
-    setSceneIndex((i) => (i + 1) % total);
-    setElapsedMs(0);
-  }, [elapsedMs, total]);
-
-  const goTo = (index: number) => {
-    setSceneIndex((index + total) % total);
-    setElapsedMs(0);
-  };
+  const goPrev = () => setSceneIndex((i) => (i - 1 + total) % total);
+  const goNext = () => setSceneIndex((i) => (i + 1) % total);
 
   return (
-    <section aria-labelledby="product-demo-heading" className="w-full max-w-6xl mx-auto space-y-6 sm:space-y-8 pb-16 sm:pb-20">
-      <style>{KEYFRAMES}</style>
+    <section
+      aria-labelledby="product-demo-heading"
+      className="w-full max-w-6xl mx-auto pb-16 sm:pb-20"
+    >
+      <style>{SHOWCASE_CSS}</style>
 
-      <div className="space-y-2 text-center sm:text-left">
-        <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#9B6A1F]">
-          <Film className="w-4 h-4" aria-hidden="true" />
-          <span>Product tour</span>
-        </div>
-        <h2 id="product-demo-heading" className="text-xl sm:text-3xl font-bold text-[#1E1007] font-serif leading-[1.2]">
-          See Achiev on your laptop and tablet
+      <div className="space-y-1.5 text-center mb-6 sm:mb-8">
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8f5f2c]">
+          Product showcase
+        </p>
+        <h2
+          id="product-demo-heading"
+          className="text-xl sm:text-3xl font-bold text-[#1E1007] font-serif leading-[1.2]"
+        >
+          {scene.title}
         </h2>
-        <p className="text-sm sm:text-base text-[#4E3721] leading-relaxed max-w-2xl mx-auto sm:mx-0">
-          Follow one feature at a time, or jump straight to the part you care about.
+        <p className="text-sm text-[#4E3721] leading-relaxed max-w-2xl mx-auto">
+          {scene.caption}
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 items-end gap-6">
-        <div className="lg:col-span-7">
-          <LaptopFrame scene={scene} />
-        </div>
-        <div className="mx-auto w-full max-w-xs sm:max-w-sm lg:col-span-5 lg:max-w-none">
-          <TabletFrame scene={scene} />
-        </div>
-      </div>
+      {/* Full-Height Transparent Left & Right Arrow Columns flanking Stacked MacBook + iPad */}
+      <div className="grid grid-cols-[44px_minmax(0,1fr)_44px] sm:grid-cols-[76px_minmax(0,1fr)_76px] items-stretch">
+        <button
+          type="button"
+          onClick={goPrev}
+          aria-label="Previous section preview"
+          className="pds-arrow-col flex items-center justify-center cursor-pointer select-none text-[#4E3211]/65 hover:text-[#1E1007]"
+        >
+          <ChevronLeft className="w-9 h-24 sm:w-12 sm:h-32 shrink-0" strokeWidth={1.1} aria-hidden="true" />
+        </button>
 
-      <div className="rounded-3xl border border-[#DFCCA8] bg-[#FFFDF8] p-5 sm:p-6 space-y-5 shadow-[0_10px_30px_rgba(78,50,15,0.07)]">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-          <div aria-live="polite" key={scene.title} className="space-y-1.5 min-w-0 animate-[pdsFade_500ms_ease-out] motion-reduce:animate-none">
-            <p className="text-xs font-bold uppercase tracking-wider" style={{ color: scene.section.accent }}>
-              {String(sceneIndex + 1).padStart(2, '0')} / {String(total).padStart(2, '0')} · {scene.section.label}
-            </p>
-            <h3 className="text-lg font-bold text-[#1E1007] font-serif">{scene.title}</h3>
-            <p className="text-sm text-[#4E3721] leading-relaxed max-w-2xl">{scene.caption}</p>
+        <div className="flex flex-col items-center gap-7 sm:gap-10 min-w-0 py-2">
+          <div className="w-full">
+            <LaptopFrame scene={scene} />
           </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              type="button"
-              onClick={() => goTo(sceneIndex - 1)}
-              aria-label="Previous feature"
-              className="p-2.5 rounded-xl bg-[#EFE4CC] hover:bg-[#E5D4B2] text-[#2A170B] transition cursor-pointer"
-            >
-              <ChevronLeft className="w-4 h-4" aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsPlaying((p) => !p)}
-              aria-label={isPlaying ? 'Pause product tour' : 'Play product tour'}
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold text-white transition cursor-pointer shadow hover:brightness-110 motion-reduce:transition-none"
-              style={{ background: scene.section.accent }}
-            >
-              {isPlaying ? <Pause className="w-3.5 h-3.5" aria-hidden="true" /> : <Play className="w-3.5 h-3.5" aria-hidden="true" />}
-              <span>{isPlaying ? 'Pause' : 'Play'}</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => goTo(sceneIndex + 1)}
-              aria-label="Next feature"
-              className="p-2.5 rounded-xl bg-[#EFE4CC] hover:bg-[#E5D4B2] text-[#2A170B] transition cursor-pointer"
-            >
-              <ChevronRight className="w-4 h-4" aria-hidden="true" />
-            </button>
+          <div className="w-full">
+            <TabletFrame scene={scene} />
           </div>
         </div>
 
-        <div role="group" aria-label="Jump to a feature" className="grid grid-cols-3 sm:grid-cols-9 gap-2">
-          {DEMO_SCENES.map((item, i) => {
-            const Icon = item.section.icon;
-            const active = i === sceneIndex;
-            const fill = active ? progress : i < sceneIndex ? 1 : 0;
-            return (
-              <button
-                key={item.section.key}
-                type="button"
-                onClick={() => goTo(i)}
-                aria-label={`Jump to ${item.section.label}: ${item.title}`}
-                aria-current={active ? 'step' : undefined}
-                title={item.title}
-                className="relative overflow-hidden rounded-xl border px-2 py-2 text-left text-[11px] font-semibold text-[#4E3721] bg-[#FFFDF8] hover:border-[#C99B48] transition-colors cursor-pointer motion-reduce:transition-none"
-                style={active ? { borderColor: item.section.accent, background: '#FBF1DA', color: '#23140A' } : { borderColor: '#E3D2B1' }}
-              >
-                <span className="relative flex items-center gap-1.5">
-                  <Icon className="w-3.5 h-3.5 shrink-0" style={{ color: item.section.accent }} aria-hidden="true" />
-                  <span className="truncate">{item.section.label}</span>
-                </span>
-                <span
-                  aria-hidden="true"
-                  className="absolute inset-x-0 bottom-0 h-1 origin-left transition-transform duration-100 motion-reduce:transition-none"
-                  style={{ background: item.section.accent, transform: `scaleX(${fill})` }}
-                />
-              </button>
-            );
-          })}
-        </div>
-
-        <div className="flex items-center justify-between gap-3">
-          <button
-            type="button"
-            onClick={() => setElapsedMs(0)}
-            className="text-xs font-semibold text-[#6B5038] hover:text-[#23140A] cursor-pointer"
-          >
-            Restart this feature
-          </button>
-          <span className="text-[11px] text-[#6B5038]">{isPlaying ? 'Tour is playing' : 'Tour is paused'}</span>
-        </div>
+        <button
+          type="button"
+          onClick={goNext}
+          aria-label="Next section preview"
+          className="pds-arrow-col flex items-center justify-center cursor-pointer select-none text-[#4E3211]/65 hover:text-[#1E1007]"
+        >
+          <ChevronRight className="w-9 h-24 sm:w-12 sm:h-32 shrink-0" strokeWidth={1.1} aria-hidden="true" />
+        </button>
       </div>
     </section>
   );

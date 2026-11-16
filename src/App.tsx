@@ -1104,8 +1104,13 @@ export default function App() {
           className="app-theme-wallpaper"
           aria-hidden="true"
           style={{
+            zIndex: 1,
             backgroundImage: appWallpaperUri,
-            backgroundSize: customWallpaperUri ? 'cover' : undefined,
+            backgroundSize: customWallpaperUri
+              ? customWallpaperUri.trim().startsWith('url(')
+                ? 'cover'
+                : '100% 100%'
+              : undefined,
             backgroundPosition: customWallpaperUri ? 'center' : undefined,
             opacity: appWallpaperOpacity,
           }}
