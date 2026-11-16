@@ -6,9 +6,10 @@
      UNIFIED FONT SYSTEM - ALATA ACROSS ENTIRE APPLICATION (USER DEFAULT)
      Ensures typography is completely consistent, modern, clean, and elegant.
      ========================================================================= */
-  --font-sans: 'Alata', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-serif: 'Alata', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-heading: 'Alata', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-sans: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif);
+  --font-serif: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif);
+  --font-mono: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif);
+  --font-heading: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif);
 
   /* =========================================================================
      SOBER, RESTORATIVE, EYE-COMFORTABLE MEDICAL PALETTE
@@ -217,81 +218,81 @@ html[data-design="2"].dark {
 }
 
 html[data-design="3"] {
-  --th-bg: #f0fcff;
-  --th-surface: rgba(246, 254, 255, 0.90);
-  --th-raised: rgba(194, 232, 255, 0.80);
-  --th-header: rgba(234, 255, 255, 0.88);
-  --th-border: #9cc5de;
-  --th-ink: #042a41;
-  --th-muted: #365c73;
-  --th-accent: #004671;
-  --th-accent-soft: rgba(0, 70, 113, 0.14);
-  --th-dark-surface: #042a41;
-  --th-dark-raised: #063b5c;
-  --th-dark-border: #1d5678;
-  --th-btn-idle-bg: linear-gradient(180deg, rgba(234, 255, 255, 0.96) 0%, rgba(194, 232, 255, 0.94) 100%);
-  --th-btn-idle-ink: #042a41;
-  --th-btn-active-bg: linear-gradient(145deg, #004671 0%, #042a41 100%);
-  --th-btn-active-border: #1f6a96;
+  --th-bg: #fbf3f2;
+  --th-surface: rgba(253, 248, 247, 0.92);
+  --th-raised: rgba(246, 229, 229, 0.90);
+  --th-header: rgba(249, 238, 237, 0.92);
+  --th-border: #dec4c9;
+  --th-ink: #3d212b;
+  --th-muted: #78525f;
+  --th-accent: #6e4253;
+  --th-accent-soft: rgba(110, 66, 83, 0.12);
+  --th-dark-surface: #26161c;
+  --th-dark-raised: #352028;
+  --th-dark-border: #5a3a46;
+  --th-btn-idle-bg: linear-gradient(180deg, rgba(254, 249, 248, 0.97) 0%, rgba(244, 226, 227, 0.94) 100%);
+  --th-btn-idle-ink: #3d212b;
+  --th-btn-active-bg: linear-gradient(145deg, #7d4e60 0%, #633949 58%, #4d2a37 100%);
+  --th-btn-active-border: #8c5c6e;
 }
 html[data-design="3"].dark {
-  --th-bg: #021521;
-  --th-surface: rgba(4, 42, 65, 0.90);
-  --th-raised: rgba(6, 59, 92, 0.92);
-  --th-header: rgba(3, 30, 48, 0.92);
-  --th-border: #1d5678;
-  --th-ink: #eaffff;
-  --th-muted: #9fc6de;
-  --th-accent: #7ec8eb;
-  --th-accent-soft: rgba(194, 232, 255, 0.16);
-  --th-dark-surface: #042a41;
-  --th-dark-raised: #063b5c;
-  --th-dark-border: #1d5678;
-  --th-btn-idle-bg: linear-gradient(180deg, #0e4263 0%, #062b42 58%, #041d2e 100%);
-  --th-btn-idle-ink: #c2e8ff;
-  --th-btn-idle-border: #1e628c;
-  --th-btn-active-bg: linear-gradient(155deg, #2b7ea8 0%, #00588c 52%, #004671 100%);
-  --th-btn-active-ink: #eaffff;
-  --th-btn-active-border: #72b8db;
+  --th-bg: #1c1115;
+  --th-surface: rgba(38, 22, 28, 0.92);
+  --th-raised: rgba(53, 32, 40, 0.94);
+  --th-header: rgba(29, 17, 21, 0.92);
+  --th-border: #5a3a46;
+  --th-ink: #f8eaeb;
+  --th-muted: #cfaab3;
+  --th-accent: #d49aa6;
+  --th-accent-soft: rgba(212, 154, 166, 0.16);
+  --th-dark-surface: #26161c;
+  --th-dark-raised: #352028;
+  --th-dark-border: #5a3a46;
+  --th-btn-idle-bg: linear-gradient(180deg, #3c242d 0%, #2b1820 58%, #1f1016 100%);
+  --th-btn-idle-ink: #f4dfe2;
+  --th-btn-idle-border: #633f4d;
+  --th-btn-active-bg: linear-gradient(155deg, #9d6376 0%, #7d4a5b 54%, #613544 100%);
+  --th-btn-active-ink: #fff7f8;
+  --th-btn-active-border: #d49aa6;
 }
 
 html[data-design="4"] {
-  --th-bg: #eef2f7;
-  --th-surface: rgba(248, 250, 252, 0.90);
-  --th-raised: rgba(226, 232, 240, 0.92);
-  --th-header: rgba(241, 245, 249, 0.90);
-  --th-border: #cbd5e1;
-  --th-ink: #1e293b;
-  --th-muted: #475569;
-  --th-accent: #2563eb;
-  --th-accent-soft: rgba(37, 99, 235, 0.14);
-  --th-dark-surface: #161a22;
-  --th-dark-raised: #222834;
-  --th-dark-border: #334155;
-  --th-btn-idle-bg: linear-gradient(180deg, rgba(248, 250, 252, 0.96) 0%, rgba(226, 232, 240, 0.95) 100%);
-  --th-btn-idle-ink: #1e293b;
-  --th-btn-active-bg: linear-gradient(145deg, #2563eb 0%, #1d4ed8 54%, #1e3a8a 100%);
-  --th-btn-active-border: #60a5fa;
+  --th-bg: #edf1f5;
+  --th-surface: rgba(246, 248, 250, 0.92);
+  --th-raised: rgba(226, 232, 239, 0.92);
+  --th-header: rgba(240, 243, 247, 0.92);
+  --th-border: #c5ced9;
+  --th-ink: #222b38;
+  --th-muted: #546273;
+  --th-accent: #56728f;
+  --th-accent-soft: rgba(86, 114, 143, 0.13);
+  --th-dark-surface: #171b22;
+  --th-dark-raised: #222833;
+  --th-dark-border: #384352;
+  --th-btn-idle-bg: linear-gradient(180deg, rgba(247, 249, 251, 0.96) 0%, rgba(228, 234, 240, 0.95) 100%);
+  --th-btn-idle-ink: #222b38;
+  --th-btn-active-bg: linear-gradient(145deg, #5c7896 0%, #48617c 54%, #374b61 100%);
+  --th-btn-active-border: #7d9ab5;
 }
 html[data-design="4"].dark {
   --th-bg: #13161c;
-  --th-surface: rgba(24, 28, 36, 0.92);
-  --th-raised: rgba(36, 42, 54, 0.94);
+  --th-surface: rgba(23, 27, 34, 0.92);
+  --th-raised: rgba(34, 40, 51, 0.94);
   --th-header: rgba(19, 22, 28, 0.92);
-  --th-border: #374151;
-  --th-ink: #f1f5f9;
-  --th-muted: #94a3b8;
-  --th-accent: #3b82f6;
-  --th-accent-soft: rgba(59, 130, 246, 0.20);
-  --th-dark-surface: #161a22;
-  --th-dark-raised: #242a36;
-  --th-dark-border: #3b4659;
-  --th-btn-idle-bg: linear-gradient(180deg, #2b3240 0%, #1e232e 58%, #151922 100%);
-  --th-btn-idle-ink: #e2e8f0;
-  --th-btn-idle-border: #475569;
-  --th-btn-active-bg: linear-gradient(155deg, #3b82f6 0%, #2563eb 55%, #1d4ed8 100%);
-  --th-btn-active-ink: #ffffff;
-  --th-btn-active-border: #93c5fd;
+  --th-border: #384352;
+  --th-ink: #e9eef4;
+  --th-muted: #9aa7b8;
+  --th-accent: #7d9ab5;
+  --th-accent-soft: rgba(125, 154, 181, 0.18);
+  --th-dark-surface: #171b22;
+  --th-dark-raised: #222833;
+  --th-dark-border: #384352;
+  --th-btn-idle-bg: linear-gradient(180deg, #2b323f 0%, #1f2530 58%, #161a23 100%);
+  --th-btn-idle-ink: #dce4ee;
+  --th-btn-idle-border: #465366;
+  --th-btn-active-bg: linear-gradient(155deg, #6b88a6 0%, #55708d 55%, #415872 100%);
+  --th-btn-active-ink: #f8fafc;
+  --th-btn-active-border: #8eabca;
 }
 
 html[data-design="5"] {
@@ -351,8 +352,8 @@ html[data-design="5"].dark {
     overscroll-behavior-y: contain;
     overflow-x: clip;
   }
-  html, body, button, input, select, textarea, div, span, p, h1, h2, h3, h4, h5, h6, a, label, b, i, small {
-    font-family: var(--app-font-family, 'Alata', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif);
+  html, body, button, button *, input, select, textarea, div, span, p, h1, h2, h3, h4, h5, h6, a, label, b, i, small {
+    font-family: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif);
   }
   .an-sheet,
   .an-sheet *:not(.an-sheet-quick-tools):not(.an-sheet-quick-tools *):not(.an-table-word-bar):not(.an-table-word-bar *):not(.an-table-drag-grip):not(.an-table-drag-grip *) {
@@ -407,10 +408,10 @@ html[data-design="2"].dark .dark-ambient-backdrop {
   background-color: #100d1d;
 }
 html[data-design="3"].dark .dark-ambient-backdrop {
-  background-color: #021521;
+  background-color: #1c1115;
 }
 html[data-design="4"].dark .dark-ambient-backdrop {
-  background-color: #120d0c;
+  background-color: #13161c;
 }
 html[data-design="5"].dark .dark-ambient-backdrop {
   background-color: #090e0e;
@@ -432,10 +433,10 @@ html[data-design="2"].dark .dark-ambient-mesh-1 {
   background: radial-gradient(circle, rgba(71, 62, 102, 0.44) 0%, rgba(189, 131, 184, 0.16) 52%, transparent 78%);
 }
 html[data-design="3"].dark .dark-ambient-mesh-1 {
-  background: radial-gradient(circle, rgba(0, 70, 113, 0.46) 0%, rgba(4, 42, 65, 0.28) 52%, transparent 78%);
+  background: radial-gradient(circle, rgba(110, 66, 83, 0.42) 0%, rgba(56, 32, 41, 0.28) 52%, transparent 78%);
 }
 html[data-design="4"].dark .dark-ambient-mesh-1 {
-  background: radial-gradient(circle, rgba(33, 218, 239, 0.22) 0%, rgba(88, 66, 62, 0.34) 52%, transparent 78%);
+  background: radial-gradient(circle, rgba(86, 114, 143, 0.26) 0%, rgba(34, 40, 51, 0.38) 52%, transparent 78%);
 }
 html[data-design="5"].dark .dark-ambient-mesh-1 {
   background: radial-gradient(circle, rgba(0, 42, 35, 0.56) 0%, rgba(9, 14, 14, 0.32) 52%, transparent 78%);
@@ -546,16 +547,16 @@ html[data-design]:not([data-design="1"]) :is(.text-\[\#A47C43\], .text-\[\#a47c4
 
 /* Unified Typography Classes across all Design Editions */
 .font-cinzel {
-  font-family: var(--app-font-family, 'Alata', system-ui, -apple-system, sans-serif);
+  font-family: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif) !important;
 }
 .font-space {
-  font-family: var(--app-font-family, 'Alata', system-ui, -apple-system, sans-serif);
+  font-family: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif) !important;
 }
 .font-cormorant {
-  font-family: var(--app-font-family, 'Alata', system-ui, -apple-system, sans-serif);
+  font-family: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif) !important;
 }
 .font-mono-tech {
-  font-family: 'JetBrains Mono', monospace;
+  font-family: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif) !important;
 }
 
 .cyber-grid {
@@ -581,19 +582,46 @@ html[data-design]:not([data-design="1"]) :is(.text-\[\#A47C43\], .text-\[\#a47c4
 }
 
 :root {
-  --app-font-family: 'Alata', system-ui, -apple-system, sans-serif;
+  --app-font-family: 'Playfair Display', 'Lora', Georgia, serif;
   --app-font-scale: 100%;
 }
 
+html, body, #root,
+html *:not([data-font-sample]):not([data-font-sample] *):not(.an-sheet):not(.an-sheet *) {
+  font-family: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif) !important;
+}
+
+button, button *, input, select, textarea, option, optgroup,
+.an-btn, .an-btn *, .an-icon-btn, .an-icon-btn *, .an-pill, .an-pill *,
+.an-crumb, .an-save, .an-seg button, .an-seg button *,
+.atelier-btn, .atelier-btn *, .atelier-chip, .atelier-chip *, .atelier-day, .atelier-day *,
+.shelfwise-btn, .shelfwise-btn *, .rs-btn, .rs-chip, .rs-tab,
+h1, h2, h3, h4, h5, h6, a, label, p, span, div, li, td, th,
+small, strong, b, em, i, code, pre, svg text, svg tspan,
+.font-sans, .font-serif, .font-mono, .font-cinzel, .font-space, .font-cormorant {
+  font-family: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif) !important;
+}
+
 body, html, #root {
-  font-family: var(--app-font-family), 'Alata', sans-serif !important;
   font-size: var(--app-font-scale);
 }
 
-/* Preserve each font preview card sample in its own font family regardless of active app font */
+/* Preserve font preview cards & active paper custom fonts */
 [data-font-sample],
 [data-font-sample] * {
   font-family: var(--sample-font, inherit) !important;
+}
+.an-sheet,
+.an-sheet *:not(.an-sheet-quick-tools):not(.an-sheet-quick-tools *):not(.an-table-word-bar):not(.an-table-word-bar *):not(.an-table-drag-grip):not(.an-table-drag-grip *) {
+  font-family: var(--an-nf, var(--app-font-family, inherit)) !important;
+}
+.an-sheet .an-sheet-quick-tools,
+.an-sheet .an-sheet-quick-tools *,
+.an-sheet .an-table-word-bar,
+.an-sheet .an-table-word-bar *,
+.an-sheet .an-table-drag-grip,
+.an-sheet .an-table-drag-grip * {
+  font-family: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif) !important;
 }
 
 /* =========================================================================
@@ -781,7 +809,7 @@ html[data-design]:not([data-design="1"]) :is(
   .shelfwise-btn:not([aria-pressed="true"]),
   .rs-chip:not([aria-pressed="true"]),
   .rs-btn:not([aria-pressed="true"])
-):not(.shelf-world-root):not(.shelf-world-root *):not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.atelier-bell) {
+):not(.shelf-world-root):not(.shelf-world-root *):not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.atelier-bell):not(.an-note-ribbon *):not(.an-note-ribbon button) {
   background: var(--th-btn-idle-bg) !important;
   color: var(--th-btn-idle-ink) !important;
   border-color: var(--th-btn-idle-border, var(--th-border)) !important;
@@ -1063,29 +1091,22 @@ html[data-design="2"] :is(.atelier-btn, .atelier-log, .an-btn, .an-btn-primary, 
   border-radius: 15px 4px 15px 4px !important;
 }
 
-/* Theme 3 — Oceanic Horizon: Oceanic Pebbles */
-html[data-design="3"] button[class*="bg-"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.rounded-full):nth-of-type(3n+1),
-html[data-design="3"] button[class*="border"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.rounded-full):nth-of-type(3n+1),
-html[data-design="3"] :is(.atelier-btn, .atelier-log, .an-btn, .an-btn-primary, .read-attach-btn, .read-tab, .shelfwise-btn, .shelfwise-seg-btn, .rs-btn, .rs-tab):nth-of-type(3n+1) {
-  border-radius: 13px 19px 11px 17px !important;
-}
-html[data-design="3"] button[class*="bg-"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.rounded-full):nth-of-type(3n+2),
-html[data-design="3"] button[class*="border"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.rounded-full):nth-of-type(3n+2),
-html[data-design="3"] :is(.atelier-btn, .atelier-log, .an-btn, .an-btn-primary, .read-attach-btn, .read-tab, .shelfwise-btn, .shelfwise-seg-btn, .rs-btn, .rs-tab):nth-of-type(3n+2) {
-  border-radius: 18px 11px 20px 12px !important;
-}
-html[data-design="3"] button[class*="bg-"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.rounded-full):nth-of-type(3n+3),
-html[data-design="3"] button[class*="border"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.rounded-full):nth-of-type(3n+3),
-html[data-design="3"] :is(.atelier-btn, .atelier-log, .an-btn, .an-btn-primary, .read-attach-btn, .read-tab, .shelfwise-btn, .shelfwise-seg-btn, .rs-btn, .rs-tab):nth-of-type(3n+3) {
-  border-radius: 11px 16px 14px 21px !important;
+/* Theme 3 — Royal Blush & Plum: Cushioned Rounded Buttons */
+html[data-design="3"] button[class*="bg-"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.rounded-full),
+html[data-design="3"] button[class*="border"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.rounded-full),
+html[data-design="3"] button:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.rounded-full),
+html[data-design="3"] :is(.atelier-btn, .atelier-log, .an-btn, .an-btn-primary, .read-attach-btn, .read-tab, .shelfwise-btn, .shelfwise-seg-btn, .rs-btn, .rs-tab) {
+  border-radius: 15px !important;
+  box-shadow:
+    inset 0 2px 3px rgba(255, 255, 255, 0.45),
+    inset 0 -2px 4px rgba(110, 66, 83, 0.14),
+    0 5px 12px -4px rgba(61, 33, 43, 0.16) !important;
 }
 
-/* Theme 4 — Turquoise & Kabul Loft: Architectural Frosted Loft */
-html[data-design="4"] button[class*="bg-"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.rounded-full),
-html[data-design="4"] button[class*="border"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.rounded-full),
+/* Theme 4 — Muted Slate & Cobalt: Crisp Sharp 90° Right-Angle Corners on ALL Buttons */
+html[data-design="4"] button:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del),
 html[data-design="4"] :is(.atelier-btn, .atelier-log, .an-btn, .an-btn-primary, .read-attach-btn, .read-icon-btn, .read-tab, .shelfwise-btn, .shelfwise-seg-btn, .rs-btn, .rs-tab) {
-  border-radius: 15px 15px 15px 4px !important;
-  backdrop-filter: blur(8px);
+  border-radius: 0px !important;
 }
 
 /* Theme 5 — Forest Emerald & Gold: Crisp Emerald Tab (8px 14px 8px 14px) */
@@ -1227,50 +1248,50 @@ html[data-design="2"].dark .leisure-surface {
 }
 
 html[data-design="3"]:not(.dark) .leisure-surface {
-  background-color: #eaffff !important;
+  background-color: #fbf3f2 !important;
   background-image:
-    radial-gradient(ellipse 90% 65% at 15% 18%, rgba(194, 232, 255, 0.78) 0%, transparent 64%),
-    radial-gradient(ellipse 78% 70% at 85% 30%, rgba(114, 152, 175, 0.32) 0%, transparent 62%),
-    radial-gradient(ellipse 85% 65% at 50% 92%, rgba(54, 92, 115, 0.18) 0%, transparent 66%),
-    conic-gradient(from 110deg at 58% 44%, rgba(234, 255, 255, 0.72) 0deg, rgba(194, 232, 255, 0.44) 140deg, rgba(114, 152, 175, 0.22) 250deg, rgba(234, 255, 255, 0.72) 360deg),
-    linear-gradient(142deg, #eaffff 0%, #d5f2ff 52%, #c2e8ff 100%) !important;
+    radial-gradient(ellipse 90% 65% at 15% 18%, rgba(242, 214, 214, 0.78) 0%, transparent 64%),
+    radial-gradient(ellipse 78% 70% at 85% 30%, rgba(212, 166, 177, 0.28) 0%, transparent 62%),
+    radial-gradient(ellipse 85% 65% at 50% 92%, rgba(110, 66, 83, 0.14) 0%, transparent 66%),
+    conic-gradient(from 110deg at 58% 44%, rgba(252, 245, 244, 0.72) 0deg, rgba(245, 224, 224, 0.44) 140deg, rgba(212, 166, 177, 0.20) 250deg, rgba(252, 245, 244, 0.72) 360deg),
+    linear-gradient(142deg, #fdf8f7 0%, #f6e7e6 52%, #efdbdc 100%) !important;
   background-size: 100% 100% !important;
   background-repeat: no-repeat !important;
   background-attachment: fixed;
 }
 html[data-design="3"].dark .leisure-surface {
-  background-color: #021521 !important;
+  background-color: #1c1115 !important;
   background-image:
-    radial-gradient(ellipse 86% 64% at 20% 22%, rgba(0, 70, 113, 0.62) 0%, transparent 62%),
-    radial-gradient(ellipse 80% 70% at 86% 24%, rgba(54, 92, 115, 0.46) 0%, transparent 62%),
-    radial-gradient(ellipse 80% 64% at 50% 92%, rgba(114, 152, 175, 0.22) 0%, transparent 66%),
-    conic-gradient(from 195deg at 42% 48%, rgba(4, 42, 65, 0.78) 0deg, rgba(0, 70, 113, 0.44) 125deg, rgba(2, 21, 33, 0.78) 250deg, rgba(4, 42, 65, 0.78) 360deg),
-    linear-gradient(148deg, #021826 0%, #042a41 50%, #01121d 100%) !important;
+    radial-gradient(ellipse 86% 64% at 20% 22%, rgba(110, 66, 83, 0.46) 0%, transparent 62%),
+    radial-gradient(ellipse 80% 70% at 86% 24%, rgba(76, 44, 57, 0.48) 0%, transparent 62%),
+    radial-gradient(ellipse 80% 64% at 50% 92%, rgba(212, 154, 166, 0.16) 0%, transparent 66%),
+    conic-gradient(from 195deg at 42% 48%, rgba(38, 22, 28, 0.80) 0deg, rgba(90, 54, 68, 0.40) 125deg, rgba(26, 15, 19, 0.82) 250deg, rgba(38, 22, 28, 0.80) 360deg),
+    linear-gradient(148deg, #23151a 0%, #311d24 50%, #170d11 100%) !important;
   background-size: 100% 100% !important;
   background-repeat: no-repeat !important;
   background-attachment: fixed;
 }
 
 html[data-design="4"]:not(.dark) .leisure-surface {
-  background-color: #e8fbfd !important;
+  background-color: #edf1f5 !important;
   background-image:
-    radial-gradient(ellipse 88% 68% at 16% 18%, rgba(33, 218, 239, 0.34) 0%, transparent 64%),
-    radial-gradient(ellipse 76% 68% at 88% 22%, rgba(88, 66, 62, 0.16) 0%, transparent 62%),
-    radial-gradient(ellipse 82% 66% at 52% 90%, rgba(88, 66, 62, 0.18) 0%, transparent 66%),
-    conic-gradient(from 150deg at 52% 46%, rgba(242, 253, 254, 0.68) 0deg, rgba(33, 218, 239, 0.22) 130deg, rgba(88, 66, 62, 0.14) 240deg, rgba(242, 253, 254, 0.68) 360deg),
-    linear-gradient(155deg, #eafbfc 0%, #d4f5f9 52%, #ebe2df 100%) !important;
+    radial-gradient(ellipse 88% 68% at 16% 18%, rgba(125, 154, 181, 0.24) 0%, transparent 64%),
+    radial-gradient(ellipse 76% 68% at 88% 22%, rgba(86, 114, 143, 0.14) 0%, transparent 62%),
+    radial-gradient(ellipse 82% 66% at 52% 90%, rgba(100, 116, 139, 0.14) 0%, transparent 66%),
+    conic-gradient(from 150deg at 52% 46%, rgba(247, 249, 251, 0.72) 0deg, rgba(208, 220, 232, 0.34) 130deg, rgba(148, 163, 184, 0.16) 240deg, rgba(247, 249, 251, 0.72) 360deg),
+    linear-gradient(155deg, #f3f6f9 0%, #e5ebf2 52%, #dbe3ec 100%) !important;
   background-size: 100% 100% !important;
   background-repeat: no-repeat !important;
   background-attachment: fixed;
 }
 html[data-design="4"].dark .leisure-surface {
-  background-color: #120d0c !important;
+  background-color: #13161c !important;
   background-image:
-    radial-gradient(ellipse 86% 66% at 18% 20%, rgba(33, 218, 239, 0.28) 0%, transparent 64%),
-    radial-gradient(ellipse 76% 70% at 86% 24%, rgba(88, 66, 62, 0.64) 0%, transparent 62%),
-    radial-gradient(ellipse 78% 64% at 48% 90%, rgba(33, 218, 239, 0.16) 0%, transparent 64%),
-    conic-gradient(from 225deg at 44% 48%, rgba(18, 13, 12, 0.78) 0deg, rgba(88, 66, 62, 0.42) 135deg, rgba(24, 18, 16, 0.74) 255deg, rgba(18, 13, 12, 0.78) 360deg),
-    linear-gradient(148deg, #110b0a 0%, #241917 52%, #0c0807 100%) !important;
+    radial-gradient(ellipse 86% 66% at 18% 20%, rgba(86, 114, 143, 0.26) 0%, transparent 64%),
+    radial-gradient(ellipse 76% 70% at 86% 24%, rgba(43, 52, 66, 0.56) 0%, transparent 62%),
+    radial-gradient(ellipse 78% 64% at 48% 90%, rgba(125, 154, 181, 0.14) 0%, transparent 64%),
+    conic-gradient(from 225deg at 44% 48%, rgba(19, 22, 28, 0.82) 0deg, rgba(46, 56, 70, 0.42) 135deg, rgba(24, 29, 38, 0.78) 255deg, rgba(19, 22, 28, 0.82) 360deg),
+    linear-gradient(148deg, #12151b 0%, #1d232d 52%, #0e1116 100%) !important;
   background-size: 100% 100% !important;
   background-repeat: no-repeat !important;
   background-attachment: fixed;

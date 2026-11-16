@@ -445,22 +445,23 @@ export const Design9MorningEdition: React.FC<Design9Props> = ({
                 ))}
             </div>
 
-            {/* Quick Add Task */}
+            {/* Quick Add Task Centered at Bottom */}
             {onAddTask && (
-              <form onSubmit={handleAddNewTask} className="pt-2 border-t border-stone-200 dark:border-stone-700 flex items-center gap-1.5">
+              <form onSubmit={handleAddNewTask} className="pt-2 border-t border-stone-200 dark:border-stone-700 flex flex-col items-center gap-1.5">
                 <input
                   type="text"
                   placeholder="+ Add clinical task..."
                   value={taskInput}
                   onChange={(e) => setTaskInput(e.target.value)}
-                  className="bg-stone-50 dark:bg-[#151920] text-xs px-2.5 py-1 rounded-lg border border-stone-300 dark:border-stone-700 outline-none flex-1 text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:border-stone-800"
+                  className="w-full bg-stone-50 dark:bg-[#151920] text-xs px-2.5 py-1 rounded-lg border border-stone-300 dark:border-stone-700 outline-none text-center text-stone-900 dark:text-stone-100 placeholder-stone-400 focus:border-stone-800"
                 />
                 <button
                   type="submit"
                   disabled={!taskInput.trim()}
-                  className="p-1.5 rounded-lg bg-stone-900 text-stone-100 dark:bg-stone-100 dark:text-stone-900 hover:bg-stone-800 disabled:opacity-30 transition-all shrink-0 cursor-pointer shadow-xs"
+                  className="px-3.5 py-1 rounded-lg bg-stone-900 text-stone-100 dark:bg-stone-100 dark:text-stone-900 hover:bg-stone-800 disabled:opacity-30 transition-all shrink-0 cursor-pointer shadow-xs flex items-center justify-center gap-1 text-xs font-bold mx-auto"
                 >
                   <Plus className="w-3.5 h-3.5" />
+                  <span>Add</span>
                 </button>
               </form>
             )}

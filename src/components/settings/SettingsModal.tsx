@@ -10,7 +10,7 @@ import {
   getCurrentLanguage,
   setAppLanguage,
 } from '../../data/translations';
-import { SUBSCRIPTION_TIERS, COMPETITOR_BENCHMARKS } from '../../data/subscriptionData';
+import { SUBSCRIPTION_TIERS } from '../../data/subscriptionData';
 import { ThemeAppStorePreviews } from './ThemeAppStorePreviews';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -136,32 +136,32 @@ export const MASTER_EDITIONS: MasterEdition[] = [
   },
   {
     id: '3',
-    title: 'Oceanic Horizon',
-    badge: 'Theme 3 · Ice Mist & Deep Ocean',
-    category: 'Ice Mist #EAFFFF · Glacial #C2E8FF · Deep Ocean #004671',
-    tagline: 'Ice mist & glacial sky by day, abyssal navy & deep ocean steel by night',
-    description: 'Crisp coastal ocean spectrum uniting #EAFFFF ice mist and #C2E8FF glacial sky with #7298AF cerulean, #365C73 coastal steel, #042A41 abyssal navy, and #004671 deep ocean.',
-    paletteColors: ['#eaffff', '#c2e8ff', '#7298af', '#365c73', '#004671'],
+    title: 'Royal Blush & Plum',
+    badge: 'Theme 3 · Pastel Beige-Pink',
+    category: 'Royal Blush #FBF3F2 · Warm Beige #F5E6E7 · Plum Cocoa #6E4253',
+    tagline: 'Cushioned royal baby-pink & warm beige by day, velvety deep plum by night',
+    description: 'Royal pastel baby-pink & warm antique beige surfaces paired with refined plum-cocoa buttons and generous cushioned borders.',
+    paletteColors: ['#fbf3f2', '#f5e6e7', '#d49aa6', '#6e4253', '#1c1115'],
     keyHighlights: [
-      'Ice Mist (#EAFFFF) Light Mode & Abyssal Navy (#042A41) Dark Mode',
-      'Deep Ocean (#004671) & Glacial Sky (#C2E8FF) layered glass cards',
-      'Oceanic Pebble button silhouettes with cool cerulean depth',
-      'Full Light & Dark oceanic seascape Shelf ambiance',
+      'Royal Baby-Pink & Antique Beige (#FBF3F2) Light Mode surfaces',
+      'Velvety Deep Plum (#1C1115) Dark Mode & soft rose accents',
+      'Cushioned Rounded (15px) button silhouettes across panels',
+      'Full Light & Dark Royal Blush study & Shelf ambiance',
     ],
   },
   {
     id: '4',
-    title: 'Slate & Cobalt Loft',
-    badge: 'Theme 4 · Slate Grey & Cobalt Blue',
-    category: 'Slate Grey #cbd5e1 · Cobalt Blue #2563eb · Charcoal #13161c',
-    tagline: 'Architectural slate grey & royal cobalt blue by day, deep gunmetal slate by night',
-    description: 'Clean architectural contrast pairing cool slate grey surfaces and crisp white cards with royal cobalt blue accents in Light mode and deep gunmetal slate (#13161c / #1f242d) in Dark mode.',
-    paletteColors: ['#f1f5f9', '#cbd5e1', '#3b82f6', '#2563eb', '#13161c'],
+    title: 'Muted Slate & Cobalt',
+    badge: 'Theme 4 · Matte Architectural Grey-Blue',
+    category: 'Soft Mist #F1F5F8 · Matte Cobalt #56728F · Dark Slate #131921',
+    tagline: 'Restrained matte slate & muted cobalt blue by day, deep charcoal slate by night',
+    description: 'Calm architectural contrast pairing desaturated slate mist surfaces with muted matte cobalt accents and razor-crisp 90° geometric corners.',
+    paletteColors: ['#f1f5f8', '#dbe4ee', '#7d9ab5', '#56728f', '#131921'],
     keyHighlights: [
-      'Slate Grey (#f1f5f9) Light Mode & Gunmetal Charcoal (#13161c) Dark Mode',
-      'Cobalt Blue (#2563eb / #3b82f6) interactive controls & glass cards',
-      'Crisp architectural contrast tailored for long anatomy & pathology sessions',
-      'Matching Cobalt & Slate Loft button contours & Shelf ambiance',
+      'Soft Muted Slate (#F1F5F8) Light Mode & Charcoal Slate (#131921) Dark Mode',
+      'Restrained Matte Cobalt (#56728F / #7D9AB5) interactive controls',
+      'Zero-radius architectural 90° sharp corner geometry',
+      'Matching Slate & Cobalt Shelf ambiance without eye strain',
     ],
   },
   {
@@ -185,33 +185,48 @@ export interface FontOption {
   id: string;
   name: string;
   category: string;
-  fontType: 'handwriting' | 'sans' | 'serif' | 'mono';
+  fontType: 'handwriting' | 'sans' | 'serif';
   cssFamily: string;
   description: string;
   sample: string;
 }
 
 export const APP_FONTS: FontOption[] = [
-  // 5 CLASSY SANS-SERIF FONTS (including Alata)
-  { id: 'alata', name: 'Alata', category: 'Classy Monolinear Sans', fontType: 'sans', cssFamily: "'Alata', sans-serif", description: 'Classy monumental geometric monolinear sans.', sample: 'Cardiovascular Hemodynamics & Clinical Triage' },
-  { id: 'plus-jakarta', name: 'Plus Jakarta Sans', category: 'Modern Geometric Workstation', fontType: 'sans', cssFamily: "'Plus Jakarta Sans', sans-serif", description: 'Clean crisp modern medical UI font.', sample: 'Arterial Blood Gas Analysis & Anion Gap Synthesis' },
-  { id: 'inter', name: 'Inter', category: 'Swiss Clinical Precision', fontType: 'sans', cssFamily: "'Inter', sans-serif", description: 'High x-height optimized for dense ward tables and charts.', sample: 'Pharmacokinetics: Volume of Distribution & Half-Life' },
-  { id: 'poppins', name: 'Poppins', category: 'Geometric Rounded Sans', fontType: 'sans', cssFamily: "'Poppins', sans-serif", description: 'Friendly balanced geometric curves for rapid recall.', sample: 'Glasgow Coma Scale (GCS) Assessment in Trauma' },
-  { id: 'outfit', name: 'Outfit', category: 'Contemporary Tech Sans', fontType: 'sans', cssFamily: "'Outfit', sans-serif", description: 'Ultra-legible contemporary display font.', sample: 'Systemic Vascular Resistance & Cardiac Output Monitoring' },
+  // 10 HANDWRITING FONTS
+  { id: 'pacifico', name: 'Pacifico', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Pacifico', cursive", description: 'Expressive brush script for warm personal headers.', sample: 'High-Yield Ward Pearl: Check Airway, Breathing & SpO2 first!' },
+  { id: 'dancing-script', name: 'Dancing Script', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Dancing Script', cursive", description: 'Fluid calligraphic strokes for memorable study anchors.', sample: 'Important: Discontinue Metformin 48 hrs prior to IV contrast.' },
+  { id: 'caveat', name: 'Caveat', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Caveat', cursive", description: 'Natural rapid medical student notebook cursive.', sample: 'Differential Diagnosis: Pneumothorax vs Cardiac Tamponade.' },
+  { id: 'architects-daughter', name: 'Architects Daughter', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Architects Daughter', cursive", description: 'Grid-aligned blueprint hand lettering for diagrams.', sample: 'Formula: MAP = DBP + 1/3 (SBP - DBP) >= 65 mmHg.' },
+  { id: 'brush-script', name: 'Brush Script', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Brush Script MT', 'Great Vibes', cursive", description: 'Classic painterly fountain script feel.', sample: 'Clinical Round Notes — Cardiology Morning Posting.' },
+  { id: 'marker-felt', name: 'Marker Felt', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Marker Felt', 'Comic Sans MS', 'Patrick Hand', cursive", description: 'Bold felt-tip whiteboard highlight lettering.', sample: 'Remember triad: Beck’s Triad -> Hypotension, JVD, Muffled heart sounds.' },
+  { id: 'chalkduster', name: 'Chalkduster', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Chalkduster', 'Patrick Hand', cursive", description: 'Textured lecture blackboard chalk lettering.', sample: 'Cranial Nerve Exam: CN I to XII Quick Recall.' },
+  { id: 'alex-brush', name: 'Alex Brush', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Alex Brush', cursive", description: 'Elegant flowing ink cursive for refined titles.', sample: 'The Art & Science of Physical Examination.' },
+  { id: 'great-vibes', name: 'Great Vibes', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Great Vibes', cursive", description: 'Formal royal calligraphy penmanship.', sample: 'Certificate of Clinical Distinction & Focus.' },
+  { id: 'satisfy', name: 'Satisfy', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Satisfy', cursive", description: 'Clean effortless cursive signature strokes.', sample: 'Rx: Tab. Amoxicillin-Clavulanate 625mg PO TDS x 7d.' },
 
-  // 5 CLASSY SERIF FONTS
-  { id: 'lora', name: 'Lora', category: 'Literary Contemporary Serif', fontType: 'serif', cssFamily: "'Lora', serif", description: 'Contemporary serif with calligraphic balance.', sample: 'Differential Diagnosis of Acute Abdomen & Peritonitis' },
-  { id: 'fraunces', name: 'Fraunces', category: 'Warm Vintage Optical Serif', fontType: 'serif', cssFamily: "'Fraunces', serif", description: 'Warm optical display serif with rich character.', sample: 'The Principles and Practice of Clinical Medicine' },
-  { id: 'eb-garamond', name: 'EB Garamond', category: 'Oxford Scholarly Classic', fontType: 'serif', cssFamily: "'EB Garamond', serif", description: 'Timeless Renaissance scholarly serif.', sample: 'Harrison’s Principles of Internal Medicine (21st Edition)' },
-  { id: 'playfair', name: 'Playfair Display', category: 'High-Contrast Editorial Serif', fontType: 'serif', cssFamily: "'Playfair Display', serif", description: 'Dramatic high-contrast clinical journal title font.', sample: 'Lancet Clinical Trials & Global Health Evidence' },
-  { id: 'merriweather', name: 'Merriweather', category: 'Screen-Optimized Reading Serif', fontType: 'serif', cssFamily: "'Merriweather', serif", description: 'Pleasant robust serif designed for extended textbook reading.', sample: 'Diagnostic Criteria for Acute Coronary Syndromes (ACS)' },
+  // 10 SANS-SERIF FONTS
+  { id: 'helvetica', name: 'Helvetica', category: 'Sans-Serif', fontType: 'sans', cssFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", description: 'Iconic Swiss clinical precision typography.', sample: 'Cardiovascular Hemodynamics & Clinical Triage' },
+  { id: 'arial', name: 'Arial', category: 'Sans-Serif', fontType: 'sans', cssFamily: "Arial, Helvetica, sans-serif", description: 'Clean universal medical chart sans-serif.', sample: 'Arterial Blood Gas Analysis & Anion Gap Synthesis' },
+  { id: 'calibri', name: 'Calibri', category: 'Sans-Serif', fontType: 'sans', cssFamily: "Calibri, 'Source Sans 3', 'Open Sans', sans-serif", description: 'Soft warm modern humanist sans-serif.', sample: 'Pharmacokinetics: Volume of Distribution & Half-Life' },
+  { id: 'inter', name: 'Inter', category: 'Sans-Serif', fontType: 'sans', cssFamily: "'Inter', sans-serif", description: 'High x-height UI font built for dense lab tables.', sample: 'Glasgow Coma Scale (GCS) Assessment in Trauma' },
+  { id: 'roboto', name: 'Roboto', category: 'Sans-Serif', fontType: 'sans', cssFamily: "'Roboto', sans-serif", description: 'Geometric Android-native friendly clarity.', sample: 'Systemic Vascular Resistance & Cardiac Output' },
+  { id: 'open-sans', name: 'Open Sans', category: 'Sans-Serif', fontType: 'sans', cssFamily: "'Open Sans', sans-serif", description: 'Neutral ultra-legible humanist lecture typography.', sample: 'Renal Clearance & Glomerular Filtration Curves' },
+  { id: 'lato', name: 'Lato', category: 'Sans-Serif', fontType: 'sans', cssFamily: "'Lato', sans-serif", description: 'Balanced semi-rounded warmth and seriousness.', sample: 'Pediatric Immunization & Developmental Milestones' },
+  { id: 'montserrat', name: 'Montserrat', category: 'Sans-Serif', fontType: 'sans', cssFamily: "'Montserrat', sans-serif", description: 'Wide geometric modernist headlines & labels.', sample: 'ACLS & Emergency Trauma Protocol Summary' },
+  { id: 'source-sans-3', name: 'Source Sans 3', category: 'Sans-Serif', fontType: 'sans', cssFamily: "'Source Sans 3', sans-serif", description: 'Adobe editorial sans calibrated for long screens.', sample: 'Evidence-Based Internal Medicine Pocket Guide' },
+  { id: 'futura', name: 'Futura', category: 'Sans-Serif', fontType: 'sans', cssFamily: "Futura, 'Plus Jakarta Sans', 'Outfit', sans-serif", description: 'Clean architectural Bauhaus geometric sans.', sample: 'Neuroanatomy Tracts & Brainstem Cross-Sections' },
 
-  // 5 CLASSY HANDWRITING FONTS
-  { id: 'caveat', name: 'Caveat', category: 'Natural Note-Taker Cursive', fontType: 'handwriting', cssFamily: "'Caveat', cursive", description: 'Organic handwritten student notebook cursive.', sample: 'High-Yield Ward Pearl: Always confirm Airway, Breathing & SpO2 first!' },
-  { id: 'kalam', name: 'Kalam', category: 'Clinical Ballpoint Penmanship', fontType: 'handwriting', cssFamily: "'Kalam', cursive", description: 'Authentic pen-stroke hospital prescription handwriting.', sample: 'Rx: Tab. Amoxicillin-Clavulanate 625mg PO TDS x 7 days.' },
-  { id: 'patrick-hand', name: 'Patrick Hand', category: 'Neat Resident Study Print', fontType: 'handwriting', cssFamily: "'Patrick Hand', cursive", description: 'Clean upright student notebook handwriting.', sample: 'Differential Diagnosis: Rule out Tension Pneumothorax vs Tamponade.' },
-  { id: 'dancing-script', name: 'Dancing Script', category: 'Fluid Calligraphic Notes', fontType: 'handwriting', cssFamily: "'Dancing Script', cursive", description: 'Expressive lively notes for memory anchors.', sample: 'Important: Discontinue Metformin 48 hrs before IV contrast!' },
-  { id: 'architects-daughter', name: 'Architects Daughter', category: 'Precise Architectural Script', fontType: 'handwriting', cssFamily: "'Architects Daughter', cursive", description: 'Crisp grid-aligned blueprint lettering for diagrams.', sample: 'Step 1: Calculate MAP = DBP + 1/3 (SBP - DBP).' },
+  // 10 SERIF FONTS
+  { id: 'times-new-roman', name: 'Times New Roman', category: 'Serif', fontType: 'serif', cssFamily: "'Times New Roman', Times, serif", description: 'Timeless academic paper & medical journal standard.', sample: 'Harrison’s Principles of Internal Medicine — Review Notes' },
+  { id: 'georgia', name: 'Georgia', category: 'Serif', fontType: 'serif', cssFamily: "Georgia, serif", description: 'Wide generous screen serif built for clarity.', sample: 'Differential Diagnosis of Acute Abdomen & Peritonitis' },
+  { id: 'garamond', name: 'Garamond', category: 'Serif', fontType: 'serif', cssFamily: "Garamond, 'EB Garamond', serif", description: 'Graceful Old-Style scholarly print elegance.', sample: 'Classical Materia Medica & Pathophysiology Essays' },
+  { id: 'baskerville', name: 'Baskerville', category: 'Serif', fontType: 'serif', cssFamily: "Baskerville, 'Libre Baskerville', serif", description: 'Transitional high-contrast British academic serif.', sample: 'Oxford Handbook of Clinical Medicine Notes' },
+  { id: 'merriweather', name: 'Merriweather', category: 'Serif', fontType: 'serif', cssFamily: "'Merriweather', serif", description: 'Robust condensed serif designed for deep textbook study.', sample: 'Diagnostic Criteria for Acute Coronary Syndromes' },
+  { id: 'playfair-display', name: 'Playfair Display', category: 'Serif', fontType: 'serif', cssFamily: "'Playfair Display', serif", description: 'Signature royal editorial serif (Default Ach1ev Style).', sample: 'Ach1ev Editorial Study — Clinical Journal Synthesis' },
+  { id: 'bodoni', name: 'Bodoni', category: 'Serif', fontType: 'serif', cssFamily: "'Bodoni Moda', 'Bodoni MT', Didot, serif", description: 'Dramatic hairline Didone contrast for headers.', sample: 'Grand Rounds Case Compendium & Therapeutics' },
+  { id: 'palatino', name: 'Palatino', category: 'Serif', fontType: 'serif', cssFamily: "'Palatino Linotype', 'Book Antiqua', Palatino, serif", description: 'Broad sculptural Renaissance humanist serif.', sample: 'Physiological Basis of Medical Practice' },
+  { id: 'lora', name: 'Lora', category: 'Serif', fontType: 'serif', cssFamily: "'Lora', serif", description: 'Calligraphic contemporary serif with subtle curves.', sample: 'Integrated Pathology & Pharmacology Compendium' },
+  { id: 'cinzel', name: 'Cinzel', category: 'Serif', fontType: 'serif', cssFamily: "'Cinzel', serif", description: 'Regal engraved Roman inscription proportions.', sample: 'HIPPOCRATIC CLINICAL ARCHIVE & NOTES' },
 ];
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -486,13 +501,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   useEffect(() => {
     if (typeof document === 'undefined') return;
     const href =
-      'https://fonts.googleapis.com/css2?family=Alata&family=Architects+Daughter&family=Caveat:wght@400;500;600;700&family=Dancing+Script:wght@400;600;700&family=EB+Garamond:ital,wght@0,400;0,600;0,700;1,400&family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600&family=Inter:wght@300;400;500;600;700&family=Kalam:wght@300;400;700&family=Lora:ital,wght@0,400;0,600;1,400&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=Outfit:wght@300;400;500;600;700&family=Patrick+Hand&family=Playfair+Display:ital,wght@0,500;0,700;0,900;1,400&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Poppins:wght@300;400;500;600;700&display=swap';
-    const existing = Array.from(document.querySelectorAll('link[rel="stylesheet"]')).some((l) =>
-      (l.getAttribute('href') || '').includes('fonts.googleapis.com')
-    );
-    if (!existing && !document.getElementById('achiev-google-fonts')) {
+      'https://fonts.googleapis.com/css2?family=Alex+Brush&family=Architects+Daughter&family=Bodoni+Moda:wght@500;700&family=Caveat:wght@500;700&family=Cinzel:wght@600;700&family=Dancing+Script:wght@600;700&family=EB+Garamond:wght@400;600&family=Great+Vibes&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Lato:wght@400;700&family=Libre+Baskerville:wght@400;700&family=Lora:wght@400;600;700&family=Merriweather:wght@400;700&family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600;700&family=Outfit:wght@400;600;700&family=Pacifico&family=Patrick+Hand&family=Playfair+Display:ital,wght@0,500;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;600;700&family=Roboto:wght@400;500;700&family=Satisfy&family=Source+Sans+3:wght@400;600;700&display=swap';
+    if (!document.getElementById('achiev-google-fonts-30')) {
       const link = document.createElement('link');
-      link.id = 'achiev-google-fonts';
+      link.id = 'achiev-google-fonts-30';
       link.rel = 'stylesheet';
       link.href = href;
       document.head.appendChild(link);
@@ -673,14 +685,46 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [dailyQBankGoal, setDailyQBankGoal] = useState<number>(() => Number(localStorage.getItem('medden_daily_qbank')) || 40);
   const [distractionFree, setDistractionFree] = useState<boolean>(() => localStorage.getItem('medden_distraction_free') === 'true');
   const [currentFont, setCurrentFont] = useState<string>(() => {
-    return localStorage.getItem('medden_app_font') || 'Alata';
+    return localStorage.getItem('medden_app_font') || 'Playfair Display';
   });
   const [fontScale, setFontScale] = useState<number>(() => {
     const saved = localStorage.getItem('medden_font_scale');
     return saved ? parseInt(saved, 10) : 100;
   });
-  const [fontCategoryFilter, setFontCategoryFilter] = useState<'all' | 'handwriting' | 'sans' | 'serif' | 'mono'>('all');
+  const [fontCategoryFilter, setFontCategoryFilter] = useState<'all' | 'handwriting' | 'sans' | 'serif'>('all');
   const [copiedAppletId, setCopiedAppletId] = useState<boolean>(false);
+
+  // Receiving / Payout Account Settings stored in localStorage for instant UPI QR & Payment routing
+  const [payoutConfig, setPayoutConfig] = useState<{
+    accountName: string;
+    upiId: string;
+    bankName: string;
+    accountNumber: string;
+    ifscCode: string;
+  }>(() => {
+    try {
+      const saved = localStorage.getItem('achiev_merchant_payout_v1');
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return {
+      accountName: 'Ach1ev Official Study Platform',
+      upiId: 'achiev@okicici',
+      bankName: 'ICICI Bank Ltd.',
+      accountNumber: '004201528491',
+      ifscCode: 'ICIC0000042',
+    };
+  });
+  const [payoutSavedMsg, setPayoutSavedMsg] = useState<string | null>(null);
+
+  const handleSavePayoutConfig = (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      localStorage.setItem('achiev_merchant_payout_v1', JSON.stringify(payoutConfig));
+      window.dispatchEvent(new Event('achiev_payout_updated'));
+      setPayoutSavedMsg('Receiving account updated! UPI QR, Card & Net Banking checkout now route here.');
+      setTimeout(() => setPayoutSavedMsg(null), 3200);
+    } catch {}
+  };
 
   const handleCopyAppletId = () => {
     navigator.clipboard.writeText('0087218c-d7d0-4ad0-b0df-2e515051e7a0');
@@ -691,7 +735,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const handleSelectFont = (font: FontOption) => {
     setCurrentFont(font.name);
     localStorage.setItem('medden_app_font', font.name);
-    document.documentElement.style.setProperty('--app-font-family', `${font.cssFamily}, system-ui, sans-serif`);
+    document.documentElement.style.setProperty('--app-font-family', font.cssFamily);
     setSavedFeedback(true);
     setTimeout(() => setSavedFeedback(false), 1500);
   };
@@ -893,18 +937,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 : 'hidden sm:flex sm:w-48'
             }`}
           >
-            {/* Top Navigation Action Row: Back to Dashboard + Minimize arrow on Mobile */}
-            <div className="pb-1.5 border-b border-stone-200/80 dark:border-[#382518] shrink-0 flex items-center gap-1">
+            {/* Top Arrow Action Matching Main Dashboard Sidebar (No "Back" label) */}
+            <div className="pb-1.5 border-b border-stone-200/80 dark:border-[#382518] shrink-0 flex items-center justify-end gap-1">
               {onClose && (
                 <button
                   type="button"
                   onClick={onClose}
-                  title="Back to Dashboard"
-                  aria-label="Back to Dashboard"
-                  className="flex-1 group flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all shadow-xs hover:brightness-110 active:scale-[0.97] cursor-pointer bg-stone-200/75 hover:bg-stone-300/80 dark:bg-[#241911] dark:hover:bg-[#312116] text-stone-800 dark:text-[#efe4d4] border border-stone-300/80 dark:border-[#3e291b]"
+                  title="Return to Dashboard"
+                  aria-label="Return to Dashboard"
+                  className="hidden sm:flex w-8 h-8 rounded-xl items-center justify-center transition-all hover:brightness-110 active:scale-[0.95] cursor-pointer bg-stone-200/75 hover:bg-stone-300/80 dark:bg-[#241911] dark:hover:bg-[#312116] text-stone-800 dark:text-[#efe4d4] border border-stone-300/80 dark:border-[#3e291b]"
                 >
-                  <ArrowLeft className="w-3.5 h-3.5 stroke-[2.2] transition-transform duration-200 group-hover:-translate-x-1" />
-                  <span>Back</span>
+                  <ArrowLeft className="w-4 h-4 stroke-[2.2]" />
                 </button>
               )}
               <button
@@ -912,9 +955,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 onClick={() => setIsMobileSidebarOpen(false)}
                 title="Collapse Settings Sidebar"
                 aria-label="Collapse Settings Sidebar"
-                className="sm:hidden p-1.5 rounded-xl bg-stone-200/75 hover:bg-stone-300/80 dark:bg-[#241911] dark:hover:bg-[#312116] text-stone-700 dark:text-[#efe4d4] border border-stone-300/80 dark:border-[#3e291b] cursor-pointer shrink-0"
+                className="sm:hidden w-8 h-8 rounded-xl flex items-center justify-center bg-stone-200/75 hover:bg-stone-300/80 dark:bg-[#241911] dark:hover:bg-[#312116] text-stone-700 dark:text-[#efe4d4] border border-stone-300/80 dark:border-[#3e291b] cursor-pointer shrink-0"
               >
-                <ArrowLeft className="w-3.5 h-3.5" />
+                <ArrowLeft className="w-4 h-4 stroke-[2.2]" />
               </button>
             </div>
 
@@ -1195,86 +1238,167 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
               </div>
 
-              {/* Curated Architectural & Atmospheric Wallpapers */}
-              <div className="space-y-2.5">
-                <h5 className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400">
-                  Curated Royal Study Backdrops
-                </h5>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                  {[
-                    {
-                      id: 'theme-default',
-                      title: 'Theme Default Wallpaper',
-                      desc: 'Matches your active Edition',
-                      uri: '',
-                      preview: 'linear-gradient(135deg, #2a180d 0%, #a47c43 50%, #f6f2ea 100%)',
-                    },
-                    {
-                      id: 'royal-linen',
-                      title: 'Warm Royal Linen Mesh',
-                      desc: 'Soft parchment & golden glow',
-                      uri: 'radial-gradient(circle at 20% 20%, rgba(251,191,36,0.22), transparent 55%), linear-gradient(135deg, #fdfbf7 0%, #f3ead8 55%, #e8d9be 100%)',
-                      preview: 'linear-gradient(135deg, #fdfbf7 0%, #f3ead8 55%, #e8d9be 100%)',
-                    },
-                    {
-                      id: 'obsidian-gold',
-                      title: 'Espresso Library Night',
-                      desc: 'Deep walnut embers & bronze mist',
-                      uri: 'radial-gradient(circle at 80% 18%, rgba(217,119,6,0.22), transparent 48%), linear-gradient(145deg, #0d0704 0%, #24130a 52%, #130905 100%)',
-                      preview: 'linear-gradient(145deg, #0d0704 0%, #24130a 52%, #130905 100%)',
-                    },
-                    {
-                      id: 'emerald-greenhouse',
-                      title: 'Evergreen Forest Mist',
-                      desc: 'Calming botanical canopy depth',
-                      uri: 'radial-gradient(circle at 28% 24%, rgba(212,175,55,0.16), transparent 52%), linear-gradient(145deg, #031511 0%, #063229 50%, #090e0e 100%)',
-                      preview: 'linear-gradient(145deg, #031511 0%, #063229 50%, #090e0e 100%)',
-                    },
-                    {
-                      id: 'slate-cobalt',
-                      title: 'Slate & Cobalt Architectural',
-                      desc: 'Cool slate frost & deep sapphire',
-                      uri: 'radial-gradient(circle at 75% 22%, rgba(59,130,246,0.22), transparent 52%), linear-gradient(145deg, #0f172a 0%, #1e293b 55%, #13161c 100%)',
-                      preview: 'linear-gradient(145deg, #0f172a 0%, #1e293b 55%, #13161c 100%)',
-                    },
-                    {
-                      id: 'twilight-plum',
-                      title: 'Twilight Velvet Horizon',
-                      desc: 'Plum, orchid & warm sunset blush',
-                      uri: 'radial-gradient(circle at 75% 20%, rgba(241,145,109,0.24), transparent 50%), linear-gradient(145deg, #1a1230 0%, #473e66 54%, #241738 100%)',
-                      preview: 'linear-gradient(145deg, #1a1230 0%, #473e66 54%, #241738 100%)',
-                    },
-                  ].map((preset) => {
-                    const isSelected = customWallpaper === preset.uri;
-                    return (
-                      <button
-                        key={preset.id}
-                        type="button"
-                        onClick={() => applyCustomWallpaper(preset.uri, customWallpaperOpacity)}
-                        className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${
-                          isSelected
-                            ? 'border-amber-500 ring-2 ring-amber-500/25 bg-amber-50/60 dark:bg-[#231912]'
-                            : 'border-stone-200 dark:border-[#382518] bg-white dark:bg-[#18110c] hover:border-amber-500/50'
-                        }`}
-                      >
-                        <div
-                          className="h-20 w-full rounded-xl border border-black/10 dark:border-white/10 shadow-inner"
-                          style={{ background: preset.preview }}
-                        />
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="min-w-0">
-                            <div className="text-xs font-bold text-stone-900 dark:text-stone-100 truncate">
-                              {preset.title}
+              {/* 10 Curated Abstract Designs: 5 Dark + 5 Light */}
+              <div className="space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <h5 className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400">
+                    10 Abstract Wallpaper Designs (5 Dark · 5 Light)
+                  </h5>
+                  <button
+                    type="button"
+                    onClick={() => applyCustomWallpaper('', customWallpaperOpacity)}
+                    className={`px-3 py-1 rounded-xl text-[11px] font-bold border transition-all cursor-pointer ${
+                      customWallpaper === ''
+                        ? 'border-amber-500 bg-amber-500/15 text-amber-800 dark:text-amber-300'
+                        : 'border-stone-200 dark:border-[#382518] text-stone-600 dark:text-stone-300 hover:border-amber-400'
+                    }`}
+                  >
+                    Use Theme Default
+                  </button>
+                </div>
+
+                {/* 5 DARK ABSTRACT WALLPAPERS */}
+                <div className="space-y-2">
+                  <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-stone-500 dark:text-amber-300/90 flex items-center gap-1.5">
+                    <Moon className="w-3.5 h-3.5" />
+                    <span>5 Dark Abstract Wallpapers</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {[
+                      {
+                        id: 'dark-abs-1',
+                        title: 'Espresso Ripple Silk',
+                        desc: 'Layered deep cocoa ribbons & brass light',
+                        uri: 'radial-gradient(ellipse 75% 55% at 18% 22%, rgba(212,158,72,0.22), transparent 60%), conic-gradient(from 210deg at 78% 72%, rgba(111,66,37,0.34), rgba(14,7,3,0.95) 45%, rgba(164,124,67,0.18) 78%, rgba(14,7,3,0.98))',
+                      },
+                      {
+                        id: 'dark-abs-2',
+                        title: 'Velvet Plum Aurora',
+                        desc: 'Abstract plum & orchid dusk waves',
+                        uri: 'radial-gradient(circle at 22% 75%, rgba(212,154,166,0.24), transparent 52%), conic-gradient(from 145deg at 68% 26%, rgba(110,66,83,0.44), rgba(22,12,16,0.96) 52%, rgba(71,62,102,0.34) 80%, rgba(16,9,13,0.98))',
+                      },
+                      {
+                        id: 'dark-abs-3',
+                        title: 'Muted Cobalt Facets',
+                        desc: 'Architectural geometric slate shards',
+                        uri: 'linear-gradient(125deg, rgba(125,154,181,0.14) 0%, transparent 44%), repeating-linear-gradient(135deg, rgba(86,114,143,0.09) 0px, rgba(86,114,143,0.09) 28px, transparent 28px, transparent 62px), radial-gradient(circle at 80% 24%, rgba(86,114,143,0.28), transparent 50%), linear-gradient(145deg, #0d131a 0%, #16202b 54%, #0c1016 100%)',
+                      },
+                      {
+                        id: 'dark-abs-4',
+                        title: 'Emerald Gold Nebula',
+                        desc: 'Deep botanical canopy & molten gold arc',
+                        uri: 'radial-gradient(ellipse 68% 48% at 72% 22%, rgba(209,168,84,0.20), transparent 55%), radial-gradient(circle at 20% 80%, rgba(14,119,82,0.26), transparent 52%), conic-gradient(from 90deg at 35% 35%, rgba(0,42,35,0.9), #051612 58%, rgba(209,168,84,0.14) 85%, #070d0c)',
+                      },
+                      {
+                        id: 'dark-abs-5',
+                        title: 'Obsidian Contour Grid',
+                        desc: 'Minimalist nocturnal contour rings',
+                        uri: 'repeating-radial-gradient(circle at 75% 30%, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 2px, transparent 2px, transparent 28px), radial-gradient(circle at 25% 25%, rgba(180,140,85,0.16), transparent 55%), linear-gradient(160deg, #0c0c0f 0%, #17171c 58%, #09090b 100%)',
+                      },
+                    ].map((preset) => {
+                      const isSelected = customWallpaper === preset.uri;
+                      return (
+                        <button
+                          key={preset.id}
+                          type="button"
+                          onClick={() => applyCustomWallpaper(preset.uri, customWallpaperOpacity)}
+                          className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${
+                            isSelected
+                              ? 'border-amber-500 ring-2 ring-amber-500/25 bg-amber-50/60 dark:bg-[#231912]'
+                              : 'border-stone-200 dark:border-[#382518] bg-white dark:bg-[#18110c] hover:border-amber-500/50'
+                          }`}
+                        >
+                          <div
+                            className="h-20 w-full rounded-xl border border-black/15 dark:border-white/10 shadow-inner"
+                            style={{ background: preset.uri }}
+                          />
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="min-w-0">
+                              <div className="text-xs font-bold text-stone-900 dark:text-stone-100 truncate">
+                                {preset.title}
+                              </div>
+                              <div className="text-[10.5px] text-stone-500 dark:text-stone-400 truncate">
+                                {preset.desc}
+                              </div>
                             </div>
-                            <div className="text-[10.5px] text-stone-500 dark:text-stone-400 truncate">
-                              {preset.desc}
-                            </div>
+                            {isSelected && <CheckCircle2 className="w-4 h-4 text-amber-600 shrink-0" />}
                           </div>
-                          {isSelected && <CheckCircle2 className="w-4 h-4 text-amber-600 shrink-0" />}
-                        </div>
-                      </button>
-                    );
-                  })}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* 5 LIGHT ABSTRACT WALLPAPERS */}
+                <div className="space-y-2 pt-2">
+                  <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-stone-500 dark:text-amber-200/80 flex items-center gap-1.5">
+                    <Sun className="w-3.5 h-3.5 text-amber-500" />
+                    <span>5 Light Abstract Wallpapers</span>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                    {[
+                      {
+                        id: 'light-abs-1',
+                        title: 'Warm Caramel Cloud',
+                        desc: 'Creamy parchment with amber silk swirl',
+                        uri: 'radial-gradient(ellipse 70% 55% at 22% 20%, rgba(217,155,67,0.22), transparent 60%), conic-gradient(from 195deg at 75% 75%, rgba(242,222,192,0.9), rgba(252,248,240,0.98) 52%, rgba(226,198,151,0.55) 82%, #fdfaf3)',
+                      },
+                      {
+                        id: 'light-abs-2',
+                        title: 'Royal Rose Marble',
+                        desc: 'Soft pastel blush & ivory organic waves',
+                        uri: 'radial-gradient(circle at 76% 24%, rgba(212,154,166,0.28), transparent 52%), radial-gradient(circle at 20% 78%, rgba(229,190,194,0.34), transparent 54%), linear-gradient(135deg, #fdf7f6 0%, #f7eaeb 52%, #f1dede 100%)',
+                      },
+                      {
+                        id: 'light-abs-3',
+                        title: 'Nordic Slate Prisms',
+                        desc: 'Airy architectural cool grey & cobalt mist',
+                        uri: 'repeating-linear-gradient(120deg, rgba(86,114,143,0.06) 0px, rgba(86,114,143,0.06) 34px, transparent 34px, transparent 74px), radial-gradient(circle at 78% 22%, rgba(125,154,181,0.26), transparent 50%), linear-gradient(145deg, #f8fafc 0%, #edf2f7 55%, #e2e8f0 100%)',
+                      },
+                      {
+                        id: 'light-abs-4',
+                        title: 'Champagne Dune Curves',
+                        desc: 'Warm sunlit ripples on antique sand',
+                        uri: 'repeating-radial-gradient(circle at 18% 82%, rgba(182,140,82,0.06) 0px, rgba(182,140,82,0.06) 2px, transparent 2px, transparent 32px), radial-gradient(circle at 80% 18%, rgba(216,194,170,0.45), transparent 55%), linear-gradient(135deg, #faf6ee 0%, #efe5d2 55%, #e6d7be 100%)',
+                      },
+                      {
+                        id: 'light-abs-5',
+                        title: 'Pearl Sage Origami',
+                        desc: 'Serene botanical ivory geometric facets',
+                        uri: 'conic-gradient(from 40deg at 65% 32%, rgba(132,169,140,0.16), rgba(249,250,246,0.96) 45%, rgba(216,226,214,0.65) 75%, #f5f7f2), linear-gradient(155deg, #f8faf7 0%, #edf2eb 58%, #e4ebe2 100%)',
+                      },
+                    ].map((preset) => {
+                      const isSelected = customWallpaper === preset.uri;
+                      return (
+                        <button
+                          key={preset.id}
+                          type="button"
+                          onClick={() => applyCustomWallpaper(preset.uri, customWallpaperOpacity)}
+                          className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${
+                            isSelected
+                              ? 'border-amber-500 ring-2 ring-amber-500/25 bg-amber-50/60 dark:bg-[#231912]'
+                              : 'border-stone-200 dark:border-[#382518] bg-white dark:bg-[#18110c] hover:border-amber-500/50'
+                          }`}
+                        >
+                          <div
+                            className="h-20 w-full rounded-xl border border-black/10 dark:border-white/10 shadow-inner"
+                            style={{ background: preset.uri }}
+                          />
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="min-w-0">
+                              <div className="text-xs font-bold text-stone-900 dark:text-stone-100 truncate">
+                                {preset.title}
+                              </div>
+                              <div className="text-[10.5px] text-stone-500 dark:text-stone-400 truncate">
+                                {preset.desc}
+                              </div>
+                            </div>
+                            {isSelected && <CheckCircle2 className="w-4 h-4 text-amber-600 shrink-0" />}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
             </div>
@@ -1663,11 +1787,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
                     {[
                       { key: 'all', label: `All (${APP_FONTS.length})`, count: APP_FONTS.length },
-                      { key: 'handwriting', label: `✍️ Handwriting (${APP_FONTS.filter(f => f.fontType === 'handwriting').length})`, count: APP_FONTS.filter(f => f.fontType === 'handwriting').length },
-                      { key: 'sans', label: `Clean Sans (${APP_FONTS.filter(f => f.fontType === 'sans').length})`, count: APP_FONTS.filter(f => f.fontType === 'sans').length },
-                      { key: 'serif', label: `Editorial Serif (${APP_FONTS.filter(f => f.fontType === 'serif').length})`, count: APP_FONTS.filter(f => f.fontType === 'serif').length },
-                      { key: 'mono', label: `Technical Mono (${APP_FONTS.filter(f => f.fontType === 'mono').length})`, count: APP_FONTS.filter(f => f.fontType === 'mono').length },
-                    ].filter((btn) => btn.count > 0).map((btn) => (
+                      { key: 'handwriting', label: `Handwriting (${APP_FONTS.filter(f => f.fontType === 'handwriting').length})`, count: APP_FONTS.filter(f => f.fontType === 'handwriting').length },
+                      { key: 'sans', label: `Sans-Serif (${APP_FONTS.filter(f => f.fontType === 'sans').length})`, count: APP_FONTS.filter(f => f.fontType === 'sans').length },
+                      { key: 'serif', label: `Serif (${APP_FONTS.filter(f => f.fontType === 'serif').length})`, count: APP_FONTS.filter(f => f.fontType === 'serif').length },
+                    ].map((btn) => (
                       <button
                         key={btn.key}
                         type="button"
@@ -2273,51 +2396,108 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   ))}
               </div>
 
-              {/* Other Note-Making Apps Pricing & Criteria Benchmark */}
-              <div className="rounded-2xl border border-stone-200 dark:border-[#382518] bg-white dark:bg-[#1a120d] overflow-hidden">
-                <div className="px-4 py-3 border-b border-stone-200 dark:border-[#352317] bg-stone-50/90 dark:bg-[#18110c] flex flex-wrap items-center justify-between gap-2">
+              {/* Receiving Payout Account Configuration (Direct UPI, Net Banking & Card Settlement) */}
+              <form
+                onSubmit={handleSavePayoutConfig}
+                className="rounded-2xl border border-stone-200 dark:border-[#382518] bg-white dark:bg-[#1a120d] p-4 sm:p-5 space-y-4"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stone-200/80 dark:border-[#352317] pb-3">
                   <div>
-                    <h5 className="text-xs font-bold text-stone-900 dark:text-stone-100">
-                      Note-Making Apps Benchmark Pricing &amp; Feature Criteria
+                    <h5 className="text-xs sm:text-sm font-bold text-stone-900 dark:text-stone-100">
+                      Creator Receiving Account &amp; Direct Settlement Setup
                     </h5>
                     <p className="text-[11px] text-stone-500 dark:text-stone-400">
-                      Calibrated Achiev pricing criteria compared against popular note apps
+                      Payments via UPI QR (with Ach1ev logo), Debit/Credit Card, and Net Banking route directly to these details.
                     </p>
                   </div>
+                  <button
+                    type="button"
+                    onClick={() => window.dispatchEvent(new CustomEvent('achiev_open_subscription'))}
+                    className="themed-accent-btn px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold cursor-pointer shrink-0"
+                  >
+                    Open Payment Checkout
+                  </button>
                 </div>
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left border-collapse text-[11px]">
-                    <thead>
-                      <tr className="border-b border-stone-200 dark:border-[#352317] text-stone-500 dark:text-stone-400 font-mono uppercase text-[10px]">
-                        <th className="py-2 px-3">App</th>
-                        <th className="py-2 px-3">Other App Price</th>
-                        <th className="py-2 px-3">Matched Feature Criteria</th>
-                        <th className="py-2 px-3">Achiev Price &amp; Plan</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-stone-100 dark:divide-[#2e1e14]">
-                      {COMPETITOR_BENCHMARKS.map((row) => (
-                        <tr key={row.app}>
-                          <td className="py-2 px-3 font-bold text-stone-900 dark:text-stone-100 whitespace-nowrap">
-                            {row.app}
-                          </td>
-                          <td className="py-2 px-3 font-mono text-stone-600 dark:text-stone-300 whitespace-nowrap">
-                            ~₹{row.typicalPriceMonthlyInr}/mo
-                          </td>
-                          <td className="py-2 px-3 text-stone-700 dark:text-stone-300">
-                            {row.keyMatchedFeatures}
-                          </td>
-                          <td className="py-2 px-3 whitespace-nowrap">
-                            <span className="font-bold text-amber-700 dark:text-amber-300">
-                              {row.matchedAchievTier} · ₹{row.achievPriceMonthlyInr}/mo
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+
+                {payoutSavedMsg && (
+                  <div className="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/35 text-emerald-700 dark:text-emerald-300 text-xs font-semibold flex items-center gap-2">
+                    <CheckCircle2 className="w-4 h-4 shrink-0" />
+                    <span>{payoutSavedMsg}</span>
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-[11px] font-semibold text-stone-600 dark:text-stone-300 block mb-1">
+                      Account Holder / Beneficiary Name
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      value={payoutConfig.accountName}
+                      onChange={(e) => setPayoutConfig((p) => ({ ...p, accountName: e.target.value }))}
+                      className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-[#382518] bg-stone-50 dark:bg-[#120c08] text-xs outline-none focus:border-amber-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-stone-600 dark:text-stone-300 block mb-1">
+                      Receiving UPI ID (Used for live QR &amp; UPI Apps)
+                    </label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="yourname@okicici"
+                      value={payoutConfig.upiId}
+                      onChange={(e) => setPayoutConfig((p) => ({ ...p, upiId: e.target.value }))}
+                      className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-[#382518] bg-stone-50 dark:bg-[#120c08] text-xs font-mono outline-none focus:border-amber-500"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-[11px] font-semibold text-stone-600 dark:text-stone-300 block mb-1">
+                      Bank Name
+                    </label>
+                    <input
+                      type="text"
+                      value={payoutConfig.bankName}
+                      onChange={(e) => setPayoutConfig((p) => ({ ...p, bankName: e.target.value }))}
+                      className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-[#382518] bg-stone-50 dark:bg-[#120c08] text-xs outline-none focus:border-amber-500"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <label className="text-[11px] font-semibold text-stone-600 dark:text-stone-300 block mb-1">
+                        Account Number
+                      </label>
+                      <input
+                        type="text"
+                        value={payoutConfig.accountNumber}
+                        onChange={(e) => setPayoutConfig((p) => ({ ...p, accountNumber: e.target.value }))}
+                        className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-[#382518] bg-stone-50 dark:bg-[#120c08] text-xs font-mono outline-none focus:border-amber-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-semibold text-stone-600 dark:text-stone-300 block mb-1">
+                        IFSC Code
+                      </label>
+                      <input
+                        type="text"
+                        value={payoutConfig.ifscCode}
+                        onChange={(e) => setPayoutConfig((p) => ({ ...p, ifscCode: e.target.value.toUpperCase() }))}
+                        className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-[#382518] bg-stone-50 dark:bg-[#120c08] text-xs font-mono outline-none focus:border-amber-500"
+                      />
+                    </div>
+                  </div>
                 </div>
-              </div>
+
+                <div className="flex justify-end">
+                  <button
+                    type="submit"
+                    className="themed-accent-btn px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold cursor-pointer shadow-xs"
+                  >
+                    Save Receiving Account
+                  </button>
+                </div>
+              </form>
             </div>
           )}
           {/* ========================================================================= */}

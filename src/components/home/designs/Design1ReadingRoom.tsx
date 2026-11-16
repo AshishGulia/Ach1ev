@@ -2218,23 +2218,23 @@ export const Design1ReadingRoom: React.FC<Design1Props> = ({
                   ))}
               </div>
 
-              {/* Inline Quick Add Task on Clipboard */}
+              {/* Inline Quick Add Task Centered at Bottom */}
               {onAddTask && (
-                <form onSubmit={handleAddNewTask} className="mt-2.5 pt-2 border-t border-amber-900/10 dark:border-[#352317] flex items-center gap-1.5">
+                <form onSubmit={handleAddNewTask} className="mt-2.5 pt-2 border-t border-amber-900/10 dark:border-[#352317] flex flex-col items-center gap-2">
                   <input
                     type="text"
                     placeholder="+ Clip new task..."
                     value={taskInput}
                     onChange={(e) => setTaskInput(e.target.value)}
-                    className="bg-amber-50/50 dark:bg-[#1a120d] text-xs px-2.5 py-1.5 rounded-xl border border-amber-900/10 dark:border-[#382518] outline-none flex-1 text-slate-900 dark:text-[#efe4d4] placeholder-stone-400 dark:placeholder-[#8b735c] focus:border-amber-500 font-sans"
+                    className="w-full bg-amber-50/50 dark:bg-[#1a120d] text-xs px-2.5 py-1.5 rounded-xl border border-amber-900/10 dark:border-[#382518] outline-none text-center text-slate-900 dark:text-[#efe4d4] placeholder-stone-400 dark:placeholder-[#8b735c] focus:border-amber-500 font-sans"
                   />
                   <button
                     type="submit"
                     disabled={!taskInput.trim()}
-                    className="p-1.5 px-2.5 rounded-xl bg-amber-700 hover:bg-amber-800 text-white disabled:opacity-30 transition-all shrink-0 cursor-pointer shadow-xs text-xs font-bold flex items-center gap-1"
+                    className="p-1.5 px-4 rounded-xl bg-amber-700 hover:bg-amber-800 text-white disabled:opacity-30 transition-all shrink-0 cursor-pointer shadow-xs text-xs font-bold flex items-center justify-center gap-1 mx-auto"
                   >
                     <Plus className="w-3.5 h-3.5" />
-                    <span>Clip</span>
+                    <span>Add</span>
                   </button>
                 </form>
               )}

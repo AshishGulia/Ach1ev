@@ -23,14 +23,10 @@ import {
   Phone,
   ShieldCheck,
   RotateCcw,
-  Film,
 } from 'lucide-react';
 
 const FeatureVideoSeriesShowcase = React.lazy(
   () => import('../landing/FeatureVideoSeriesShowcase')
-);
-const ProductDemoShowcase = React.lazy(
-  () => import('../landing/productDemo/ProductDemoShowcase')
 );
 
 interface AuthPortalProps {
@@ -313,52 +309,52 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
         </div>
       )}
 
-      {/* Top Dark Login Screen Viewport (fills screen height leaving only a subtle bottom peek of the brown->cream merge) */}
+      {/* Top Dark Login Screen Viewport (leaves organic bottom peek of misty espresso->caramel merge) */}
       <div
         className={
           isModal
             ? 'relative z-10 w-full max-w-4xl grid grid-cols-1 lg:grid-cols-12 gap-6 items-center'
-            : 'relative w-full min-h-[calc(100dvh-64px)] sm:min-h-[calc(100dvh-76px)] flex items-center justify-center px-3.5 sm:px-8 py-4 sm:py-6 overflow-hidden shrink-0'
+            : 'relative w-full min-h-[calc(100dvh-72px)] sm:min-h-[calc(100dvh-88px)] flex items-center justify-center px-4 sm:px-8 py-6 sm:py-10 overflow-hidden shrink-0'
         }
         style={
           isModal
             ? undefined
             : {
                 background:
-                  'radial-gradient(ellipse 85% 75% at 22% 24%, #261209 0%, #150904 56%, #0c0402 100%)',
+                  'radial-gradient(ellipse 90% 80% at 18% 20%, #2a1409 0%, #160904 54%, #0c0402 100%)',
               }
         }
       >
-        {/* Lightweight zero-blur ambient warmth for fast mobile GPU rendering */}
+        {/* Uneven Organic Espresso Depth Spots */}
         {!isModal && (
           <div
             className="absolute inset-0 pointer-events-none"
             aria-hidden="true"
             style={{
               background:
-                'radial-gradient(circle at 14% 16%, rgba(120, 62, 28, 0.22) 0%, transparent 45%), radial-gradient(circle at 86% 28%, rgba(138, 78, 36, 0.16) 0%, transparent 42%)',
+                'radial-gradient(circle at 12% 18%, rgba(138, 72, 32, 0.25) 0%, transparent 44%), radial-gradient(circle at 82% 22%, rgba(154, 88, 38, 0.18) 0%, transparent 40%), radial-gradient(circle at 46% 78%, rgba(92, 46, 18, 0.22) 0%, transparent 46%)',
             }}
           />
         )}
 
-      {/* Simple Clean Split Layout: Brand Logo & Name Beside Bevelled Frosted-Glass Login Box */}
-      <div className={isModal ? 'contents' : 'relative z-10 w-full max-w-4xl grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 items-center my-auto'}>
-        {/* Left: Frameless Brand Panel */}
-        <div className="lg:col-span-5 flex flex-col items-center lg:items-start justify-center text-center lg:text-left px-2 py-2 sm:p-6 relative">
-          <div className="flex flex-col items-center lg:items-start gap-2 w-full">
-            <div className="relative flex items-center justify-center lg:justify-start mb-1 select-none max-w-full">
+      {/* Clean Split Layout: Vertically Centered Brand Panel Beside Slightly Lower Compact Login Box */}
+      <div className={isModal ? 'contents' : 'relative z-10 w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10 items-center my-auto'}>
+        {/* Left: Centered Hero Brand & Tagline */}
+        <div className="lg:col-span-5 flex flex-col items-center lg:items-start justify-center text-center lg:text-left px-2 py-4 sm:py-8 relative">
+          <div className="flex flex-col items-center lg:items-start gap-3 w-full">
+            <div className="relative flex items-center justify-center lg:justify-start mb-0.5 select-none max-w-full">
               <div
                 aria-hidden="true"
                 className="pointer-events-none absolute -inset-x-10 -inset-y-6 rounded-full opacity-55"
                 style={{
                   background:
-                    'radial-gradient(ellipse 70% 65% at 50% 50%, rgba(10, 4, 1, 0.48) 0%, rgba(22, 10, 4, 0.16) 56%, transparent 82%)',
+                    'radial-gradient(ellipse 70% 65% at 50% 50%, rgba(10, 4, 1, 0.5) 0%, rgba(22, 10, 4, 0.18) 56%, transparent 82%)',
                 }}
               />
               <div
                 className="relative z-10 max-w-full"
                 style={{
-                  filter: 'drop-shadow(0 10px 24px rgba(10, 4, 1, 0.34))',
+                  filter: 'drop-shadow(0 12px 26px rgba(10, 4, 1, 0.36))',
                 }}
               >
                 <img
@@ -367,37 +363,26 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                   draggable={false}
                   fetchPriority="high"
                   decoding="sync"
-                  className="w-[241px] sm:w-[295px] max-w-full h-auto object-contain select-none pointer-events-none"
+                  className="w-[235px] sm:w-[292px] max-w-full h-auto object-contain select-none pointer-events-none"
                 />
               </div>
             </div>
 
             <p
-              className="leading-relaxed max-w-xs italic font-serif text-[#c9b08a] opacity-75"
-              style={{ fontSize: 'clamp(0.82rem, 1.5vw, 1rem)' }}
+              className="leading-relaxed max-w-xs italic font-serif text-[#d3ba94] opacity-85"
+              style={{ fontSize: 'clamp(0.84rem, 1.45vw, 0.98rem)' }}
             >
               A quiet space to settle thoughts, write clinical notes, and carry your study desk everywhere.
             </p>
-
-            {!isModal && (
-              <a
-                href="#medical-student-seo-guide"
-                onClick={() => setShowShowcase(true)}
-                className="mt-1.5 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 border border-amber-400/25 text-[11px] font-semibold text-amber-200 transition-colors"
-              >
-                <Film className="w-3.5 h-3.5 text-amber-300" />
-                <span>Cheapest Medical Note App · Watch 9-Part Tour ↓</span>
-              </a>
-            )}
           </div>
         </div>
 
-        {/* Right: Borderless Frosted-Glass Bevelled Login Box (Always Dark) */}
+        {/* Right: Compact Borderless Frosted-Glass Login Card Positioned Breathably Lower */}
         <div
-          className="lg:col-span-7 rounded-3xl p-4 sm:p-8 backdrop-blur-xl backdrop-saturate-150 flex flex-col justify-between transition-all"
+          className="lg:col-span-7 lg:mt-10 rounded-3xl p-4 sm:p-6 backdrop-blur-xl backdrop-saturate-150 flex flex-col justify-between transition-all max-w-xl w-full mx-auto"
           style={{
             background:
-              'linear-gradient(160deg, rgba(36, 18, 10, 0.68) 0%, rgba(18, 8, 4, 0.56) 100%)',
+              'linear-gradient(160deg, rgba(38, 19, 10, 0.72) 0%, rgba(18, 8, 4, 0.58) 100%)',
             boxShadow:
               'inset 0 1.5px 1px rgba(255, 224, 178, 0.14), inset 0 -2px 6px rgba(0, 0, 0, 0.45), 0 24px 60px rgba(0, 0, 0, 0.55)',
           }}
@@ -740,6 +725,19 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                   )}
                 </button>
 
+                {!isModal && mode !== 'forgot' && (
+                  <div className="pt-1 text-center">
+                    <button
+                      type="button"
+                      onClick={() => window.dispatchEvent(new CustomEvent('achiev_skip_create_note'))}
+                      className="inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-semibold text-[#f3d9a8] hover:text-white underline underline-offset-4 decoration-amber-400/80 hover:decoration-amber-200 transition-colors cursor-pointer"
+                    >
+                      <span>Skip and create note</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+
                 {mode === 'forgot' && (
                   <button
                     type="button"
@@ -898,6 +896,19 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                   </span>
                   <ArrowRight className="w-4 h-4 relative z-10" />
                 </button>
+
+                {!isModal && (
+                  <div className="pt-1 text-center">
+                    <button
+                      type="button"
+                      onClick={() => window.dispatchEvent(new CustomEvent('achiev_skip_create_note'))}
+                      className="inline-flex items-center gap-1.5 text-xs sm:text-[13px] font-semibold text-[#f3d9a8] hover:text-white underline underline-offset-4 decoration-amber-400/80 hover:decoration-amber-200 transition-colors cursor-pointer"
+                    >
+                      <span>Skip and create note</span>
+                      <ArrowRight className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
               </form>
             )}
           </div>
@@ -907,32 +918,58 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
 
       {!isModal && (
         <>
-          {/* Silky Multi-Stop Color Merge: Deep Espresso Brown -> Warm Bronze -> Champagne Latte -> Whitish Royal Cream */}
+          {/* 3x Tall Organic Misty Brown Fog -> Thick Creamy Caramel Blend (No Straight Horizontal Seam) */}
           <div
             aria-hidden="true"
-            className="w-full h-20 sm:h-24 relative z-10 pointer-events-none shrink-0"
+            className="w-full h-56 sm:h-72 relative z-10 pointer-events-none shrink-0 overflow-hidden"
             style={{
               background:
-                'linear-gradient(180deg, #0c0402 0%, #1d0d06 16%, #3f2213 34%, #724e35 54%, #ad8a68 72%, #dfc9a8 87%, #f5ebd8 95%, #FCF9F1 100%)',
-            }}
-          />
-          <section
-            aria-label="Achiev Medical Study Guide & Tour"
-            className="w-full relative z-10 px-4 sm:px-8 pt-2 sm:pt-3 pb-14 sm:pb-16 text-[#23140A]"
-            style={{
-              background: 'linear-gradient(180deg, #FCF9F1 0%, #F7EFE0 52%, #F1E6CE 100%)',
+                'linear-gradient(180deg, #0c0402 0%, #180b05 12%, #2c160b 26%, #492815 41%, #6f4627 56%, #9e7147 71%, #cca578 85%, #e8cc9e 94%, #f4e2c2 100%)',
             }}
           >
-            {showShowcase ? (
-              <Suspense fallback={<div className="w-full max-w-6xl mx-auto mt-4 h-48 rounded-3xl bg-[#EFE4CC]/60 animate-pulse" />}>
-                <>
-                  <ProductDemoShowcase />
+            {/* Layered Uneven Misty Fog Banks */}
+            <div
+              className="absolute -inset-x-12 top-2 bottom-0"
+              style={{
+                background:
+                  'radial-gradient(ellipse 46% 52% at 18% 48%, rgba(226, 179, 118, 0.24) 0%, rgba(164, 108, 60, 0.12) 45%, transparent 78%), radial-gradient(ellipse 50% 48% at 54% 58%, rgba(244, 226, 194, 0.28) 0%, rgba(198, 146, 88, 0.14) 48%, transparent 80%), radial-gradient(ellipse 48% 55% at 86% 42%, rgba(212, 162, 102, 0.22) 0%, rgba(120, 68, 34, 0.12) 50%, transparent 80%)',
+              }}
+            />
+            <div
+              className="absolute inset-x-0 bottom-0 h-36"
+              style={{
+                background:
+                  'radial-gradient(ellipse 65% 70% at 28% 85%, rgba(247, 232, 206, 0.52) 0%, transparent 72%), radial-gradient(ellipse 60% 65% at 75% 88%, rgba(235, 204, 158, 0.48) 0%, transparent 72%)',
+              }}
+            />
+          </div>
+
+          <section
+            aria-label="Achiev Medical Study Guide & Tour"
+            className="w-full relative z-10 px-4 sm:px-8 pt-2 sm:pt-4 pb-16 sm:pb-20 text-[#23140A] overflow-hidden"
+            style={{
+              background:
+                'radial-gradient(circle at 14% 16%, rgba(224, 181, 120, 0.36) 0%, transparent 45%), radial-gradient(circle at 86% 24%, rgba(206, 152, 88, 0.26) 0%, transparent 48%), radial-gradient(circle at 48% 72%, rgba(255, 248, 234, 0.72) 0%, transparent 55%), linear-gradient(180deg, #f4e2c2 0%, #efe0c1 42%, #e8cfa4 100%)',
+            }}
+          >
+            {/* Subtle Frosted Glass Depth Veil Matching Top Atmospheric Design */}
+            <div
+              aria-hidden="true"
+              className="pointer-events-none absolute inset-0 backdrop-blur-[2px]"
+              style={{
+                background:
+                  'radial-gradient(ellipse 75% 45% at 50% 0%, rgba(255, 249, 238, 0.38) 0%, transparent 70%)',
+              }}
+            />
+            <div className="relative z-10">
+              {showShowcase ? (
+                <Suspense fallback={<div className="w-full max-w-6xl mx-auto mt-4 h-48 rounded-3xl bg-[#E8D2AA]/60 animate-pulse" />}>
                   <FeatureVideoSeriesShowcase />
-                </>
-              </Suspense>
-            ) : (
-              <div className="w-full max-w-6xl mx-auto h-32" />
-            )}
+                </Suspense>
+              ) : (
+                <div className="w-full max-w-6xl mx-auto h-32" />
+              )}
+            </div>
           </section>
         </>
       )}

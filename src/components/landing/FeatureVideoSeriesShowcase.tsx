@@ -15,26 +15,33 @@ import {
   Sparkles,
   Palette,
   Users,
-  MessageSquareCode,
+  Settings as SettingsIcon,
   Cat,
   Layers,
   Award,
-  IndianRupee,
   ChevronDown,
   ChevronUp,
-  Film,
+  Sun,
+  Moon,
+  Laptop,
+  Tablet,
+  ArrowRight,
+  MousePointer,
 } from 'lucide-react';
-import { COMPETITOR_BENCHMARKS, SUBSCRIPTION_TIERS } from '../../data/subscriptionData';
+import { SUBSCRIPTION_TIERS } from '../../data/subscriptionData';
 
-export interface SeriesEpisode {
+export interface ShowcaseSection {
   id: string;
-  epNumber: string;
-  sidebarSegment: string;
+  stepNum: string;
+  sectionName: string;
   title: string;
   subtitle: string;
   durationSec: number;
   accent: string;
   accentSoft: string;
+  tooltipTitle: string;
+  tooltipBody: string;
+  cursorStops: Array<{ atPct: number; xPct: number; yPct: number }>;
   highlights: string[];
   captions: Array<{ atPct: number; text: string }>;
   iconKey:
@@ -46,217 +53,275 @@ export interface SeriesEpisode {
     | 'mnemonics'
     | 'hub'
     | 'themes'
-    | 'dev';
+    | 'settings';
 }
 
-export const FEATURE_VIDEO_SERIES: SeriesEpisode[] = [
+export const PRODUCT_DEMO_SECTIONS: ShowcaseSection[] = [
   {
-    id: 'ep-01-dashboard-eye',
-    epNumber: 'EP 01',
-    sidebarSegment: '1. Dashboard · Cockpit',
-    title: 'Cockpit Overview & 20-20-20 Eye Rest Timer',
-    subtitle: 'Track live study momentum, quick-launch slabs, and configure the 20-20-20 Eye Rest Timer directly from the top bar.',
-    durationSec: 10,
+    id: 'sec-01-cockpit',
+    stepNum: '01',
+    sectionName: 'Cockpit Dashboard',
+    title: 'Cockpit Dashboard & 20-20-20 Eye Rest Timer',
+    subtitle: 'Track live study momentum, quick-launch subject slabs, daily task streaks, and built-in eye rest breaks from one sleek command desk.',
+    durationSec: 9,
     accent: '#d97706',
     accentSoft: 'rgba(217, 119, 6, 0.22)',
+    tooltipTitle: '20-20-20 Eye Rest Guard',
+    tooltipBody: 'Gentle vision breaks calibrated for marathon study blocks.',
+    cursorStops: [
+      { atPct: 0, xPct: 26, yPct: 38 },
+      { atPct: 45, xPct: 74, yPct: 30 },
+      { atPct: 80, xPct: 54, yPct: 68 },
+    ],
     highlights: [
-      'One-glance study hours, tasks & notebook progress',
-      'Built-in 20-20-20 Eye Rest Timer inside the header button',
-      'Customize break interval, snooze & gentle alert chimes',
+      'Subject slab launcher & daily streak velocity',
+      'Header 20-20-20 Eye Rest Timer with snooze control',
+      'Live daily checklists synced across desktop & tablet',
     ],
     captions: [
-      { atPct: 0, text: 'Open your Cockpit dashboard to view today’s clinical tasks and focus score.' },
-      { atPct: 35, text: 'Click the Eye Timer button right in the header bar to configure break intervals.' },
-      { atPct: 70, text: 'Automatic 20-20-20 eye rest prompts protect vision during marathon MBBS & PG study.' },
+      { atPct: 0, text: 'Launch subjects, track focus hours, and manage daily clinical tasks in your Cockpit Dashboard.' },
+      { atPct: 45, text: 'Monitor your live 20-20-20 Eye Rest countdown right in the minimalist top bar.' },
     ],
     iconKey: 'dashboard',
   },
   {
-    id: 'ep-02-read-side-by-side',
-    epNumber: 'EP 02',
-    sidebarSegment: '2. Read · Textbook Desk',
-    title: 'Side-by-Side Books Reading (PDF, Word & EPUB)',
-    subtitle: 'Open and compare multiple medical textbooks, lecture slides, and guidelines side-by-side without switching tabs.',
-    durationSec: 11,
+    id: 'sec-02-reading',
+    stepNum: '02',
+    sectionName: 'Side-by-Side Reading',
+    title: 'Side-by-Side PDF, DOCX & EPUB Reading Desk',
+    subtitle: 'Open textbooks, class handouts, and pathology atlases beside each other without flipping windows.',
+    durationSec: 10,
     accent: '#0ea5e9',
-    accentSoft: 'rgba(14, 165, 233, 0.2)',
+    accentSoft: 'rgba(14, 165, 233, 0.20)',
+    tooltipTitle: 'Dual-Pane Textbook Sync',
+    tooltipBody: 'Cross-reference Harrison’s & Robbins side by side and snip directly to notes.',
+    cursorStops: [
+      { atPct: 0, xPct: 30, yPct: 44 },
+      { atPct: 45, xPct: 72, yPct: 46 },
+      { atPct: 80, xPct: 50, yPct: 26 },
+    ],
     highlights: [
-      'Upload PDF, Word (.docx) & EPUB documents directly',
-      'Dual & multi-slab side-by-side book reading layout',
-      'Pinch-zoom, highlight & snip textbook diagrams straight to notes',
+      'Open PDF, Word (.docx) & EPUB textbooks directly',
+      'Adjustable dual split panes for cross-referencing',
+      'One-tap diagram capture sent straight into your notebook',
     ],
     captions: [
-      { atPct: 0, text: 'Click Upload Document in Read to open Harrison’s, Robbins, or class handouts.' },
-      { atPct: 35, text: 'Open two books side-by-side to cross-reference pathology and clinical pharmacology.' },
-      { atPct: 72, text: 'Capture any high-yield diagram slab and send it straight into your active notebook.' },
+      { atPct: 0, text: 'Open two reference books simultaneously to verify pathology alongside clinical pharmacology.' },
+      { atPct: 50, text: 'Snip high-yield textbook figures and lock them onto any study sheet.' },
     ],
     iconKey: 'read',
   },
   {
-    id: 'ep-03-notes-book-table',
-    epNumber: 'EP 03',
-    sidebarSegment: '3. Create Note · Studio',
-    title: 'Book Open Beside Notes + Picture-to-Table Converter',
-    subtitle: 'Keep a reference book from your Shelf or device open right beside your ruled note canvas, and turn photos into editable tables.',
-    durationSec: 12,
+    id: 'sec-03-notes',
+    stepNum: '03',
+    sectionName: 'Smart Notes & Tables',
+    title: 'Smart Notes, Custom Lines, Lockable Boxes & Picture-to-Table',
+    subtitle: 'Ruled, dotted, or gridded paper with adjustable line spacing, lockable floating text boxes, image lock/delete handles, and Picture-to-Table capture.',
+    durationSec: 11,
     accent: '#10b981',
-    accentSoft: 'rgba(16, 185, 129, 0.2)',
+    accentSoft: 'rgba(16, 185, 129, 0.20)',
+    tooltipTitle: 'AI Picture-to-Table + Lock Handles',
+    tooltipBody: 'Snap textbook charts into editable rows and lock boxes or photos in place.',
+    cursorStops: [
+      { atPct: 0, xPct: 28, yPct: 48 },
+      { atPct: 42, xPct: 68, yPct: 42 },
+      { atPct: 78, xPct: 64, yPct: 72 },
+    ],
     highlights: [
-      'Open a Book from Shelf or Upload right next to your note page',
-      'Picture-to-Table AI converts textbook photos into clean tables',
-      'Pinned bottom YouTube lecture dock while writing',
+      '30 Handwriting, Sans-Serif & Serif fonts + custom line gaps',
+      'Movable floating text boxes & photos with Position Lock',
+      'Picture-to-Table extracts printed charts into structured grids',
     ],
     captions: [
-      { atPct: 0, text: 'Pick any book from your Shelf or Upload one directly beside your ruled note page.' },
-      { atPct: 38, text: 'Snap or upload a textbook chart using Picture-to-Table to auto-generate editable rows.' },
-      { atPct: 74, text: 'Watch lecture videos pinned cleanly at the bottom while taking crisp clinical notes.' },
+      { atPct: 0, text: 'Customize line spacing, color, and paper rhythm while keeping a reference book open beside your canvas.' },
+      { atPct: 48, text: 'Extract textbook tables from photos and lock floating callout boxes cleanly on the sheet.' },
     ],
     iconKey: 'note',
   },
   {
-    id: 'ep-04-calendar-trackers',
-    epNumber: 'EP 04',
-    sidebarSegment: '4. Calendar · Trackers & Roster',
-    title: 'Adding Trackers, Calendar Tasks & Clinical Schedules',
-    subtitle: 'Organize ward postings, exam countdowns, daily study habit trackers, and scan timetable photos into scheduled tasks.',
-    durationSec: 10,
+    id: 'sec-04-calendar',
+    stepNum: '04',
+    sectionName: 'Calendar Trackers',
+    title: 'Calendar Trackers, Habit Streaks & Timetable Scanner',
+    subtitle: 'Organize ward postings, subject revision targets, and scan printed lecture schedules straight onto your interactive calendar.',
+    durationSec: 9,
     accent: '#8b5cf6',
     accentSoft: 'rgba(139, 92, 246, 0.22)',
+    tooltipTitle: 'Smart Timetable Scanner',
+    tooltipBody: 'Convert timetable screenshots into recurring ward & exam blocks.',
+    cursorStops: [
+      { atPct: 0, xPct: 34, yPct: 36 },
+      { atPct: 48, xPct: 68, yPct: 58 },
+      { atPct: 82, xPct: 44, yPct: 74 },
+    ],
     highlights: [
-      'Add subject revision trackers & daily study checklists',
-      'Smart Calendar Tasks for MBBS/NEET-PG/USMLE deadlines',
-      'Scan printed ward schedules into instant calendar events',
+      'Daily MCQ & subject revision habit heatmaps',
+      'Quick bottom-centered task entry on every dashboard',
+      'Scan printed clinical duty rosters into calendar events',
     ],
     captions: [
-      { atPct: 0, text: 'Create daily subject & MCQ habit trackers to keep revision streaks consistent.' },
-      { atPct: 36, text: 'Add priority tasks & clinical posting schedules directly onto your smart calendar.' },
-      { atPct: 72, text: 'Sync exam timelines and check off daily milestones with zero friction.' },
+      { atPct: 0, text: 'Track daily question bank streaks alongside exam countdown milestones.' },
+      { atPct: 50, text: 'Drop ward postings and lecture blocks directly onto your weekly study grid.' },
     ],
     iconKey: 'calendar',
   },
   {
-    id: 'ep-05-shelf-cat',
-    epNumber: 'EP 05',
-    sidebarSegment: '5. Shelf · 3D Almirah',
-    title: 'Creative Almirah Book Stacking & Petting the Cat',
-    subtitle: 'Pick and drop books between clear-glass wood almirahs and the obsidian steel vault, switch Day/Night, and pet your study cat.',
-    durationSec: 12,
+    id: 'sec-05-shelf',
+    stepNum: '05',
+    sectionName: '3D Bookshelf',
+    title: 'Interactive 3D Almirah Library & Study Companion',
+    subtitle: 'Arrange textbooks and notebooks inside glass-door wooden almirahs, steel vaults, backlit shelves, and unlock ambient study companionship.',
+    durationSec: 10,
     accent: '#f59e0b',
     accentSoft: 'rgba(245, 158, 11, 0.22)',
+    tooltipTitle: 'Drag & Drop 3D Cabinets',
+    tooltipBody: 'Move volumes between Walnut, Caramel, Roman Arch & Steel vaults.',
+    cursorStops: [
+      { atPct: 0, xPct: 30, yPct: 42 },
+      { atPct: 48, xPct: 56, yPct: 48 },
+      { atPct: 82, xPct: 76, yPct: 76 },
+    ],
     highlights: [
-      'Pick & drop books seamlessly across any shelf compartment',
-      '5 distinct cabinets: Glass Wood Almirahs to Dark Steel Vault',
-      'Click the floor cat to walk & click again to pet & purr ♥',
+      '5 detailed cabinets with brass name banners',
+      'Drag books across shelves or slide crystal glass doors',
+      'Custom subject folders right inside your library space',
     ],
     captions: [
-      { atPct: 0, text: 'Unlock glass doors on Walnut & Caramel almirahs or spin the Dark Steel Vault dial.' },
-      { atPct: 36, text: 'Pick any book and drop it into a different shelf section or almirah compartment.' },
-      { atPct: 72, text: 'Click the floor cat to roam slowly; pet her anywhere to settle and purr with hearts.' },
+      { atPct: 0, text: 'Slide open glass doors on warm hardwood almirahs or unlock obsidian steel vaults.' },
+      { atPct: 50, text: 'Move textbooks cleanly between compartments with instant cloud persistence.' },
     ],
     iconKey: 'shelf',
   },
   {
-    id: 'ep-06-mnemonics',
-    epNumber: 'EP 06',
-    sidebarSegment: '6. Mnemonics & Flowcharts',
-    title: 'High-Yield Medical Mnemonics & Diagnostic Flowcharts',
-    subtitle: 'Build branchable clinical algorithms and active-recall pharmacology or anatomy mnemonics in seconds.',
+    id: 'sec-06-mnemonics',
+    stepNum: '06',
+    sectionName: 'Mnemonics & Flowcharts',
+    title: 'Active-Recall Mnemonics & Expandable Diagnostic Flowcharts',
+    subtitle: 'Sketch pan-and-zoom differential workup trees on a touch-friendly canvas and save high-yield memory triggers by subject.',
     durationSec: 9,
     accent: '#ec4899',
-    accentSoft: 'rgba(236, 72, 153, 0.2)',
+    accentSoft: 'rgba(236, 72, 153, 0.20)',
+    tooltipTitle: 'Pinch-Zoom Algorithm Canvas',
+    tooltipBody: 'Expand fullscreen to map complex clinical pathways without crowding.',
+    cursorStops: [
+      { atPct: 0, xPct: 38, yPct: 34 },
+      { atPct: 48, xPct: 62, yPct: 54 },
+      { atPct: 80, xPct: 48, yPct: 72 },
+    ],
     highlights: [
-      'Rapid active-recall cards for Anatomy, Path & Pharm',
-      'Visual flowchart nodes for diagnostic workups',
-      'One-click snip into study notebooks',
+      'Single streamlined ribbon on an expandable flowchart canvas',
+      'Touch pinch-zoom & omnidirectional pan across mobile/tablet',
+      'One-click export of clinical pathways into any study note',
     ],
     captions: [
-      { atPct: 0, text: 'Browse subject-tagged clinical mnemonics tailored for medical board exams.' },
-      { atPct: 45, text: 'Build multi-step diagnostic flowcharts and insert them cleanly into notes.' },
+      { atPct: 0, text: 'Group pharmacology and pathology memory hooks inside organized subject folders.' },
+      { atPct: 50, text: 'Expand the flowchart canvas edge-to-edge to trace multi-branch diagnostic algorithms.' },
     ],
     iconKey: 'mnemonics',
   },
   {
-    id: 'ep-07-achievers-hub',
-    epNumber: 'EP 07',
-    sidebarSegment: "7. Achiever's Hub",
-    title: "Achiever's Hub · Medical Community & Study Groups",
-    subtitle: "Connect with classmates and peers inside Achiever's Hub to exchange clinical pearls, notes, and MCQ discussions.",
-    durationSec: 10,
+    id: 'sec-07-hub',
+    stepNum: '07',
+    sectionName: "Achiever's Hub",
+    title: "Achiever's Hub & Leisure Reset Wings",
+    subtitle: "Collaborate with fellow medical scholars in Achiever's Hub or unwind inside curated Leisure wings with live Gemini world & medical news.",
+    durationSec: 9,
     accent: '#14b8a6',
-    accentSoft: 'rgba(20, 184, 166, 0.2)',
+    accentSoft: 'rgba(20, 184, 166, 0.20)',
+    tooltipTitle: 'Favorite Wings + Live Pulse',
+    tooltipBody: 'Pin your top 3 Leisure wings and browse concise Inshorts-style news cards.',
+    cursorStops: [
+      { atPct: 0, xPct: 32, yPct: 40 },
+      { atPct: 48, xPct: 66, yPct: 48 },
+      { atPct: 82, xPct: 52, yPct: 70 },
+    ],
     highlights: [
-      "Share study notes & exam doubts inside Achiever's Hub",
-      'Search fellow scholars by @username & add study friends',
-      'Save shared community posts straight to your notebook',
+      "Peer notes, MCQ threads & study circles in Achiever's Hub",
+      'Top-3 favorite Leisure wings bar + More Wings drawer',
+      'Auto-updated Gemini medical & world briefings with sources',
     ],
     captions: [
-      { atPct: 0, text: "Open Achiever's Hub from the sidebar to join live medical student circles." },
-      { atPct: 45, text: 'Discuss high-yield cases, exchange memory tricks, and snip pearls into your notes.' },
+      { atPct: 0, text: "Exchange high-yield pearls and shared clinical summaries inside Achiever's Hub." },
+      { atPct: 48, text: 'Take mindful breaks with concise sourced news cards, reading journals, and ambient audio.' },
     ],
     iconKey: 'hub',
   },
   {
-    id: 'ep-08-themes-leisure',
-    epNumber: 'EP 08',
-    sidebarSegment: '8. Themes & Leisure',
-    title: '5 Scenic Day/Night Themes & Cozy Leisure Reset',
-    subtitle: 'Transform your entire workspace & shelf world across Marble, Twilight Sunset, Oceanic Horizon, Slate Grey & Cobalt Blue, and Forest Emerald & Gold.',
-    durationSec: 10,
+    id: 'sec-08-themes',
+    stepNum: '08',
+    sectionName: 'Custom Themes',
+    title: 'Curated Day/Night Themes & Abstract Wallpapers',
+    subtitle: 'Personalize every pixel with Forest Emerald & Gold, Ocean Horizon, Royal Blush & Plum, Muted Slate & Cobalt, plus 10 abstract wallpapers.',
+    durationSec: 9,
     accent: '#84cc16',
-    accentSoft: 'rgba(132, 204, 22, 0.2)',
+    accentSoft: 'rgba(132, 204, 22, 0.20)',
+    tooltipTitle: '5 Master Themes · 10 Wallpapers',
+    tooltipBody: 'Switch light/dark atmospheres and crisp typography across every button.',
+    cursorStops: [
+      { atPct: 0, xPct: 28, yPct: 42 },
+      { atPct: 48, xPct: 56, yPct: 36 },
+      { atPct: 80, xPct: 72, yPct: 64 },
+    ],
     highlights: [
-      '5 signature color combos with Day Sun & Night Moon modes',
-      'Twilight Sunset, Oceanic Horizon, Slate Grey & Cobalt, Forest Emerald',
-      'Calming Leisure space with ambient peace sounds & Gemini news',
+      'Signature themes tuned with crisp contrast in Day & Night',
+      '10 curated Dark & Light abstract workspace wallpapers',
+      'Live opacity & surface harmony across mobile and desktop',
     ],
     captions: [
-      { atPct: 0, text: 'Switch effortlessly between Marble, Twilight Sunset, Oceanic Horizon, Slate Grey & Cobalt & Forest Emerald.' },
-      { atPct: 48, text: 'Toggle Day Sun & Night Moon modes—each shelf world adapts plants, lamps & fireflies.' },
+      { atPct: 0, text: 'Pick any curated color combo—from Forest Emerald & Gold to Muted Slate & Cobalt.' },
+      { atPct: 50, text: 'Layer subtle dark or light abstract wallpapers with adjustable frosted opacity.' },
     ],
     iconKey: 'themes',
   },
   {
-    id: 'ep-09-settings-dev',
-    epNumber: 'EP 09',
-    sidebarSegment: '9. Settings · Talk to Developer',
-    title: 'Smart Settings Sidebar, Cloud Drive & Talk to Developer',
-    subtitle: 'Reorder sidebar sections, connect your own Google Drive library, or message the developer directly with visual feedback.',
+    id: 'sec-09-settings',
+    stepNum: '09',
+    sectionName: 'Settings',
+    title: 'Typography Engine, Drive Vault & Settings Controls',
+    subtitle: 'Apply 30 Handwriting, Sans-Serif & Serif fonts site-wide, connect Google Drive storage, and customize sidebar flow effortlessly.',
     durationSec: 9,
     accent: '#eab308',
-    accentSoft: 'rgba(234, 179, 8, 0.2)',
+    accentSoft: 'rgba(234, 179, 8, 0.20)',
+    tooltipTitle: '30 Curated Fonts · Cloud Sync',
+    tooltipBody: 'Change interface typography globally—from headers down to every badge.',
+    cursorStops: [
+      { atPct: 0, xPct: 28, yPct: 36 },
+      { atPct: 48, xPct: 68, yPct: 46 },
+      { atPct: 80, xPct: 54, yPct: 68 },
+    ],
     highlights: [
-      'Most-used to least-used prioritized Settings sidebar',
-      'Offload heavy PDFs cleanly to personal Google Drive',
-      'Direct Talk to Developer feedback desk from sidebar bottom',
+      '30 categorized fonts applied universally across the app',
+      'Personal Google Drive offloading for large medical PDFs',
+      'Fast local-first PWA performance on mobile & desktop',
     ],
     captions: [
-      { atPct: 0, text: 'Customize typography, languages, themes & sidebar segment order in Settings.' },
-      { atPct: 48, text: 'Send feature requests or UI screenshots straight to the developer in one click.' },
+      { atPct: 0, text: 'Switch between Playfair Display, Lora, Inter, or Caveat across every view and button.' },
+      { atPct: 50, text: 'Manage cloud backups, sidebar item ordering, and membership directly in Settings.' },
     ],
-    iconKey: 'dev',
+    iconKey: 'settings',
   },
 ];
 
-const SEO_FAQS = [
+const STUDY_FAQS = [
   {
-    q: 'Why is Achiev the cheapest note-making website for medical students?',
-    a: 'Achiev gives MBBS, NEET-PG, USMLE, and nursing students a generous ₹0 Free Scholar plan, Clinical Plus at just ₹1,200/year (only ₹100/month), and Residency Pro at ₹3,600/year (only ₹300/month)—up to 80% cheaper than GoodNotes, Notability, RemNote, Notion AI, or Evernote, with zero hardware lock-in.',
+    q: 'Can I read medical textbooks beside my notes while keeping lectures docked?',
+    a: 'Yes. Open any PDF, Word (.docx), or EPUB file right next to your ruled clinical note sheet, snip diagrams directly in, and keep your study lecture pinned cleanly.',
   },
   {
-    q: 'Can I keep a medical textbook open beside my notes while writing?',
-    a: 'Yes! Open any PDF, Word (.docx), or EPUB textbook from your Shelf or upload a file right inside Create Note to read side-by-side with your ruled paper canvas and pin lecture videos at the bottom.',
+    q: 'How does Picture-to-Table speed up pharmacology and pathology revision?',
+    a: 'Upload or snap a photo of a classification table from a textbook or slide, and Ach1ev structures the rows into an editable grid directly on your note page.',
   },
   {
-    q: 'How does the Picture-to-Table feature help medical students?',
-    a: 'Simply capture or upload a photo of a complex pharmacology, pathology, or microbiology table from a book or slide—Achiev converts the image into a crisp, editable structured table inside your notes.',
+    q: 'Can I customize fonts, line spacing, and themes on mobile and desktop?',
+    a: 'Yes. Choose from 30 Handwriting, Sans-Serif, and Serif fonts that propagate across every control, adjust paper line spacing and style, and switch among 5 signature Day/Night themes plus 10 abstract wallpapers.',
   },
   {
-    q: 'Does Achiev work offline and across Android, Windows, iPad, and Mac?',
-    a: 'Yes. Achiev is an installable cross-platform web app (PWA) with local offline caching, Supabase cloud sync, and personal Google Drive storage offloading.',
+    q: 'Can I try Create Note immediately before signing up?',
+    a: 'Yes. Click "Skip and create note" right below the login form to open a blank clinical sheet immediately, then sign in anytime to save and sync your notebooks.',
   },
 ];
 
-function getEpisodeIcon(key: SeriesEpisode['iconKey']) {
+function getSectionIcon(key: ShowcaseSection['iconKey']) {
   switch (key) {
     case 'dashboard':
       return Eye;
@@ -274,8 +339,8 @@ function getEpisodeIcon(key: SeriesEpisode['iconKey']) {
       return Users;
     case 'themes':
       return Palette;
-    case 'dev':
-      return MessageSquareCode;
+    case 'settings':
+      return SettingsIcon;
   }
 }
 
@@ -283,25 +348,26 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
   const [activeIdx, setActiveIdx] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [autoAdvance, setAutoAdvance] = useState(true);
+  const [uiThemeDark, setUiThemeDark] = useState(true);
   const [progressPct, setProgressPct] = useState(0);
   const [openFaqIdx, setOpenFaqIdx] = useState<number | null>(0);
   const [exportingId, setExportingId] = useState<string | null>(null);
   const [exportMsg, setExportMsg] = useState<string | null>(null);
   const timerRef = useRef<number | null>(null);
 
-  const episode = FEATURE_VIDEO_SERIES[activeIdx] || FEATURE_VIDEO_SERIES[0]!;
+  const section = PRODUCT_DEMO_SECTIONS[activeIdx] || PRODUCT_DEMO_SECTIONS[0]!;
 
   useEffect(() => {
     if (!isPlaying) return;
-    const stepMs = 80;
-    const increment = (stepMs / (episode.durationSec * 1000)) * 100;
+    const stepMs = 70;
+    const increment = (stepMs / (section.durationSec * 1000)) * 100;
 
     timerRef.current = window.setInterval(() => {
       setProgressPct((prev) => {
         const next = prev + increment;
         if (next >= 100) {
           if (autoAdvance) {
-            setActiveIdx((curr) => (curr + 1) % FEATURE_VIDEO_SERIES.length);
+            setActiveIdx((curr) => (curr + 1) % PRODUCT_DEMO_SECTIONS.length);
             return 0;
           }
           setIsPlaying(false);
@@ -314,17 +380,25 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
     return () => {
       if (timerRef.current !== null) window.clearInterval(timerRef.current);
     };
-  }, [isPlaying, activeIdx, autoAdvance, episode.durationSec]);
+  }, [isPlaying, activeIdx, autoAdvance, section.durationSec]);
 
   const currentCaption = useMemo(() => {
-    let chosen = episode.captions[0]?.text || episode.subtitle;
-    for (const c of episode.captions) {
+    let chosen = section.captions[0]?.text || section.subtitle;
+    for (const c of section.captions) {
       if (progressPct >= c.atPct) chosen = c.text;
     }
     return chosen;
-  }, [episode, progressPct]);
+  }, [section, progressPct]);
 
-  const selectEpisode = (idx: number) => {
+  const activeCursor = useMemo(() => {
+    let pos = section.cursorStops[0] || { xPct: 50, yPct: 50 };
+    for (const stop of section.cursorStops) {
+      if (progressPct >= stop.atPct) pos = stop;
+    }
+    return pos;
+  }, [section, progressPct]);
+
+  const selectSection = (idx: number) => {
     setActiveIdx(idx);
     setProgressPct(0);
     setIsPlaying(true);
@@ -335,24 +409,23 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
     return `0:${String(whole).padStart(2, '0')}`;
   };
 
-  // Real client-side HTML5 Canvas -> WebM video generator for any episode
-  const handleDownloadEpisodeVideo = async () => {
+  const handleDownloadDemoClip = async () => {
     if (exportingId) return;
     if (typeof MediaRecorder === 'undefined') {
-      setExportMsg('Video export requires a modern desktop/Android Chrome, Edge, or Firefox browser.');
+      setExportMsg('Showcase clip export requires a modern desktop or Android browser.');
       return;
     }
 
-    const ep = episode;
-    setExportingId(ep.id);
-    setExportMsg(`Rendering HD video (${ep.epNumber}: ${ep.title})...`);
+    const sec = section;
+    setExportingId(sec.id);
+    setExportMsg(`Rendering demo clip (${sec.stepNum}: ${sec.sectionName})...`);
 
     try {
       const canvas = document.createElement('canvas');
       canvas.width = 1280;
       canvas.height = 720;
       const ctx = canvas.getContext('2d');
-      if (!ctx) throw new Error('Canvas 2D unavailable');
+      if (!ctx) throw new Error('Canvas unavailable');
 
       const stream = canvas.captureStream(30);
       const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9')
@@ -369,76 +442,58 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
       });
 
       recorder.start();
-      const totalFrames = 150; // 5s crisp 30fps walkthrough clip
+      const totalFrames = 120;
       for (let f = 0; f <= totalFrames; f++) {
         const pct = (f / totalFrames) * 100;
-        // Draw dark espresso HD frame
-        const bgGrad = ctx.createRadialGradient(340, 200, 40, 640, 360, 820);
-        bgGrad.addColorStop(0, '#2a150b');
-        bgGrad.addColorStop(0.55, '#140804');
-        bgGrad.addColorStop(1, '#080301');
-        ctx.fillStyle = bgGrad;
+        const grad = ctx.createLinearGradient(0, 0, 1280, 720);
+        grad.addColorStop(0, '#1e1008');
+        grad.addColorStop(1, '#0b0502');
+        ctx.fillStyle = grad;
         ctx.fillRect(0, 0, 1280, 720);
 
-        // Header bar
-        ctx.fillStyle = 'rgba(255, 240, 210, 0.08)';
-        ctx.fillRect(48, 42, 1184, 62);
-        ctx.fillStyle = ep.accent;
-        ctx.fillRect(48, 42, 130, 62);
+        ctx.fillStyle = sec.accent;
+        ctx.fillRect(64, 56, 84, 44);
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 22px system-ui, sans-serif';
-        ctx.fillText(ep.epNumber, 82, 81);
+        ctx.font = 'bold 20px system-ui, sans-serif';
+        ctx.fillText(sec.stepNum, 92, 85);
+
         ctx.fillStyle = '#fef3c7';
         ctx.font = 'bold 24px system-ui, sans-serif';
-        ctx.fillText(`Achiev · ${ep.sidebarSegment}`, 205, 81);
+        ctx.fillText(`Ach1ev · ${sec.sectionName}`, 168, 86);
 
-        // Main Card
-        ctx.fillStyle = 'rgba(24, 12, 6, 0.9)';
-        ctx.strokeStyle = ep.accent;
+        ctx.fillStyle = 'rgba(255,255,255,0.06)';
+        ctx.strokeStyle = sec.accent;
         ctx.lineWidth = 2;
         ctx.beginPath();
-        ctx.roundRect(64, 136, 1152, 430, 24);
+        ctx.roundRect(64, 130, 1152, 460, 22);
         ctx.fill();
         ctx.stroke();
 
         ctx.fillStyle = '#fffbeb';
-        ctx.font = 'bold 40px system-ui, sans-serif';
-        ctx.fillText(ep.title, 108, 212);
+        ctx.font = 'bold 34px system-ui, sans-serif';
+        ctx.fillText(sec.title, 102, 200);
 
         ctx.fillStyle = '#d6c3a5';
-        ctx.font = '24px system-ui, sans-serif';
-        ctx.fillText(ep.subtitle.slice(0, 84), 108, 260);
-        if (ep.subtitle.length > 84) {
-          ctx.fillText(ep.subtitle.slice(84), 108, 294);
-        }
+        ctx.font = '21px system-ui, sans-serif';
+        ctx.fillText(sec.subtitle.slice(0, 92), 102, 246);
 
-        // Animated step highlights
-        ep.highlights.forEach((hl, i) => {
-          const activeStep = pct >= i * 33;
-          ctx.fillStyle = activeStep ? ep.accentSoft : 'rgba(255,255,255,0.04)';
+        sec.highlights.forEach((hl, i) => {
+          const active = pct >= i * 33;
+          ctx.fillStyle = active ? sec.accentSoft : 'rgba(255,255,255,0.04)';
           ctx.beginPath();
-          ctx.roundRect(108, 336 + i * 68, 1064, 52, 12);
+          ctx.roundRect(102, 304 + i * 74, 1076, 56, 12);
           ctx.fill();
-          ctx.fillStyle = activeStep ? '#fde68a' : '#78716c';
-          ctx.font = 'bold 22px system-ui, sans-serif';
-          ctx.fillText(`${activeStep ? '✓' : '•'}  ${hl}`, 130, 369 + i * 68);
+          ctx.fillStyle = active ? '#fde68a' : '#8a7a69';
+          ctx.font = 'bold 20px system-ui, sans-serif';
+          ctx.fillText(`${active ? '✓' : '•'}  ${hl}`, 128, 339 + i * 74);
         });
 
-        // Bottom caption & progress
-        let cap = ep.captions[0]?.text || '';
-        for (const c of ep.captions) {
-          if (pct >= c.atPct) cap = c.text;
-        }
-        ctx.fillStyle = '#fde68a';
-        ctx.font = 'italic 22px system-ui, sans-serif';
-        ctx.fillText(cap.slice(0, 96), 64, 625);
+        ctx.fillStyle = 'rgba(255,255,255,0.16)';
+        ctx.fillRect(64, 636, 1152, 8);
+        ctx.fillStyle = sec.accent;
+        ctx.fillRect(64, 636, (1152 * pct) / 100, 8);
 
-        ctx.fillStyle = 'rgba(255,255,255,0.14)';
-        ctx.fillRect(64, 656, 1152, 10);
-        ctx.fillStyle = ep.accent;
-        ctx.fillRect(64, 656, (1152 * pct) / 100, 10);
-
-        await new Promise((r) => setTimeout(r, 33));
+        await new Promise((r) => setTimeout(r, 30));
       }
 
       recorder.stop();
@@ -446,361 +501,512 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `Achiev-${ep.id}.webm`;
+      a.download = `Ach1ev-${sec.id}.webm`;
       a.click();
       URL.revokeObjectURL(url);
-      setExportMsg(`Downloaded ${ep.epNumber} walkthrough video (.webm)!`);
+      setExportMsg(`Exported ${sec.sectionName} demo clip.`);
     } catch {
-      setExportMsg('Could not export video on this browser.');
+      setExportMsg('Could not render demo clip on this browser.');
     } finally {
       setExportingId(null);
-      window.setTimeout(() => setExportMsg(null), 4000);
+      window.setTimeout(() => setExportMsg(null), 3500);
     }
   };
 
   return (
-    <div id="medical-student-seo-guide" className="w-full max-w-6xl mx-auto space-y-16 sm:space-y-20 text-[#23140A]">
-      {/* ═══════════════ 1. EVERNOTE-INSPIRED ROYAL CREAM SEO HERO ═══════════════ */}
-      <section aria-labelledby="seo-hero-heading" className="text-center space-y-5 px-2 sm:px-6 pt-2">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#EFE4CC] border border-[#D4B87E] text-[#4E3211] text-[11px] sm:text-xs font-semibold shadow-2xs tracking-wide">
+    <div id="medical-student-seo-guide" className="w-full max-w-6xl mx-auto space-y-14 sm:space-y-18 text-[#23140A]">
+      {/* ═══════════════ 1. ROYAL CARAMEL-CREAM FROSTED HERO ═══════════════ */}
+      <section aria-labelledby="seo-hero-heading" className="text-center space-y-4 px-2 sm:px-6 pt-2">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-[#FBF4E6]/75 backdrop-blur-md border border-[#C9A060]/45 text-[#4E3211] text-[11px] sm:text-xs font-semibold shadow-2xs tracking-wide">
           <Award className="w-3.5 h-3.5 text-[#8E5B13] shrink-0" />
-          <span>Ach1ev · The Royal Medical Study Workspace · MBBS · NEET-PG · USMLE</span>
+          <span>Ach1ev · Notes &amp; Focus Study Platform · Desktop &amp; Tablet</span>
         </div>
 
         <h1
           id="seo-hero-heading"
           className="text-3xl sm:text-5xl font-bold tracking-tight text-[#190D05] font-serif leading-[1.12] max-w-4xl mx-auto"
         >
-          Tame your textbooks. Settle every clinical idea in one place.
+          Tame your textbooks. Settle every clinical idea in one studio.
         </h1>
 
-        <p className="max-w-3xl mx-auto text-sm sm:text-lg text-[#4E3721] leading-relaxed">
-          Remember everything and tackle MBBS, NEET-PG &amp; USMLE prep without paying ₹450–₹1,100/month across separate apps.
-          <strong className="text-[#8E5B13]"> Ach1ev</strong> unites ruled notes, side-by-side books, Picture-to-Table capture,
-          20-20-20 eye rest alerts, and custom bookshelves starting at{' '}
-          <strong className="text-[#0E7752]">₹0 Free Forever</strong> and{' '}
-          <strong className="text-[#0E7752]">only ₹100/month (₹1,200/yr)</strong>.
+        <p className="max-w-3xl mx-auto text-sm sm:text-base text-[#4B341E] leading-relaxed">
+          Unite ruled clinical notes, side-by-side reference books, Picture-to-Table extraction,
+          interactive 3D almirahs, and 20-20-20 vision breaks inside one calm workspace built for focused study.
         </p>
 
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3.5 pt-4 max-w-4xl mx-auto">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 max-w-4xl mx-auto">
           {[
-            { label: 'Honest Student Price', val: '₹0 · ₹100/mo', sub: 'Annual ₹1,200/yr & ₹3,600/yr Pro' },
-            { label: 'Split Book + Note Desk', val: 'Side-by-Side', sub: 'PDF, DOCX & EPUB + Video Dock' },
-            { label: 'Instant AI Capture', val: 'Pic → Table', sub: 'Book Tables & Floated Text Boxes' },
-            { label: 'Built-In Balance', val: 'Eye Timer + Wing', sub: '20-20-20 Rest & Gemini News' },
+            { label: 'Focus Command', val: 'Cockpit + Eye Rest', sub: 'Daily tasks, streaks & vision timer' },
+            { label: 'Split Reading Desk', val: 'Side-by-Side', sub: 'PDF, DOCX & EPUB side-by-side' },
+            { label: 'Smart Studio', val: 'Pic → Table', sub: '30 fonts, lockable boxes & lines' },
+            { label: 'Calm Workspace', val: '3D Shelf + Themes', sub: '5 themes, 10 wallpapers & Leisure' },
           ].map((stat) => (
             <div
               key={stat.label}
-              className="rounded-2xl p-4 text-left border border-[#E0CFAF] bg-[#FFFDF8] shadow-[0_8px_24px_rgba(72,46,14,0.06)] hover:border-[#C99B48] transition-colors"
+              className="rounded-2xl p-4 text-left border border-[#D4B47C]/55 bg-[#FFFBF2]/72 backdrop-blur-md shadow-[0_8px_24px_rgba(72,46,14,0.07)] hover:border-[#B98537] transition-colors"
             >
-              <div className="text-[10.5px] uppercase tracking-wider text-[#8E5B13] font-bold">{stat.label}</div>
-              <div className="text-lg font-bold text-[#190D05] mt-1 font-serif">{stat.val}</div>
+              <div className="text-[10px] uppercase tracking-wider text-[#8E5B13] font-bold">{stat.label}</div>
+              <div className="text-base sm:text-lg font-bold text-[#190D05] mt-1 font-serif">{stat.val}</div>
               <div className="text-[11px] text-[#6B5038] mt-1">{stat.sub}</div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ═══════════════ 2. SERIES-WISE FEATURE VIDEO TOUR (DASHBOARD TO LAST SIDEBAR SEGMENT) ═══════════════ */}
+      {/* ═══════════════ 2. DUAL-DEVICE (LAPTOP + TABLET) 9-SECTION PRODUCT DEMO SHOWCASE ═══════════════ */}
       <section aria-labelledby="video-series-heading" className="space-y-5">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
           <div>
-            <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#9B6A1F]">
-              <Film className="w-4 h-4" />
-              <span>9-Part Interactive Video Walkthrough Series</span>
+            <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#8E5B13]">
+              <Laptop className="w-3.5 h-3.5" />
+              <Tablet className="w-3.5 h-3.5" />
+              <span>Interactive 9-Section Product Demo</span>
             </div>
             <h2 id="video-series-heading" className="text-xl sm:text-2xl font-bold text-[#1E1007] mt-1 font-serif">
-              Explore Every Feature: Dashboard to Last Sidebar Segment
+              Live Laptop &amp; Tablet Workspace Walkthrough
             </h2>
           </div>
 
           <div className="flex items-center gap-2 flex-wrap">
-            <label className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#FFFDF8] border border-[#E0CFAF] text-[#3E2816] text-xs font-medium cursor-pointer select-none shadow-2xs">
+            <button
+              type="button"
+              onClick={() => setUiThemeDark((d) => !d)}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FFFBF2]/80 backdrop-blur-md border border-[#D4B47C]/60 text-[#3E2816] text-xs font-semibold cursor-pointer shadow-2xs hover:bg-[#FFF7E6]"
+            >
+              {uiThemeDark ? <Moon className="w-3.5 h-3.5 text-amber-700" /> : <Sun className="w-3.5 h-3.5 text-amber-600" />}
+              <span>{uiThemeDark ? 'Dark Tech UI' : 'Light Tech UI'}</span>
+            </button>
+
+            <label className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#FFFBF2]/80 backdrop-blur-md border border-[#D4B47C]/60 text-[#3E2816] text-xs font-medium cursor-pointer select-none shadow-2xs">
               <input
                 type="checkbox"
                 checked={autoAdvance}
                 onChange={(e) => setAutoAdvance(e.target.checked)}
                 className="accent-amber-600"
               />
-              <span>Auto-Play Next Episode</span>
+              <span>Auto-Cycle</span>
             </label>
 
             <button
               type="button"
-              onClick={handleDownloadEpisodeVideo}
+              onClick={handleDownloadDemoClip}
               disabled={exportingId !== null}
               className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-[#9B6A1F] hover:bg-[#825614] text-white text-xs font-bold transition cursor-pointer disabled:opacity-50 shadow-sm"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>{exportingId ? 'Rendering WebM...' : `Export ${episode.epNumber} Video`}</span>
+              <span>{exportingId ? 'Rendering...' : `Save Clip ${section.stepNum}`}</span>
             </button>
           </div>
         </div>
 
         {exportMsg && (
-          <div className="px-4 py-2 rounded-xl bg-[#F3E7CC] border border-[#D4B77E] text-[#5C3D18] text-xs font-medium">
+          <div className="px-4 py-2 rounded-xl bg-[#FBF2DF]/85 backdrop-blur-md border border-[#D4B47C] text-[#5C3D18] text-xs font-medium">
             {exportMsg}
           </div>
         )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-stretch">
-          {/* Left 7 Cols: 16:9 Live Animated Feature Theatre Player */}
-          <div className="lg:col-span-7 flex flex-col rounded-3xl overflow-hidden border border-[#DFCCA8] bg-[#FFFDF8] shadow-[0_14px_40px_rgba(78,50,15,0.10)]">
-            {/* Video Stage */}
-            <div className="relative aspect-video w-full p-5 sm:p-6 flex flex-col justify-between overflow-hidden bg-gradient-to-br from-[#231108] via-[#130904] to-[#080301]">
-              {/* Top Episode Badge */}
-              <div className="relative z-10 flex items-center justify-between gap-2">
-                <div className="flex items-center gap-2">
-                  <span
-                    className="px-2.5 py-1 rounded-lg text-[11px] font-extrabold text-white shadow"
-                    style={{ background: episode.accent }}
-                  >
-                    {episode.epNumber} / 09
-                  </span>
-                  <span className="px-2.5 py-1 rounded-lg text-[11px] font-semibold bg-black/45 border border-white/10 text-amber-100">
-                    {episode.sidebarSegment}
-                  </span>
-                </div>
-                <span className="text-[11px] font-mono text-amber-200/80 bg-black/40 px-2 py-0.5 rounded">
-                  {formatSec((progressPct / 100) * episode.durationSec)} / {formatSec(episode.durationSec)}
+        {/* Section Pills Navigation Strip (All 9 Sections at a Glance) */}
+        <div className="flex flex-wrap gap-1.5 p-2 rounded-2xl bg-[#FFFBF2]/70 backdrop-blur-md border border-[#D4B47C]/55 shadow-sm">
+          {PRODUCT_DEMO_SECTIONS.map((sec, idx) => {
+            const Icon = getSectionIcon(sec.iconKey);
+            const isActive = idx === activeIdx;
+            return (
+              <button
+                key={sec.id}
+                type="button"
+                onClick={() => selectSection(idx)}
+                className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-[11px] font-bold transition-all cursor-pointer ${
+                  isActive
+                    ? 'text-white shadow-sm scale-[1.02]'
+                    : 'text-[#4B341E] bg-[#F7EBD2]/75 hover:bg-[#EEDBB5]/80'
+                }`}
+                style={isActive ? { backgroundColor: sec.accent } : undefined}
+              >
+                <Icon className="w-3.5 h-3.5 shrink-0" />
+                <span>
+                  {sec.stepNum}. {sec.sectionName}
                 </span>
-              </div>
+              </button>
+            );
+          })}
+        </div>
 
-              {/* Animated Visual Mockup Scene Specific to Active Episode */}
-              <div className="relative z-10 my-auto py-3">
-                <EpisodeAnimatedViewport episode={episode} progressPct={progressPct} />
-              </div>
+        {/* Dual Realistic Device Stage (Sleek Laptop Frame + Tablet Frame Side-by-Side) */}
+        <div className="rounded-3xl border border-[#CFAF75]/65 bg-[#FFF9EE]/65 backdrop-blur-xl p-4 sm:p-6 shadow-[0_18px_48px_rgba(78,50,15,0.12)] space-y-4">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-center">
+            {/* SLEEK LAPTOP FRAME (8 Cols) */}
+            <div className="lg:col-span-8 flex flex-col items-center">
+              {/* Lid & Screen Bezel */}
+              <div className="w-full rounded-t-2xl border-[3px] border-[#261a12] bg-[#160f0a] p-2 sm:p-2.5 shadow-2xl relative">
+                {/* Webcam dot */}
+                <div className="w-2 h-2 rounded-full bg-[#3a2a1e] border border-[#523d2d] mx-auto mb-1.5" />
 
-              {/* Dynamic Subtitles / Voiceover Script Bar */}
-              <div className="relative z-10 rounded-xl px-3.5 py-2 bg-black/65 border border-white/10 backdrop-blur-md">
-                <p className="text-xs sm:text-[13px] text-amber-50 font-medium leading-snug">
-                  {currentCaption}
-                </p>
+                {/* Screen Viewport */}
+                <div
+                  className={`relative rounded-xl overflow-hidden border transition-colors duration-300 h-[270px] sm:h-[325px] flex ${
+                    uiThemeDark
+                      ? 'bg-gradient-to-br from-[#1b1009] via-[#120a05] to-[#0a0502] border-white/10 text-[#efe4d4]'
+                      : 'bg-gradient-to-br from-[#fffdf9] via-[#faf2e2] to-[#f2e2c6] border-[#d6be93] text-[#221308]'
+                  }`}
+                >
+                  {/* Simulated App Sidebar inside Laptop */}
+                  <div
+                    className={`w-28 sm:w-36 shrink-0 p-2 border-r flex flex-col justify-between ${
+                      uiThemeDark
+                        ? 'bg-black/30 border-white/10'
+                        : 'bg-[#f4e7cf]/75 border-[#dcc49a]'
+                    }`}
+                  >
+                    <div className="space-y-1">
+                      <div className="px-1.5 py-1 text-[9px] font-extrabold uppercase tracking-wider opacity-70">
+                        Ach1ev Studio
+                      </div>
+                      {PRODUCT_DEMO_SECTIONS.slice(0, 7).map((item, sIdx) => {
+                        const ItemIcon = getSectionIcon(item.iconKey);
+                        const active = sIdx === activeIdx;
+                        return (
+                          <div
+                            key={item.id}
+                            className={`flex items-center gap-1.5 px-1.5 py-1 rounded-lg text-[9.5px] font-semibold transition-all ${
+                              active
+                                ? 'text-white shadow-2xs'
+                                : uiThemeDark
+                                ? 'text-[#c9b497]/75'
+                                : 'text-[#5b4128]/80'
+                            }`}
+                            style={active ? { backgroundColor: section.accent } : undefined}
+                          >
+                            <ItemIcon className="w-3 h-3 shrink-0" />
+                            <span className="truncate">{item.sectionName}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                    <div
+                      className={`p-1.5 rounded-lg text-[9px] font-semibold flex items-center gap-1 ${
+                        activeIdx >= 7
+                          ? 'text-white'
+                          : uiThemeDark
+                          ? 'bg-white/5 text-[#c9b497]'
+                          : 'bg-[#ead6b2] text-[#4b341e]'
+                      }`}
+                      style={activeIdx >= 7 ? { backgroundColor: section.accent } : undefined}
+                    >
+                      <Palette className="w-3 h-3 shrink-0" />
+                      <span className="truncate">Themes &amp; Settings</span>
+                    </div>
+                  </div>
+
+                  {/* Main Auto-Scrolling Workspace Canvas */}
+                  <div className="flex-1 p-3 sm:p-4 relative overflow-hidden flex flex-col justify-between">
+                    {/* Minimalist Top Bar */}
+                    <div className="flex items-center justify-between gap-2 pb-2 border-b border-current/10 shrink-0">
+                      <div className="flex items-center gap-1.5">
+                        <span
+                          className="px-2 py-0.5 rounded-md text-[9.5px] font-bold text-white"
+                          style={{ backgroundColor: section.accent }}
+                        >
+                          {section.stepNum} / 09
+                        </span>
+                        <span className="text-[11px] font-bold truncate">{section.sectionName}</span>
+                      </div>
+                      <div className="text-[9.5px] font-mono opacity-75">
+                        20:00 Eye Rest · Synced
+                      </div>
+                    </div>
+
+                    {/* Smoothly Auto-Scrolling Card Stack */}
+                    <div className="flex-1 overflow-hidden relative py-2">
+                      <div
+                        className="transition-transform duration-300 ease-out"
+                        style={{
+                          transform: `translateY(-${Math.round((progressPct / 100) * 18)}px)`,
+                        }}
+                      >
+                        <LaptopSectionCanvas
+                          section={section}
+                          progressPct={progressPct}
+                          uiThemeDark={uiThemeDark}
+                        />
+                      </div>
+
+                      {/* Contextual Hover Tooltip Callout */}
+                      <div
+                        className={`mt-2.5 rounded-xl p-2 border backdrop-blur-md shadow-md transition-all duration-300 ${
+                          uiThemeDark
+                            ? 'bg-black/60 border-white/15 text-amber-50'
+                            : 'bg-white/80 border-[#d6be93] text-[#221308]'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-[10px] font-bold" style={{ color: section.accent }}>
+                            {section.tooltipTitle}
+                          </span>
+                          <span className="text-[9px] font-mono opacity-65">LIVE PREVIEW</span>
+                        </div>
+                        <p className="text-[10px] opacity-85 mt-0.5 leading-snug">
+                          {section.tooltipBody}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Bottom Dynamic Subtitles Strip */}
+                    <div
+                      className={`px-2.5 py-1.5 rounded-lg text-[10px] font-medium truncate border shrink-0 ${
+                        uiThemeDark
+                          ? 'bg-black/50 border-white/10 text-amber-100'
+                          : 'bg-[#f6ebd4]/90 border-[#dec599] text-[#3a2512]'
+                      }`}
+                    >
+                      {currentCaption}
+                    </div>
+
+                    {/* Minimalist Animated Cursor Highlight */}
+                    <div
+                      aria-hidden="true"
+                      className="pointer-events-none absolute z-20 transition-all duration-700 ease-in-out flex items-center gap-1"
+                      style={{
+                        left: `${activeCursor.xPct}%`,
+                        top: `${activeCursor.yPct}%`,
+                        transform: 'translate(-50%, -50%)',
+                      }}
+                    >
+                      <span
+                        className="w-5 h-5 rounded-full animate-ping opacity-40"
+                        style={{ backgroundColor: section.accent }}
+                      />
+                      <span
+                        className="absolute w-3.5 h-3.5 rounded-full border-2 border-white shadow-md flex items-center justify-center"
+                        style={{ backgroundColor: section.accent }}
+                      >
+                        <MousePointer className="w-2 h-2 text-white" />
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* Laptop Base Lip */}
+              <div className="w-[104%] h-3 rounded-b-xl bg-gradient-to-b from-[#4a372a] to-[#231811] border-t border-[#6e5442]/40 shadow-lg flex items-center justify-center">
+                <div className="w-16 h-1 rounded-full bg-[#150e09]/80" />
               </div>
             </div>
 
-            {/* Video Scrubber & Transport Controls */}
-            <div className="p-4 bg-[#FAF4E6] border-t border-[#E6D6B8] space-y-3 text-[#2A170B]">
-              {/* Clickable Seek Bar */}
-              <div
-                role="slider"
-                aria-label="Episode playback timeline"
-                aria-valuemin={0}
-                aria-valuemax={100}
-                aria-valuenow={Math.round(progressPct)}
-                tabIndex={0}
-                onClick={(e) => {
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  const pct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
-                  setProgressPct(pct);
-                }}
-                className="w-full h-2 rounded-full bg-[#E5D7BA] cursor-pointer overflow-hidden"
-              >
+            {/* COMPANION TABLET FRAME (4 Cols) */}
+            <div className="lg:col-span-4 flex flex-col items-center">
+              <div className="w-full max-w-[260px] rounded-[24px] border-[3px] border-[#261a12] bg-[#160f0a] p-2.5 shadow-2xl">
                 <div
-                  className="h-full rounded-full transition-all duration-100"
-                  style={{ width: `${progressPct}%`, background: episode.accent }}
-                />
-              </div>
-
-              <div className="flex flex-wrap items-center justify-between gap-2">
-                <div className="flex items-center gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => selectEpisode((activeIdx - 1 + FEATURE_VIDEO_SERIES.length) % FEATURE_VIDEO_SERIES.length)}
-                    className="p-2 rounded-xl bg-[#EFE4CC] hover:bg-[#E5D4B2] text-[#2A170B] transition cursor-pointer"
-                    title="Previous Episode"
-                  >
-                    <SkipBack className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setIsPlaying((p) => !p)}
-                    className="px-4 py-2 rounded-xl text-xs font-bold text-white flex items-center gap-1.5 transition cursor-pointer shadow"
-                    style={{ background: episode.accent }}
-                  >
-                    {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
-                    <span>{isPlaying ? 'Pause' : 'Play'}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => selectEpisode((activeIdx + 1) % FEATURE_VIDEO_SERIES.length)}
-                    className="p-2 rounded-xl bg-[#EFE4CC] hover:bg-[#E5D4B2] text-[#2A170B] transition cursor-pointer"
-                    title="Next Episode"
-                  >
-                    <SkipForward className="w-4 h-4" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setProgressPct(0);
-                      setIsPlaying(true);
-                    }}
-                    className="p-2 rounded-xl bg-[#EFE4CC] hover:bg-[#E5D4B2] text-[#2A170B] transition cursor-pointer"
-                    title="Replay Episode"
-                  >
-                    <RotateCcw className="w-4 h-4" />
-                  </button>
-                </div>
-
-                <div className="text-xs text-[#6B5038] font-semibold truncate max-w-[260px]">
-                  {episode.title}
-                </div>
-              </div>
-
-              {/* Episode Highlights */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1">
-                {episode.highlights.map((h) => (
-                  <div key={h} className="flex items-start gap-1.5 text-[11px] text-[#3F2918] bg-[#FFFDF8] rounded-xl p-2 border border-[#E6D7B9]">
-                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0 mt-0.5" style={{ color: episode.accent }} />
-                    <span>{h}</span>
+                  className={`rounded-[18px] p-3 h-[285px] sm:h-[315px] flex flex-col justify-between border overflow-hidden transition-colors duration-300 ${
+                    uiThemeDark
+                      ? 'bg-gradient-to-b from-[#1f130b] to-[#0d0603] border-white/10 text-[#efe4d4]'
+                      : 'bg-gradient-to-b from-[#fffdf8] to-[#f4e5c8] border-[#d6be93] text-[#221308]'
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-[9.5px] font-bold border-b border-current/10 pb-1.5">
+                    <span>Tablet Companion</span>
+                    <span
+                      className="px-1.5 py-0.5 rounded text-white text-[9px]"
+                      style={{ backgroundColor: section.accent }}
+                    >
+                      {section.stepNum}
+                    </span>
                   </div>
-                ))}
+
+                  <div className="my-auto space-y-2 py-1">
+                    <div className="flex items-center gap-2">
+                      <div
+                        className="w-8 h-8 rounded-xl flex items-center justify-center shrink-0"
+                        style={{ backgroundColor: section.accentSoft, color: section.accent }}
+                      >
+                        {React.createElement(getSectionIcon(section.iconKey), { className: 'w-4 h-4' })}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-[11px] font-bold leading-tight truncate">{section.sectionName}</div>
+                        <div className="text-[9.5px] opacity-70">Touch &amp; Stylus Ready</div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5 pt-1">
+                      {section.highlights.map((hl, i) => {
+                        const lit = progressPct >= i * 32;
+                        return (
+                          <div
+                            key={hl}
+                            className={`rounded-xl px-2.5 py-1.5 text-[10px] border transition-all duration-300 flex items-start gap-1.5 ${
+                              lit
+                                ? uiThemeDark
+                                  ? 'bg-white/10 border-white/20 text-amber-50'
+                                  : 'bg-white/85 border-[#cfa868] text-[#1e1007] shadow-2xs'
+                                : 'opacity-50 border-transparent'
+                            }`}
+                          >
+                            <CheckCircle2
+                              className="w-3 h-3 shrink-0 mt-0.5"
+                              style={{ color: section.accent }}
+                            />
+                            <span className="leading-snug">{hl}</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t border-current/10 flex items-center justify-between text-[9.5px] opacity-75">
+                    <span>Offline PWA Ready</span>
+                    <span>9-Section Tour</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Right 5 Cols: Series-Wise Playlist (Cockpit -> Last Sidebar Segment) */}
-          <div className="lg:col-span-5 rounded-3xl border border-[#DFCCA8] bg-[#FFFDF8] p-3.5 flex flex-col gap-2 max-h-[540px] overflow-y-auto custom-scrollbar shadow-[0_10px_30px_rgba(78,50,15,0.07)]">
-            <div className="px-2 py-1 text-xs font-bold uppercase tracking-wider text-[#8E5B13] flex items-center justify-between">
-              <span>Series Playlist (Sidebar Order)</span>
-              <span>{FEATURE_VIDEO_SERIES.length} Episodes</span>
+          {/* Scrubber + Playback Bar */}
+          <div className="pt-2 border-t border-[#DEC79E]/70 space-y-2.5">
+            <div
+              role="slider"
+              aria-label="Product demo playback progress"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(progressPct)}
+              tabIndex={0}
+              onClick={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                const pct = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+                setProgressPct(pct);
+              }}
+              className="w-full h-2 rounded-full bg-[#E3CFA8] cursor-pointer overflow-hidden"
+            >
+              <div
+                className="h-full rounded-full transition-all duration-100"
+                style={{ width: `${progressPct}%`, backgroundColor: section.accent }}
+              />
             </div>
 
-            {FEATURE_VIDEO_SERIES.map((ep, idx) => {
-              const Icon = getEpisodeIcon(ep.iconKey);
-              const active = idx === activeIdx;
-              return (
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-1.5">
                 <button
-                  key={ep.id}
                   type="button"
-                  onClick={() => selectEpisode(idx)}
-                  className={`w-full text-left p-2.5 rounded-2xl border transition-all cursor-pointer flex items-start gap-3 ${
-                    active
-                      ? 'bg-[#FBF1DA] border-[#C9963B] shadow-sm'
-                      : 'bg-[#FAF5EA]/75 border-[#EAE0C8] hover:bg-[#F5EAD2]'
-                  }`}
+                  onClick={() =>
+                    selectSection((activeIdx - 1 + PRODUCT_DEMO_SECTIONS.length) % PRODUCT_DEMO_SECTIONS.length)
+                  }
+                  className="p-2 rounded-xl bg-[#EFE0C2] hover:bg-[#E4CF9F] text-[#2A170B] transition cursor-pointer"
+                  title="Previous Section"
                 >
-                  <div
-                    className="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 mt-0.5 shadow-2xs"
-                    style={{
-                      background: active ? ep.accent : '#EDE2C8',
-                      color: active ? '#ffffff' : '#5E4224',
-                    }}
-                  >
-                    <Icon className="w-4 h-4" />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center justify-between gap-2">
-                      <span className="text-[10px] font-bold uppercase tracking-wider" style={{ color: ep.accent }}>
-                        {ep.epNumber} · {ep.sidebarSegment}
-                      </span>
-                      <span className="text-[10px] font-mono text-[#7A5D41]">{formatSec(ep.durationSec)}</span>
-                    </div>
-                    <div className="text-xs sm:text-[13px] font-bold text-[#221208] leading-snug mt-0.5">
-                      {ep.title}
-                    </div>
-                  </div>
+                  <SkipBack className="w-4 h-4" />
                 </button>
-              );
-            })}
+                <button
+                  type="button"
+                  onClick={() => setIsPlaying((p) => !p)}
+                  className="px-4 py-2 rounded-xl text-xs font-bold text-white flex items-center gap-1.5 transition cursor-pointer shadow"
+                  style={{ backgroundColor: section.accent }}
+                >
+                  {isPlaying ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                  <span>{isPlaying ? 'Pause' : 'Play'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => selectSection((activeIdx + 1) % PRODUCT_DEMO_SECTIONS.length)}
+                  className="p-2 rounded-xl bg-[#EFE0C2] hover:bg-[#E4CF9F] text-[#2A170B] transition cursor-pointer"
+                  title="Next Section"
+                >
+                  <SkipForward className="w-4 h-4" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setProgressPct(0);
+                    setIsPlaying(true);
+                  }}
+                  className="p-2 rounded-xl bg-[#EFE0C2] hover:bg-[#E4CF9F] text-[#2A170B] transition cursor-pointer"
+                  title="Replay"
+                >
+                  <RotateCcw className="w-4 h-4" />
+                </button>
+              </div>
+
+              <div className="text-xs font-semibold text-[#5C3F23] flex items-center gap-2">
+                <span>{section.title}</span>
+                <span className="font-mono opacity-75">
+                  {formatSec((progressPct / 100) * section.durationSec)} / {formatSec(section.durationSec)}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* ═══════════════ 3. CHEAPEST MEDICAL STUDENT PRICING COMPARISON ═══════════════ */}
-      <section aria-labelledby="pricing-comparison-heading" className="space-y-6">
-        <div className="text-center space-y-2">
-          <div className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-[#0E7752]">
-            <IndianRupee className="w-3.5 h-3.5" />
-            <span>Transparent Student-First Pricing</span>
-          </div>
-          <h2 id="pricing-comparison-heading" className="text-xl sm:text-2xl font-bold text-[#1E1007] font-serif">
-            Why Medical Students Switch From Expensive Subscriptions to Achiev
+      {/* ═══════════════ 3. ACH1EV MEMBERSHIP TIERS (CLEAN, NO COMPETITOR TABLES) ═══════════════ */}
+      <section aria-labelledby="achiev-plans-heading" className="space-y-5">
+        <div className="text-center space-y-1.5">
+          <h2 id="achiev-plans-heading" className="text-xl sm:text-2xl font-bold text-[#1E1007] font-serif">
+            Ach1ev Academic Plans
           </h2>
-          <p className="text-xs sm:text-sm text-[#63482E] max-w-2xl mx-auto">
-            Every tier unlocks cross-device medical reading &amp; note-making at a fraction of legacy app prices.
+          <p className="text-xs sm:text-sm text-[#5C4128] max-w-xl mx-auto">
+            Start free or unlock complete clinical extraction, all 3D almirahs, and cloud sync via UPI, Card, or Net Banking.
           </p>
         </div>
 
-        {/* Achiev Plans Strip (3 Expert Tiers: Free, ₹1,200/yr · ₹100/mo, ₹3,600/yr · ₹300/mo) */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
           {SUBSCRIPTION_TIERS.map((tier) => (
             <div
               key={tier.id}
-              className={`rounded-2xl p-5 border flex flex-col justify-between transition-all ${
+              className={`rounded-2xl p-5 border flex flex-col justify-between transition-all backdrop-blur-md ${
                 tier.highlight
-                  ? 'bg-gradient-to-b from-[#FFF7E1] to-[#F9EED2] border-[#C89336] ring-1 ring-[#D7A648]/40 shadow-[0_14px_32px_rgba(142,91,19,0.14)]'
-                  : 'bg-[#FFFDF8] border-[#E3D2B1] shadow-[0_6px_18px_rgba(78,50,15,0.05)]'
+                  ? 'bg-[#FFF8E6]/88 border-[#C89336] ring-1 ring-[#D7A648]/40 shadow-[0_14px_32px_rgba(142,91,19,0.14)]'
+                  : 'bg-[#FFFBF2]/78 border-[#D4B47C]/55 shadow-[0_6px_18px_rgba(78,50,15,0.06)]'
               }`}
             >
               <div>
-                <div className="text-[10.5px] font-bold uppercase tracking-wider text-[#9B6A1F]">{tier.badge}</div>
+                <div className="text-[10px] font-bold uppercase tracking-wider text-[#9B6A1F]">{tier.badge}</div>
                 <h3 className="text-lg font-bold text-[#1E1007] mt-1 font-serif">{tier.name}</h3>
                 <div className="flex items-baseline gap-2 mt-1.5">
-                  <span className="text-3xl font-extrabold text-[#0E7752]">
+                  <span className="text-3xl font-extrabold text-[#1E1007]">
                     {tier.priceAnnual === 0 ? '₹0' : `₹${tier.priceAnnual.toLocaleString('en-IN')}`}
                   </span>
-                  <span className="text-xs font-semibold text-[#7A5D41]">
-                    {tier.priceAnnual === 0 ? 'Free Forever' : `/ year · only ₹${tier.priceMonthly}/mo`}
+                  <span className="text-xs font-semibold text-[#6E5238]">
+                    {tier.priceAnnual === 0 ? 'Free Forever' : `/ year · ₹${tier.priceMonthly}/mo`}
                   </span>
                 </div>
                 <p className="text-xs text-[#594028] mt-2 leading-relaxed">{tier.description}</p>
               </div>
-              <ul className="mt-4 pt-3 border-t border-[#E6D7B9] space-y-2">
-                {tier.features.slice(0, 5).map((f) => (
-                  <li key={f} className="flex items-start gap-1.5 text-[11.5px] text-[#3C2715]">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-[#0E7752] shrink-0 mt-0.5" />
-                    <span>{f}</span>
-                  </li>
-                ))}
-              </ul>
+              <div className="mt-4 pt-3 border-t border-[#DEC79E]/75 space-y-3">
+                <ul className="space-y-2">
+                  {tier.features.slice(0, 5).map((f) => (
+                    <li key={f} className="flex items-start gap-1.5 text-[11.5px] text-[#3C2715]">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#8E5B13] shrink-0 mt-0.5" />
+                      <span>{f}</span>
+                    </li>
+                  ))}
+                </ul>
+                <button
+                  type="button"
+                  onClick={() => window.dispatchEvent(new CustomEvent('achiev_skip_create_note'))}
+                  className="w-full py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 bg-[#9B6A1F] hover:bg-[#825614] text-white transition cursor-pointer"
+                >
+                  <span>{tier.priceAnnual === 0 ? 'Start Free Note' : 'Explore Inside Studio'}</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
             </div>
           ))}
         </div>
-
-        {/* Competitor Comparison Table */}
-        <div className="rounded-2xl border border-[#E0CFAF] bg-[#FFFDF8] overflow-x-auto shadow-[0_8px_24px_rgba(78,50,15,0.06)]">
-          <table className="w-full text-left border-collapse min-w-[640px]">
-            <thead>
-              <tr className="border-b border-[#E0CFAF] text-[11px] uppercase tracking-wider text-[#6D4715] bg-[#F5EBD4]">
-                <th className="py-3 px-4">Popular Note App</th>
-                <th className="py-3 px-4">Their Typical Cost</th>
-                <th className="py-3 px-4">Achiev Cost</th>
-                <th className="py-3 px-4">Why Achiev Wins for Medical Students</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-[#EDE1C7] text-xs">
-              {COMPETITOR_BENCHMARKS.map((row) => (
-                <tr key={row.app} className="hover:bg-[#FAF4E4]">
-                  <td className="py-3 px-4 font-bold text-[#1E1007]">{row.app}</td>
-                  <td className="py-3 px-4 text-[#B93838] font-medium">{row.typicalPriceNote}</td>
-                  <td className="py-3 px-4 text-[#0E7752] font-bold">
-                    ₹{row.achievPriceMonthlyInr}/mo ({row.matchedAchievTier})
-                  </td>
-                  <td className="py-3 px-4 text-[#4A331F]">{row.achievAdvantage}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
       </section>
 
-      {/* ═══════════════ 4. MEDICAL STUDENT SEO FAQ ACCORDION ═══════════════ */}
+      {/* ═══════════════ 4. STUDY WORKSPACE FAQ ACCORDION ═══════════════ */}
       <section aria-labelledby="medical-faq-heading" className="max-w-4xl mx-auto space-y-3 pb-4">
         <h2 id="medical-faq-heading" className="text-lg sm:text-xl font-bold text-center text-[#1E1007] font-serif mb-4">
-          Frequently Asked Questions · Medical Student Study Workspace
+          Frequently Asked Questions
         </h2>
-        {SEO_FAQS.map((item, i) => {
+        {STUDY_FAQS.map((item, i) => {
           const isOpen = openFaqIdx === i;
           return (
             <div
               key={item.q}
-              className="rounded-2xl border border-[#E3D2B1] bg-[#FFFDF8] overflow-hidden shadow-[0_4px_14px_rgba(78,50,15,0.05)]"
+              className="rounded-2xl border border-[#D4B47C]/55 bg-[#FFFBF2]/78 backdrop-blur-md overflow-hidden shadow-[0_4px_14px_rgba(78,50,15,0.05)]"
             >
               <button
                 type="button"
                 onClick={() => setOpenFaqIdx(isOpen ? null : i)}
-                className="w-full px-4 py-3.5 text-left flex items-center justify-between gap-3 cursor-pointer hover:bg-[#FAF3E2]"
+                className="w-full px-4 py-3.5 text-left flex items-center justify-between gap-3 cursor-pointer hover:bg-[#FAF0D8]/70"
               >
                 <span className="text-xs sm:text-sm font-bold text-[#221208]">{item.q}</span>
                 {isOpen ? (
@@ -810,7 +1016,7 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
                 )}
               </button>
               {isOpen && (
-                <div className="px-4 pb-3.5 text-xs sm:text-[13px] text-[#523B26] leading-relaxed border-t border-[#EDE1C7] pt-2.5 bg-[#FDFBF5]">
+                <div className="px-4 pb-3.5 text-xs sm:text-[13px] text-[#523B26] leading-relaxed border-t border-[#E6D1AA]/65 pt-2.5">
                   {item.a}
                 </div>
               )}
@@ -822,71 +1028,64 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
   );
 };
 
-/* ───────────── ANIMATED LIVE SCENE RENDERER PER EPISODE ───────────── */
-const EpisodeAnimatedViewport: React.FC<{ episode: SeriesEpisode; progressPct: number }> = ({
-  episode,
-  progressPct,
-}) => {
-  const step = progressPct < 33 ? 1 : progressPct < 68 ? 2 : 3;
+/* ───────────── ANIMATED MINI UI INSIDE LAPTOP SCREEN PER SECTION ───────────── */
+const LaptopSectionCanvas: React.FC<{
+  section: ShowcaseSection;
+  progressPct: number;
+  uiThemeDark: boolean;
+}> = ({ section, progressPct, uiThemeDark }) => {
+  const step = progressPct < 34 ? 1 : progressPct < 68 ? 2 : 3;
+  const cardSurface = uiThemeDark
+    ? 'bg-white/[0.06] border-white/10'
+    : 'bg-white/75 border-[#dcc49a]';
 
-  if (episode.iconKey === 'dashboard') {
+  if (section.iconKey === 'dashboard') {
     return (
-      <div className="grid grid-cols-3 gap-2.5 items-center">
-        <div className="col-span-2 rounded-2xl p-3 bg-white/[0.06] border border-white/10 space-y-2">
-          <div className="flex items-center justify-between text-[11px] font-bold text-amber-200">
-            <span>Cockpit · MBBS Pharmacology &amp; Path</span>
-            <span className="px-2 py-0.5 rounded bg-amber-500/25 text-amber-200 animate-pulse">Live Sync</span>
+      <div className="grid grid-cols-3 gap-2">
+        <div className={`col-span-2 rounded-xl p-2.5 border ${cardSurface} space-y-2`}>
+          <div className="text-[10px] font-bold flex items-center justify-between">
+            <span>Daily Clinical Slabs</span>
+            <span className="text-[9px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400">Active</span>
           </div>
-          <div className="grid grid-cols-3 gap-2">
-            {['14 Notebooks', '8 Books Read', '92% Streak'].map((kpi, i) => (
+          <div className="grid grid-cols-3 gap-1.5">
+            {['Pharmacology', 'Pathology', 'Medicine'].map((s, i) => (
               <div
-                key={kpi}
-                className={`rounded-xl p-2 text-[10px] font-semibold border transition-all duration-500 ${
-                  step >= i + 1 ? 'bg-amber-500/20 border-amber-400/50 text-amber-50 scale-[1.03]' : 'bg-black/30 border-white/10 text-stone-400'
+                key={s}
+                className={`p-2 rounded-lg text-[9.5px] font-semibold border transition-all ${
+                  step >= i + 1 ? 'bg-amber-500/20 border-amber-400/50 scale-[1.03]' : 'border-current/10 opacity-70'
                 }`}
               >
-                {kpi}
+                {s}
               </div>
             ))}
           </div>
         </div>
-        <div
-          className={`rounded-2xl p-3 border text-center transition-all duration-500 ${
-            step >= 2 ? 'bg-amber-500/25 border-amber-300 scale-105 shadow-lg' : 'bg-white/[0.05] border-white/10'
-          }`}
-        >
-          <Eye className="w-6 h-6 mx-auto text-amber-300 mb-1" />
-          <div className="text-[11px] font-bold text-amber-50">Eye Rest Timer</div>
-          <div className="text-sm font-mono font-extrabold text-amber-300 mt-0.5">
-            {step === 1 ? '20:00' : step === 2 ? '19:42' : 'Break: 20s ✨'}
+        <div className={`rounded-xl p-2.5 border text-center flex flex-col justify-center ${cardSurface}`}>
+          <Eye className="w-4 h-4 mx-auto text-amber-400 mb-1" />
+          <div className="text-[9.5px] font-bold">Eye Rest</div>
+          <div className="text-xs font-mono font-extrabold text-amber-400">
+            {step === 1 ? '20:00' : step === 2 ? '19:45' : 'Rest 20s'}
           </div>
         </div>
       </div>
     );
   }
 
-  if (episode.iconKey === 'read') {
+  if (section.iconKey === 'read') {
     return (
-      <div className="grid grid-cols-2 gap-3">
-        {[
-          { book: "Harrison's Internal Med", tag: 'PDF · Page 412', active: step >= 1 },
-          { book: 'Robbins Pathology Notes', tag: 'EPUB / DOCX Side-by-Side', active: step >= 2 },
-        ].map((pane, idx) => (
-          <div
-            key={pane.book}
-            className={`rounded-2xl p-3 border transition-all duration-500 ${
-              pane.active ? 'bg-sky-500/15 border-sky-400/45 translate-y-0 opacity-100' : 'bg-white/[0.04] border-white/10 opacity-60 translate-y-1'
-            }`}
-          >
-            <div className="flex items-center justify-between text-[10px] font-bold text-sky-300 mb-1.5">
-              <span>Slab {idx + 1} · {pane.tag}</span>
-              <BookOpenText className="w-3.5 h-3.5" />
+      <div className="grid grid-cols-2 gap-2.5">
+        {['Harrison Internal Medicine · PDF', 'Robbins Pathology · EPUB'].map((title, idx) => (
+          <div key={title} className={`rounded-xl p-2.5 border ${cardSurface} space-y-1.5`}>
+            <div className="text-[10px] font-bold truncate" style={{ color: section.accent }}>
+              Pane {idx + 1} · {title}
             </div>
-            <div className="text-xs font-bold text-white">{pane.book}</div>
-            <div className="mt-2 space-y-1">
-              <div className="h-2 w-11/12 rounded bg-white/15" />
-              <div className={`h-2 w-4/5 rounded transition-colors ${step === 3 ? 'bg-amber-400/70' : 'bg-white/15'}`} />
-              <div className="h-2 w-3/4 rounded bg-white/10" />
+            <div className="space-y-1">
+              <div className="h-2 w-11/12 rounded bg-current/15" />
+              <div
+                className="h-2 w-4/5 rounded transition-colors"
+                style={{ backgroundColor: step >= idx + 2 ? section.accentSoft : 'rgba(128,128,128,0.2)' }}
+              />
+              <div className="h-2 w-2/3 rounded bg-current/10" />
             </div>
           </div>
         ))}
@@ -894,83 +1093,29 @@ const EpisodeAnimatedViewport: React.FC<{ episode: SeriesEpisode; progressPct: n
     );
   }
 
-  if (episode.iconKey === 'note') {
+  if (section.iconKey === 'note') {
     return (
-      <div className="grid grid-cols-12 gap-2.5">
-        <div className="col-span-5 rounded-2xl p-2.5 bg-emerald-500/10 border border-emerald-400/35">
-          <div className="text-[10px] font-bold text-emerald-300 flex items-center gap-1 mb-1">
-            <BookOpenText className="w-3 h-3" />
-            <span>Open Book Beside Note</span>
+      <div className="grid grid-cols-12 gap-2">
+        <div className={`col-span-5 rounded-xl p-2 border ${cardSurface}`}>
+          <div className="text-[9.5px] font-bold text-emerald-400 flex items-center gap-1">
+            <PenTool className="w-3 h-3" />
+            <span>Lockable Box + Image</span>
           </div>
-          <div className="text-[11px] font-semibold text-white">KDT Pharmacology</div>
-          <div className="mt-2 p-2 rounded-lg bg-black/40 border border-dashed border-emerald-400/50 text-[10px] text-emerald-100">
-            {step === 1 ? '📷 Textbook table image selected' : '✓ Converted via Picture-to-Table!'}
-          </div>
-        </div>
-        <div className="col-span-7 rounded-2xl p-2.5 bg-[#fffdf7]/10 border border-white/15 flex flex-col justify-between">
-          <div>
-            <div className="text-[10px] font-bold text-amber-200 flex items-center justify-between">
-              <span className="flex items-center gap-1"><PenTool className="w-3 h-3" /> Ruled Clinical Note</span>
-              <Table2 className="w-3.5 h-3.5 text-emerald-300" />
-            </div>
-            <div className="mt-1.5 grid grid-cols-3 gap-1 text-[9px] font-mono">
-              {['Drug', 'Mechanism', 'Key Side Effect', 'Atropine', 'M-Blocker', 'Dry mouth', 'Digoxin', 'Na/K ATPase', 'Yellow vision'].map(
-                (cell, ci) => (
-                  <div
-                    key={cell}
-                    className={`px-1.5 py-1 rounded border transition-all ${
-                      ci < 3
-                        ? 'bg-emerald-600/35 border-emerald-400/40 font-bold text-white'
-                        : step >= 2
-                          ? 'bg-white/10 border-white/15 text-amber-50'
-                          : 'bg-white/[0.03] border-white/5 text-transparent'
-                    }`}
-                  >
-                    {cell}
-                  </div>
-                )
-              )}
-            </div>
-          </div>
-          <div className="mt-2 px-2 py-1 rounded bg-black/50 text-[9px] text-amber-200 flex items-center justify-between">
-            <span>▶ Lecture Video Docked at Bottom</span>
-            <span>Pinned</span>
+          <div className="mt-1.5 p-1.5 rounded-lg border border-dashed border-emerald-400/50 text-[9px]">
+            {step >= 2 ? '🔒 Position Locked on Sheet' : 'Drag & Resize Text Box'}
           </div>
         </div>
-      </div>
-    );
-  }
-
-  if (episode.iconKey === 'calendar') {
-    return (
-      <div className="grid grid-cols-2 gap-3">
-        <div className="rounded-2xl p-3 bg-violet-500/15 border border-violet-400/40 space-y-1.5">
-          <div className="text-[11px] font-bold text-violet-200">Daily Trackers &amp; Tasks</div>
-          {[
-            { t: 'Revise 40 Anatomy MCQs', done: step >= 1 },
-            { t: 'Medicine Ward Posting 8 AM', done: step >= 2 },
-            { t: '20-min Anki Card Streak', done: step >= 3 },
-          ].map((item) => (
-            <div key={item.t} className="flex items-center gap-2 text-[11px] bg-black/30 rounded-lg px-2 py-1">
-              <span className={item.done ? 'text-emerald-400 font-bold' : 'text-stone-500'}>
-                {item.done ? '☑' : '☐'}
-              </span>
-              <span className={item.done ? 'line-through text-stone-300' : 'text-white'}>{item.t}</span>
-            </div>
-          ))}
-        </div>
-        <div className="rounded-2xl p-3 bg-white/[0.06] border border-white/15">
-          <div className="text-[11px] font-bold text-amber-200 mb-2">Smart Clinical Schedule Grid</div>
-          <div className="grid grid-cols-4 gap-1 text-center text-[9px]">
-            {['Mon', 'Tue', 'Wed', 'Thu', 'Surgery', 'Medicine', 'OBG', 'Peds'].map((c, idx) => (
+        <div className={`col-span-7 rounded-xl p-2 border ${cardSurface}`}>
+          <div className="text-[9.5px] font-bold mb-1 flex items-center justify-between">
+            <span>Picture-to-Table Grid</span>
+            <Table2 className="w-3 h-3 text-emerald-400" />
+          </div>
+          <div className="grid grid-cols-3 gap-1 text-[8.5px] font-mono">
+            {['Drug', 'Class', 'Use', 'Atropine', 'Antimus.', 'Bradycardia'].map((c, ci) => (
               <div
                 key={c}
-                className={`p-1.5 rounded ${
-                  idx < 4
-                    ? 'bg-violet-500/30 text-violet-100 font-bold'
-                    : step >= 2
-                      ? 'bg-amber-500/25 text-amber-100'
-                      : 'bg-white/5 text-stone-400'
+                className={`px-1 py-0.5 rounded border ${
+                  ci < 3 || step >= 2 ? 'border-emerald-400/35 bg-emerald-500/15' : 'border-current/10 opacity-40'
                 }`}
               >
                 {c}
@@ -982,54 +1127,33 @@ const EpisodeAnimatedViewport: React.FC<{ episode: SeriesEpisode; progressPct: n
     );
   }
 
-  if (episode.iconKey === 'shelf') {
-    return (
-      <div className="rounded-2xl p-3 bg-[#1c1008]/90 border border-amber-500/35 space-y-2">
-        <div className="flex items-center justify-between text-[11px] font-bold text-amber-200">
-          <span>3D Almirah Bay · Glass Doors &amp; Black Steel Vault</span>
-          <span className="text-pink-300">{step === 3 ? '🐱 Kitty Petted: purr~ ♥ ♥' : '🐱 Walking on Floor...'}</span>
-        </div>
-        <div className="grid grid-cols-3 gap-2">
-          <div className="rounded-xl p-2 bg-amber-900/35 border border-white/25 text-[10px]">
-            <div className="font-bold text-amber-100">Glass Walnut</div>
-            <div className="flex gap-1 mt-1.5">
-              <span className="h-7 w-2.5 rounded-xs bg-rose-700" />
-              <span className="h-7 w-2.5 rounded-xs bg-sky-700" />
-              <span className={`h-7 w-2.5 rounded-xs bg-amber-600 transition-transform ${step >= 2 ? 'translate-x-10 scale-110 ring-2 ring-amber-300' : ''}`} />
-            </div>
-          </div>
-          <div className="rounded-xl p-2 bg-amber-800/30 border border-white/25 text-[10px]">
-            <div className="font-bold text-amber-100">Glass Caramel</div>
-            <div className="text-[9px] text-amber-200/80 mt-2">
-              {step >= 2 ? '📥 Book Dropped!' : 'Crystal Sliding Glass'}
-            </div>
-          </div>
-          <div className="rounded-xl p-2 bg-[#0a0c10] border border-stone-600 text-[10px]">
-            <div className="font-bold text-stone-200">Obsidian Vault</div>
-            <div className="w-6 h-6 rounded-full border-2 border-amber-400 mx-auto mt-1 bg-stone-900" />
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="rounded-2xl p-4 border border-white/15 bg-white/[0.05] flex items-center justify-between gap-4">
-      <div className="space-y-1.5">
-        <div className="inline-flex items-center gap-1.5 text-xs font-bold" style={{ color: episode.accent }}>
-          <Sparkles className="w-3.5 h-3.5" />
-          <span>{episode.sidebarSegment}</span>
+    <div className={`rounded-xl p-3 border ${cardSurface} flex items-center justify-between gap-3`}>
+      <div className="space-y-1 min-w-0">
+        <div className="text-[10px] font-bold uppercase tracking-wider" style={{ color: section.accent }}>
+          {section.sectionName}
         </div>
-        <div className="text-sm sm:text-base font-bold text-white">{episode.title}</div>
-        <div className="text-xs text-[#d6c2a5] max-w-md">{episode.subtitle}</div>
+        <div className="text-xs font-bold leading-snug truncate">{section.title}</div>
+        <div className="flex flex-wrap gap-1 pt-0.5">
+          {section.highlights.slice(0, 2).map((h, i) => (
+            <span
+              key={h}
+              className={`text-[9px] px-2 py-0.5 rounded-md border ${
+                step >= i + 1 ? 'border-current/25 bg-current/10 font-semibold' : 'border-current/10 opacity-65'
+              }`}
+            >
+              {h}
+            </span>
+          ))}
+        </div>
       </div>
       <div
-        className="w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 shadow-lg transition-transform duration-500"
-        style={{ background: episode.accentSoft, border: `1.5px solid ${episode.accent}`, transform: `scale(${step === 2 ? 1.08 : 1})` }}
+        className="w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 border"
+        style={{ backgroundColor: section.accentSoft, borderColor: section.accent }}
       >
-        {React.createElement(getEpisodeIcon(episode.iconKey), {
-          className: 'w-8 h-8',
-          style: { color: episode.accent },
+        {React.createElement(getSectionIcon(section.iconKey), {
+          className: 'w-6 h-6',
+          style: { color: section.accent },
         })}
       </div>
     </div>

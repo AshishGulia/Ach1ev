@@ -330,18 +330,18 @@ const THEME_LOOK_OVERRIDES: Record<Exclude<ShelfThemeId, '1'>, Record<string, Th
     Vault: { frame: '#100d1d', dark: '#07050f', back: '#040308', plank: '#1a152e', face: '#0d0a17', handle: '#f1916d' },
   },
   '3': {
-    'Dark Chocolate': { frame: '#163c54', dark: '#0a2233', back: '#041724', plank: '#265370', face: '#163c54', handle: '#c2e8ff' },
-    'Creamy Caramel': { frame: '#557d96', dark: '#365c73', back: '#1d394a', plank: '#7298af', face: '#557d96', handle: '#eaffff' },
-    'Vanilla White': { frame: '#eaffff', dark: '#b3dcf2', back: '#f0fcff', plank: '#c2e8ff', face: '#f5feff', handle: '#004671' },
-    'Mocha Espresso': { frame: '#042a41', dark: '#021826', back: '#01101a', plank: '#004671', face: '#032236', handle: '#c2e8ff' },
-    Vault: { frame: '#021521', dark: '#010b12', back: '#01070b', plank: '#042233', face: '#02111a', handle: '#7298af' },
+    'Dark Chocolate': { frame: '#4a2b37', dark: '#2a161e', back: '#1c0f14', plank: '#633c4b', face: '#4a2b37', handle: '#efd4d7' },
+    'Creamy Caramel': { frame: '#b98f98', dark: '#876069', back: '#4d3239', plank: '#d6b4bb', face: '#b98f98', handle: '#fbf3f2' },
+    'Vanilla White': { frame: '#fbf3f2', dark: '#dec4c9', back: '#fdf9f8', plank: '#edd9dc', face: '#fdf8f7', handle: '#6e4253' },
+    'Mocha Espresso': { frame: '#352028', dark: '#221218', back: '#170c10', plank: '#4f303c', face: '#2b1920', handle: '#d49aa6' },
+    Vault: { frame: '#24141a', dark: '#140a0e', back: '#0d0609', plank: '#361f28', face: '#1c0f14', handle: '#cfaab3' },
   },
   '4': {
-    'Dark Chocolate': { frame: '#1f242d', dark: '#14171c', back: '#0d1015', plank: '#2c3340', face: '#1f242d', handle: '#60a5fa' },
-    'Creamy Caramel': { frame: '#64748b', dark: '#475569', back: '#1e293b', plank: '#94a3b8', face: '#64748b', handle: '#eff6ff' },
-    'Vanilla White': { frame: '#e2e8f0', dark: '#94a3b8', back: '#f1f5f9', plank: '#cbd5e1', face: '#f8fafc', handle: '#1d4ed8' },
-    'Mocha Espresso': { frame: '#171b22', dark: '#0f1217', back: '#090b0f', plank: '#242b38', face: '#13171e', handle: '#3b82f6' },
-    Vault: { frame: '#0f1217', dark: '#080a0d', back: '#050608', plank: '#181d26', face: '#0c0f14', handle: '#60a5fa' },
+    'Dark Chocolate': { frame: '#232934', dark: '#161a22', back: '#0f1218', plank: '#323a49', face: '#232934', handle: '#7d9ab5' },
+    'Creamy Caramel': { frame: '#687687', dark: '#4a5563', back: '#242b35', plank: '#8e9bab', face: '#687687', handle: '#edf1f5' },
+    'Vanilla White': { frame: '#e5ebf1', dark: '#b3bec9', back: '#f4f7fa', plank: '#cfd7e0', face: '#f8fafc', handle: '#48617c' },
+    'Mocha Espresso': { frame: '#191e26', dark: '#11151b', back: '#0b0e12', plank: '#28303d', face: '#151920', handle: '#7d9ab5' },
+    Vault: { frame: '#11151b', dark: '#090b0f', back: '#06070a', plank: '#1c222c', face: '#0e1116', handle: '#7d9ab5' },
   },
   '5': {
     'Dark Chocolate': { frame: '#002a23', dark: '#001a15', back: '#020f0d', plank: '#083b32', face: '#002a23', handle: '#d1a854' },
@@ -376,9 +376,9 @@ export function getThemeAlmirahTrim(themeId: ShelfThemeId): ThemeAlmirahTrim {
     case '2':
       return { accentHex: '#f1916d', corniceInlay: 'linear-gradient(90deg, transparent, rgba(241,145,109,0.48), transparent)', plinthAccentBg: '#473e66', plinthText: '#f8e8ec' };
     case '3':
-      return { accentHex: '#7298af', corniceInlay: 'linear-gradient(90deg, transparent, rgba(194,232,255,0.50), transparent)', plinthAccentBg: '#004671', plinthText: '#eaffff' };
+      return { accentHex: '#d49aa6', corniceInlay: 'linear-gradient(90deg, transparent, rgba(212,154,166,0.46), transparent)', plinthAccentBg: '#6e4253', plinthText: '#fbf3f2' };
     case '4':
-      return { accentHex: '#21daef', corniceInlay: 'linear-gradient(90deg, transparent, rgba(33,218,239,0.52), transparent)', plinthAccentBg: '#58423e', plinthText: '#e9fbfd' };
+      return { accentHex: '#7d9ab5', corniceInlay: 'linear-gradient(90deg, transparent, rgba(125,154,181,0.44), transparent)', plinthAccentBg: '#374b61', plinthText: '#edf1f5' };
     case '5':
       return { accentHex: '#d1a854', corniceInlay: 'linear-gradient(90deg, transparent, rgba(209,168,84,0.52), transparent)', plinthAccentBg: '#002a23', plinthText: '#f2e7d9' };
     default:
@@ -824,10 +824,10 @@ export const ShelfThemeCarpet: React.FC<{ night: boolean; lit: boolean; themeId:
       case '3':
         return (
           <svg viewBox="0 0 790 92" preserveAspectRatio="none" style={{ width: '100%', height: '100%', overflow: 'visible' }}>
-            <rect x="18" y="8" width="754" height="74" rx="18" fill="#efe6d3" stroke="#2c7a94" strokeWidth="4" />
-            <path d="M24 30 Q90 22 156 30 T288 30 T420 30 T552 30 T684 30 T766 30" fill="none" stroke="#4ca0b8" strokeWidth="2.5" />
-            <path d="M24 62 Q90 54 156 62 T288 62 T420 62 T552 62 T684 62 T766 62" fill="none" stroke="#c97d5d" strokeWidth="2.5" />
-            <rect x="34" y="16" width="722" height="58" rx="12" fill="none" stroke="#b59d7a" strokeWidth="1.5" strokeDasharray="6 6" />
+            <rect x="18" y="8" width="754" height="74" rx="18" fill="#f7eaea" stroke="#6e4253" strokeWidth="4" />
+            <path d="M24 30 Q90 22 156 30 T288 30 T420 30 T552 30 T684 30 T766 30" fill="none" stroke="#9e6d7d" strokeWidth="2.5" />
+            <path d="M24 62 Q90 54 156 62 T288 62 T420 62 T552 62 T684 62 T766 62" fill="none" stroke="#c89ea7" strokeWidth="2.5" />
+            <rect x="34" y="16" width="722" height="58" rx="12" fill="none" stroke="#8c5c6e" strokeWidth="1.5" strokeDasharray="6 6" />
           </svg>
         );
       case '4':

@@ -10,9 +10,9 @@
   --at-sage-soft: #F1E7D6;
   --at-brass-soft: #F1E7D6;
   --at-shadow: 0 1px 0 rgba(255,255,255,.8) inset, 0 20px 40px -28px rgba(54,40,20,.35);
-  --at-serif: var(--app-font-family, 'Alata', system-ui, -apple-system, sans-serif);
-  --at-sans: var(--app-font-family, 'Alata', system-ui, -apple-system, sans-serif);
-  --at-mono: "Geist Mono", "JetBrains Mono", ui-monospace, monospace;
+  --at-serif: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif);
+  --at-sans: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif);
+  --at-mono: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif);
 }
 
 .dark .atelier-root,
@@ -895,6 +895,8 @@ html.dark .atelier-sticky,
 
 .atelier-sticky .atelier-add {
   display: flex;
+  flex-direction: column;
+  align-items: center;
   gap: 6px;
   margin-top: 8px;
   border-top: 1px dashed rgba(61,52,32,.3);
@@ -902,13 +904,14 @@ html.dark .atelier-sticky,
 }
 
 .atelier-sticky .atelier-add input {
-  flex: 1;
+  width: 100%;
   min-width: 0;
   border: 0;
   background: none;
   outline: none;
   font-family: "Caveat", cursive;
   font-size: 14px;
+  text-align: center;
   color: var(--note-ink);
 }
 
@@ -917,8 +920,8 @@ html.dark .atelier-sticky,
 }
 
 .atelier-sticky .atelier-add button {
-  width: 24px;
-  height: 24px;
+  width: 28px;
+  height: 28px;
   border-radius: 50%;
   background: var(--note-ink);
   color: var(--note);
@@ -926,7 +929,7 @@ html.dark .atelier-sticky,
   place-items: center;
   border: none;
   cursor: pointer;
-  margin-right: 26px;
+  margin: 0 auto;
 }
 
 /* Reminders Section - Compact */

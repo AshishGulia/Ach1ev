@@ -1542,6 +1542,17 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({
   // 2. UI Controls
   const [searchQuery, setSearchQuery] = useState('');
   const [activeCategoryFilter, setActiveCategoryFilter] = useState<string | null>(null);
+  const [moreWingsOpen, setMoreWingsOpen] = useState(false);
+  const [favoriteWingIds, setFavoriteWingIds] = useState<string[]>(() => {
+    try {
+      const saved = localStorage.getItem('medden_leisure_favorite_wings_v1');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) return parsed.slice(0, 3);
+      }
+    } catch {}
+    return [];
+  });
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [starredSlabs, setStarredSlabs] = useState<Record<string, boolean>>(() => {
     try {
@@ -1567,6 +1578,28 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({
     const m = Math.floor(seconds / 60);
     const s = seconds % 60;
     return `${m}:${s.toString().padStart(2, '0')}`;
+  };
+
+  const resolvedFavoriteWingIds =
+    favoriteWingIds.length > 0
+      ? favoriteWingIds.filter((id) => wings.some((w) => w.id === id)).slice(0, 3)
+      : wings.slice(0, 3).map((w) => w.id);
+
+  const toggleFavoriteWing = (wingId: string, e?: React.MouseEvent) => {
+    e?.stopPropagation();
+    const base = resolvedFavoriteWingIds;
+    let next: string[];
+    if (base.includes(wingId)) {
+      const remaining = base.filter((id) => id !== wingId);
+      const fill = wings.find((w) => !remaining.includes(w.id) && w.id !== wingId)?.id;
+      next = fill && remaining.length < 3 ? [...remaining, fill] : remaining;
+    } else {
+      next = [...base, wingId].slice(-3);
+    }
+    setFavoriteWingIds(next);
+    try {
+      localStorage.setItem('medden_leisure_favorite_wings_v1', JSON.stringify(next));
+    } catch {}
   };
 
   const handleToggleStar = (slabId: string, e: React.MouseEvent) => {
@@ -2328,6 +2361,7 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({
     title: string;
     summary: string;
     source: string;
+    sourceUrl: string;
     category: string;
     timestamp: string;
     readTime?: string;
@@ -2357,6 +2391,7 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({
       title: n.title,
       summary: `${n.bulletSummary.join(' ')} ${n.relevanceForStudents}`.slice(0, 310),
       source: n.source,
+      sourceUrl: `https://news.google.com/search?q=${encodeURIComponent(n.title)}`,
       category: cat === 'All' ? (idx < 3 ? 'India & ICMR' : 'World & Science') : cat,
       timestamp: n.timestamp,
       readTime: '35 sec read',
@@ -2389,6 +2424,10 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({
               title: String(art.title || 'Latest Global Briefing'),
               summary: String(art.summary || ''),
               source: String(art.source || 'Gemini Wire'),
+              sourceUrl:
+                typeof art.url === 'string' && /^https?:\/\//i.test(art.url)
+                  ? art.url
+                  : `https://news.google.com/search?q=${encodeURIComponent(String(art.title || 'Medical News'))}`,
               category: String(art.category || category),
               timestamp: String(art.timestamp || 'Just now'),
               readTime: String(art.readTime || '40 sec read'),
@@ -2868,40 +2907,122 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({
             </button>
           </div>
 
-          {/* Category Filter Pills Row (All 9 Wings) */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 custom-scrollbar">
-            <button
-              type="button"
-              onClick={() => setActiveCategoryFilter(null)}
-              className={`px-3 py-1 rounded-full text-[11px] font-mono whitespace-nowrap transition-all cursor-pointer ${
-                activeCategoryFilter === null
-                  ? 'themed-tab-active bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 font-bold shadow-xs'
-                  : 'themed-glass-card bg-white dark:bg-[#160f0b] text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 border border-stone-200 dark:border-[#382518]'
-              }`}
-            >
-              ALL WINGS ({wings.length})
-            </button>
+          {/* Compact Filter Bar: "More Wings" Button on Left + Top 3 Favorite Wings Only */}
+          <div className="relative flex flex-wrap items-center gap-2 pb-1">
+            {/* Left Button revealing remaining Wings + All Wings */}
+            <div className="relative shrink-0">
+              <button
+                type="button"
+                onClick={() => setMoreWingsOpen((v) => !v)}
+                className={`px-3 py-1 rounded-full text-[11px] font-mono uppercase whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 border ${
+                  moreWingsOpen || (activeCategoryFilter !== null && !resolvedFavoriteWingIds.includes(activeCategoryFilter))
+                    ? 'themed-tab-active bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 font-bold border-transparent shadow-xs'
+                    : 'themed-glass-card bg-white dark:bg-[#160f0b] text-stone-700 dark:text-stone-300 border-stone-200 dark:border-[#382518] hover:border-amber-400'
+                }`}
+              >
+                <Layers className="w-3 h-3 shrink-0" />
+                <span>More Wings</span>
+                <ChevronDown className={`w-3 h-3 transition-transform ${moreWingsOpen ? 'rotate-180' : ''}`} />
+              </button>
 
-            {wings.map((w) => {
-              const isSelected = activeCategoryFilter === w.id;
-              return (
-                <button
-                  key={w.id}
-                  type="button"
-                  onClick={() => setActiveCategoryFilter(isSelected ? null : w.id)}
-                  className={`px-3 py-1 rounded-full text-[11px] font-mono uppercase whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
-                    isSelected
-                      ? 'themed-tab-active bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 font-bold shadow-xs'
-                      : 'themed-glass-card bg-white dark:bg-[#160f0b] text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 border border-stone-200 dark:border-[#382518]'
-                  }`}
+              {moreWingsOpen && (
+                <div
+                  className="absolute left-0 top-full mt-2 z-40 w-72 max-w-[85vw] rounded-2xl border border-stone-200 dark:border-[#382518] bg-white dark:bg-[#18110c] shadow-2xl p-2 space-y-1 animate-in fade-in duration-150"
+                  onMouseLeave={() => setMoreWingsOpen(false)}
                 >
-                  <span>{w.icon}</span>
-                  <span>
-                    {w.badge} {w.slabs.length}
-                  </span>
-                </button>
-              );
-            })}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveCategoryFilter(null);
+                      setMoreWingsOpen(false);
+                    }}
+                    className={`w-full px-3 py-1.5 rounded-xl text-left text-[11px] font-mono font-bold flex items-center justify-between transition cursor-pointer ${
+                      activeCategoryFilter === null
+                        ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300'
+                        : 'text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-[#251a12]'
+                    }`}
+                  >
+                    <span>ALL WINGS ({wings.length})</span>
+                    {activeCategoryFilter === null && <Check className="w-3.5 h-3.5" />}
+                  </button>
+
+                  <div className="h-px bg-stone-200/80 dark:bg-[#352317] my-1" />
+                  <div className="px-2 py-0.5 text-[10px] font-mono uppercase text-stone-400">
+                    Other &amp; All Wings (Star to Pin Top 3)
+                  </div>
+
+                  <div className="max-h-60 overflow-y-auto space-y-0.5 custom-scrollbar">
+                    {wings
+                      .filter((w) => !resolvedFavoriteWingIds.includes(w.id))
+                      .concat(wings.filter((w) => resolvedFavoriteWingIds.includes(w.id)))
+                      .map((w) => {
+                        const isSelected = activeCategoryFilter === w.id;
+                        const isFav = resolvedFavoriteWingIds.includes(w.id);
+                        return (
+                          <div
+                            key={w.id}
+                            className={`flex items-center justify-between gap-1 px-2 py-1.5 rounded-xl transition ${
+                              isSelected
+                                ? 'bg-amber-500/20 text-amber-900 dark:text-amber-200 font-bold'
+                                : 'hover:bg-stone-100 dark:hover:bg-[#251a12] text-stone-700 dark:text-stone-300'
+                            }`}
+                          >
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setActiveCategoryFilter(isSelected ? null : w.id);
+                                setMoreWingsOpen(false);
+                              }}
+                              className="flex items-center gap-1.5 text-left text-[11px] font-mono uppercase flex-1 min-w-0 cursor-pointer"
+                            >
+                              <span>{w.icon}</span>
+                              <span className="truncate">{w.badge}</span>
+                              <span className="opacity-60">({w.slabs.length})</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => toggleFavoriteWing(w.id, e)}
+                              title={isFav ? 'Pinned in top 3 favorites' : 'Pin to top 3 favorite wings'}
+                              className="p-1 rounded-lg hover:bg-amber-500/20 cursor-pointer shrink-0"
+                            >
+                              <Star
+                                className={`w-3.5 h-3.5 ${
+                                  isFav ? 'fill-amber-400 text-amber-500' : 'text-stone-400'
+                                }`}
+                              />
+                            </button>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Only Top 3 Favorite Wings Displayed Inline */}
+            {wings
+              .filter((w) => resolvedFavoriteWingIds.includes(w.id))
+              .slice(0, 3)
+              .map((w) => {
+                const isSelected = activeCategoryFilter === w.id;
+                return (
+                  <button
+                    key={w.id}
+                    type="button"
+                    onClick={() => setActiveCategoryFilter(isSelected ? null : w.id)}
+                    className={`px-3 py-1 rounded-full text-[11px] font-mono uppercase whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 ${
+                      isSelected
+                        ? 'themed-tab-active bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 font-bold shadow-xs'
+                        : 'themed-glass-card bg-white dark:bg-[#160f0b] text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200 border border-stone-200 dark:border-[#382518]'
+                    }`}
+                  >
+                    <span>{w.icon}</span>
+                    <span>
+                      {w.badge} {w.slabs.length}
+                    </span>
+                  </button>
+                );
+              })}
           </div>
         </div>
 
@@ -4006,11 +4127,22 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({
                           </div>
                         </div>
 
-                        {n.relevanceForStudents && (
-                          <div className="mx-4 mb-4 p-2.5 rounded-xl bg-[#120c08] border border-[#352317] text-[11px] text-[#d4aa6e]">
-                            <strong>Takeaway:</strong> {n.relevanceForStudents}
-                          </div>
-                        )}
+                        <div className="mx-4 mb-4 space-y-2">
+                          {n.relevanceForStudents && (
+                            <div className="p-2.5 rounded-xl bg-[#120c08] border border-[#352317] text-[11px] text-[#d4aa6e]">
+                              <strong>Takeaway:</strong> {n.relevanceForStudents}
+                            </div>
+                          )}
+                          <a
+                            href={n.sourceUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-amber-400 hover:text-amber-300 underline underline-offset-2"
+                          >
+                            <span>Read Full Source ({n.source})</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                        </div>
                       </article>
                     ))}
                   </div>
@@ -5066,7 +5198,7 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({
                             className="px-4 py-2 rounded-xl bg-[#A47C43] hover:bg-[#8f6730] text-white text-xs font-bold flex items-center gap-1.5 shadow cursor-pointer"
                           >
                             <PenTool className="w-3.5 h-3.5" />
-                            <span>Open Dual Web-View: Notes + 4-Page Blog</span>
+                            <span>Open Notes &amp; 4-Page Blog</span>
                           </button>
                           <button
                             type="button"
@@ -5160,21 +5292,18 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({
               onClick={(e) => e.stopPropagation()}
               className="w-full max-w-6xl h-[92vh] bg-[#160f0b] border border-[#4a321e] rounded-3xl shadow-2xl overflow-hidden flex flex-col"
             >
-              {/* Dual Web-View Chrome Header */}
+              {/* Clean Split Reader Header (Dual Web-View text removed) */}
               <div className="px-4 sm:px-6 py-3 bg-[#1e130c] border-b border-[#3a2617] flex items-center justify-between gap-3 shrink-0">
                 <div className="flex items-center gap-2.5 min-w-0">
-                  <span className="px-2.5 py-0.5 rounded-full bg-[#A47C43] text-white text-[10px] font-mono font-bold uppercase shrink-0">
-                    Dual Web-View
-                  </span>
                   <h3 className="font-serif text-sm sm:text-base font-bold text-stone-100 truncate">
-                    {activeWingNotes.title} · Mini Notes &amp; Editorial Blog
+                    {activeWingNotes.title} · Mini Notes &amp; Blog
                   </h3>
                 </div>
                 <button
                   type="button"
                   onClick={() => setActiveWingNotes(null)}
                   className="p-1.5 rounded-lg bg-[#2a1c12] hover:bg-[#3a2719] text-stone-300 cursor-pointer"
-                  aria-label="Close dual web-view window"
+                  aria-label="Close wing notes and blog reader"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -5214,19 +5343,23 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({
                       className="w-full px-3 py-2 rounded-xl bg-[#1d130d] border border-[#3d281a] text-xs font-bold text-stone-100 outline-none focus:border-amber-500"
                     />
 
-                    {/* Mini Ruled Canvas */}
+                    {/* Mini Ruled Canvas — backgroundAttachment local syncs lines smoothly with scrolling text */}
                     <div
-                      className="flex-1 min-h-[220px] rounded-2xl border border-[#d6c7b0]/40 shadow-inner p-3.5 flex flex-col"
-                      style={{
-                        backgroundColor: wingMiniNoteAccent,
-                        backgroundImage: 'repeating-linear-gradient(to bottom, transparent 0 25px, rgba(148,130,105,0.22) 25px 26px)',
-                      }}
+                      className="flex-1 min-h-[220px] rounded-2xl border border-[#d6c7b0]/40 shadow-inner overflow-hidden flex flex-col"
+                      style={{ backgroundColor: wingMiniNoteAccent }}
                     >
                       <textarea
                         value={wingMiniNoteBody}
                         onChange={(e) => setWingMiniNoteBody(e.target.value)}
                         placeholder={`Capture notes while reading the ${blog.categoryName} blog...\n\n• Paste highlights or personal insights\n• Click Save to sync straight to your Achiev Notebooks`}
-                        className="w-full flex-1 bg-transparent text-[#24160b] text-xs leading-[26px] resize-none outline-none font-serif"
+                        className="w-full flex-1 bg-transparent text-[#24160b] text-xs leading-[26px] resize-none outline-none font-serif px-3.5 py-[13px]"
+                        style={{
+                          lineHeight: '26px',
+                          backgroundAttachment: 'local',
+                          backgroundPosition: '0 13px',
+                          backgroundImage:
+                            'repeating-linear-gradient(to bottom, transparent 0 25px, rgba(148,130,105,0.28) 25px 26px)',
+                        }}
                       />
                     </div>
 
@@ -5263,18 +5396,11 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({
 
                 {/* WINDOW 2 (RIGHT 7 COLS): 4-PAGE ILLUSTRATED BLOG READER + TOP 5 LEARN MORE WEBSITES */}
                 <div className="lg:col-span-7 overflow-y-auto custom-scrollbar bg-[#fcf9f1] text-[#23150a] flex flex-col">
-                  {/* Blog Editorial Masthead */}
+                  {/* Clean Blog Heading Only */}
                   <div className="p-5 sm:p-7 border-b border-[#e5dac2] bg-gradient-to-b from-[#f6efe0] to-[#fcf9f1] space-y-2">
-                    <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] font-mono uppercase tracking-wider text-[#8c5d19] font-bold">
-                      <span>Ach1ev Journal · {blog.categoryName}</span>
-                      <span>{blog.author} · {blog.readMinutes} min read · Page {page.pageNumber} of {blog.pages.length}</span>
-                    </div>
                     <h4 className="font-serif text-xl sm:text-2xl font-bold text-[#1b0f06] leading-snug">
                       {blog.blogTitle}
                     </h4>
-                    <p className="text-xs sm:text-sm text-[#5c422a] leading-relaxed">
-                      {blog.subtitle}
-                    </p>
 
                     {/* 4-Page Navigation Tabs */}
                     <div className="pt-2 flex flex-wrap items-center gap-1.5">

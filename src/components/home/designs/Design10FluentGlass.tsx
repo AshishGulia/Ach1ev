@@ -486,22 +486,23 @@ export const Design10FluentGlass: React.FC<Design10Props> = ({
             </div>
           </div>
 
-          {/* Quick Add Task */}
+          {/* Quick Add Task Centered at Bottom */}
           {onAddTask && (
-            <form onSubmit={handleAddNewTask} className="mt-2 pt-2 border-t border-stone-200/70 dark:border-[#242e3d] flex items-center gap-1.5">
+            <form onSubmit={handleAddNewTask} className="mt-2 pt-2 border-t border-stone-200/70 dark:border-[#242e3d] flex flex-col items-center gap-1.5">
               <input
                 type="text"
                 placeholder="+ Add task..."
                 value={taskInput}
                 onChange={(e) => setTaskInput(e.target.value)}
-                className="bg-stone-100 dark:bg-[#1c222b] text-[11px] px-2 py-1 rounded-lg border border-stone-200 dark:border-[#2b3542] outline-none flex-1 text-slate-900 dark:text-zinc-100 placeholder-stone-400 focus:border-amber-500"
+                className="w-full bg-stone-100 dark:bg-[#1c222b] text-[11px] px-2 py-1 rounded-lg border border-stone-200 dark:border-[#2b3542] outline-none text-center text-slate-900 dark:text-zinc-100 placeholder-stone-400 focus:border-amber-500"
               />
               <button
                 type="submit"
                 disabled={!taskInput.trim()}
-                className="p-1.5 rounded-lg bg-slate-900 dark:bg-stone-100 text-white dark:text-slate-950 hover:bg-slate-800 disabled:opacity-30 transition-all shrink-0 cursor-pointer shadow-xs"
+                className="px-3.5 py-1 rounded-lg bg-slate-900 dark:bg-stone-100 text-white dark:text-slate-950 hover:bg-slate-800 disabled:opacity-30 transition-all shrink-0 cursor-pointer shadow-xs flex items-center justify-center gap-1 text-[11px] font-bold mx-auto"
               >
                 <Plus className="w-3 h-3" />
+                <span>Add</span>
               </button>
             </form>
           )}

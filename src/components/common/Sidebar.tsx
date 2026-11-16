@@ -596,15 +596,15 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 )}
               </div>
 
-              {/* Subtle Watermark Emblem between Section 2 Navigation & Daily Thought */}
+              {/* Prominent Subtle Watermark Emblem between Section 2 Navigation & Daily Thought */}
               <div
                 aria-hidden="true"
-                className="pointer-events-none select-none flex flex-col items-center justify-center py-2 px-2"
-                style={{ opacity: isNightMode ? 0.16 : 0.14, color: sb.railText }}
+                className="pointer-events-none select-none flex flex-col items-center justify-center py-2.5 px-1"
+                style={{ opacity: isNightMode ? 0.18 : 0.15, color: sb.railText }}
               >
                 <svg
-                  viewBox="0 0 120 88"
-                  className="w-[74px] h-[54px]"
+                  viewBox="0 0 132 96"
+                  className="w-[144px] h-[106px] max-w-full"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2.1"
@@ -612,28 +612,34 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   strokeLinejoin="round"
                 >
                   {/* Stethoscope-shaped Headphones Arch & Binaural Earpieces */}
-                  <path d="M24 38C24 18 40 7 60 7C80 7 96 18 96 38" />
-                  <rect x="17" y="34" width="11" height="18" rx="5.5" />
-                  <rect x="92" y="34" width="11" height="18" rx="5.5" />
+                  <path d="M22 41C22 19 39 8 60 8C81 8 98 19 98 41" />
+                  <rect x="15" y="36" width="11" height="19" rx="5.5" />
+                  <rect x="94" y="36" width="11" height="19" rx="5.5" />
                   {/* Stethoscope Chestpiece Bell Accent at Crown */}
-                  <circle cx="60" cy="7" r="3.8" fill="currentColor" fillOpacity="0.22" />
+                  <circle cx="60" cy="8" r="4" fill="currentColor" fillOpacity="0.22" />
 
                   {/* Cute Smiling Open Notebook Resting Inside the Arch */}
-                  <path d="M33 32C42 29 51 31 60 35C69 31 78 29 87 32V61C78 58 69 60 60 64C51 60 42 58 33 61Z" />
-                  <line x1="60" y1="35" x2="60" y2="64" />
+                  <path d="M32 34C41 31 51 33 60 37C69 33 79 31 88 34V64C79 61 69 63 60 67C51 63 41 61 32 64Z" />
+                  <line x1="60" y1="37" x2="60" y2="67" />
                   {/* Cute Eyes & Warm Smile */}
-                  <circle cx="47" cy="45" r="1.6" fill="currentColor" stroke="none" />
-                  <circle cx="73" cy="45" r="1.6" fill="currentColor" stroke="none" />
-                  <path d="M55 51.5C57.5 54 62.5 54 65 51.5" strokeWidth="1.8" />
+                  <circle cx="46.5" cy="48" r="1.7" fill="currentColor" stroke="none" />
+                  <circle cx="73.5" cy="48" r="1.7" fill="currentColor" stroke="none" />
+                  <path d="M54.5 54.5C57.5 57.5 62.5 57.5 65.5 54.5" strokeWidth="1.9" />
                   {/* Notebook ruled lines */}
-                  <line x1="39" y1="53" x2="49" y2="52" strokeWidth="1.3" opacity="0.55" />
-                  <line x1="71" y1="52" x2="81" y2="53" strokeWidth="1.3" opacity="0.55" />
+                  <line x1="38" y1="56" x2="49" y2="55" strokeWidth="1.3" opacity="0.55" />
+                  <line x1="71" y1="55" x2="82" y2="56" strokeWidth="1.3" opacity="0.55" />
+
+                  {/* Steaming Study Coffee Cup beside Notebook */}
+                  <path d="M106 58H120V68C120 71 118 73 113 73C108 73 106 71 106 68V58Z" strokeWidth="1.8" />
+                  <path d="M120 60H123.5C125 60 125.5 65 123.5 66H120" strokeWidth="1.6" />
+                  <path d="M110 54C110 51 112 50 112 48" strokeWidth="1.3" opacity="0.65" />
+                  <path d="M115 54C115 51 117 50 117 48" strokeWidth="1.3" opacity="0.65" />
 
                   {/* Sleek Fountain/Study Pen Horizontally Underneath */}
-                  <path d="M28 74H82L91 77.5L82 81H28C25.5 81 24 79.5 24 77.5C24 75.5 25.5 74 28 74Z" />
-                  <line x1="37" y1="74" x2="37" y2="81" strokeWidth="1.6" />
-                  <line x1="77" y1="74" x2="77" y2="81" strokeWidth="1.6" />
-                  <line x1="44" y1="74" x2="63" y2="74" strokeWidth="2.8" opacity="0.7" />
+                  <path d="M26 80H84L93 83.5L84 87H26C23.5 87 22 85.5 22 83.5C22 81.5 23.5 80 26 80Z" />
+                  <line x1="36" y1="80" x2="36" y2="87" strokeWidth="1.6" />
+                  <line x1="79" y1="80" x2="79" y2="87" strokeWidth="1.6" />
+                  <line x1="44" y1="80" x2="64" y2="80" strokeWidth="2.8" opacity="0.7" />
                 </svg>
               </div>
             </div>
@@ -657,7 +663,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <p
                       className="sidebar-thought-quote font-sans not-italic font-medium"
                       style={{
-                        fontFamily: "var(--app-font-family, 'Alata', system-ui, -apple-system, sans-serif)",
+                        fontFamily: "var(--app-font-family, inherit)",
                         fontSize: '12.5px',
                         fontStyle: 'normal',
                         lineHeight: 1.45,
@@ -669,7 +675,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     <span
                       className="sidebar-thought-author font-sans tracking-wider uppercase block mt-1 font-bold"
                       style={{
-                        fontFamily: "var(--app-font-family, 'Alata', system-ui, -apple-system, sans-serif)",
+                        fontFamily: "var(--app-font-family, inherit)",
                         fontSize: '10px',
                         color: sb.authorColor,
                       }}

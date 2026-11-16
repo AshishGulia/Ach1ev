@@ -79,6 +79,7 @@ export default function App() {
     phoneUser,
     isLoading: authLoading,
     isGuestMode,
+    enterGuestMode,
     isAuthModalOpen,
     closeAuthModal,
     signOut,
@@ -125,6 +126,61 @@ export default function App() {
   const [currentSubject, setCurrentSubject] = useState<SubjectCourse>('Pharmacology');
   const [userProfile, setUserProfile] = useState<UserProfile>(INITIAL_USER_PROFILE);
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState<boolean>(false);
+
+  const currentSubjectRef = React.useRef<SubjectCourse>(currentSubject);
+  currentSubjectRef.current = currentSubject;
+
+  useEffect(() => {
+    const handleOpenSub = () => setIsSubscriptionModalOpen(true);
+    const handleSkipCreateNote = () => {
+      enterGuestMode();
+      const today = new Date().toISOString().split('T')[0];
+      const nowIso = new Date().toISOString();
+      const ts = Date.now();
+      const newNb: Notebook = {
+        id: `nb-${ts}`,
+        title: 'Untitled Clinical Note',
+        subject: currentSubjectRef.current,
+        coverTheme: 'botany',
+        coverTitle: 'CLINICAL NOTE',
+        coverSubtitle: 'Blank Note Sheet',
+        coverColor: '#A47C43',
+        paperType: 'ruled-thin',
+        paperColor: 'beige',
+        activePageIndex: 0,
+        createdAt: today,
+        updatedAt: nowIso,
+        pages: [
+          {
+            id: `p-${ts}`,
+            title: 'Untitled Clinical Note',
+            contentHtml: '<p><br></p>',
+            inkStrokes: [],
+            screenshots: [],
+            date: today,
+            updatedAt: nowIso,
+          },
+        ],
+      };
+      setNotebooks((prev) => {
+        const next = [newNb, ...prev];
+        try {
+          localStorage.setItem('medden_notebooks', JSON.stringify(next));
+        } catch {}
+        return next;
+      });
+      setActiveNotebookId(newNb.id);
+      setActiveView('notebooks');
+      setIsEditingNote(true);
+    };
+
+    window.addEventListener('achiev_open_subscription', handleOpenSub);
+    window.addEventListener('achiev_skip_create_note', handleSkipCreateNote);
+    return () => {
+      window.removeEventListener('achiev_open_subscription', handleOpenSub);
+      window.removeEventListener('achiev_skip_create_note', handleSkipCreateNote);
+    };
+  }, [enterGuestMode]);
 
   // In-Notebook Active Note Editor View (when student opens a notebook directly)
   const [isEditingNote, setIsEditingNote] = useState<boolean>(false);

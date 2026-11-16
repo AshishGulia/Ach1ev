@@ -96,6 +96,7 @@ import {
 } from 'lucide-react';
 import { Notebook, DesignId, MedicalBook } from '../../types';
 import { getDrivePreviewUrl } from '../../services/googleDriveService';
+import { useAuth } from '../../contexts/AuthContext';
 import {
   RoundColorColumnsPicker,
   UNIFIED_COLOR_COLUMNS,
@@ -286,32 +287,52 @@ const NOTE_FONT_OPTIONS: Array<{
   key: string;
   short: string;
   label: string;
+  category: 'Handwriting' | 'Sans-Serif' | 'Serif';
   family: string;
   isHandwriting?: boolean;
 }> = [
-  { id: 'font-alata', key: 'alata', short: 'Alata', label: 'Alata · Workspace clean', family: "'Alata', sans-serif" },
-  { id: 'font-plus-jakarta', key: 'plus-jakarta', short: 'Plus Jakarta Sans', label: 'Plus Jakarta Sans · Modern geometric', family: "'Plus Jakarta Sans', sans-serif" },
-  { id: 'font-inter', key: 'inter', short: 'Inter', label: 'Inter · Swiss clinical legible', family: "'Inter', sans-serif" },
-  { id: 'font-poppins', key: 'poppins', short: 'Poppins', label: 'Poppins · Rounded clean sans', family: "'Poppins', sans-serif" },
-  { id: 'font-outfit', key: 'outfit', short: 'Outfit', label: 'Outfit · Architectural modern', family: "'Outfit', sans-serif" },
-  { id: 'font-lora', key: 'lora', short: 'Lora', label: 'Lora · Calligraphic ink serif', family: "'Lora', serif" },
-  { id: 'font-fraunces', key: 'fraunces', short: 'Fraunces', label: 'Fraunces · Warm optical serif', family: "'Fraunces', serif" },
-  { id: 'font-eb-garamond', key: 'eb-garamond', short: 'EB Garamond', label: 'EB Garamond · Oxford scholarly serif', family: "'EB Garamond', serif" },
-  { id: 'font-playfair', key: 'playfair', short: 'Playfair Display', label: 'Playfair Display · Editorial journal', family: "'Playfair Display', serif" },
-  { id: 'font-merriweather', key: 'merriweather', short: 'Merriweather', label: 'Merriweather · Classic book serif', family: "'Merriweather', serif" },
-  { id: 'font-caveat', key: 'caveat', short: 'Caveat', label: 'Caveat · Handwritten flow', family: "'Caveat', cursive", isHandwriting: true },
-  { id: 'font-kalam', key: 'kalam', short: 'Kalam', label: 'Kalam · Upright ballpoint hand', family: "'Kalam', cursive", isHandwriting: true },
-  { id: 'font-patrick', key: 'patrick', short: 'Patrick Hand', label: 'Patrick Hand · Neat study script', family: "'Patrick Hand', cursive", isHandwriting: true },
-  { id: 'font-dancing-script', key: 'dancing-script', short: 'Dancing Script', label: 'Dancing Script · Fluid script', family: "'Dancing Script', cursive", isHandwriting: true },
-  { id: 'font-architects-daughter', key: 'architects-daughter', short: 'Architects Daughter', label: 'Architects Daughter · Draftsman pen', family: "'Architects Daughter', cursive", isHandwriting: true },
-  { id: 'font-mono', key: 'mono', short: 'JetBrains Mono', label: 'JetBrains Mono · Technical & formula', family: "'JetBrains Mono', monospace" },
+  // Handwriting (10)
+  { id: 'font-pacifico', key: 'pacifico', short: 'Pacifico', label: 'Pacifico', category: 'Handwriting', family: "'Pacifico', cursive", isHandwriting: true },
+  { id: 'font-dancing-script', key: 'dancing-script', short: 'Dancing Script', label: 'Dancing Script', category: 'Handwriting', family: "'Dancing Script', cursive", isHandwriting: true },
+  { id: 'font-caveat', key: 'caveat', short: 'Caveat', label: 'Caveat', category: 'Handwriting', family: "'Caveat', cursive", isHandwriting: true },
+  { id: 'font-architects-daughter', key: 'architects-daughter', short: 'Architects Daughter', label: 'Architects Daughter', category: 'Handwriting', family: "'Architects Daughter', cursive", isHandwriting: true },
+  { id: 'font-brush-script', key: 'brush-script', short: 'Brush Script', label: 'Brush Script', category: 'Handwriting', family: "'Brush Script MT', 'Great Vibes', cursive", isHandwriting: true },
+  { id: 'font-marker-felt', key: 'marker-felt', short: 'Marker Felt', label: 'Marker Felt', category: 'Handwriting', family: "'Marker Felt', 'Comic Sans MS', 'Patrick Hand', cursive", isHandwriting: true },
+  { id: 'font-chalkduster', key: 'chalkduster', short: 'Chalkduster', label: 'Chalkduster', category: 'Handwriting', family: "'Chalkduster', 'Patrick Hand', cursive", isHandwriting: true },
+  { id: 'font-alex-brush', key: 'alex-brush', short: 'Alex Brush', label: 'Alex Brush', category: 'Handwriting', family: "'Alex Brush', cursive", isHandwriting: true },
+  { id: 'font-great-vibes', key: 'great-vibes', short: 'Great Vibes', label: 'Great Vibes', category: 'Handwriting', family: "'Great Vibes', cursive", isHandwriting: true },
+  { id: 'font-satisfy', key: 'satisfy', short: 'Satisfy', label: 'Satisfy', category: 'Handwriting', family: "'Satisfy', cursive", isHandwriting: true },
+
+  // Sans-Serif (10)
+  { id: 'font-helvetica', key: 'helvetica', short: 'Helvetica', label: 'Helvetica', category: 'Sans-Serif', family: "'Helvetica Neue', Helvetica, Arial, sans-serif" },
+  { id: 'font-arial', key: 'arial', short: 'Arial', label: 'Arial', category: 'Sans-Serif', family: "Arial, Helvetica, sans-serif" },
+  { id: 'font-calibri', key: 'calibri', short: 'Calibri', label: 'Calibri', category: 'Sans-Serif', family: "Calibri, 'Source Sans 3', 'Open Sans', sans-serif" },
+  { id: 'font-inter', key: 'inter', short: 'Inter', label: 'Inter', category: 'Sans-Serif', family: "'Inter', sans-serif" },
+  { id: 'font-roboto', key: 'roboto', short: 'Roboto', label: 'Roboto', category: 'Sans-Serif', family: "'Roboto', sans-serif" },
+  { id: 'font-open-sans', key: 'open-sans', short: 'Open Sans', label: 'Open Sans', category: 'Sans-Serif', family: "'Open Sans', sans-serif" },
+  { id: 'font-lato', key: 'lato', short: 'Lato', label: 'Lato', category: 'Sans-Serif', family: "'Lato', sans-serif" },
+  { id: 'font-montserrat', key: 'montserrat', short: 'Montserrat', label: 'Montserrat', category: 'Sans-Serif', family: "'Montserrat', sans-serif" },
+  { id: 'font-source-sans-3', key: 'source-sans-3', short: 'Source Sans 3', label: 'Source Sans 3', category: 'Sans-Serif', family: "'Source Sans 3', sans-serif" },
+  { id: 'font-futura', key: 'futura', short: 'Futura', label: 'Futura', category: 'Sans-Serif', family: "Futura, 'Plus Jakarta Sans', 'Outfit', sans-serif" },
+
+  // Serif (10)
+  { id: 'font-times-new-roman', key: 'times-new-roman', short: 'Times New Roman', label: 'Times New Roman', category: 'Serif', family: "'Times New Roman', Times, serif" },
+  { id: 'font-georgia', key: 'georgia', short: 'Georgia', label: 'Georgia', category: 'Serif', family: "Georgia, serif" },
+  { id: 'font-garamond', key: 'garamond', short: 'Garamond', label: 'Garamond', category: 'Serif', family: "Garamond, 'EB Garamond', serif" },
+  { id: 'font-baskerville', key: 'baskerville', short: 'Baskerville', label: 'Baskerville', category: 'Serif', family: "Baskerville, 'Libre Baskerville', serif" },
+  { id: 'font-merriweather', key: 'merriweather', short: 'Merriweather', label: 'Merriweather', category: 'Serif', family: "'Merriweather', serif" },
+  { id: 'font-playfair', key: 'playfair', short: 'Playfair Display', label: 'Playfair Display', category: 'Serif', family: "'Playfair Display', serif" },
+  { id: 'font-bodoni', key: 'bodoni', short: 'Bodoni', label: 'Bodoni', category: 'Serif', family: "'Bodoni Moda', 'Bodoni MT', Didot, serif" },
+  { id: 'font-palatino', key: 'palatino', short: 'Palatino', label: 'Palatino', category: 'Serif', family: "'Palatino Linotype', 'Book Antiqua', Palatino, serif" },
+  { id: 'font-lora', key: 'lora', short: 'Lora', label: 'Lora', category: 'Serif', family: "'Lora', serif" },
+  { id: 'font-cinzel', key: 'cinzel', short: 'Cinzel', label: 'Cinzel', category: 'Serif', family: "'Cinzel', serif" },
 ];
 
 const normalizeNoteFontKey = (raw: string): string => {
-  if (raw === 'sans') return 'alata';
-  if (raw === 'serif') return 'merriweather';
+  if (raw === 'sans' || raw === 'alata') return 'helvetica';
+  if (raw === 'serif') return 'playfair';
   if (raw === 'hand') return 'caveat';
-  return raw || 'alata';
+  return raw || 'playfair';
 };
 
 const formatTodayDate = () =>
@@ -417,6 +438,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
   books = [],
   activeDesign = '1',
 }) => {
+  const { user, googleUser, phoneUser, openAuthModal } = useAuth();
   // Title & Content (Starts with clean blank ruled paper by default)
   const initialTitle = notebook?.title || 'Untitled Note';
   const initialContent =
@@ -445,9 +467,9 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
   const [paperStyle, setPaperStyle] = useState<'ruled' | 'plain' | 'grid' | 'dot'>('ruled');
   const [fontStyle, setFontStyle] = useState<string>(() => {
     try {
-      return localStorage.getItem('medden_note_font_style') || 'alata';
+      return localStorage.getItem('medden_note_font_style') || 'playfair';
     } catch {
-      return 'alata';
+      return 'playfair';
     }
   });
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
@@ -2841,6 +2863,46 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
           <span className="lbl">Book</span>
         </button>
 
+        {/* Large Prominent Save Note Button (Requires Sign Up / Sign In for Guests) */}
+        <button
+          type="button"
+          onClick={() => {
+            if (!user && !googleUser && !phoneUser) {
+              showToast('Please sign up / sign in first to save your notes');
+              openAuthModal();
+              return;
+            }
+            if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
+            setSaveStatus('saved');
+            if (onUpdateNotebook && editorRef.current) {
+              const updatedHtml = editorRef.current.innerHTML;
+              const resolvedTitle = noteTitle.trim() || 'Untitled Note';
+              if (notebook) {
+                const pages = [...(notebook.pages || [])];
+                if (pages[activePageIndex]) {
+                  pages[activePageIndex] = {
+                    ...pages[activePageIndex],
+                    title: resolvedTitle,
+                    contentHtml: updatedHtml,
+                    updatedAt: new Date().toISOString(),
+                  };
+                }
+                onUpdateNotebook({
+                  ...notebook,
+                  title: resolvedTitle,
+                  pages,
+                });
+              }
+            }
+            showToast('Note saved to your Achiev account!');
+          }}
+          className="an-btn primary px-4 py-2 text-xs sm:text-[13px] font-bold flex items-center gap-2 shadow-md cursor-pointer shrink-0"
+          title="Save note to your account"
+        >
+          <Cloud className="w-4 h-4" />
+          <span>Save Note</span>
+        </button>
+
         {/* Save Status Indicator */}
         <div className="an-save" aria-live="polite">
           {saveStatus === 'saving' ? (
@@ -3341,7 +3403,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                 </button>
 
                 <span className="an-vsep" />
-                {/* Compact Font Picker */}
+                {/* Compact Categorized Font Picker (30 Fonts) */}
                 <select
                   className="an-select-sm an-font-select"
                   value={normalizeNoteFontKey(fontStyle)}
@@ -3355,10 +3417,14 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                   aria-label="Note font family"
                   title="Choose font"
                 >
-                  {NOTE_FONT_OPTIONS.map((f) => (
-                    <option key={f.key} value={f.key} style={{ fontFamily: f.family }}>
-                      {f.short}
-                    </option>
+                  {(['Handwriting', 'Sans-Serif', 'Serif'] as const).map((cat) => (
+                    <optgroup key={cat} label={cat}>
+                      {NOTE_FONT_OPTIONS.filter((f) => f.category === cat).map((f) => (
+                        <option key={f.key} value={f.key} style={{ fontFamily: f.family }}>
+                          {f.short}
+                        </option>
+                      ))}
+                    </optgroup>
                   ))}
                 </select>
 

@@ -49,17 +49,17 @@ export const DESIGN_OPTIONS = [
   {
     id: '3' as DesignId,
     num: '3',
-    name: 'Oceanic Horizon',
-    label: 'Oceanic Horizon',
-    tagline: 'Ice mist #EAFFFF & glacial sky #C2E8FF (Light) with deep ocean #004671 & abyssal #042A41 (Dark)',
+    name: 'Royal Blush & Plum',
+    label: 'Royal Blush & Plum',
+    tagline: 'Royal beige-pink #FBF3F2 & sober plum-cocoa #6E4253 / #D49AA6 with cushioned rounded buttons',
     badge: 'Theme 3',
   },
   {
     id: '4' as DesignId,
     num: '4',
-    name: 'Slate & Cobalt Loft',
-    label: 'Slate & Cobalt Loft',
-    tagline: 'Dark Slate Grey #1F242D & Cobalt Blue #3B82F6 (Dark) with Cool Slate & Blue #2563EB (Light)',
+    name: 'Muted Slate & Cobalt',
+    label: 'Muted Slate & Cobalt',
+    tagline: 'Calm matte slate & muted desaturated slate-cobalt #56728F / #7D9AB5 with sharp 90° edges',
     badge: 'Theme 4',
   },
   {
