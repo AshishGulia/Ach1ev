@@ -18,6 +18,7 @@ import {
   Maximize2,
   ChevronRight,
   Sparkles,
+  Plus,
 } from 'lucide-react';
 
 interface Design3Props {
@@ -37,6 +38,7 @@ export const Design3NightDesk: React.FC<Design3Props> = ({
   currentSubject,
   tasks,
   onToggleTask,
+  onAddTask,
   notebooks,
   onOpenNotebook,
   onOpenStudio,
@@ -44,6 +46,21 @@ export const Design3NightDesk: React.FC<Design3Props> = ({
 }) => {
   // Anatomy view layer
   const [anatomyLayer, setAnatomyLayer] = useState<'Muscular' | 'Skeletal' | 'Organs' | 'Nervous'>('Muscular');
+  const [taskInput, setTaskInput] = useState('');
+
+  const handleAddNewTask = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!taskInput.trim()) return;
+    onAddTask({
+      id: `task-${Date.now()}`,
+      title: taskInput.trim(),
+      completed: false,
+      priority: 'routine',
+      subject: currentSubject,
+      highYield: false,
+    });
+    setTaskInput('');
+  };
 
   // Focus Timer state (25:00)
   const [timerSeconds, setTimerSeconds] = useState(25 * 60);
@@ -358,6 +375,24 @@ export const Design3NightDesk: React.FC<Design3Props> = ({
               ))}
             </div>
           </div>
+
+          <form onSubmit={handleAddNewTask} className="mt-2 pt-2 border-t border-slate-800 flex flex-col items-center gap-1.5">
+            <input
+              type="text"
+              placeholder="+ Add task..."
+              value={taskInput}
+              onChange={(e) => setTaskInput(e.target.value)}
+              className="w-full bg-[#0b1016] text-xs px-2.5 py-1 rounded-lg border border-slate-700 outline-none text-center text-slate-100 placeholder-slate-500 focus:border-cyan-500"
+            />
+            <button
+              type="submit"
+              disabled={!taskInput.trim()}
+              className="px-3.5 py-1 rounded-lg bg-cyan-500 text-slate-950 hover:bg-cyan-400 disabled:opacity-30 transition-all shrink-0 cursor-pointer flex items-center justify-center gap-1 text-xs font-bold mx-auto"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>Add Task</span>
+            </button>
+          </form>
         </div>
 
         {/* Calendar (Span 2) */}

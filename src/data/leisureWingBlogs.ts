@@ -1,8 +1,86 @@
-import medicalNewsImg from '../assets/images/leisure_news_medical_1794742096397.jpg';
-import spaceCosmosImg from '../assets/images/leisure_space_cosmos_1794742095142.jpg';
-import photoStudioImg from '../assets/images/leisure_photography_studio_1794742096766.jpg';
-import musicAcousticsImg from '../assets/images/leisure_music_acoustics_1794742096540.jpg';
-import wellnessSportImg from '../assets/images/leisure_wellness_sport_1794742096683.jpg';
+const svgDataUri = (svg: string) =>
+  `data:image/svg+xml;utf8,${encodeURIComponent(svg.trim())}`;
+
+const medicalNewsImg = svgDataUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0b1f26"/><stop offset="55%" stop-color="#133842"/><stop offset="100%" stop-color="#2a1c12"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="72%" cy="34%" r="48%">
+      <stop offset="0%" stop-color="#21daef" stop-opacity="0.34"/><stop offset="100%" stop-color="#21daef" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#bg)"/><rect width="800" height="450" fill="url(#glow)"/>
+  <path d="M0 300 L170 300 L215 240 L255 345 L305 160 L350 325 L395 275 L440 300 L800 300" fill="none" stroke="#38bdf8" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" opacity="0.88"/>
+  <circle cx="305" cy="160" r="7" fill="#fbbf24"/>
+  <rect x="64" y="62" width="126" height="28" rx="14" fill="#fbbf24" fill-opacity="0.16" stroke="#fbbf24" stroke-opacity="0.5"/>
+  <text x="127" y="81" text-anchor="middle" fill="#fde68a" font-family="Georgia, serif" font-size="13" font-weight="700">CLINICAL BRIEF</text>
+  <text x="64" y="138" fill="#f8fafc" font-family="Georgia, serif" font-size="36" font-weight="700">Medical Science &amp; Dispatch</text>
+  <text x="64" y="172" fill="#cbd5e1" font-family="sans-serif" font-size="16">Peer-reviewed clinical breakthroughs &amp; bedside physiology</text>
+</svg>`);
+
+const spaceCosmosImg = svgDataUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
+  <defs>
+    <linearGradient id="sb" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#050816"/><stop offset="60%" stop-color="#111936"/><stop offset="100%" stop-color="#2b1b47"/>
+    </linearGradient>
+    <radialGradient id="neb" cx="68%" cy="42%" r="44%">
+      <stop offset="0%" stop-color="#c2e8ff" stop-opacity="0.32"/><stop offset="60%" stop-color="#7298af" stop-opacity="0.12"/><stop offset="100%" stop-color="#000" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#sb)"/><rect width="800" height="450" fill="url(#neb)"/>
+  <circle cx="560" cy="200" r="78" fill="#1e293b" stroke="#93c5fd" stroke-width="2" opacity="0.9"/>
+  <ellipse cx="560" cy="204" rx="135" ry="26" fill="none" stroke="#e0f2fe" stroke-width="2.5" opacity="0.65" transform="rotate(-14 560 204)"/>
+  <circle cx="140" cy="90" r="2" fill="#fff"/><circle cx="260" cy="140" r="1.5" fill="#bae6fd"/><circle cx="690" cy="82" r="2" fill="#fde68a"/><circle cx="420" cy="68" r="1.8" fill="#fff"/>
+  <text x="64" y="138" fill="#f8fafc" font-family="Georgia, serif" font-size="36" font-weight="700">Cosmos &amp; Deep Space</text>
+  <text x="64" y="172" fill="#bfdbfe" font-family="sans-serif" font-size="16">Astrophysics, exoplanet horizons &amp; orbital observatories</text>
+</svg>`);
+
+const photoStudioImg = svgDataUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
+  <defs>
+    <linearGradient id="pb" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1f140d"/><stop offset="55%" stop-color="#3c2618"/><stop offset="100%" stop-color="#5a3822"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#pb)"/>
+  <circle cx="585" cy="225" r="108" fill="#120c08" stroke="#d4af37" stroke-width="3"/>
+  <circle cx="585" cy="225" r="74" fill="#1e1510" stroke="#94a3b8" stroke-width="2"/>
+  <circle cx="585" cy="225" r="42" fill="#0c4a6e" opacity="0.65"/>
+  <circle cx="568" cy="206" r="14" fill="#ffffff" opacity="0.35"/>
+  <text x="64" y="148" fill="#fef3c7" font-family="Georgia, serif" font-size="36" font-weight="700">Visual Arts &amp; Optics</text>
+  <text x="64" y="182" fill="#e7d6be" font-family="sans-serif" font-size="16">Light craft, framing geometry &amp; documentary cinema</text>
+</svg>`);
+
+const musicAcousticsImg = svgDataUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
+  <defs>
+    <linearGradient id="mb" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#1b1428"/><stop offset="55%" stop-color="#473e66"/><stop offset="100%" stop-color="#8b4d5a"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#mb)"/>
+  <path d="M0 290 Q 120 190, 240 290 T 480 290 T 720 290 T 800 260" fill="none" stroke="#f5d7db" stroke-width="3" opacity="0.8"/>
+  <path d="M0 320 Q 140 245, 280 320 T 560 320 T 800 300" fill="none" stroke="#f1916d" stroke-width="2.5" opacity="0.7"/>
+  <text x="64" y="142" fill="#fdf2f8" font-family="Georgia, serif" font-size="36" font-weight="700">Music &amp; Focus Acoustics</text>
+  <text x="64" y="176" fill="#f5d7db" font-family="sans-serif" font-size="16">Binaural calm, classical harmonic structure &amp; soundscapes</text>
+</svg>`);
+
+const wellnessSportImg = svgDataUri(`
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 450">
+  <defs>
+    <linearGradient id="wb" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#05211c"/><stop offset="55%" stop-color="#0b3b32"/><stop offset="100%" stop-color="#194a3d"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="450" fill="url(#wb)"/>
+  <circle cx="595" cy="215" r="92" fill="#d8c2aa" fill-opacity="0.12" stroke="#d8c2aa" stroke-opacity="0.45" stroke-width="2"/>
+  <path d="M510 265 Q 570 140, 665 185" fill="none" stroke="#34d399" stroke-width="3.5" stroke-linecap="round"/>
+  <text x="64" y="142" fill="#ecfdf5" font-family="Georgia, serif" font-size="36" font-weight="700">Wellness, Posture &amp; Sport</text>
+  <text x="64" y="176" fill="#a7f3d0" font-family="sans-serif" font-size="16">Cognitive stamina, recovery rituals &amp; clinical longevity</text>
+</svg>`);
 
 export interface WingBlogPage {
   pageNumber: number;

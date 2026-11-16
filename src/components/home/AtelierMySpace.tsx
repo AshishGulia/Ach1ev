@@ -1180,6 +1180,7 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
                     />
                     <button type="submit" aria-label="Add task">
                       <Plus className="w-3.5 h-3.5" />
+                      <span>Add Task</span>
                     </button>
                   </form>
 

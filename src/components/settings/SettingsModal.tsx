@@ -1807,75 +1807,113 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   </div>
                 </div>
 
-                {/* Font Options Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-                  {APP_FONTS
-                    .filter((f) => fontCategoryFilter === 'all' || f.fontType === fontCategoryFilter)
-                    .map((font) => {
-                      const isSelected = currentFont === font.name;
-                      const isHandwriting = font.fontType === 'handwriting';
+                {/* Grouped Individual Category Font Sections (Handwriting · Sans-Serif · Serif) */}
+                <div className="space-y-6">
+                  {(
+                    [
+                      {
+                        key: 'handwriting',
+                        title: 'Handwriting',
+                        subtitle: 'Expressive cursive, brush, blackboard & studio pen lettering',
+                      },
+                      {
+                        key: 'sans',
+                        title: 'Sans-Serif',
+                        subtitle: 'Clean geometric, neo-grotesque & humanist clarity',
+                      },
+                      {
+                        key: 'serif',
+                        title: 'Serif',
+                        subtitle: 'Editorial book, medical journal & royal classic serif typography',
+                      },
+                    ] as const
+                  )
+                    .filter((group) => fontCategoryFilter === 'all' || fontCategoryFilter === group.key)
+                    .map((group) => {
+                      const groupFonts = APP_FONTS.filter((f) => f.fontType === group.key);
+                      if (groupFonts.length === 0) return null;
                       return (
-                        <div
-                          key={font.id}
-                          onClick={() => handleSelectFont(font)}
-                          className={`p-3.5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between group ${
-                            isSelected
-                              ? 'border-[#A47C43] bg-amber-50/50 dark:bg-[#231912] ring-2 ring-[#A47C43]/30 shadow-xs'
-                              : isHandwriting
-                              ? 'border-amber-200/90 dark:border-[#4b3322] bg-amber-50/20 dark:bg-[#1a120d] hover:border-amber-400'
-                              : 'border-stone-200/90 dark:border-[#382518] bg-white dark:bg-[#18110c] hover:border-amber-500'
-                          }`}
-                        >
-                          <div className="space-y-1">
-                            <div className="flex items-center justify-between">
-                              <span className="font-bold text-stone-900 dark:text-stone-100 flex items-center gap-1.5">
-                                <span
-                                  data-font-sample=""
-                                  style={
-                                    {
-                                      fontFamily: font.cssFamily,
-                                      '--sample-font': font.cssFamily,
-                                      fontSize: isHandwriting ? '1.25rem' : '1.05rem',
-                                      fontStyle: 'normal',
-                                    } as React.CSSProperties
-                                  }
-                                >
-                                  {font.name}
-                                </span>
-                                {isHandwriting && (
-                                  <span className="px-1.5 py-0.2 rounded text-[8.5px] font-mono font-bold bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 border border-amber-300 dark:border-amber-800">
-                                    ✍️ Handwriting
-                                  </span>
-                                )}
-                                {isSelected && <Check className="w-3.5 h-3.5 text-amber-500" />}
-                              </span>
-                              <span className="text-[9.5px] font-mono px-1.5 py-0.2 rounded bg-stone-100 dark:bg-[#251a12] text-stone-600 dark:text-stone-300">
-                                {font.category}
-                              </span>
+                        <section key={group.key} className="space-y-3">
+                          <div className="flex items-center justify-between gap-2 pb-1.5 border-b border-stone-200/80 dark:border-[#382518]">
+                            <div>
+                              <h5 className="text-sm font-bold text-stone-900 dark:text-stone-100">
+                                {group.title}
+                              </h5>
+                              <p className="text-[11px] text-stone-500 dark:text-stone-400">
+                                {group.subtitle}
+                              </p>
                             </div>
+                            <span className="text-[10.5px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/25 shrink-0">
+                              {groupFonts.length} Fonts
+                            </span>
                           </div>
 
-                          {/* Live Font Sample */}
-                          <div
-                            data-font-sample=""
-                            className={`mt-2.5 p-3 rounded-lg border text-stone-900 dark:text-stone-100 transition-colors ${
-                              isHandwriting
-                                ? 'bg-amber-50/60 dark:bg-[#1d1810] border-amber-200/60 dark:border-[#4b3322]'
-                                : 'bg-stone-50 dark:bg-[#120c08] border-stone-100 dark:border-[#352317]'
-                            }`}
-                            style={
-                              {
-                                fontFamily: font.cssFamily,
-                                '--sample-font': font.cssFamily,
-                                fontStyle: 'normal',
-                              } as React.CSSProperties
-                            }
-                          >
-                            <div className={`font-semibold leading-snug ${isHandwriting ? 'text-base sm:text-lg text-amber-950 dark:text-amber-200' : 'text-sm'}`}>
-                              {font.sample}
-                            </div>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                            {groupFonts.map((font) => {
+                              const isSelected = currentFont === font.name;
+                              const isHandwriting = font.fontType === 'handwriting';
+                              return (
+                                <div
+                                  key={font.id}
+                                  onClick={() => handleSelectFont(font)}
+                                  className={`p-3.5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between group ${
+                                    isSelected
+                                      ? 'border-[#A47C43] bg-amber-50/50 dark:bg-[#231912] ring-2 ring-[#A47C43]/30 shadow-xs'
+                                      : isHandwriting
+                                      ? 'border-amber-200/90 dark:border-[#4b3322] bg-amber-50/20 dark:bg-[#1a120d] hover:border-amber-400'
+                                      : 'border-stone-200/90 dark:border-[#382518] bg-white dark:bg-[#18110c] hover:border-amber-500'
+                                  }`}
+                                >
+                                  <div className="space-y-1">
+                                    <div className="flex items-center justify-between gap-2">
+                                      <span className="font-bold text-stone-900 dark:text-stone-100 flex items-center gap-1.5 min-w-0">
+                                        <span
+                                          data-font-sample=""
+                                          className="truncate"
+                                          style={
+                                            {
+                                              fontFamily: font.cssFamily,
+                                              '--sample-font': font.cssFamily,
+                                              fontSize: isHandwriting ? '1.22rem' : '1.04rem',
+                                              fontStyle: 'normal',
+                                            } as React.CSSProperties
+                                          }
+                                        >
+                                          {font.name}
+                                        </span>
+                                        {isSelected && <Check className="w-3.5 h-3.5 text-amber-500 shrink-0" />}
+                                      </span>
+                                      <span className="text-[9.5px] font-mono px-1.5 py-0.5 rounded bg-stone-100 dark:bg-[#251a12] text-stone-600 dark:text-stone-300 shrink-0">
+                                        {font.category}
+                                      </span>
+                                    </div>
+                                  </div>
+
+                                  {/* Live Font Sample */}
+                                  <div
+                                    data-font-sample=""
+                                    className={`mt-2.5 p-3 rounded-lg border text-stone-900 dark:text-stone-100 transition-colors ${
+                                      isHandwriting
+                                        ? 'bg-amber-50/60 dark:bg-[#1d1810] border-amber-200/60 dark:border-[#4b3322]'
+                                        : 'bg-stone-50 dark:bg-[#120c08] border-stone-100 dark:border-[#352317]'
+                                    }`}
+                                    style={
+                                      {
+                                        fontFamily: font.cssFamily,
+                                        '--sample-font': font.cssFamily,
+                                        fontStyle: 'normal',
+                                      } as React.CSSProperties
+                                    }
+                                  >
+                                    <div className={`font-semibold leading-snug ${isHandwriting ? 'text-base sm:text-lg text-amber-950 dark:text-amber-200' : 'text-sm'}`}>
+                                      {font.sample}
+                                    </div>
+                                  </div>
+                                </div>
+                              );
+                            })}
                           </div>
-                        </div>
+                        </section>
                       );
                     })}
                 </div>
