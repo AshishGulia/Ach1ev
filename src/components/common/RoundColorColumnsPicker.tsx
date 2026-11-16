@@ -184,7 +184,7 @@ export const RoundColorColumnsPicker: React.FC<RoundColorColumnsPickerProps> = (
                       ? 'ring-1 ring-stone-300 dark:ring-stone-600'
                       : 'ring-1 ring-black/10 dark:ring-white/15'
                   }`}
-                  style={{ backgroundColor: sw.color }}
+                  style={{ backgroundColor: sw.color, minWidth: 0, minHeight: 0, padding: 0 }}
                 />
               );
             })}
@@ -211,7 +211,7 @@ export const RoundColorColumnsPicker: React.FC<RoundColorColumnsPickerProps> = (
                       ? 'ring-2 ring-offset-1 ring-[#a47c43] dark:ring-[#e8be82] scale-115'
                       : 'ring-1 ring-black/15 dark:ring-white/15'
                   }`}
-                  style={{ backgroundColor: sw.color }}
+                  style={{ backgroundColor: sw.color, minWidth: 0, minHeight: 0, padding: 0 }}
                 />
               );
             })}

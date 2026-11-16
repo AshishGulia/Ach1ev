@@ -2000,7 +2000,7 @@ html.dark :is(
 
 /* Create Note Ribbon: Plain Flat Formatting Controls Across All 10 Themes (Light & Dark) */
 .an-note-ribbon .an-ribbon-scroll :is(
-  button,
+  button:not([data-swatch]),
   .an-icon-btn,
   .an-ribbon-feat,
   .an-color-split,
@@ -2008,7 +2008,7 @@ html.dark :is(
   .an-color-arrow,
   .an-select-sm,
   .an-paper-mini-pills,
-  .an-paper-mini-pills button
+  .an-paper-mini-pills button:not([data-swatch])
 ) {
   background: transparent !important;
   background-image: none !important;
@@ -2017,15 +2017,14 @@ html.dark :is(
 }
 
 .an-note-ribbon .an-ribbon-scroll :is(
-  button,
+  button:not([data-swatch]),
   .an-icon-btn,
   .an-ribbon-feat,
   .an-color-main,
   .an-color-arrow,
-  .an-paper-mini-pills button
+  .an-paper-mini-pills button:not([data-swatch])
 ):hover {
   background: color-mix(in srgb, var(--an-brass, #A47C43) 12%, transparent) !important;
   box-shadow: none !important;
   filter: none !important;
 }
-

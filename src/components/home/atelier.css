@@ -1335,26 +1335,26 @@ html.dark[data-design="2"] .atelier-root,
 html[data-design="3"] .atelier-root,
 .atelier-root[data-atelier-theme="3"] {
   --at-bg: transparent;
-  --at-paper: rgba(246, 254, 255, 0.82);
-  --at-ink: #042a41;
-  --at-muted: #365c73;
-  --at-line: #9cc5de;
-  --at-brass: #7298af;
-  --at-sage: #004671;
-  --at-sage-soft: rgba(0, 70, 113, 0.14);
-  --at-brass-soft: rgba(114, 152, 175, 0.16);
+  --at-paper: rgba(253, 248, 247, 0.88);
+  --at-ink: #3d212b;
+  --at-muted: #78525f;
+  --at-line: #dec4c9;
+  --at-brass: #6e4253;
+  --at-sage: #9d6376;
+  --at-sage-soft: rgba(157, 99, 118, 0.14);
+  --at-brass-soft: rgba(110, 66, 83, 0.14);
 }
 html.dark[data-design="3"] .atelier-root,
 .dark .atelier-root[data-atelier-theme="3"] {
   --at-bg: transparent;
-  --at-paper: rgba(4, 42, 65, 0.82);
-  --at-ink: #eaffff;
-  --at-muted: #9fc6de;
-  --at-line: #1d5678;
-  --at-brass: #c2e8ff;
-  --at-sage: #72b8db;
-  --at-sage-soft: rgba(114, 184, 219, 0.18);
-  --at-brass-soft: rgba(194, 232, 255, 0.16);
+  --at-paper: rgba(38, 22, 28, 0.88);
+  --at-ink: #f8eaeb;
+  --at-muted: #cfaab3;
+  --at-line: #5a3a46;
+  --at-brass: #d49aa6;
+  --at-sage: #e8b8c2;
+  --at-sage-soft: rgba(212, 154, 166, 0.18);
+  --at-brass-soft: rgba(212, 154, 166, 0.16);
 }
 
 html[data-design="4"] .atelier-root,

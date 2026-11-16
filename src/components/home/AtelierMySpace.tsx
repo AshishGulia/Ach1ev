@@ -88,7 +88,7 @@ const DEFAULT_TRACKERS: TrackerItem[] = [];
 const ACCENTS_BY_THEME: Record<string, string[]> = {
   '1': ['#A47C43', '#8f5f2c', '#3F4E6B', '#8A5A3B', '#6B4A5E', '#b47b44'],
   '2': ['#f1916d', '#bd83b8', '#473e66', '#d97a98', '#9b638f', '#e07a5f'],
-  '3': ['#004671', '#365c73', '#7298af', '#042a41', '#267ba3', '#568ea8'],
+  '3': ['#6e4253', '#d49aa6', '#9d6376', '#3d212b', '#78525f', '#b87b89'],
   '4': ['#2563eb', '#475569', '#3b82f6', '#1e3a8a', '#64748b', '#1d4ed8'],
   '5': ['#002a23', '#b48735', '#0f4d40', '#8f6b29', '#1b5e50', '#5e4c36'],
 };
@@ -826,7 +826,7 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
         {/* Top Search Bar (Eye rest timer & theme mode live in the top utility ribbon) */}
         <header className="atelier-top">
           <label className="atelier-search">
-            <Search className="w-3.5 h-3.5 text-stone-400" />
+            <Search className="w-3.5 h-3.5" style={{ color: 'var(--at-muted)' }} />
             <input
               placeholder="Search notes, slabs…"
               value={searchQuery}
@@ -1556,13 +1556,13 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
                   >
                     <div className="flex items-center gap-1.5">
                       <span className="text-sm">{preset.icon}</span>
-                      <span className="text-xs font-bold text-stone-800 dark:text-stone-200 group-hover:text-amber-600 truncate">
+                      <span className="text-xs font-bold truncate" style={{ color: 'var(--at-ink)' }}>
                         {preset.name}
                       </span>
                     </div>
-                    <div className="flex items-center justify-between text-[10px] text-stone-400 mt-1">
+                    <div className="flex items-center justify-between text-[10px] mt-1" style={{ color: 'var(--at-muted)' }}>
                       <span>Goal: {preset.goal} {preset.unit}</span>
-                      <span className="font-mono uppercase text-[9px] text-amber-700 dark:text-amber-400">{preset.type}</span>
+                      <span className="font-mono uppercase text-[9px]" style={{ color: 'var(--at-brass)' }}>{preset.type}</span>
                     </div>
                   </button>
                 ))}
@@ -1706,7 +1706,7 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
               {/* Talk to Developer Banner per User Request */}
               <div className="flex items-center justify-between p-2.5 rounded-xl bg-stone-100 dark:bg-[#140e0a] border border-stone-200 dark:border-[#352317] mt-2">
                 <div className="flex items-center gap-2">
-                  <MessageSquareCode className="w-4 h-4 text-stone-500" />
+                  <MessageSquareCode className="w-4 h-4" style={{ color: 'var(--at-brass)' }} />
                   <span className="text-[11px] text-stone-600 dark:text-stone-300">
                     Need a bespoke formula or complex tracker not working?
                   </span>

@@ -326,7 +326,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
         className={
           isModal
             ? 'relative z-10 w-full max-w-4xl grid grid-cols-1 lg:grid-cols-12 gap-6 items-center'
-            : 'relative w-full min-h-[calc(100dvh-72px)] sm:min-h-[calc(100dvh-88px)] flex items-center justify-center px-4 sm:px-8 py-6 sm:py-10 overflow-hidden shrink-0'
+            : 'relative w-full min-h-[calc(100dvh-118px)] sm:min-h-[calc(100dvh-136px)] flex items-center justify-center px-4 sm:px-8 py-4 sm:py-6 overflow-hidden shrink-0'
         }
         style={
           isModal
@@ -674,7 +674,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                   <button
                     type="submit"
                     disabled={!!submitting}
-                    className="group relative overflow-hidden w-1/2 min-w-[160px] py-2.5 px-4 rounded-xl text-[#1b1007] font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 disabled:opacity-50"
+                    className="group relative overflow-hidden w-auto min-w-[116px] sm:min-w-[126px] py-1.5 px-5 rounded-xl text-[#1b1007] font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 disabled:opacity-50"
                     style={{
                       background:
                         'linear-gradient(135deg, #f6dea3 0%, #dca952 44%, #ecc774 72%, #b67d29 100%)',
@@ -693,7 +693,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                     />
                     {mode === 'forgot' ? (
                       <>
-                        <KeyRound className="w-4 h-4 relative z-10" />
+                        <KeyRound className="w-3.5 h-3.5 relative z-10" />
                         <span className="relative z-10">{submitting === 'email' ? 'Sending...' : 'Send Reset Link'}</span>
                       </>
                     ) : (
@@ -705,7 +705,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                             ? 'Sign In'
                             : 'Create Account'}
                         </span>
-                        <ArrowRight className="w-4 h-4 relative z-10" />
+                        <ArrowRight className="w-3.5 h-3.5 relative z-10" />
                       </>
                     )}
                   </button>
@@ -842,7 +842,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                   <button
                     type="submit"
                     disabled={!!submitting}
-                    className="group relative overflow-hidden w-1/2 min-w-[160px] py-2.5 px-4 rounded-xl text-[#1b1007] font-bold text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 disabled:opacity-50"
+                    className="group relative overflow-hidden w-auto min-w-[116px] sm:min-w-[126px] py-1.5 px-5 rounded-xl text-[#1b1007] font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 disabled:opacity-50"
                     style={{
                       background:
                         'linear-gradient(135deg, #f6dea3 0%, #dca952 44%, #ecc774 72%, #b67d29 100%)',
@@ -868,7 +868,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                         ? 'Verify OTP'
                         : 'Send OTP'}
                     </span>
-                    <ArrowRight className="w-4 h-4 relative z-10" />
+                    <ArrowRight className="w-3.5 h-3.5 relative z-10" />
                   </button>
                 </div>
               </form>
@@ -926,15 +926,23 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
 
       {!isModal && (
         <>
-          {/* Borderless Cosine-Eased Vertical Transition with Asymptotic Zero-Slope Join into Caramel Cream */}
+          {/* Borderless Cosine-Eased Vertical Transition with Bottom-Edge Glimpse on Initial Viewport */}
           <div
             aria-hidden="true"
-            className="w-full min-h-[calc(100dvh-72px)] sm:min-h-[calc(100dvh-88px)] relative z-10 pointer-events-none shrink-0"
+            className="w-full min-h-[calc(100dvh-72px)] sm:min-h-[calc(100dvh-88px)] relative z-10 pointer-events-none shrink-0 flex flex-col justify-start items-center pt-4"
             style={{
               background:
-                'linear-gradient(180deg, #0c0402 0%, #100503 7%, #170904 15%, #241108 24%, #351a0d 34%, #4b2613 44%, #64351b 54%, #7f4928 64%, #9b6039 73%, #b67b4f 81%, #ce9769 87%, #e0b386 92%, #ecc89e 95.5%, #f2d9b7 98%, #f4e2c2 100%)',
+                'linear-gradient(180deg, #0c0402 0%, #1c0c04 4.5%, #341809 10%, #512811 17%, #6d3a1c 27%, #8a4f2b 40%, #a5673e 54%, #be8154 68%, #d39b6d 80%, #e3b88b 89%, #eed0ab 94.5%, #f3dcc0 98%, #f4e2c2 100%)',
             }}
-          />
+          >
+            <div className="flex flex-col items-center gap-1 opacity-75 animate-bounce">
+              <span className="w-5 h-5 rounded-full border border-[#e7bc82]/35 bg-[#2a1307]/45 flex items-center justify-center text-[#f1cc96]">
+                <svg viewBox="0 0 16 16" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4 6.5l4 4 4-4" />
+                </svg>
+              </span>
+            </div>
+          </div>
 
           <section
             aria-label="Achiev Medical Study Guide & Tour"

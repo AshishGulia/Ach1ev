@@ -20,8 +20,20 @@ import {
 } from 'lucide-react';
 
 // Authentic Bookshelf / Almirah SVG Icon
-const BookshelfIcon: React.FC<{ className?: string }> = ({ className = 'w-3.5 h-3.5' }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+const BookshelfIcon: React.FC<{ className?: string; style?: React.CSSProperties }> = ({
+  className = 'w-3.5 h-3.5',
+  style,
+}) => (
+  <svg
+    className={className}
+    style={style}
+    viewBox="0 0 24 24"
+    fill="none"
+    stroke="currentColor"
+    strokeWidth="2"
+    strokeLinecap="round"
+    strokeLinejoin="round"
+  >
     <rect x="3" y="3" width="18" height="18" rx="2" />
     <line x1="3" y1="9" x2="21" y2="9" />
     <line x1="3" y1="15" x2="21" y2="15" />
@@ -32,9 +44,13 @@ const BookshelfIcon: React.FC<{ className?: string }> = ({ className = 'w-3.5 h-
 );
 
 // Custom Nib Pen SVG Icon
-const PenLogoIcon: React.FC<{ className?: string }> = ({ className = 'w-3.5 h-3.5' }) => (
+const PenLogoIcon: React.FC<{ className?: string; style?: React.CSSProperties }> = ({
+  className = 'w-3.5 h-3.5',
+  style,
+}) => (
   <svg
     className={className}
+    style={style}
     viewBox="0 0 24 24"
     fill="none"
     stroke="currentColor"
@@ -164,13 +180,17 @@ export const Sidebar: React.FC<SidebarProps> = ({
     }
   }, [activeView]);
 
-  const isNightMode =
-    isDarkMode !== undefined
-      ? isDarkMode
-      : typeof document !== 'undefined'
-      ? document.documentElement.classList.contains('dark') ||
-        localStorage.getItem('medden_theme') === 'dark'
-      : false;
+  const [observedDark, setObservedDark] = useState<boolean>(() => {
+    try {
+      if (typeof document !== 'undefined') {
+        return (
+          document.documentElement.classList.contains('dark') ||
+          localStorage.getItem('medden_theme') === 'dark'
+        );
+      }
+    } catch {}
+    return false;
+  });
 
   const [observedDesign, setObservedDesign] = useState<string>(() => {
     try {
@@ -186,9 +206,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
   });
 
   useEffect(() => {
-    if (activeDesign !== undefined) return;
-    const syncDesign = () => {
+    if (typeof document === 'undefined') return;
+    const syncRootAttrs = () => {
       try {
+        setObservedDark(
+          document.documentElement.classList.contains('dark') ||
+            localStorage.getItem('medden_theme') === 'dark'
+        );
         const d =
           document.documentElement.getAttribute('data-design') ||
           localStorage.getItem('medden_active_design') ||
@@ -196,15 +220,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
         setObservedDesign(d);
       } catch {}
     };
-    syncDesign();
-    const obs = new MutationObserver(syncDesign);
+    syncRootAttrs();
+    const obs = new MutationObserver(syncRootAttrs);
     obs.observe(document.documentElement, {
       attributes: true,
-      attributeFilter: ['data-design'],
+      attributeFilter: ['class', 'data-design'],
     });
     return () => obs.disconnect();
-  }, [activeDesign]);
+  }, []);
 
+  const isNightMode = isDarkMode !== undefined ? isDarkMode : observedDark;
   const resolvedDesign = activeDesign || observedDesign || '1';
   const themeMeta = getThemeMeta(resolvedDesign);
   const sb = isNightMode ? themeMeta.sidebar.dark : themeMeta.sidebar.light;
@@ -491,9 +516,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   title="Minimize sidebar to thin column"
                   aria-label="Minimize sidebar"
                   style={toggleBtnStyle}
-                  className={`w-full group flex items-center justify-center py-1 transition-all shadow-xs hover:brightness-110 active:scale-[0.97] cursor-pointer ${leatherBtnCls}`}
+                  className={`raw-icon-btn w-full group flex items-center justify-center py-1 transition-all shadow-xs hover:brightness-110 active:scale-[0.97] cursor-pointer ${leatherBtnCls}`}
                 >
-                  <ArrowLeft className="w-3.5 h-3.5 stroke-[2.2] transition-transform duration-200 group-hover:-translate-x-1" />
+                  <ArrowLeft
+                    className="w-3.5 h-3.5 stroke-[2.2] transition-transform duration-200 group-hover:-translate-x-1"
+                    style={{ color: sb.toggleBtnText }}
+                  />
                 </button>
               </div>
 
@@ -551,7 +579,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           className={`w-3 h-3 shrink-0 transition-transform duration-200 ${
                             isMoreExpanded ? 'rotate-180' : ''
                           }`}
-                          style={{ color: sb.mutedLabelColor }}
+                          style={{
+                            color:
+                              MORE_BRANCH_IDS.has(activeView) && !isMoreExpanded
+                                ? sb.activeIconColor
+                                : sb.mutedLabelColor,
+                          }}
                         />
                       </div>
                     </button>
@@ -775,9 +808,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 title="Expand sidebar column"
                 aria-label="Expand sidebar column"
                 style={toggleBtnStyle}
-                className={`w-6 h-6 group flex items-center justify-center transition-all shadow-xs hover:brightness-110 active:scale-[0.96] cursor-pointer ${leatherBtnCls}`}
+                className={`raw-icon-btn w-6 h-6 group flex items-center justify-center transition-all shadow-xs hover:brightness-110 active:scale-[0.96] cursor-pointer ${leatherBtnCls}`}
               >
-                <ArrowRight className="w-3.5 h-3.5 stroke-[2.2] transition-transform duration-200 group-hover:translate-x-0.5" />
+                <ArrowRight
+                  className="w-3.5 h-3.5 stroke-[2.2] transition-transform duration-200 group-hover:translate-x-0.5"
+                  style={{ color: sb.toggleBtnText }}
+                />
               </button>
 
               <div className="w-4 h-[1px]" style={{ background: sb.sectionBorder }} />

@@ -578,6 +578,26 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
     return 'solid';
   });
   const [isRulerMenuOpen, setIsRulerMenuOpen] = useState<boolean>(false);
+  const [rulerMenuPos, setRulerMenuPos] = useState<{ left: number; top: number }>({ left: 16, top: 112 });
+  const rulerBtnRef = useRef<HTMLButtonElement | null>(null);
+
+  const sepiaLightMap: Record<string, string> = {
+    '1': '#F3E5C8',
+    '2': '#EDE4CC',
+    '3': '#F5E7CE',
+    '4': '#EFE4CF',
+    '5': '#F0E6CB',
+  };
+  const sepiaDarkMap: Record<string, string> = {
+    '1': '#251A10',
+    '2': '#1B2219',
+    '3': '#26191D',
+    '4': '#1A2029',
+    '5': '#161D17',
+  };
+  const activeSepiaHex = isDarkThemeDoc
+    ? sepiaDarkMap[docDesignId] || '#251A10'
+    : sepiaLightMap[docDesignId] || '#F3E5C8';
 
   useEffect(() => {
     try {
@@ -1820,6 +1840,10 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
         setIsBookPickerOpen(false);
         setOpenColorMenu(null);
         setOpenUnderlineMenu(null);
+        setIsPaperMenuOpen(false);
+        setIsRulerMenuOpen(false);
+        setActiveTextBoxId(null);
+        setBoxColorPickerTarget(null);
         setSelectionPill((p) => ({ ...p, visible: false }));
       }
     };
@@ -1828,6 +1852,16 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
       if (!target.closest('.an-color-popover') && !target.closest('.an-color-split')) {
         setOpenColorMenu(null);
         setOpenUnderlineMenu(null);
+      }
+      if (!target.closest('.an-paper-popover') && !target.closest('[data-paper-trigger]')) {
+        setIsPaperMenuOpen(false);
+      }
+      if (!target.closest('.an-ruler-popover') && !target.closest('[data-ruler-trigger]')) {
+        setIsRulerMenuOpen(false);
+      }
+      if (!target.closest('.an-floating-textbox')) {
+        setActiveTextBoxId(null);
+        setBoxColorPickerTarget(null);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -3644,108 +3678,30 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                 {/* Lines Customization (Line Spacing, Color Picker, Line Style) */}
                 <div className="relative shrink-0">
                   <button
+                    ref={rulerBtnRef}
+                    data-ruler-trigger="true"
                     type="button"
                     className={`an-ribbon-feat compact shrink-0 ${isRulerMenuOpen ? 'text-[#A47C43] font-semibold' : ''}`}
-                    onClick={() => setIsRulerMenuOpen((v) => !v)}
+                    onClick={() => {
+                      if (!isRulerMenuOpen && rulerBtnRef.current) {
+                        const rect = rulerBtnRef.current.getBoundingClientRect();
+                        setRulerMenuPos({
+                          left: Math.max(12, Math.min(window.innerWidth - 280, rect.left)),
+                          top: rect.bottom + 8,
+                        });
+                      }
+                      setIsPaperMenuOpen(false);
+                      setIsRulerMenuOpen((v) => !v);
+                    }}
                     title="Customize Lines (Spacing, Color & Solid/Dotted/Dashed/Double)"
                   >
                     <SlidersHorizontal className="w-3.5 h-3.5 text-[#A47C43]" />
                     <span>Lines</span>
                   </button>
-                  {isRulerMenuOpen && (
-                    <div
-                      className="fixed z-50 w-64 p-3.5 rounded-2xl bg-[var(--an-paper)] border border-[var(--an-line)] shadow-2xl space-y-3"
-                      style={{ top: 108, right: 'max(16px, 22vw)' }}
-                      onMouseDown={(e) => e.stopPropagation()}
-                    >
-                      <div className="flex items-center justify-between pb-1.5 border-b border-[var(--an-line)]">
-                        <span className="text-xs font-bold text-[var(--an-ink)]">Lines Settings</span>
-                        <button
-                          type="button"
-                          onClick={() => setIsRulerMenuOpen(false)}
-                          className="p-0.5 rounded hover:bg-black/10 cursor-pointer"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-
-                      <div className="space-y-1">
-                        <div className="flex items-center justify-between text-[11px] font-semibold">
-                          <span>Line Spacing</span>
-                          <span className="font-mono">{rulerSpacingPx}px</span>
-                        </div>
-                        <input
-                          type="range"
-                          min={20}
-                          max={48}
-                          value={rulerSpacingPx}
-                          onChange={(e) => {
-                            setPaperStyle('ruled');
-                            setRulerSpacingPx(Number(e.target.value));
-                          }}
-                          className="w-full accent-[#A47C43] cursor-pointer"
-                        />
-                      </div>
-
-                      <div className="space-y-1">
-                        <span className="text-[11px] font-semibold block">Line Style</span>
-                        <div className="grid grid-cols-4 gap-1">
-                          {(['solid', 'dotted', 'dashed', 'double'] as const).map((st) => (
-                            <button
-                              key={st}
-                              type="button"
-                              onClick={() => {
-                                setPaperStyle('ruled');
-                                setRulerStyle(st);
-                              }}
-                              className={`py-1 rounded-lg text-[10px] font-bold capitalize border cursor-pointer ${
-                                rulerStyle === st
-                                  ? 'bg-[#A47C43] text-white border-[#A47C43]'
-                                  : 'bg-[var(--an-page)] border-[var(--an-line)] text-[var(--an-ink)]'
-                              }`}
-                            >
-                              {st}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      <div className="space-y-1.5">
-                        <span className="text-[11px] font-semibold block">Line Color</span>
-                        <RoundColorColumnsPicker
-                          columns={UNIFIED_COLOR_COLUMNS}
-                          selectedColor={rulerColor}
-                          onSelectColor={(c) => {
-                            setPaperStyle('ruled');
-                            setRulerColor(c);
-                          }}
-                          showStandardRow
-                          swatchSizeClass="w-4 h-4"
-                        />
-                      </div>
-                    </div>
-                  )}
                 </div>
 
                 {/* Paper Color Customization Button (Distinct Paper Logo, Theme-Synced, Default Sepia, Color Columns) */}
                 {(() => {
-                  const sepiaLightMap: Record<string, string> = {
-                    '1': '#F3E5C8',
-                    '2': '#EDE4CC',
-                    '3': '#F5E7CE',
-                    '4': '#EFE4CF',
-                    '5': '#F0E6CB',
-                  };
-                  const sepiaDarkMap: Record<string, string> = {
-                    '1': '#251A10',
-                    '2': '#1B2219',
-                    '3': '#26191D',
-                    '4': '#1A2029',
-                    '5': '#161D17',
-                  };
-                  const activeSepiaHex = isDarkThemeDoc
-                    ? sepiaDarkMap[docDesignId] || '#251A10'
-                    : sepiaLightMap[docDesignId] || '#F3E5C8';
                   const swatchPreviewBg =
                     !paperColor || paperColor === 'sepia' || paperColor === 'beige'
                       ? activeSepiaHex
@@ -3773,22 +3729,11 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                       : 0.85;
                   const lineInk = lum > 0.52 ? '#5A3A1E' : '#EED9BC';
 
-                  const applyPaperChoice = (nextVal: string) => {
-                    setPaperColor(nextVal);
-                    if (notebook && onUpdateNotebook) {
-                      onUpdateNotebook({
-                        ...notebook,
-                        paperColor: nextVal,
-                        updatedAt: new Date().toISOString(),
-                      });
-                    }
-                    triggerSave();
-                  };
-
                   return (
                     <div className="relative shrink-0">
                       <button
                         ref={paperBtnRef}
+                        data-paper-trigger="true"
                         type="button"
                         className={`an-ribbon-feat compact shrink-0 ${isPaperMenuOpen ? 'font-semibold' : ''}`}
                         onClick={() => {
@@ -3799,6 +3744,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                               top: rect.bottom + 8,
                             });
                           }
+                          setIsRulerMenuOpen(false);
                           setIsPaperMenuOpen((v) => !v);
                         }}
                         title="Change Paper Color (Default: Sepia)"
@@ -3828,65 +3774,6 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                         </svg>
                         <span>Paper</span>
                       </button>
-
-                      {isPaperMenuOpen && (
-                        <div
-                          className="fixed z-50 w-[268px] p-3.5 rounded-2xl bg-[var(--an-paper)] border border-[var(--an-line)] shadow-2xl space-y-2.5"
-                          style={{ left: paperMenuPos.left, top: paperMenuPos.top }}
-                          onMouseDown={(e) => e.stopPropagation()}
-                        >
-                          <div className="flex items-center justify-between pb-1.5 border-b border-[var(--an-line)]">
-                            <span className="text-xs font-bold text-[var(--an-ink)]">Paper Color</span>
-                            <button
-                              type="button"
-                              onClick={() => setIsPaperMenuOpen(false)}
-                              className="p-0.5 rounded hover:bg-black/10 cursor-pointer"
-                            >
-                              <X className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-
-                          <div className="flex flex-wrap gap-1">
-                            {[
-                              { id: 'sepia', label: 'Sepia (Default)', swatch: activeSepiaHex },
-                              { id: 'white', label: 'White', swatch: isDarkThemeDoc ? '#23211E' : '#FFFFFF' },
-                              { id: 'mint', label: 'Mint', swatch: isDarkThemeDoc ? '#14241B' : '#E6F4EA' },
-                              { id: 'ice-blue', label: 'Ice', swatch: isDarkThemeDoc ? '#14202D' : '#E8F2FC' },
-                              { id: 'dark', label: 'Night', swatch: '#14110E' },
-                            ].map((preset) => (
-                              <button
-                                key={preset.id}
-                                type="button"
-                                onClick={() => applyPaperChoice(preset.id)}
-                                className={`px-2 py-1 rounded-lg text-[10px] font-semibold flex items-center gap-1 border cursor-pointer ${
-                                  paperColor === preset.id
-                                    ? 'border-[var(--an-brass)] ring-1 ring-[var(--an-brass)]'
-                                    : 'border-[var(--an-line)]'
-                                }`}
-                              >
-                                <span
-                                  className="w-2.5 h-2.5 rounded-full border border-black/20 shrink-0"
-                                  style={{ backgroundColor: preset.swatch }}
-                                />
-                                <span>{preset.label}</span>
-                              </button>
-                            ))}
-                          </div>
-
-                          <div className="space-y-1">
-                            <span className="text-[11px] font-semibold block text-[var(--an-ink)]">
-                              Custom Color Columns
-                            </span>
-                            <RoundColorColumnsPicker
-                              columns={UNIFIED_COLOR_COLUMNS}
-                              selectedColor={paperColor.startsWith('#') ? paperColor : undefined}
-                              onSelectColor={(hex) => applyPaperChoice(hex)}
-                              showStandardRow
-                              swatchSizeClass="w-4 h-4"
-                            />
-                          </div>
-                        </div>
-                      )}
                     </div>
                   );
                 })()}
@@ -4507,13 +4394,13 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                                 prev.map((b) => (b.id === box.id ? { ...b, locked: !b.locked } : b))
                               )
                             }
-                            className={`px-1.5 py-0.5 rounded text-[10px] font-bold flex items-center gap-1 cursor-pointer ${
-                              box.locked ? 'bg-amber-600 text-white' : 'bg-black/10 text-[var(--an-ink)]'
+                            className={`w-5 h-5 p-0 rounded flex items-center justify-center cursor-pointer transition-colors ${
+                              box.locked ? 'bg-amber-600 text-white' : 'bg-black/10 text-[var(--an-ink)] hover:bg-black/15'
                             }`}
-                            title={box.locked ? 'Unlock Text Box Position' : 'Lock Text Box Position'}
+                            title={box.locked ? 'Unlock Text Box' : 'Lock Text Box'}
+                            aria-label={box.locked ? 'Unlock Text Box' : 'Lock Text Box'}
                           >
                             {box.locked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
-                            <span>{box.locked ? 'Locked' : 'Lock'}</span>
                           </button>
 
                           {/* Shape Selector */}
@@ -5658,6 +5545,161 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
               swatchSizeClass="w-6 h-6"
             />
           )}
+        </div>
+      )}
+
+      {/* Lines Settings Popover (Rendered outside ribbon scroll so swatches stay bright & unclipped) */}
+      {isRulerMenuOpen && (
+        <div
+          className="an-color-popover an-ruler-popover w-64 space-y-3 animate-in fade-in zoom-in-95 duration-100"
+          style={{ left: rulerMenuPos.left, top: rulerMenuPos.top }}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-center justify-between pb-1.5 border-b border-[var(--an-line)]">
+            <span className="text-xs font-bold text-[var(--an-ink)]">Lines Settings</span>
+            <button
+              type="button"
+              onClick={() => setIsRulerMenuOpen(false)}
+              className="p-0.5 rounded hover:bg-black/10 cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          <div className="space-y-1">
+            <div className="flex items-center justify-between text-[11px] font-semibold">
+              <span>Line Spacing</span>
+              <span className="font-mono">{rulerSpacingPx}px</span>
+            </div>
+            <input
+              type="range"
+              min={20}
+              max={48}
+              value={rulerSpacingPx}
+              onChange={(e) => {
+                setPaperStyle('ruled');
+                setRulerSpacingPx(Number(e.target.value));
+              }}
+              className="w-full accent-[#A47C43] cursor-pointer"
+            />
+          </div>
+
+          <div className="space-y-1">
+            <span className="text-[11px] font-semibold block">Line Style</span>
+            <div className="grid grid-cols-4 gap-1">
+              {(['solid', 'dotted', 'dashed', 'double'] as const).map((st) => (
+                <button
+                  key={st}
+                  type="button"
+                  onClick={() => {
+                    setPaperStyle('ruled');
+                    setRulerStyle(st);
+                  }}
+                  className={`py-1 rounded-lg text-[10px] font-bold capitalize border cursor-pointer ${
+                    rulerStyle === st
+                      ? 'bg-[#A47C43] text-white border-[#A47C43]'
+                      : 'bg-[var(--an-page)] border-[var(--an-line)] text-[var(--an-ink)]'
+                  }`}
+                >
+                  {st}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <span className="text-[11px] font-semibold block">Line Color</span>
+            <RoundColorColumnsPicker
+              columns={UNIFIED_COLOR_COLUMNS}
+              selectedColor={rulerColor}
+              onSelectColor={(c) => {
+                setPaperStyle('ruled');
+                setRulerColor(c);
+              }}
+              showStandardRow
+              swatchSizeClass="w-4 h-4"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Paper Color Popover (Rendered outside ribbon scroll so all 10 color columns render visibly) */}
+      {isPaperMenuOpen && (
+        <div
+          className="an-color-popover an-paper-popover w-[272px] space-y-2.5 animate-in fade-in zoom-in-95 duration-100"
+          style={{ left: paperMenuPos.left, top: paperMenuPos.top }}
+          onMouseDown={(e) => e.stopPropagation()}
+        >
+          <div className="flex items-center justify-between pb-1.5 border-b border-[var(--an-line)]">
+            <span className="text-xs font-bold text-[var(--an-ink)]">Paper Color</span>
+            <button
+              type="button"
+              onClick={() => setIsPaperMenuOpen(false)}
+              className="p-0.5 rounded hover:bg-black/10 cursor-pointer"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          <div className="flex flex-wrap gap-1">
+            {[
+              { id: 'sepia', label: 'Sepia (Default)', swatch: activeSepiaHex },
+              { id: 'white', label: 'White', swatch: isDarkThemeDoc ? '#23211E' : '#FFFFFF' },
+              { id: 'mint', label: 'Mint', swatch: isDarkThemeDoc ? '#14241B' : '#E6F4EA' },
+              { id: 'ice-blue', label: 'Ice', swatch: isDarkThemeDoc ? '#14202D' : '#E8F2FC' },
+              { id: 'dark', label: 'Night', swatch: '#14110E' },
+            ].map((preset) => (
+              <button
+                key={preset.id}
+                type="button"
+                onClick={() => {
+                  setPaperColor(preset.id);
+                  if (notebook && onUpdateNotebook) {
+                    onUpdateNotebook({
+                      ...notebook,
+                      paperColor: preset.id,
+                      updatedAt: new Date().toISOString(),
+                    });
+                  }
+                  triggerSave();
+                }}
+                className={`px-2 py-1 rounded-lg text-[10px] font-semibold flex items-center gap-1 border cursor-pointer ${
+                  paperColor === preset.id
+                    ? 'border-[var(--an-brass)] ring-1 ring-[var(--an-brass)]'
+                    : 'border-[var(--an-line)]'
+                }`}
+              >
+                <span
+                  className="w-2.5 h-2.5 rounded-full border border-black/20 shrink-0"
+                  style={{ backgroundColor: preset.swatch }}
+                />
+                <span>{preset.label}</span>
+              </button>
+            ))}
+          </div>
+
+          <div className="space-y-1.5">
+            <span className="text-[11px] font-semibold block text-[var(--an-ink)]">
+              Custom Color Columns
+            </span>
+            <RoundColorColumnsPicker
+              columns={UNIFIED_COLOR_COLUMNS}
+              selectedColor={paperColor.startsWith('#') ? paperColor : undefined}
+              onSelectColor={(hex) => {
+                setPaperColor(hex);
+                if (notebook && onUpdateNotebook) {
+                  onUpdateNotebook({
+                    ...notebook,
+                    paperColor: hex,
+                    updatedAt: new Date().toISOString(),
+                  });
+                }
+                triggerSave();
+              }}
+              showStandardRow
+              swatchSizeClass="w-4 h-4"
+            />
+          </div>
         </div>
       )}
 

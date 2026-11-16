@@ -11,6 +11,7 @@ import {
   setAppLanguage,
 } from '../../data/translations';
 import { SUBSCRIPTION_TIERS } from '../../data/subscriptionData';
+import { getThemeMeta } from '../../data/themeMeta';
 import { ThemeAppStorePreviews } from './ThemeAppStorePreviews';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -265,6 +266,103 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [driveOpError, setDriveOpError] = useState<string | null>(null);
   const [driveOpSuccess, setDriveOpSuccess] = useState<string | null>(null);
   const [syncingManual, setSyncingManual] = useState(false);
+
+  const [isNightMode, setIsNightMode] = useState<boolean>(() => {
+    try {
+      if (typeof document !== 'undefined') {
+        return (
+          document.documentElement.classList.contains('dark') ||
+          localStorage.getItem('medden_theme') === 'dark'
+        );
+      }
+    } catch {}
+    return false;
+  });
+
+  const [observedDesign, setObservedDesign] = useState<string>(() => {
+    try {
+      if (typeof document !== 'undefined') {
+        return (
+          document.documentElement.getAttribute('data-design') ||
+          localStorage.getItem('medden_active_design') ||
+          '1'
+        );
+      }
+    } catch {}
+    return '1';
+  });
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const syncRootTheme = () => {
+      try {
+        setIsNightMode(
+          document.documentElement.classList.contains('dark') ||
+            localStorage.getItem('medden_theme') === 'dark'
+        );
+        const d =
+          document.documentElement.getAttribute('data-design') ||
+          localStorage.getItem('medden_active_design') ||
+          '1';
+        setObservedDesign(d);
+      } catch {}
+    };
+    syncRootTheme();
+    const obs = new MutationObserver(syncRootTheme);
+    obs.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class', 'data-design'],
+    });
+    return () => obs.disconnect();
+  }, []);
+
+  const resolvedDesign = activeDesign || observedDesign || '1';
+  const themeMeta = getThemeMeta(resolvedDesign);
+  const sb = isNightMode ? themeMeta.sidebar.dark : themeMeta.sidebar.light;
+
+  const getSettingsBtnStyle = (isActive: boolean): React.CSSProperties =>
+    isActive
+      ? {
+          background: sb.activeBtnBg,
+          border: `1px solid ${sb.activeBtnBorder}`,
+          color: sb.activeBtnText,
+          borderRadius: resolvedDesign === '1' ? '9px' : themeMeta.buttonRadius,
+          fontWeight: 600,
+          backdropFilter: 'blur(14px) saturate(1.25)',
+          WebkitBackdropFilter: 'blur(14px) saturate(1.25)',
+          boxShadow: isNightMode
+            ? '0 0 0 1px rgba(255, 255, 255, 0.2), 0 8px 20px -4px rgba(0, 0, 0, 0.9), 0 2px 6px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.42), inset 0 -1px 0 rgba(0, 0, 0, 0.25)'
+            : '0 4px 12px -2px rgba(36, 22, 10, 0.34), 0 2px 4px rgba(36, 22, 10, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.22)',
+        }
+      : {
+          background: sb.idleBtnBg,
+          border: '1px solid transparent',
+          color: sb.idleBtnText,
+          borderRadius: resolvedDesign === '1' ? '9px' : themeMeta.buttonRadius,
+          boxShadow: isNightMode
+            ? '0 3px 8px -2px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05)'
+            : undefined,
+        };
+
+  const settingsToggleBtnStyle: React.CSSProperties = {
+    background: sb.toggleBtnBg,
+    border: `1px solid ${sb.toggleBtnBorder}`,
+    color: sb.toggleBtnText,
+    borderRadius: resolvedDesign === '1' ? '9px' : themeMeta.buttonRadius,
+    boxShadow: isNightMode
+      ? '0 4px 10px -2px rgba(0, 0, 0, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.14)'
+      : undefined,
+  };
+
+  const themeAccentIconStyle: React.CSSProperties = {
+    color: 'var(--th-accent)',
+  };
+
+  const themeAccentSoftBadgeStyle: React.CSSProperties = {
+    backgroundColor: 'var(--th-accent-soft)',
+    color: 'var(--th-accent)',
+    borderColor: 'color-mix(in srgb, var(--th-accent) 34%, transparent)',
+  };
 
   // Per-theme Light / Dark screenshot preview toggle state
   const [themePreviewModes, setThemePreviewModes] = useState<Record<string, 'light' | 'dark'>>({});
@@ -827,16 +925,25 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
       
       {/* Header ribbon shown only in popup modal mode; Workspace view already displays Settings in the top panel */}
       {!isWorkspaceView && (
-        <div className="bg-stone-50 dark:bg-[#140e0a] px-6 py-3.5 border-b border-stone-200/80 dark:border-[#382518] flex items-center justify-between shrink-0">
+        <div
+          className="themed-glass-bar px-6 py-3.5 border-b flex items-center justify-between shrink-0"
+          style={{ borderColor: 'var(--th-border)' }}
+        >
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-amber-600/15 text-amber-700 dark:text-amber-400 flex items-center justify-center border border-amber-600/25">
+            <div
+              className="w-8 h-8 rounded-xl flex items-center justify-center border"
+              style={themeAccentSoftBadgeStyle}
+            >
               <Settings className="w-4 h-4" />
             </div>
             <div>
-              <h3 className="text-xl font-bold font-serif text-stone-900 dark:text-stone-100 flex items-center gap-2">
+              <h3 className="text-xl font-bold font-serif flex items-center gap-2" style={{ color: 'var(--th-ink)' }}>
                 <span>Settings</span>
                 {savedFeedback && (
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/15 text-amber-700 dark:text-amber-400 border border-amber-500/30 animate-pulse">
+                  <span
+                    className="text-[10px] font-mono px-2 py-0.5 rounded-full border animate-pulse"
+                    style={themeAccentSoftBadgeStyle}
+                  >
                     Saved
                   </span>
                 )}
@@ -867,16 +974,24 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
           {/* Collapsed Vertical Icon Rail on Mobile (<sm) matching minimized Dashboard Sidebar */}
           {!isMobileSidebarOpen && (
-            <div className="themed-glass-bar sm:hidden w-11 border-r border-stone-200/80 dark:border-[#382518] bg-stone-50/90 dark:bg-[#140e0a] py-1.5 px-1 flex flex-col items-center justify-between gap-1.5 shrink-0 z-10">
+            <div
+              className="sm:hidden w-11 py-1.5 px-1 flex flex-col items-center justify-between gap-1.5 shrink-0 z-10"
+              style={{
+                background: sb.railBg,
+                borderRight: `1px solid ${sb.railBorder}`,
+                color: sb.railText,
+              }}
+            >
               <div className="flex flex-col items-center gap-1 w-full">
                 <button
                   type="button"
                   onClick={() => setIsMobileSidebarOpen(true)}
                   title="Expand Settings Menu"
                   aria-label="Expand Settings Menu"
-                  className="w-8 h-8 rounded-xl flex items-center justify-center bg-stone-200/80 hover:bg-stone-300/80 dark:bg-[#241911] dark:hover:bg-[#312116] text-stone-800 dark:text-[#efe4d4] border border-stone-300/80 dark:border-[#3e291b] cursor-pointer transition-all"
+                  style={settingsToggleBtnStyle}
+                  className="raw-icon-btn w-8 h-8 flex items-center justify-center cursor-pointer transition-all hover:brightness-110"
                 >
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <ArrowRight className="w-3.5 h-3.5" style={{ color: sb.toggleBtnText }} />
                 </button>
               </div>
 
@@ -885,16 +1000,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   [
                     { id: 'profile', label: 'Profile', icon: User },
                     { id: 'designs', label: 'Themes', icon: Palette },
-                    { id: 'wallpaper', label: 'Wallpaper', icon: ImageIcon, iconClass: 'text-amber-600 dark:text-amber-400' },
+                    { id: 'wallpaper', label: 'Wallpaper', icon: ImageIcon },
                     { id: 'typography', label: 'Fonts', icon: Type },
-                    { id: 'cloud-sync', label: 'Cloud', icon: Cloud, iconClass: 'text-amber-600 dark:text-amber-400' },
-                    { id: 'import-notes', label: 'Import Notes', icon: UploadCloud, iconClass: 'text-amber-600 dark:text-amber-400' },
-                    { id: 'sidebar-buttons', label: 'Sidebar', icon: SlidersHorizontal, iconClass: 'text-amber-600 dark:text-amber-400' },
-                    { id: 'customizer', label: 'Goals', icon: Sparkles, iconClass: 'text-amber-500' },
-                    { id: 'languages', label: 'Languages', icon: Globe, iconClass: 'text-amber-600 dark:text-amber-400' },
-                    { id: 'subscription', label: 'Plans', icon: Crown, iconClass: 'text-amber-500' },
+                    { id: 'cloud-sync', label: 'Cloud', icon: Cloud },
+                    { id: 'import-notes', label: 'Import Notes', icon: UploadCloud },
+                    { id: 'sidebar-buttons', label: 'Sidebar', icon: SlidersHorizontal },
+                    { id: 'customizer', label: 'Goals', icon: Sparkles },
+                    { id: 'languages', label: 'Languages', icon: Globe },
+                    { id: 'subscription', label: 'Plans', icon: Crown },
                     { id: 'defaults', label: 'Backup', icon: Download },
-                  ] as Array<{ id: SettingsTabId; label: string; icon: React.ComponentType<any>; iconClass?: string }>
+                  ] as Array<{ id: SettingsTabId; label: string; icon: React.ComponentType<any> }>
                 ).map((tab) => {
                   const TabIcon = tab.icon;
                   const isActive = activeTab === tab.id;
@@ -905,13 +1020,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       onClick={() => setActiveTab(tab.id)}
                       title={tab.label}
                       aria-label={tab.label}
-                      className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all cursor-pointer shrink-0 ${
-                        isActive
-                          ? 'themed-tab-active bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 shadow-xs'
-                          : 'text-stone-600 dark:text-stone-400 hover:bg-stone-200/60 dark:hover:bg-[#251a12]'
-                      }`}
+                      style={getSettingsBtnStyle(isActive)}
+                      className="raw-icon-btn w-8 h-8 flex items-center justify-center transition-all hover:brightness-110 cursor-pointer shrink-0"
                     >
-                      <TabIcon className={`w-4 h-4 shrink-0 ${isActive ? '' : tab.iconClass || ''}`} />
+                      <TabIcon
+                        className="w-4 h-4 shrink-0"
+                        style={{ color: isActive ? sb.activeIconColor : sb.idleIconColor }}
+                      />
                     </button>
                   );
                 })}
@@ -931,23 +1046,32 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
           {/* Left Vertical Settings Sidebar (Slim Column matching Dashboard Sidebar) */}
           <div
-            className={`themed-glass-bar border-r border-stone-200/80 dark:border-[#382518] bg-stone-50/95 dark:bg-[#140e0a] p-1.5 flex-col justify-between gap-2 shrink-0 ${
+            className={`p-1.5 flex-col justify-between gap-2 shrink-0 ${
               isMobileSidebarOpen
                 ? 'flex absolute inset-y-0 left-0 z-30 w-[164px] shadow-2xl sm:static sm:w-[136px] sm:shadow-none animate-in slide-in-from-left-4 duration-150'
                 : 'hidden sm:flex sm:w-[136px]'
             }`}
+            style={{
+              background: sb.railBg,
+              borderRight: `1px solid ${sb.railBorder}`,
+              color: sb.railText,
+            }}
           >
             {/* Top Full-Width Arrow Action Matching Main Dashboard Sidebar (No "Back" label) */}
-            <div className="pb-1.5 border-b border-stone-200/80 dark:border-[#382518] shrink-0">
+            <div className="pb-1.5 shrink-0" style={{ borderBottom: `1px solid ${sb.sectionBorder}` }}>
               {onClose && (
                 <button
                   type="button"
                   onClick={onClose}
                   title="Return to Dashboard"
                   aria-label="Return to Dashboard"
-                  className="hidden sm:flex w-full group items-center justify-center py-1 rounded-xl transition-all hover:brightness-110 active:scale-[0.97] cursor-pointer bg-stone-200/75 hover:bg-stone-300/80 dark:bg-[#241911] dark:hover:bg-[#312116] text-stone-800 dark:text-[#efe4d4] border border-stone-300/80 dark:border-[#3e291b] shadow-2xs"
+                  style={settingsToggleBtnStyle}
+                  className="raw-icon-btn hidden sm:flex w-full group items-center justify-center py-1 transition-all hover:brightness-110 active:scale-[0.97] cursor-pointer shadow-2xs"
                 >
-                  <ArrowLeft className="w-3.5 h-3.5 stroke-[2.2] transition-transform duration-200 group-hover:-translate-x-1" />
+                  <ArrowLeft
+                    className="w-3.5 h-3.5 stroke-[2.2] transition-transform duration-200 group-hover:-translate-x-1"
+                    style={{ color: sb.toggleBtnText }}
+                  />
                 </button>
               )}
               <button
@@ -955,29 +1079,39 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 onClick={() => setIsMobileSidebarOpen(false)}
                 title="Collapse Settings Sidebar"
                 aria-label="Collapse Settings Sidebar"
-                className="sm:hidden w-full group flex items-center justify-center py-1 rounded-xl bg-stone-200/75 hover:bg-stone-300/80 dark:bg-[#241911] dark:hover:bg-[#312116] text-stone-700 dark:text-[#efe4d4] border border-stone-300/80 dark:border-[#3e291b] cursor-pointer transition-all"
+                style={settingsToggleBtnStyle}
+                className="raw-icon-btn sm:hidden w-full group flex items-center justify-center py-1 cursor-pointer transition-all hover:brightness-110"
               >
-                <ArrowLeft className="w-3.5 h-3.5 stroke-[2.2] transition-transform duration-200 group-hover:-translate-x-1" />
+                <ArrowLeft
+                  className="w-3.5 h-3.5 stroke-[2.2] transition-transform duration-200 group-hover:-translate-x-1"
+                  style={{ color: sb.toggleBtnText }}
+                />
               </button>
             </div>
 
             {/* Vertical Section Container styled identically to Dashboard Sidebar (.rounded-xl p-1 space-y-0.5) */}
             <div className="flex-1 overflow-y-auto custom-scrollbar">
-              <div className="rounded-xl p-1 space-y-0.5 bg-stone-100/70 dark:bg-[#1a110b] border border-stone-200/75 dark:border-[#2e1e13]">
+              <div
+                className="rounded-xl p-1 space-y-0.5"
+                style={{
+                  background: sb.navSectionBg,
+                  border: `1px solid ${sb.sectionBorder}`,
+                }}
+              >
                 {(
                   [
                     { id: 'profile', label: 'Profile', icon: User },
                     { id: 'designs', label: 'Themes', icon: Palette },
-                    { id: 'wallpaper', label: 'Wallpaper', icon: ImageIcon, iconClass: 'text-amber-600 dark:text-amber-400' },
+                    { id: 'wallpaper', label: 'Wallpaper', icon: ImageIcon },
                     { id: 'typography', label: 'Fonts', icon: Type },
-                    { id: 'cloud-sync', label: 'Cloud', icon: Cloud, iconClass: 'text-amber-600 dark:text-amber-400' },
-                    { id: 'import-notes', label: 'Import Notes', icon: UploadCloud, iconClass: 'text-amber-600 dark:text-amber-400' },
-                    { id: 'sidebar-buttons', label: 'Sidebar', icon: SlidersHorizontal, iconClass: 'text-amber-600 dark:text-amber-400' },
-                    { id: 'customizer', label: 'Goals', icon: Sparkles, iconClass: 'text-amber-500' },
-                    { id: 'languages', label: 'Languages', icon: Globe, iconClass: 'text-amber-600 dark:text-amber-400' },
-                    { id: 'subscription', label: 'Plans', icon: Crown, iconClass: 'text-amber-500' },
+                    { id: 'cloud-sync', label: 'Cloud', icon: Cloud },
+                    { id: 'import-notes', label: 'Import Notes', icon: UploadCloud },
+                    { id: 'sidebar-buttons', label: 'Sidebar', icon: SlidersHorizontal },
+                    { id: 'customizer', label: 'Goals', icon: Sparkles },
+                    { id: 'languages', label: 'Languages', icon: Globe },
+                    { id: 'subscription', label: 'Plans', icon: Crown },
                     { id: 'defaults', label: 'Backup', icon: Download },
-                  ] as Array<{ id: SettingsTabId; label: string; icon: React.ComponentType<any>; iconClass?: string }>
+                  ] as Array<{ id: SettingsTabId; label: string; icon: React.ComponentType<any> }>
                 ).map((tab) => {
                   const TabIcon = tab.icon;
                   const isActive = activeTab === tab.id;
@@ -989,14 +1123,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         setActiveTab(tab.id);
                         setIsMobileSidebarOpen(false);
                       }}
-                      className={`w-full min-h-[34px] sm:min-h-[30px] h-auto flex items-center gap-1.5 px-1.5 py-1.5 rounded-lg text-[11.5px] sm:text-[11px] font-medium transition-all cursor-pointer text-left ${
-                        isActive
-                          ? 'themed-tab-active bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 shadow-xs font-semibold'
-                          : 'text-stone-700 dark:text-stone-300 hover:bg-stone-200/70 dark:hover:bg-[#251a12] hover:text-stone-900 dark:hover:text-stone-100'
-                      }`}
+                      style={getSettingsBtnStyle(isActive)}
+                      className="raw-icon-btn w-full min-h-[34px] sm:min-h-[30px] h-auto flex items-center gap-1.5 px-1.5 py-1.5 text-[11.5px] sm:text-[11px] font-medium transition-all hover:brightness-110 cursor-pointer text-left"
                     >
                       <div className="w-3.5 h-3.5 flex items-center justify-center shrink-0">
-                        <TabIcon className={`w-3.5 h-3.5 shrink-0 ${isActive ? '' : tab.iconClass || ''}`} />
+                        <TabIcon
+                          className="w-3.5 h-3.5 shrink-0"
+                          style={{ color: isActive ? sb.activeIconColor : sb.idleIconColor }}
+                        />
                       </div>
                       <span className="leading-tight break-words whitespace-normal flex-1 min-w-0">
                         {tab.label}
@@ -1008,7 +1142,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
 
             {/* Bottom-pinned Log Out button */}
-            <div className="pt-1.5 border-t border-stone-200/80 dark:border-[#382518] shrink-0">
+            <div className="pt-1.5 shrink-0" style={{ borderTop: `1px solid ${sb.sectionBorder}` }}>
               <button
                 type="button"
                 onClick={handleSettingsLogout}
@@ -1059,9 +1193,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {activeTab === 'designs' && (
             <div className="space-y-4 sm:space-y-6">
               <div className="space-y-3 sm:space-y-4">
-                <div className="pb-2 border-b border-stone-200 dark:border-[#382518] flex items-center justify-between gap-2">
-                  <h4 className="text-base sm:text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-                    <Palette className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                <div className="pb-2 border-b flex items-center justify-between gap-2" style={{ borderColor: 'var(--th-border)' }}>
+                  <h4 className="text-base sm:text-lg font-bold flex items-center gap-2" style={{ color: 'var(--th-ink)' }}>
+                    <Palette className="w-4 h-4" style={themeAccentIconStyle} />
                     <span>Themes</span>
                   </h4>
                   <span className="text-[10px] font-mono text-stone-500 dark:text-stone-400">
@@ -1077,11 +1211,20 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       <div
                         key={edition.id}
                         onClick={() => handleSelectEdition(edition.id)}
-                        className={`p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all cursor-pointer relative ${
+                        className={`p-2.5 sm:p-4 rounded-xl sm:rounded-2xl border transition-all cursor-pointer relative themed-glass-card ${
                           isSelected
-                            ? 'themed-glass-card bg-amber-50/70 dark:bg-[#231912] border-[#A47C43] ring-2 ring-[#A47C43]/25 shadow-md'
-                            : 'themed-glass-card bg-white dark:bg-[#18110c] border-stone-200/90 dark:border-[#382518] hover:border-stone-300 dark:hover:border-[#4b3322]'
+                            ? 'shadow-md'
+                            : 'hover:border-stone-300 dark:hover:border-[#4b3322]'
                         }`}
+                        style={
+                          isSelected
+                            ? {
+                                borderColor: 'var(--th-accent)',
+                                backgroundColor: 'var(--th-accent-soft)',
+                                boxShadow: '0 0 0 2px color-mix(in srgb, var(--th-accent) 26%, transparent)',
+                              }
+                            : undefined
+                        }
                       >
                         <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5 sm:mb-2">
                           <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0">
@@ -1183,9 +1326,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* ========================================================================= */}
           {activeTab === 'wallpaper' && (
             <div className="space-y-5">
-              <div className="pb-2 border-b border-stone-200 dark:border-[#382518] flex flex-wrap items-center justify-between gap-2">
-                <h4 className="text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-                  <ImageIcon className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+              <div className="pb-2 border-b flex flex-wrap items-center justify-between gap-2" style={{ borderColor: 'var(--th-border)' }}>
+                <h4 className="text-lg font-bold flex items-center gap-2" style={{ color: 'var(--th-ink)' }}>
+                  <ImageIcon className="w-4 h-4" style={themeAccentIconStyle} />
                   <span>Workspace Wallpaper</span>
                 </h4>
                 {customWallpaper && (
@@ -1209,7 +1352,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       Upload any high-resolution photo from your device (resized cleanly for instant loading).
                     </p>
                   </div>
-                  <label className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold cursor-pointer flex items-center gap-1.5 shadow-sm">
+                  <label
+                    className="themed-accent-btn px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold cursor-pointer flex items-center gap-1.5 shadow-sm"
+                    style={{ background: sb.activeBtnBg, color: sb.activeBtnText }}
+                  >
                     <UploadCloud className="w-4 h-4" />
                     <span>Upload Wallpaper</span>
                     <input
@@ -1233,7 +1379,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     onChange={(e) =>
                       applyCustomWallpaper(customWallpaper, Math.max(0.15, Math.min(1, Number(e.target.value) / 100)))
                     }
-                    className="flex-1 accent-amber-600 cursor-pointer"
+                    className="flex-1 cursor-pointer"
+                    style={{ accentColor: 'var(--th-accent)' }}
                   />
                 </div>
               </div>
@@ -1249,9 +1396,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     onClick={() => applyCustomWallpaper('', customWallpaperOpacity)}
                     className={`px-3 py-1 rounded-xl text-[11px] font-bold border transition-all cursor-pointer ${
                       customWallpaper === ''
-                        ? 'border-amber-500 bg-amber-500/15 text-amber-800 dark:text-amber-300'
-                        : 'border-stone-200 dark:border-[#382518] text-stone-600 dark:text-stone-300 hover:border-amber-400'
+                        ? 'themed-accent-btn'
+                        : 'border-stone-200 dark:border-[#382518] text-stone-600 dark:text-stone-300'
                     }`}
+                    style={customWallpaper === '' ? themeAccentSoftBadgeStyle : undefined}
                   >
                     Use Theme Default
                   </button>
@@ -1259,8 +1407,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
                 {/* 5 DARK ABSTRACT WALLPAPERS */}
                 <div className="space-y-2">
-                  <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-stone-500 dark:text-amber-300/90 flex items-center gap-1.5">
-                    <Moon className="w-3.5 h-3.5" />
+                  <div className="text-[11px] font-mono font-bold uppercase tracking-wider flex items-center gap-1.5" style={{ color: 'var(--th-muted)' }}>
+                    <Moon className="w-3.5 h-3.5" style={themeAccentIconStyle} />
                     <span>5 Dark Abstract Wallpapers</span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -1302,11 +1450,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           key={preset.id}
                           type="button"
                           onClick={() => applyCustomWallpaper(preset.uri, customWallpaperOpacity)}
-                          className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${
-                            isSelected
-                              ? 'border-amber-500 ring-2 ring-amber-500/25 bg-amber-50/60 dark:bg-[#231912]'
-                              : 'border-stone-200 dark:border-[#382518] bg-white dark:bg-[#18110c] hover:border-amber-500/50'
+                          className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col gap-2 themed-glass-card ${
+                            isSelected ? 'shadow-sm' : ''
                           }`}
+                          style={
+                            isSelected
+                              ? {
+                                  borderColor: 'var(--th-accent)',
+                                  backgroundColor: 'var(--th-accent-soft)',
+                                  boxShadow: '0 0 0 2px color-mix(in srgb, var(--th-accent) 26%, transparent)',
+                                }
+                              : undefined
+                          }
                         >
                           <div
                             className="h-20 w-full rounded-xl border border-black/15 dark:border-white/10 shadow-inner"
@@ -1321,7 +1476,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                 {preset.desc}
                               </div>
                             </div>
-                            {isSelected && <CheckCircle2 className="w-4 h-4 text-amber-600 shrink-0" />}
+                            {isSelected && <CheckCircle2 className="w-4 h-4 shrink-0" style={themeAccentIconStyle} />}
                           </div>
                         </button>
                       );
@@ -1331,8 +1486,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
                 {/* 5 LIGHT ABSTRACT WALLPAPERS */}
                 <div className="space-y-2 pt-2">
-                  <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-stone-500 dark:text-amber-200/80 flex items-center gap-1.5">
-                    <Sun className="w-3.5 h-3.5 text-amber-500" />
+                  <div className="text-[11px] font-mono font-bold uppercase tracking-wider flex items-center gap-1.5" style={{ color: 'var(--th-muted)' }}>
+                    <Sun className="w-3.5 h-3.5" style={themeAccentIconStyle} />
                     <span>5 Light Abstract Wallpapers</span>
                   </div>
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -1374,11 +1529,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           key={preset.id}
                           type="button"
                           onClick={() => applyCustomWallpaper(preset.uri, customWallpaperOpacity)}
-                          className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col gap-2 ${
-                            isSelected
-                              ? 'border-amber-500 ring-2 ring-amber-500/25 bg-amber-50/60 dark:bg-[#231912]'
-                              : 'border-stone-200 dark:border-[#382518] bg-white dark:bg-[#18110c] hover:border-amber-500/50'
+                          className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col gap-2 themed-glass-card ${
+                            isSelected ? 'shadow-sm' : ''
                           }`}
+                          style={
+                            isSelected
+                              ? {
+                                  borderColor: 'var(--th-accent)',
+                                  backgroundColor: 'var(--th-accent-soft)',
+                                  boxShadow: '0 0 0 2px color-mix(in srgb, var(--th-accent) 26%, transparent)',
+                                }
+                              : undefined
+                          }
                         >
                           <div
                             className="h-20 w-full rounded-xl border border-black/10 dark:border-white/10 shadow-inner"
@@ -1393,7 +1555,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                 {preset.desc}
                               </div>
                             </div>
-                            {isSelected && <CheckCircle2 className="w-4 h-4 text-amber-600 shrink-0" />}
+                            {isSelected && <CheckCircle2 className="w-4 h-4 shrink-0" style={themeAccentIconStyle} />}
                           </div>
                         </button>
                       );
@@ -1409,9 +1571,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* ========================================================================= */}
           {activeTab === 'cloud-sync' && (
             <div className="space-y-5">
-              <div className="pb-2 border-b border-stone-200 dark:border-[#382518]">
-                <h4 className="text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-                  <Cloud className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+              <div className="pb-2 border-b" style={{ borderColor: 'var(--th-border)' }}>
+                <h4 className="text-lg font-bold flex items-center gap-2" style={{ color: 'var(--th-ink)' }}>
+                  <Cloud className="w-4 h-4" style={themeAccentIconStyle} />
                   <span>Cloud</span>
                 </h4>
               </div>
@@ -1424,8 +1586,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               )}
 
               {driveOpSuccess && (
-                <div className="p-3 rounded-xl bg-amber-500/15 border border-amber-500/35 text-amber-900 dark:text-amber-200 text-xs flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5 text-amber-600 dark:text-amber-400" />
+                <div className="p-3 rounded-xl border text-xs flex items-start gap-2" style={themeAccentSoftBadgeStyle}>
+                  <CheckCircle2 className="w-4 h-4 shrink-0 mt-0.5" style={themeAccentIconStyle} />
                   <span>{driveOpSuccess}</span>
                 </div>
               )}
@@ -1434,7 +1596,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="p-4 rounded-2xl bg-white dark:bg-[#1a120d] border border-stone-200 dark:border-[#382518] space-y-3">
                 <div className="flex items-center justify-between gap-3 flex-wrap">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-700 dark:text-amber-400 flex items-center justify-center border border-amber-500/30">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center border" style={themeAccentSoftBadgeStyle}>
                       <Database className="w-5 h-5" />
                     </div>
                     <div>
@@ -1504,7 +1666,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="p-4 rounded-2xl bg-white dark:bg-[#1a120d] border border-stone-200 dark:border-[#382518] space-y-3">
                 <div className="flex items-center justify-between gap-3 flex-wrap">
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-600 dark:text-amber-400 flex items-center justify-center border border-amber-500/30">
+                    <div className="w-10 h-10 rounded-xl flex items-center justify-center border" style={themeAccentSoftBadgeStyle}>
                       <HardDrive className="w-5 h-5" />
                     </div>
                     <div>
@@ -1513,9 +1675,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         <span
                           className={`text-[10px] font-mono px-2 py-0.5 rounded-full ${
                             driveAccount.connected
-                              ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/30'
+                              ? 'border'
                               : 'bg-stone-100 dark:bg-[#251a12] text-stone-500 dark:text-stone-400'
                           }`}
+                          style={driveAccount.connected ? themeAccentSoftBadgeStyle : undefined}
                         >
                           {driveAccount.connected ? 'Connected' : 'Disconnected'}
                         </span>
@@ -1569,7 +1732,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="p-4 rounded-2xl bg-white dark:bg-[#1a120d] border border-stone-200 dark:border-[#382518] space-y-4">
                 <div>
                   <h5 className="text-xs font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-                    <Link2 className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                    <Link2 className="w-4 h-4" style={themeAccentIconStyle} />
                     <span>Connect Your Drive</span>
                   </h5>
                   <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">
@@ -1591,17 +1754,21 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     return (
                       <div
                         key={provider.id}
-                        className={`p-2.5 rounded-xl border flex flex-col justify-between gap-2 ${
+                        className="p-2.5 rounded-xl border flex flex-col justify-between gap-2 themed-glass-card"
+                        style={
                           isLinked
-                            ? 'border-amber-500/60 bg-amber-50/40 dark:bg-[#231912]'
-                            : 'border-stone-200 dark:border-[#352317] bg-stone-50/60 dark:bg-[#140e0a]'
-                        }`}
+                            ? {
+                                borderColor: 'var(--th-accent)',
+                                backgroundColor: 'var(--th-accent-soft)',
+                              }
+                            : undefined
+                        }
                       >
                         <div className="flex items-center justify-between gap-1">
                           <span className="text-xs font-bold text-stone-800 dark:text-stone-100 truncate">
                             {provider.name}
                           </span>
-                          {isLinked && <Check className="w-3.5 h-3.5 text-amber-600 shrink-0" />}
+                          {isLinked && <Check className="w-3.5 h-3.5 shrink-0" style={themeAccentIconStyle} />}
                         </div>
                         <div className="flex items-center gap-1.5">
                           <button
@@ -1726,9 +1893,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* ========================================================================= */}
           {activeTab === 'typography' && (
             <div className="space-y-6">
-              <div className="pb-2 border-b border-stone-200 dark:border-[#382518]">
-                <h4 className="text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-                  <Type className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+              <div className="pb-2 border-b" style={{ borderColor: 'var(--th-border)' }}>
+                <h4 className="text-lg font-bold flex items-center gap-2" style={{ color: 'var(--th-ink)' }}>
+                  <Type className="w-4 h-4" style={themeAccentIconStyle} />
                   <span>Fonts</span>
                 </h4>
               </div>
@@ -1738,7 +1905,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <div className="flex items-center justify-between text-xs">
                   <span className="font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">
                     <span>Font Size Spectrum:</span>
-                    <span className="text-amber-700 dark:text-amber-400 font-mono font-black">{fontScale}%</span>
+                    <span className="font-mono font-black" style={themeAccentIconStyle}>{fontScale}%</span>
                     <span className="text-stone-400 font-normal">({Math.round(15 * (fontScale / 100))}px baseline)</span>
                   </span>
                 </div>
@@ -1750,7 +1917,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   step="5"
                   value={fontScale}
                   onChange={(e) => handleUpdateFontScale(parseInt(e.target.value, 10))}
-                  className="w-full accent-amber-600 cursor-pointer h-2 bg-stone-200 dark:bg-[#251a12] rounded-lg"
+                  className="w-full cursor-pointer h-2 bg-stone-200 dark:bg-[#251a12] rounded-lg"
+                  style={{ accentColor: 'var(--th-accent)' }}
                 />
 
                 {/* Preset spectrum quick buttons */}
@@ -1843,7 +2011,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                 {group.subtitle}
                               </p>
                             </div>
-                            <span className="text-[10.5px] font-mono font-bold px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-800 dark:text-amber-300 border border-amber-500/25 shrink-0">
+                            <span
+                              className="text-[10.5px] font-mono font-bold px-2.5 py-0.5 rounded-full border shrink-0"
+                              style={themeAccentSoftBadgeStyle}
+                            >
                               {groupFonts.length} Fonts
                             </span>
                           </div>
@@ -1856,13 +2027,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                 <div
                                   key={font.id}
                                   onClick={() => handleSelectFont(font)}
-                                  className={`p-3.5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between group ${
-                                    isSelected
-                                      ? 'border-[#A47C43] bg-amber-50/50 dark:bg-[#231912] ring-2 ring-[#A47C43]/30 shadow-xs'
-                                      : isHandwriting
-                                      ? 'border-amber-200/90 dark:border-[#4b3322] bg-amber-50/20 dark:bg-[#1a120d] hover:border-amber-400'
-                                      : 'border-stone-200/90 dark:border-[#382518] bg-white dark:bg-[#18110c] hover:border-amber-500'
+                                  className={`p-3.5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between group themed-glass-card ${
+                                    isSelected ? 'shadow-xs' : ''
                                   }`}
+                                  style={
+                                    isSelected
+                                      ? {
+                                          borderColor: 'var(--th-accent)',
+                                          backgroundColor: 'var(--th-accent-soft)',
+                                          boxShadow: '0 0 0 2px color-mix(in srgb, var(--th-accent) 26%, transparent)',
+                                        }
+                                      : undefined
+                                  }
                                 >
                                   <div className="space-y-1">
                                     <div className="flex items-center justify-between gap-2">
@@ -1881,7 +2057,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                         >
                                           {font.name}
                                         </span>
-                                        {isSelected && <Check className="w-3.5 h-3.5 text-amber-500 shrink-0" />}
+                                        {isSelected && <Check className="w-3.5 h-3.5 shrink-0" style={themeAccentIconStyle} />}
                                       </span>
                                       <span className="text-[9.5px] font-mono px-1.5 py-0.5 rounded bg-stone-100 dark:bg-[#251a12] text-stone-600 dark:text-stone-300 shrink-0">
                                         {font.category}
@@ -1892,11 +2068,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                   {/* Live Font Sample */}
                                   <div
                                     data-font-sample=""
-                                    className={`mt-2.5 p-3 rounded-lg border text-stone-900 dark:text-stone-100 transition-colors ${
-                                      isHandwriting
-                                        ? 'bg-amber-50/60 dark:bg-[#1d1810] border-amber-200/60 dark:border-[#4b3322]'
-                                        : 'bg-stone-50 dark:bg-[#120c08] border-stone-100 dark:border-[#352317]'
-                                    }`}
+                                    className="mt-2.5 p-3 rounded-lg border text-stone-900 dark:text-stone-100 transition-colors bg-stone-50/75 dark:bg-[#120c08] border-stone-200/70 dark:border-[#352317]"
                                     style={
                                       {
                                         fontFamily: font.cssFamily,
@@ -1905,7 +2077,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                                       } as React.CSSProperties
                                     }
                                   >
-                                    <div className={`font-semibold leading-snug ${isHandwriting ? 'text-base sm:text-lg text-amber-950 dark:text-amber-200' : 'text-sm'}`}>
+                                    <div className={`font-semibold leading-snug ${isHandwriting ? 'text-base sm:text-lg' : 'text-sm'}`}>
                                       {font.sample}
                                     </div>
                                   </div>
@@ -1944,11 +2116,18 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <div
                   key={lang.code}
                   onClick={() => handleLanguageSelect(lang.code)}
-                  className={`p-3.5 rounded-xl border text-left cursor-pointer transition-all relative ${
-                    isSelected
-                      ? 'border-amber-600 bg-amber-500/10 dark:bg-[#231912] ring-2 ring-amber-500/40 shadow-xs'
-                      : 'border-stone-200/90 dark:border-[#382518] bg-white dark:bg-[#18110c] hover:border-amber-400'
+                  className={`p-3.5 rounded-xl border text-left cursor-pointer transition-all relative themed-glass-card ${
+                    isSelected ? 'shadow-xs' : ''
                   }`}
+                  style={
+                    isSelected
+                      ? {
+                          borderColor: 'var(--th-accent)',
+                          backgroundColor: 'var(--th-accent-soft)',
+                          boxShadow: '0 0 0 2px color-mix(in srgb, var(--th-accent) 26%, transparent)',
+                        }
+                      : undefined
+                  }
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex items-center gap-2.5 min-w-0">
@@ -1963,7 +2142,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5 shrink-0">
-                      {isSelected && <Check className="w-4 h-4 text-amber-600 dark:text-amber-400 stroke-[3]" />}
+                      {isSelected && <Check className="w-4 h-4 stroke-[3]" style={themeAccentIconStyle} />}
                       {removable && (
                         <button
                           type="button"
@@ -1985,9 +2164,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
 
             return (
               <div className="space-y-5">
-                <div className="pb-2 border-b border-stone-200 dark:border-[#382518]">
-                  <h4 className="text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-                    <Globe className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                <div className="pb-2 border-b" style={{ borderColor: 'var(--th-border)' }}>
+                  <h4 className="text-lg font-bold flex items-center gap-2" style={{ color: 'var(--th-ink)' }}>
+                    <Globe className="w-4 h-4" style={themeAccentIconStyle} />
                     <span>Languages</span>
                   </h4>
                 </div>
@@ -2221,16 +2400,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* ========================================================================= */}
           {activeTab === 'import-notes' && (
             <div className="space-y-6">
-              <div className="pb-2 border-b border-stone-200 dark:border-[#382518]">
-                <h4 className="text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-                  <UploadCloud className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+              <div className="pb-2 border-b" style={{ borderColor: 'var(--th-border)' }}>
+                <h4 className="text-lg font-bold flex items-center gap-2" style={{ color: 'var(--th-ink)' }}>
+                  <UploadCloud className="w-4 h-4" style={themeAccentIconStyle} />
                   <span>Import Notes</span>
                 </h4>
               </div>
 
               {importStatus && (
-                <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-[#231912] border border-amber-300 dark:border-[#4b3322] text-amber-900 dark:text-amber-300 text-xs font-semibold flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 animate-spin text-amber-600 dark:text-amber-400" />
+                <div className="p-3.5 rounded-xl border text-xs font-semibold flex items-center gap-2" style={themeAccentSoftBadgeStyle}>
+                  <Sparkles className="w-4 h-4 animate-spin" style={themeAccentIconStyle} />
                   <span>{importStatus}</span>
                 </div>
               )}
@@ -2308,9 +2487,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* ========================================================================= */}
           {activeTab === 'sidebar-buttons' && (
             <div className="space-y-6">
-              <div className="pb-2 border-b border-stone-200 dark:border-[#382518]">
-                <h4 className="text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-                  <SlidersHorizontal className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+              <div className="pb-2 border-b" style={{ borderColor: 'var(--th-border)' }}>
+                <h4 className="text-lg font-bold flex items-center gap-2" style={{ color: 'var(--th-ink)' }}>
+                  <SlidersHorizontal className="w-4 h-4" style={themeAccentIconStyle} />
                   <span>Sidebar</span>
                 </h4>
               </div>
@@ -2357,7 +2536,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           onChange={() => toggleSidebarSetting(item.key)}
                           className="sr-only peer"
                         />
-                        <div className="w-9 h-5 bg-stone-300 peer-focus:outline-none rounded-full peer dark:bg-[#322318] peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-600"></div>
+                        <div
+                          className="w-9 h-5 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all"
+                          style={{
+                            backgroundColor:
+                              sidebarSettings[item.key] !== false
+                                ? 'var(--th-accent)'
+                                : isNightMode
+                                ? '#322318'
+                                : '#d6d3d1',
+                          }}
+                        />
                       </label>
                     </div>
                   ))}
@@ -2370,9 +2559,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* ========================================================================= */}
           {activeTab === 'subscription' && (
             <div className="space-y-6">
-              <div className="pb-2 border-b border-stone-200 dark:border-[#382518]">
-                <h4 className="text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-                  <Crown className="w-4 h-4 text-amber-500" />
+              <div className="pb-2 border-b" style={{ borderColor: 'var(--th-border)' }}>
+                <h4 className="text-lg font-bold flex items-center gap-2" style={{ color: 'var(--th-ink)' }}>
+                  <Crown className="w-4 h-4" style={themeAccentIconStyle} />
                   <span>Plans</span>
                 </h4>
               </div>
@@ -2381,11 +2570,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 {SUBSCRIPTION_TIERS.map((tier) => (
                   <div
                     key={tier.id}
-                    className={`p-4 rounded-xl border flex flex-col justify-between ${
+                    className="p-4 rounded-xl border flex flex-col justify-between themed-glass-card"
+                    style={
                       tier.highlight
-                        ? 'border-amber-500 bg-amber-500/10 dark:bg-[#231912] ring-2 ring-amber-500/20'
-                        : 'border-stone-200 dark:border-[#382518] bg-white dark:bg-[#18110c]'
-                    }`}
+                        ? {
+                            borderColor: 'var(--th-accent)',
+                            backgroundColor: 'var(--th-accent-soft)',
+                            boxShadow: '0 0 0 2px color-mix(in srgb, var(--th-accent) 22%, transparent)',
+                          }
+                        : undefined
+                    }
                   >
                     <div>
                       <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-stone-100 dark:bg-[#251a12] text-stone-700 dark:text-stone-300 uppercase">
@@ -2398,7 +2592,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         <div className="text-lg font-black font-mono text-stone-900 dark:text-stone-100">
                           {tier.priceAnnual === 0 ? '₹0 / Free' : `₹${tier.priceAnnual.toLocaleString('en-IN')} / yr`}
                         </div>
-                        <div className="text-[11px] font-mono font-bold text-amber-700 dark:text-amber-400">
+                        <div className="text-[11px] font-mono font-bold" style={themeAccentIconStyle}>
                           {tier.priceMonthly === 0 ? 'Forever Free Core Suite' : `Only ₹${tier.priceMonthly} / month`}
                         </div>
                       </div>
@@ -2408,7 +2602,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       <ul className="space-y-1.5 text-[10.5px]">
                         {tier.features.slice(0, 6).map((f, i) => (
                           <li key={i} className="flex items-start gap-1.5">
-                            <Check className="w-3 h-3 text-amber-600 shrink-0 mt-0.5" />
+                            <Check className="w-3 h-3 shrink-0 mt-0.5" style={themeAccentIconStyle} />
                             <span className="text-stone-700 dark:text-stone-300">{f}</span>
                           </li>
                         ))}
@@ -2541,9 +2735,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* ========================================================================= */}
           {activeTab === 'customizer' && (
             <div className="space-y-6">
-              <div className="pb-2 border-b border-stone-200 dark:border-[#382518]">
-                <h4 className="text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-amber-500" />
+              <div className="pb-2 border-b" style={{ borderColor: 'var(--th-border)' }}>
+                <h4 className="text-lg font-bold flex items-center gap-2" style={{ color: 'var(--th-ink)' }}>
+                  <Sparkles className="w-4 h-4" style={themeAccentIconStyle} />
                   <span>Goals</span>
                 </h4>
               </div>
@@ -2551,7 +2745,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               {/* Deep Study & Distraction Controls */}
               <div className="p-4 rounded-2xl bg-stone-50/80 dark:bg-[#18110c] border border-stone-200/90 dark:border-[#382518] space-y-4">
                 <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  <ShieldCheck className="w-4 h-4" style={themeAccentIconStyle} />
                   <span className="text-xs font-bold text-stone-800 dark:text-stone-200">
                     Deep Study & Focus Protections
                   </span>
@@ -2561,7 +2755,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-[#140e0a] border border-stone-200/80 dark:border-[#352317]">
                   <div className="pr-4">
                     <div className="text-xs font-semibold text-stone-900 dark:text-stone-100 flex items-center gap-1.5">
-                      <Zap className="w-3.5 h-3.5 text-amber-500" />
+                      <Zap className="w-3.5 h-3.5" style={themeAccentIconStyle} />
                       <span>Distraction-Free Deep Note Mode</span>
                     </div>
                     <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">
@@ -2570,10 +2764,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   </div>
                   <button
                     type="button"
+                    role="switch"
+                    aria-checked={distractionFree}
                     onClick={handleToggleDistractionFree}
-                    className={`w-11 h-6 rounded-full transition-colors relative cursor-pointer shrink-0 ${
-                      distractionFree ? 'bg-[#A47C43]' : 'bg-stone-300 dark:bg-[#322318]'
-                    }`}
+                    className="w-11 h-6 rounded-full transition-colors relative cursor-pointer shrink-0"
+                    style={{
+                      backgroundColor: distractionFree
+                        ? 'var(--th-accent)'
+                        : isNightMode
+                        ? '#322318'
+                        : '#d6d3d1',
+                    }}
                   >
                     <div
                       className={`w-4 h-4 rounded-full bg-white transition-transform transform shadow-2xs absolute top-1 ${
@@ -2615,7 +2816,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               {/* 3. Daily Clinical Target Goals */}
               <div className="p-4 rounded-2xl bg-stone-50/80 dark:bg-[#18110c] border border-stone-200/90 dark:border-[#382518] space-y-4">
                 <div className="flex items-center gap-2">
-                  <Target className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  <Target className="w-4 h-4" style={themeAccentIconStyle} />
                   <span className="text-xs font-bold text-stone-800 dark:text-stone-200">
                     Clinical Exam & Daily Target Goals
                   </span>
@@ -2628,7 +2829,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       <label className="text-[11px] font-semibold text-stone-700 dark:text-stone-300">
                         Daily Focus Hours Target:
                       </label>
-                      <span className="text-xs font-bold font-mono text-amber-700 dark:text-amber-400">{dailyHoursGoal} hrs/day</span>
+                      <span className="text-xs font-bold font-mono" style={themeAccentIconStyle}>{dailyHoursGoal} hrs/day</span>
                     </div>
                     <div className="grid grid-cols-5 gap-1.5">
                       {[3, 4, 5, 6, 8].map((h) => (
@@ -2654,7 +2855,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       <label className="text-[11px] font-semibold text-stone-700 dark:text-stone-300">
                         Daily USMLE / MCQ Questions:
                       </label>
-                      <span className="text-xs font-bold font-mono text-amber-600 dark:text-amber-400">{dailyQBankGoal} Qs</span>
+                      <span className="text-xs font-bold font-mono" style={themeAccentIconStyle}>{dailyQBankGoal} Qs</span>
                     </div>
                     <div className="grid grid-cols-5 gap-1.5">
                       {[20, 40, 60, 80, 100].map((q) => (
@@ -2713,9 +2914,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* ========================================================================= */}
           {activeTab === 'profile' && (
             <form onSubmit={handleSaveProfile} className="space-y-4">
-              <div className="pb-2 border-b border-stone-200 dark:border-[#382518]">
-                <h4 className="text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-                  <User className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+              <div className="pb-2 border-b" style={{ borderColor: 'var(--th-border)' }}>
+                <h4 className="text-lg font-bold flex items-center gap-2" style={{ color: 'var(--th-ink)' }}>
+                  <User className="w-4 h-4" style={themeAccentIconStyle} />
                   <span>Profile</span>
                 </h4>
               </div>
@@ -2727,10 +2928,14 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     <img
                       src={profileForm.avatarUrl}
                       alt={profileForm.name}
-                      className="w-16 h-16 rounded-2xl object-cover ring-2 ring-amber-500/40 shadow-sm"
+                      className="w-16 h-16 rounded-2xl object-cover shadow-sm"
+                      style={{ border: '2px solid color-mix(in srgb, var(--th-accent) 45%, transparent)' }}
                     />
                   ) : (
-                    <div className="w-16 h-16 rounded-2xl bg-amber-600/15 text-amber-800 dark:text-amber-300 font-bold text-xl flex items-center justify-center border border-amber-500/30">
+                    <div
+                      className="w-16 h-16 rounded-2xl font-bold text-xl flex items-center justify-center border"
+                      style={themeAccentSoftBadgeStyle}
+                    >
                       {(profileForm.name || 'S').slice(0, 2).toUpperCase()}
                     </div>
                   )}
@@ -2790,7 +2995,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     Username (searchable by friends in Achiever's Hub):
                   </label>
                   <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-mono font-bold text-amber-700 dark:text-amber-400">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-mono font-bold" style={themeAccentIconStyle}>
                       @
                     </span>
                     <input
@@ -2879,37 +3084,46 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* ========================================================================= */}
           {activeTab === 'defaults' && (
             <div className="space-y-4">
-              <div className="pb-2 border-b border-stone-200 dark:border-[#382518]">
-                <h4 className="text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-                  <Download className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+              <div className="pb-2 border-b" style={{ borderColor: 'var(--th-border)' }}>
+                <h4 className="text-lg font-bold flex items-center gap-2" style={{ color: 'var(--th-ink)' }}>
+                  <Download className="w-4 h-4" style={themeAccentIconStyle} />
                   <span>Backup</span>
                 </h4>
               </div>
               {/* Google AI Studio Export Card */}
-              <div className="p-4 rounded-xl bg-amber-50/70 dark:bg-amber-950/20 border border-amber-200/90 dark:border-amber-900/50 space-y-3">
+              <div
+                className="p-4 rounded-xl border space-y-3"
+                style={{
+                  backgroundColor: 'var(--th-accent-soft)',
+                  borderColor: 'color-mix(in srgb, var(--th-accent) 28%, transparent)',
+                }}
+              >
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex items-center gap-2">
-                    <span className="p-1.5 rounded-lg bg-amber-500/20 text-amber-700 dark:text-amber-300">
+                    <span className="p-1.5 rounded-lg border" style={themeAccentSoftBadgeStyle}>
                       <Sparkles className="w-4 h-4" />
                     </span>
                     <div>
-                      <h4 className="text-xs font-bold text-amber-950 dark:text-amber-200">
+                      <h4 className="text-xs font-bold" style={{ color: 'var(--th-ink)' }}>
                         Export to Google AI Studio
                       </h4>
-                      <p className="text-[11px] text-amber-800/80 dark:text-amber-300/80">
+                      <p className="text-[11px]" style={{ color: 'var(--th-muted)' }}>
                         Full-stack workspace bundle with server, Flowcharts, Leisure Atelier & Gemini API
                       </p>
                     </div>
                   </div>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-200/60 dark:bg-amber-900/60 text-amber-900 dark:text-amber-300 font-semibold">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border font-semibold" style={themeAccentSoftBadgeStyle}>
                     Applet Ready
                   </span>
                 </div>
 
-                <div className="p-2.5 rounded-lg bg-white/70 dark:bg-[#1a1714] border border-amber-200/60 dark:border-amber-900/40 text-[11px] font-mono flex items-center justify-between">
+                <div
+                  className="p-2.5 rounded-lg bg-white/75 dark:bg-[#1a1714] border text-[11px] font-mono flex items-center justify-between"
+                  style={{ borderColor: 'var(--th-border)' }}
+                >
                   <div className="truncate">
                     <span className="text-stone-500 dark:text-stone-400">Applet ID: </span>
-                    <span className="font-semibold text-stone-800 dark:text-amber-200">0087218c-d7d0-4ad0-b0df-2e515051e7a0</span>
+                    <span className="font-semibold" style={{ color: 'var(--th-ink)' }}>0087218c-d7d0-4ad0-b0df-2e515051e7a0</span>
                   </div>
                   <button
                     type="button"
@@ -2917,7 +3131,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     title="Copy Applet ID"
                     className="ml-2 px-2 py-1 rounded bg-stone-100 hover:bg-stone-200 dark:bg-[#251a12] dark:hover:bg-[#322318] text-stone-700 dark:text-stone-300 flex items-center gap-1 text-[10px] transition-colors cursor-pointer"
                   >
-                    {copiedAppletId ? <Check className="w-3 h-3 text-amber-600 dark:text-amber-400" /> : <Copy className="w-3 h-3" />}
+                    {copiedAppletId ? <Check className="w-3 h-3" style={themeAccentIconStyle} /> : <Copy className="w-3 h-3" />}
                     <span>{copiedAppletId ? 'Copied' : 'Copy'}</span>
                   </button>
                 </div>
@@ -2926,7 +3140,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <a
                     href="/api/export/aistudio"
                     download="MedDen-AI-Studio-Export.zip"
-                    className="px-3.5 py-1.5 bg-amber-700 hover:bg-amber-800 text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                    className="themed-accent-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                    style={{ background: sb.activeBtnBg, color: sb.activeBtnText }}
                   >
                     <Download className="w-3.5 h-3.5" />
                     <span>Download AI Studio Bundle (.zip)</span>
@@ -2949,19 +3164,27 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         onClose();
                         onOpenAIStudioModal();
                       }}
-                      className="px-3.5 py-1.5 bg-amber-500/15 hover:bg-amber-500/25 text-amber-800 dark:text-amber-300 rounded-xl text-xs font-semibold flex items-center gap-1.5 border border-amber-500/40 transition-colors cursor-pointer"
+                      className="px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition-colors cursor-pointer"
+                      style={themeAccentSoftBadgeStyle}
                     >
-                      <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+                      <Sparkles className="w-3.5 h-3.5" style={themeAccentIconStyle} />
                       <span>Share Center & Links</span>
                     </button>
                   )}
                 </div>
 
-                <div className="text-[10px] text-stone-600 dark:text-stone-400 space-y-1 bg-amber-500/5 p-2 rounded-lg border border-amber-500/10">
-                  <p className="font-semibold text-stone-700 dark:text-stone-300">How to use in Google AI Studio:</p>
+                <div
+                  className="text-[10px] p-2 rounded-lg border space-y-1"
+                  style={{
+                    color: 'var(--th-muted)',
+                    borderColor: 'var(--th-border)',
+                    backgroundColor: 'color-mix(in srgb, var(--th-surface) 60%, transparent)',
+                  }}
+                >
+                  <p className="font-semibold" style={{ color: 'var(--th-ink)' }}>How to use in Google AI Studio:</p>
                   <ol className="list-decimal list-inside space-y-0.5">
                     <li>Download the <strong>MedDen-AI-Studio-Export.zip</strong> bundle above.</li>
-                    <li>Go to <a href="https://aistudio.google.com" target="_blank" rel="noreferrer" className="underline font-medium text-amber-700 dark:text-amber-400">Google AI Studio</a>.</li>
+                    <li>Go to <a href="https://aistudio.google.com" target="_blank" rel="noreferrer" className="underline font-medium" style={themeAccentIconStyle}>Google AI Studio</a>.</li>
                     <li>Click <strong>New Applet</strong> or import project archive, then upload the ZIP.</li>
                     <li>All modules (Atelier, Flowcharts, 10 Peace Sounds, Notes) are immediately active.</li>
                   </ol>
