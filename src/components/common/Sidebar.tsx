@@ -134,6 +134,7 @@ interface SidebarProps {
   onOpenSettings?: () => void;
   onOpenAIStudioModal?: () => void;
   isDarkMode?: boolean;
+  isGuestOnly?: boolean;
 }
 
 const MORE_BRANCH_IDS = new Set(['mnemonics', 'leisure', 'talk-to-dev']);
@@ -150,6 +151,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   activeDesign,
   onOpenSettings,
   isDarkMode,
+  isGuestOnly = false,
 }) => {
   const isSettingsOn = activeView === 'settings' || !!isSettingsActive;
   const [isMoreExpanded, setIsMoreExpanded] = useState<boolean>(() =>
@@ -687,66 +689,68 @@ export const Sidebar: React.FC<SidebarProps> = ({
               })()}
             </div>
 
-            {/* Section 4: Bottom Settings & Trash Footer */}
-            <div
-              className="p-1.5 mx-1 mb-1 rounded-xl space-y-0.5"
-              style={{
-                background: sb.footerSectionBg,
-                border: `1px solid ${sb.sectionBorder}`,
-              }}
-            >
-              {onOpenSettings && (
+            {/* Section 4: Bottom Settings & Trash Footer (Hidden for Guest Mode) */}
+            {!isGuestOnly && (
+              <div
+                className="p-1.5 mx-1 mb-1 rounded-xl space-y-0.5"
+                style={{
+                  background: sb.footerSectionBg,
+                  border: `1px solid ${sb.sectionBorder}`,
+                }}
+              >
+                {onOpenSettings && (
+                  <button
+                    onClick={() => {
+                      onOpenSettings();
+                      if (typeof window !== 'undefined' && window.innerWidth < 768) {
+                        onClose();
+                      }
+                    }}
+                    title="Settings & Design Preferences"
+                    style={getBtnStyle(isSettingsOn)}
+                    className={`w-full min-h-[30px] h-auto flex items-center px-1.5 py-1.5 text-[11px] font-medium transition-all hover:brightness-110 cursor-pointer text-left ${leatherBtnCls}`}
+                  >
+                    <div className="flex items-center gap-1.5 min-w-0 w-full">
+                      <div className="w-4 h-4 flex items-center justify-center shrink-0">
+                        <Settings
+                          className="w-3.5 h-3.5"
+                          style={{ color: isSettingsOn ? sb.activeIconColor : sb.idleIconColor }}
+                        />
+                      </div>
+                      <span className="leading-tight break-words whitespace-normal flex-1 min-w-0">Settings</span>
+                    </div>
+                  </button>
+                )}
                 <button
-                  onClick={() => {
-                    onOpenSettings();
-                    if (typeof window !== 'undefined' && window.innerWidth < 768) {
-                      onClose();
-                    }
-                  }}
-                  title="Settings & Design Preferences"
-                  style={getBtnStyle(isSettingsOn)}
-                  className={`w-full min-h-[30px] h-auto flex items-center px-1.5 py-1.5 text-[11px] font-medium transition-all hover:brightness-110 cursor-pointer text-left ${leatherBtnCls}`}
+                  onClick={() => handleItemClick('recycle-bin')}
+                  title="Open Trash"
+                  style={
+                    activeView === 'recycle-bin'
+                      ? getBtnStyle(true)
+                      : {
+                          background: sb.idleBtnBg,
+                          border: '1px solid transparent',
+                          color: sb.trashTextColor,
+                          borderRadius: resolvedDesign === '1' ? '9px' : themeMeta.buttonRadius,
+                          fontWeight: 600,
+                        }
+                  }
+                  className={`sidebar-trash-btn w-full min-h-[30px] h-auto flex items-center px-1.5 py-1.5 text-[11px] transition-all hover:brightness-110 cursor-pointer text-left ${leatherBtnCls}`}
                 >
                   <div className="flex items-center gap-1.5 min-w-0 w-full">
                     <div className="w-4 h-4 flex items-center justify-center shrink-0">
-                      <Settings
+                      <Trash2
                         className="w-3.5 h-3.5"
-                        style={{ color: isSettingsOn ? sb.activeIconColor : sb.idleIconColor }}
+                        style={{
+                          color: activeView === 'recycle-bin' ? sb.activeIconColor : sb.trashIconColor,
+                        }}
                       />
                     </div>
-                    <span className="leading-tight break-words whitespace-normal flex-1 min-w-0">Settings</span>
+                    <span className="leading-tight break-words whitespace-normal flex-1 min-w-0 tracking-wide">Trash</span>
                   </div>
                 </button>
-              )}
-              <button
-                onClick={() => handleItemClick('recycle-bin')}
-                title="Open Trash"
-                style={
-                  activeView === 'recycle-bin'
-                    ? getBtnStyle(true)
-                    : {
-                        background: sb.idleBtnBg,
-                        border: '1px solid transparent',
-                        color: sb.trashTextColor,
-                        borderRadius: resolvedDesign === '1' ? '9px' : themeMeta.buttonRadius,
-                        fontWeight: 600,
-                      }
-                }
-                className={`sidebar-trash-btn w-full min-h-[30px] h-auto flex items-center px-1.5 py-1.5 text-[11px] transition-all hover:brightness-110 cursor-pointer text-left ${leatherBtnCls}`}
-              >
-                <div className="flex items-center gap-1.5 min-w-0 w-full">
-                  <div className="w-4 h-4 flex items-center justify-center shrink-0">
-                    <Trash2
-                      className="w-3.5 h-3.5"
-                      style={{
-                        color: activeView === 'recycle-bin' ? sb.activeIconColor : sb.trashIconColor,
-                      }}
-                    />
-                  </div>
-                  <span className="leading-tight break-words whitespace-normal flex-1 min-w-0 tracking-wide">Trash</span>
-                </div>
-              </button>
-            </div>
+              </div>
+            )}
           </div>
         ) : (
           /* Persistent Minimized Thin Slab on Left Border */
@@ -823,51 +827,53 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </div>
             </div>
 
-            <div
-              className="w-full flex flex-col items-center space-y-1 pt-2"
-              style={{ borderTop: `1px solid ${sb.sectionBorder}` }}
-            >
-              {onOpenSettings && (
+            {!isGuestOnly && (
+              <div
+                className="w-full flex flex-col items-center space-y-1 pt-2"
+                style={{ borderTop: `1px solid ${sb.sectionBorder}` }}
+              >
+                {onOpenSettings && (
+                  <button
+                    onClick={() => {
+                      onOpenSettings();
+                      if (typeof window !== 'undefined' && window.innerWidth < 768) {
+                        onClose();
+                      }
+                    }}
+                    title="Settings & Design Preferences"
+                    style={getBtnStyle(isSettingsOn)}
+                    className={`w-6 h-6 flex items-center justify-center transition-all hover:brightness-110 cursor-pointer ${leatherBtnCls}`}
+                  >
+                    <Settings
+                      className="w-3.5 h-3.5"
+                      style={{ color: isSettingsOn ? sb.activeIconColor : sb.idleIconColor }}
+                    />
+                  </button>
+                )}
                 <button
-                  onClick={() => {
-                    onOpenSettings();
-                    if (typeof window !== 'undefined' && window.innerWidth < 768) {
-                      onClose();
-                    }
-                  }}
-                  title="Settings & Design Preferences"
-                  style={getBtnStyle(isSettingsOn)}
-                  className={`w-6 h-6 flex items-center justify-center transition-all hover:brightness-110 cursor-pointer ${leatherBtnCls}`}
+                  onClick={() => handleItemClick('recycle-bin')}
+                  title="Trash"
+                  style={
+                    activeView === 'recycle-bin'
+                      ? getBtnStyle(true)
+                      : {
+                          background: sb.idleBtnBg,
+                          border: '1px solid transparent',
+                          color: sb.trashTextColor,
+                          borderRadius: resolvedDesign === '1' ? '9px' : themeMeta.buttonRadius,
+                        }
+                  }
+                  className={`sidebar-trash-btn w-6 h-6 flex items-center justify-center transition-all hover:brightness-110 cursor-pointer ${leatherBtnCls}`}
                 >
-                  <Settings
+                  <Trash2
                     className="w-3.5 h-3.5"
-                    style={{ color: isSettingsOn ? sb.activeIconColor : sb.idleIconColor }}
+                    style={{
+                      color: activeView === 'recycle-bin' ? sb.activeIconColor : sb.trashIconColor,
+                    }}
                   />
                 </button>
-              )}
-              <button
-                onClick={() => handleItemClick('recycle-bin')}
-                title="Trash"
-                style={
-                  activeView === 'recycle-bin'
-                    ? getBtnStyle(true)
-                    : {
-                        background: sb.idleBtnBg,
-                        border: '1px solid transparent',
-                        color: sb.trashTextColor,
-                        borderRadius: resolvedDesign === '1' ? '9px' : themeMeta.buttonRadius,
-                      }
-                }
-                className={`sidebar-trash-btn w-6 h-6 flex items-center justify-center transition-all hover:brightness-110 cursor-pointer ${leatherBtnCls}`}
-              >
-                <Trash2
-                  className="w-3.5 h-3.5"
-                  style={{
-                    color: activeView === 'recycle-bin' ? sb.activeIconColor : sb.trashIconColor,
-                  }}
-                />
-              </button>
-            </div>
+              </div>
+            )}
           </div>
         )}
       </aside>

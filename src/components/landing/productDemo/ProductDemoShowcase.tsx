@@ -76,6 +76,17 @@ const SHOWCASE_CSS = `
     filter: none !important;
     -webkit-tap-highlight-color: transparent !important;
   }
+  .pds-faq-btn {
+    background: linear-gradient(180deg, #b87430 0%, #a56222 100%) !important;
+    background-color: #ad6826 !important;
+    color: #221006 !important;
+    border: none !important;
+    box-shadow: none !important;
+  }
+  .pds-faq-btn:hover {
+    background: linear-gradient(180deg, #ac6926 0%, #96561b 100%) !important;
+    background-color: #9e5c1f !important;
+  }
 `;
 
 const prefersReducedMotion = () =>
@@ -393,7 +404,7 @@ export const ProductDemoShowcase: React.FC = () => {
         </div>
       </div>
 
-      {/* ═══════════════ 6. FREQUENTLY ASKED QUESTIONS — DARK CARAMEL ACCORDION ═══════════════ */}
+      {/* ═══════════════ 6. FREQUENTLY ASKED QUESTIONS — DARK CARAMEL BUTTON + CREAM ANSWER ═══════════════ */}
       <div className="max-w-4xl mx-auto space-y-3">
         <h3 className="text-xl sm:text-2xl font-bold text-center text-[#241106] font-serif mb-4">
           Frequently Asked Questions
@@ -403,12 +414,12 @@ export const ProductDemoShowcase: React.FC = () => {
           return (
             <div
               key={item.q}
-              className="rounded-2xl border border-[#8C5621] bg-[#B67A3B] overflow-hidden shadow-[0_6px_18px_rgba(44,22,8,0.14)]"
+              className="rounded-2xl border border-[#8E531C] bg-[#F4E2C2] overflow-hidden shadow-[0_6px_18px_rgba(68,36,12,0.12)]"
             >
               <button
                 type="button"
                 onClick={() => setOpenFaqIdx(isOpen ? null : i)}
-                className="w-full px-4 py-3.5 text-left flex items-center justify-between gap-3 cursor-pointer bg-[#B67A3B] hover:bg-[#A66C30] transition-colors"
+                className="pds-faq-btn raw-icon-btn w-full px-4 py-3.5 text-left flex items-center justify-between gap-3 cursor-pointer transition-colors"
               >
                 <span className="text-xs sm:text-sm font-bold text-[#221006]">{item.q}</span>
                 {isOpen ? (
@@ -418,7 +429,7 @@ export const ProductDemoShowcase: React.FC = () => {
                 )}
               </button>
               {isOpen && (
-                <div className="px-4 pb-3.5 text-xs sm:text-[13px] font-medium text-[#2A1508] bg-[#C98E4E]/45 leading-relaxed border-t border-[#8C5621]/50 pt-2.5">
+                <div className="px-4 pb-3.5 text-xs sm:text-[13px] font-medium text-[#2A1508] bg-[#F4E2C2] leading-relaxed border-t border-[#9B5E24]/30 pt-2.5">
                   {item.a}
                 </div>
               )}

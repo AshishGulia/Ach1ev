@@ -1001,12 +1001,16 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
           return (
             <div
               key={item.q}
-              className="rounded-2xl border border-[#8C5621] bg-[#B67A3B] overflow-hidden shadow-[0_6px_18px_rgba(44,22,8,0.14)]"
+              className="rounded-2xl border border-[#8E531C] bg-[#F4E2C2] overflow-hidden shadow-[0_6px_18px_rgba(68,36,12,0.12)]"
             >
               <button
                 type="button"
                 onClick={() => setOpenFaqIdx(isOpen ? null : i)}
-                className="w-full px-4 py-3.5 text-left flex items-center justify-between gap-3 cursor-pointer bg-[#B67A3B] hover:bg-[#A66C30] transition-colors"
+                className="raw-icon-btn w-full px-4 py-3.5 text-left flex items-center justify-between gap-3 cursor-pointer transition-colors"
+                style={{
+                  background: 'linear-gradient(180deg, #b87430 0%, #a56222 100%)',
+                  color: '#221006',
+                }}
               >
                 <span className="text-xs sm:text-sm font-bold text-[#221006]">{item.q}</span>
                 {isOpen ? (
@@ -1016,7 +1020,7 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
                 )}
               </button>
               {isOpen && (
-                <div className="px-4 pb-3.5 text-xs sm:text-[13px] font-medium text-[#2A1508] bg-[#C98E4E]/45 leading-relaxed border-t border-[#8C5621]/50 pt-2.5">
+                <div className="px-4 pb-3.5 text-xs sm:text-[13px] font-medium text-[#2A1508] bg-[#F4E2C2] leading-relaxed border-t border-[#9B5E24]/30 pt-2.5">
                   {item.a}
                 </div>
               )}

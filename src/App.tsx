@@ -81,6 +81,7 @@ export default function App() {
     isGuestMode,
     enterGuestMode,
     isAuthModalOpen,
+    openAuthModal,
     closeAuthModal,
     signOut,
     setSyncStatus,
@@ -88,11 +89,20 @@ export default function App() {
     driveAccount,
   } = useAuth();
 
+  const isGuestOnly = Boolean(isGuestMode && !user && !googleUser && !phoneUser);
+
   // Navigation & Subject State
   const [activeView, setActiveView] = useState<
     'home' | 'read' | 'notebooks' | 'library' | 'roster' | 'recycle-bin' | 'mnemonics' | 'leisure' | 'community' | 'make-note' | 'talk-to-dev' | 'settings'
   >('home');
   const [settingsInitialTab, setSettingsInitialTab] = useState<SettingsTabId>('profile');
+
+  useEffect(() => {
+    if (isGuestOnly && (activeView === 'settings' || activeView === 'recycle-bin')) {
+      setActiveView('make-note');
+      setIsEditingNote(true);
+    }
+  }, [isGuestOnly, activeView]);
   const [customWallpaperUri, setCustomWallpaperUri] = useState<string>(() => {
     try {
       return localStorage.getItem('achiev_custom_wallpaper_v1') || '';
@@ -1123,10 +1133,15 @@ export default function App() {
         onClose={() => setIsSidebarOpen(false)}
         onToggle={() => setIsSidebarOpen(!isSidebarOpen)}
         isDarkMode={isDarkMode}
+        isGuestOnly={isGuestOnly}
         activeDesign={activeDesign}
         activeView={isEditingNote || activeView === 'make-note' ? 'make-note' : activeView}
         isSettingsActive={activeView === 'settings' || isSettingsOpen}
         onNavigate={(view) => {
+          if (isGuestOnly && (view === 'settings' || view === 'recycle-bin')) {
+            openAuthModal();
+            return;
+          }
           setIsSettingsOpen(false);
           if (view === 'make-note') {
             handleCreateBlankNote();
@@ -1138,12 +1153,16 @@ export default function App() {
         currentSubject={currentSubject}
         onSelectSubject={setCurrentSubject}
         userProfile={userProfile}
-        onOpenSettings={() => {
-          setIsEditingNote(false);
-          setIsSettingsOpen(false);
-          setSettingsInitialTab('profile');
-          setActiveView('settings');
-        }}
+        onOpenSettings={
+          isGuestOnly
+            ? undefined
+            : () => {
+                setIsEditingNote(false);
+                setIsSettingsOpen(false);
+                setSettingsInitialTab('profile');
+                setActiveView('settings');
+              }
+        }
         onOpenAIStudioModal={() => setIsAIStudioModalOpen(true)}
       />
 
@@ -1160,12 +1179,20 @@ export default function App() {
           breakTimerCountdown={formatCountdown(secondsUntilBreak)}
           onTriggerEyeBreak={() => setIsEyeBreakModalOpen(true)}
           onOpenSettings={() => {
+            if (isGuestOnly) {
+              openAuthModal();
+              return;
+            }
             setIsEditingNote(false);
             setIsSettingsOpen(false);
             setSettingsInitialTab('profile');
             setActiveView('settings');
           }}
           onOpenCloudSettings={() => {
+            if (isGuestOnly) {
+              openAuthModal();
+              return;
+            }
             setIsEditingNote(false);
             setIsSettingsOpen(false);
             setSettingsInitialTab('cloud-sync');
@@ -1180,39 +1207,108 @@ export default function App() {
         />
 
         {/* Viewport Content */}
-        <main className="flex-1 overflow-hidden flex pb-14 md:pb-0">
-          <Suspense fallback={<div className="flex-1 flex items-center justify-center text-xs font-mono opacity-60">Loading workspace...</div>}>
-          {activeView === 'home' && (
-            <MyDenHome
-              userProfile={userProfile}
-              currentSubject={currentSubject}
-              onSelectSubject={setCurrentSubject}
-              optionSlabs={optionSlabs}
-              onUpdateOptionSlabs={setOptionSlabs}
-              tasks={tasks}
-              onToggleTask={handleToggleTask}
-              onAddTask={handleAddTask}
-              notebooks={notebooks}
-              books={books}
-              onOpenNotebook={handleOpenNotebook}
-              onOpenStudio={(actionType) => {
-                if (actionType === 'new-note') {
-                  handleCreateQuickNote();
-                } else {
-                  setActiveView('notebooks');
-                  setIsEditingNote(true);
-                }
-              }}
-              onOpenRosterModal={() => {
-                setIsEditingNote(false);
-                setActiveView('roster');
-              }}
-              onOpenSettings={() => {
-                setIsEditingNote(false);
-                setIsSettingsOpen(false);
-                setSettingsInitialTab('profile');
-                setActiveView('settings');
-              }}
+        <main className="flex-1 overflow-hidden flex flex-col pb-14 md:pb-0">
+          {(() => {
+            const isGuestPreviewingLayout =
+              isGuestOnly && !(activeView === 'make-note' || (activeView === 'notebooks' && isEditingNote));
+
+            return (
+              <>
+                {isGuestPreviewingLayout && (
+                  <div className="shrink-0 z-30 flex items-center justify-between gap-2 px-3 sm:px-4 py-1.5 border-b border-amber-500/35 bg-[#1e120a]/92 text-[#f6e8d0] text-[11px]">
+                    <span className="truncate font-medium">
+                      <strong className="text-amber-300">Layout Preview Mode</strong> — Sign in to use this section, or switch to{' '}
+                      <span className="underline decoration-amber-400/70">Create Note</span> to write freely.
+                    </span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <button
+                        type="button"
+                        onClick={handleCreateBlankNote}
+                        className="px-2.5 py-1 rounded-lg bg-[#f3d9a8]/15 hover:bg-[#f3d9a8]/25 border border-amber-300/35 text-[#fbe8c3] font-semibold transition-colors cursor-pointer"
+                      >
+                        Create Note
+                      </button>
+                      <button
+                        type="button"
+                        onClick={openAuthModal}
+                        className="px-2.5 py-1 rounded-lg bg-[#d99b3d] hover:bg-[#c5882b] text-[#1a0d05] font-bold transition-colors cursor-pointer"
+                      >
+                        Sign In
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <div
+                  className="flex-1 min-h-0 w-full flex overflow-hidden relative"
+                  data-guest-preview={isGuestPreviewingLayout ? 'true' : undefined}
+                  onClickCapture={(e) => {
+                    if (!isGuestPreviewingLayout) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openAuthModal();
+                  }}
+                  onMouseDownCapture={(e) => {
+                    if (!isGuestPreviewingLayout) return;
+                    const target = e.target as HTMLElement | null;
+                    if (target?.closest('input, textarea, select, [contenteditable="true"]')) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      openAuthModal();
+                    }
+                  }}
+                  onSubmitCapture={(e) => {
+                    if (!isGuestPreviewingLayout) return;
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openAuthModal();
+                  }}
+                  onKeyDownCapture={(e) => {
+                    if (!isGuestPreviewingLayout) return;
+                    const scrollKeys = new Set(['ArrowUp', 'ArrowDown', 'PageUp', 'PageDown', 'Home', 'End']);
+                    if (!scrollKeys.has(e.key)) {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (e.key === 'Enter' || e.key === ' ') openAuthModal();
+                    }
+                  }}
+                >
+                  <Suspense fallback={<div className="flex-1 flex items-center justify-center text-xs font-mono opacity-60">Loading workspace...</div>}>
+                  {activeView === 'home' && (
+                    <MyDenHome
+                      userProfile={userProfile}
+                      currentSubject={currentSubject}
+                      onSelectSubject={setCurrentSubject}
+                      optionSlabs={optionSlabs}
+                      onUpdateOptionSlabs={setOptionSlabs}
+                      tasks={tasks}
+                      onToggleTask={handleToggleTask}
+                      onAddTask={handleAddTask}
+                      notebooks={notebooks}
+                      books={books}
+                      onOpenNotebook={handleOpenNotebook}
+                      onOpenStudio={(actionType) => {
+                        if (actionType === 'new-note') {
+                          handleCreateQuickNote();
+                        } else {
+                          setActiveView('notebooks');
+                          setIsEditingNote(true);
+                        }
+                      }}
+                      onOpenRosterModal={() => {
+                        setIsEditingNote(false);
+                        setActiveView('roster');
+                      }}
+                      onOpenSettings={() => {
+                        if (isGuestOnly) {
+                          openAuthModal();
+                          return;
+                        }
+                        setIsEditingNote(false);
+                        setIsSettingsOpen(false);
+                        setSettingsInitialTab('profile');
+                        setActiveView('settings');
+                      }}
               onNavigate={(view) => {
                 setIsEditingNote(false);
                 setIsSettingsOpen(false);
@@ -1356,7 +1452,7 @@ export default function App() {
             </div>
           )}
 
-          {activeView === 'recycle-bin' && (
+          {activeView === 'recycle-bin' && !isGuestOnly && (
             <RecycleBinView
               items={recycleBinItems}
               onRestore={handleRestoreRecycleItem}
@@ -1377,7 +1473,7 @@ export default function App() {
             </div>
           )}
 
-          {activeView === 'settings' && (
+          {activeView === 'settings' && !isGuestOnly && (
             <div className="flex-1 h-full w-full overflow-hidden flex flex-col">
               <SettingsModal
                 isOpen={true}
@@ -1399,6 +1495,10 @@ export default function App() {
             </div>
           )}
           </Suspense>
+                </div>
+              </>
+            );
+          })()}
         </main>
 
         {/* Mobile Bottom Navigation Bar (Phone & Tablet-portrait view) */}
@@ -1466,22 +1566,24 @@ export default function App() {
             <span className="text-[9px] font-medium leading-none">Shelf</span>
           </button>
 
-          <button
-            type="button"
-            onClick={() => {
-              setIsEditingNote(false);
-              setIsSettingsOpen(false);
-              setActiveView('settings');
-            }}
-            className={`flex flex-col items-center gap-0.5 py-1 px-2.5 rounded-xl transition-all cursor-pointer ${
-              activeView === 'settings'
-                ? 'text-[var(--th-accent)] font-bold'
-                : 'text-[var(--th-muted)] hover:text-[var(--th-ink)]'
-            }`}
-          >
-            <Settings className="w-4 h-4" />
-            <span className="text-[9px] font-medium leading-none">Settings</span>
-          </button>
+          {!isGuestOnly && (
+            <button
+              type="button"
+              onClick={() => {
+                setIsEditingNote(false);
+                setIsSettingsOpen(false);
+                setActiveView('settings');
+              }}
+              className={`flex flex-col items-center gap-0.5 py-1 px-2.5 rounded-xl transition-all cursor-pointer ${
+                activeView === 'settings'
+                  ? 'text-[var(--th-accent)] font-bold'
+                  : 'text-[var(--th-muted)] hover:text-[var(--th-ink)]'
+              }`}
+            >
+              <Settings className="w-4 h-4" />
+              <span className="text-[9px] font-medium leading-none">Settings</span>
+            </button>
+          )}
         </nav>
       </div>
 

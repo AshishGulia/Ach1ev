@@ -926,33 +926,33 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
 
       {!isModal && (
         <>
-          {/* Borderless Cosine-Eased Vertical Transition matching Top Login Screen Height */}
+          {/* Borderless Cosine-Eased Vertical Transition with Asymptotic Zero-Slope Join into Caramel Cream */}
           <div
             aria-hidden="true"
             className="w-full min-h-[calc(100dvh-72px)] sm:min-h-[calc(100dvh-88px)] relative z-10 pointer-events-none shrink-0"
             style={{
               background:
-                'linear-gradient(180deg, #0c0402 0%, #110603 6%, #180a05 13%, #231008 21%, #31170b 29%, #422110 38%, #562d17 47%, #6c3b1f 56%, #834d2b 65%, #9b613a 74%, #b37a4e 82%, #ca9567 89%, #ddaf83 94%, #ebca9f 97.5%, #f4e2c2 100%)',
+                'linear-gradient(180deg, #0c0402 0%, #100503 7%, #170904 15%, #241108 24%, #351a0d 34%, #4b2613 44%, #64351b 54%, #7f4928 64%, #9b6039 73%, #b67b4f 81%, #ce9769 87%, #e0b386 92%, #ecc89e 95.5%, #f2d9b7 98%, #f4e2c2 100%)',
             }}
           />
 
           <section
             aria-label="Achiev Medical Study Guide & Tour"
-            className="w-full relative z-10 px-4 sm:px-8 pt-2 sm:pt-4 pb-16 sm:pb-20 text-[#23140A] overflow-hidden"
+            className="w-full relative z-10 -mt-20 sm:-mt-28 pt-20 sm:pt-28 px-4 sm:px-8 pb-16 sm:pb-20 text-[#23140A] overflow-hidden"
             style={{
               background:
-                'linear-gradient(180deg, #f4e2c2 0%, #f1e0bf 36%, #ecd3ab 72%, #e6c797 100%)',
+                'linear-gradient(180deg, rgba(244, 226, 194, 0) 0%, rgba(244, 226, 194, 0.48) 90px, #f4e2c2 170px, #f2dfc0 38%, #ecd3ab 74%, #e5c392 100%)',
             }}
           >
-            {/* Cream Ambient Highlights Faded In Below Top Edge so Zero Seam Appears */}
+            {/* Cream Ambient Highlights Faded In Below Feathered Join */}
             <div
               aria-hidden="true"
               className="pointer-events-none absolute inset-0"
               style={{
                 background:
-                  'radial-gradient(circle at 14% 20%, rgba(224, 181, 120, 0.36) 0%, transparent 45%), radial-gradient(circle at 86% 28%, rgba(206, 152, 88, 0.26) 0%, transparent 48%), radial-gradient(circle at 48% 72%, rgba(255, 248, 234, 0.68) 0%, transparent 55%)',
-                maskImage: 'linear-gradient(180deg, transparent 0%, #000 18%, #000 100%)',
-                WebkitMaskImage: 'linear-gradient(180deg, transparent 0%, #000 18%, #000 100%)',
+                  'radial-gradient(circle at 14% 24%, rgba(224, 181, 120, 0.34) 0%, transparent 45%), radial-gradient(circle at 86% 30%, rgba(206, 152, 88, 0.24) 0%, transparent 48%), radial-gradient(circle at 48% 72%, rgba(255, 248, 234, 0.65) 0%, transparent 55%)',
+                maskImage: 'linear-gradient(180deg, transparent 0%, transparent 14%, #000 30%, #000 100%)',
+                WebkitMaskImage: 'linear-gradient(180deg, transparent 0%, transparent 14%, #000 30%, #000 100%)',
               }}
             />
             <div className="relative z-10">
