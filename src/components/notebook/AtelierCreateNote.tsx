@@ -465,6 +465,49 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
   const [layout, setLayout] = useState<'split' | 'triple' | 'stacked' | 'focus'>('focus');
   const [mobileTab, setMobileTab] = useState<string>('note');
   const [paperStyle, setPaperStyle] = useState<'ruled' | 'plain' | 'grid' | 'dot'>('ruled');
+  const [isDarkThemeDoc, setIsDarkThemeDoc] = useState<boolean>(() =>
+    typeof document !== 'undefined' ? document.documentElement.classList.contains('dark') : false
+  );
+  const [docDesignId, setDocDesignId] = useState<string>(() =>
+    typeof document !== 'undefined'
+      ? document.documentElement.getAttribute('data-design') || String(activeDesign || '1')
+      : String(activeDesign || '1')
+  );
+
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const syncThemeAttrs = () => {
+      setIsDarkThemeDoc(document.documentElement.classList.contains('dark'));
+      setDocDesignId(
+        document.documentElement.getAttribute('data-design') || String(activeDesign || '1')
+      );
+    };
+    syncThemeAttrs();
+    const obs = new MutationObserver(syncThemeAttrs);
+    obs.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['class', 'data-design'],
+    });
+    return () => obs.disconnect();
+  }, [activeDesign]);
+
+  const [paperColor, setPaperColor] = useState<string>(() => {
+    if (notebook?.paperColor && notebook.paperColor !== 'beige') return notebook.paperColor;
+    try {
+      const stored = localStorage.getItem('achiev_note_paper_color_v1');
+      if (stored && stored !== 'beige') return stored;
+    } catch {}
+    return 'sepia';
+  });
+  const [isPaperMenuOpen, setIsPaperMenuOpen] = useState<boolean>(false);
+  const [paperMenuPos, setPaperMenuPos] = useState<{ left: number; top: number }>({ left: 16, top: 112 });
+  const paperBtnRef = useRef<HTMLButtonElement | null>(null);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('achiev_note_paper_color_v1', paperColor);
+    } catch {}
+  }, [paperColor]);
   const [fontStyle, setFontStyle] = useState<string>(() => {
     try {
       return localStorage.getItem('medden_note_font_style') || 'playfair';
@@ -1076,7 +1119,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
             coverTitle: resolvedTitle,
             coverSubtitle: 'Personal Study Notebook',
             paperType: 'ruled-thin',
-            paperColor: 'beige',
+            paperColor: paperColor || 'sepia',
             coverColor: '#7c4521',
             activePageIndex: 0,
             createdAt: todayStr,
@@ -1105,6 +1148,9 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
       loadedNoteKeyRef.current = noteKey;
       const nextTitle = notebook?.title || 'Untitled Note';
       const nextHtml = notebook?.pages?.[activePageIndex]?.contentHtml || '<p><br></p>';
+      if (notebook?.paperColor) {
+        setPaperColor(notebook.paperColor === 'beige' ? 'sepia' : notebook.paperColor);
+      }
       setNoteTitle(nextTitle);
       if (sheetTitleRef.current) {
         sheetTitleRef.current.textContent = nextTitle;
@@ -2826,6 +2872,8 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
         {/* Layout Switcher Segments - Focus & Split */}
         <div className="an-seg layouts" role="group" aria-label="Workspace layout">
           <button
+            type="button"
+            className="an-layout-toggle-btn"
             aria-pressed={layout === 'focus'}
             onClick={() => {
               setLayout('focus');
@@ -2837,6 +2885,8 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
             <span>Focus</span>
           </button>
           <button
+            type="button"
+            className="an-layout-toggle-btn"
             aria-pressed={layout === 'split'}
             onClick={() => {
               setLayout('split');
@@ -3677,6 +3727,170 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                   )}
                 </div>
 
+                {/* Paper Color Customization Button (Distinct Paper Logo, Theme-Synced, Default Sepia, Color Columns) */}
+                {(() => {
+                  const sepiaLightMap: Record<string, string> = {
+                    '1': '#F3E5C8',
+                    '2': '#EDE4CC',
+                    '3': '#F5E7CE',
+                    '4': '#EFE4CF',
+                    '5': '#F0E6CB',
+                  };
+                  const sepiaDarkMap: Record<string, string> = {
+                    '1': '#251A10',
+                    '2': '#1B2219',
+                    '3': '#26191D',
+                    '4': '#1A2029',
+                    '5': '#161D17',
+                  };
+                  const activeSepiaHex = isDarkThemeDoc
+                    ? sepiaDarkMap[docDesignId] || '#251A10'
+                    : sepiaLightMap[docDesignId] || '#F3E5C8';
+                  const swatchPreviewBg =
+                    !paperColor || paperColor === 'sepia' || paperColor === 'beige'
+                      ? activeSepiaHex
+                      : paperColor === 'white'
+                        ? isDarkThemeDoc
+                          ? '#23211E'
+                          : '#FFFFFF'
+                        : paperColor === 'dark'
+                          ? '#14110E'
+                          : paperColor === 'mint'
+                            ? isDarkThemeDoc
+                              ? '#14241B'
+                              : '#E6F4EA'
+                            : paperColor === 'ice-blue'
+                              ? isDarkThemeDoc
+                                ? '#14202D'
+                                : '#E8F2FC'
+                              : paperColor;
+                  const hexClean = swatchPreviewBg.replace('#', '');
+                  const hexNum = hexClean.length === 6 ? parseInt(hexClean, 16) : NaN;
+                  const lum = !Number.isNaN(hexNum)
+                    ? (0.2126 * ((hexNum >> 16) & 255) + 0.7152 * ((hexNum >> 8) & 255) + 0.0722 * (hexNum & 255)) / 255
+                    : isDarkThemeDoc
+                      ? 0.2
+                      : 0.85;
+                  const lineInk = lum > 0.52 ? '#5A3A1E' : '#EED9BC';
+
+                  const applyPaperChoice = (nextVal: string) => {
+                    setPaperColor(nextVal);
+                    if (notebook && onUpdateNotebook) {
+                      onUpdateNotebook({
+                        ...notebook,
+                        paperColor: nextVal,
+                        updatedAt: new Date().toISOString(),
+                      });
+                    }
+                    triggerSave();
+                  };
+
+                  return (
+                    <div className="relative shrink-0">
+                      <button
+                        ref={paperBtnRef}
+                        type="button"
+                        className={`an-ribbon-feat compact shrink-0 ${isPaperMenuOpen ? 'font-semibold' : ''}`}
+                        onClick={() => {
+                          if (!isPaperMenuOpen && paperBtnRef.current) {
+                            const rect = paperBtnRef.current.getBoundingClientRect();
+                            setPaperMenuPos({
+                              left: Math.max(12, Math.min(window.innerWidth - 280, rect.left)),
+                              top: rect.bottom + 8,
+                            });
+                          }
+                          setIsPaperMenuOpen((v) => !v);
+                        }}
+                        title="Change Paper Color (Default: Sepia)"
+                      >
+                        <svg
+                          viewBox="0 0 20 20"
+                          className="w-4 h-4 shrink-0"
+                          aria-hidden="true"
+                        >
+                          <path
+                            d="M4 2.5h8.2L16 6.3V17a1.5 1.5 0 0 1-1.5 1.5h-10A1.5 1.5 0 0 1 3 17V4A1.5 1.5 0 0 1 4 2.5Z"
+                            fill={swatchPreviewBg}
+                            stroke="var(--th-accent, var(--an-brass))"
+                            strokeWidth="1.4"
+                            strokeLinejoin="round"
+                          />
+                          <path
+                            d="M12 2.5V6.5H16"
+                            fill="none"
+                            stroke="var(--th-accent, var(--an-brass))"
+                            strokeWidth="1.2"
+                            strokeLinejoin="round"
+                          />
+                          <line x1="5.8" y1="9.2" x2="13.2" y2="9.2" stroke={lineInk} strokeOpacity="0.65" strokeWidth="1.1" strokeLinecap="round" />
+                          <line x1="5.8" y1="12.2" x2="13.2" y2="12.2" stroke={lineInk} strokeOpacity="0.65" strokeWidth="1.1" strokeLinecap="round" />
+                          <line x1="5.8" y1="15.2" x2="10.8" y2="15.2" stroke={lineInk} strokeOpacity="0.65" strokeWidth="1.1" strokeLinecap="round" />
+                        </svg>
+                        <span>Paper</span>
+                      </button>
+
+                      {isPaperMenuOpen && (
+                        <div
+                          className="fixed z-50 w-[268px] p-3.5 rounded-2xl bg-[var(--an-paper)] border border-[var(--an-line)] shadow-2xl space-y-2.5"
+                          style={{ left: paperMenuPos.left, top: paperMenuPos.top }}
+                          onMouseDown={(e) => e.stopPropagation()}
+                        >
+                          <div className="flex items-center justify-between pb-1.5 border-b border-[var(--an-line)]">
+                            <span className="text-xs font-bold text-[var(--an-ink)]">Paper Color</span>
+                            <button
+                              type="button"
+                              onClick={() => setIsPaperMenuOpen(false)}
+                              className="p-0.5 rounded hover:bg-black/10 cursor-pointer"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+
+                          <div className="flex flex-wrap gap-1">
+                            {[
+                              { id: 'sepia', label: 'Sepia (Default)', swatch: activeSepiaHex },
+                              { id: 'white', label: 'White', swatch: isDarkThemeDoc ? '#23211E' : '#FFFFFF' },
+                              { id: 'mint', label: 'Mint', swatch: isDarkThemeDoc ? '#14241B' : '#E6F4EA' },
+                              { id: 'ice-blue', label: 'Ice', swatch: isDarkThemeDoc ? '#14202D' : '#E8F2FC' },
+                              { id: 'dark', label: 'Night', swatch: '#14110E' },
+                            ].map((preset) => (
+                              <button
+                                key={preset.id}
+                                type="button"
+                                onClick={() => applyPaperChoice(preset.id)}
+                                className={`px-2 py-1 rounded-lg text-[10px] font-semibold flex items-center gap-1 border cursor-pointer ${
+                                  paperColor === preset.id
+                                    ? 'border-[var(--an-brass)] ring-1 ring-[var(--an-brass)]'
+                                    : 'border-[var(--an-line)]'
+                                }`}
+                              >
+                                <span
+                                  className="w-2.5 h-2.5 rounded-full border border-black/20 shrink-0"
+                                  style={{ backgroundColor: preset.swatch }}
+                                />
+                                <span>{preset.label}</span>
+                              </button>
+                            ))}
+                          </div>
+
+                          <div className="space-y-1">
+                            <span className="text-[11px] font-semibold block text-[var(--an-ink)]">
+                              Custom Color Columns
+                            </span>
+                            <RoundColorColumnsPicker
+                              columns={UNIFIED_COLOR_COLUMNS}
+                              selectedColor={paperColor.startsWith('#') ? paperColor : undefined}
+                              onSelectColor={(hex) => applyPaperChoice(hex)}
+                              showStandardRow
+                              swatchSizeClass="w-4 h-4"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+
                 {/* User-Pinned Custom Tools from "Add tools" */}
                 {pinnedRibbonTools.length > 0 && <span className="an-vsep" />}
                 {pinnedRibbonTools.map((tid) => {
@@ -3878,12 +4092,63 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                     ? 'nesw-resize'
                     : undefined;
                 const h = Math.max(20, Math.round(rulerSpacingPx));
-                const encColor = encodeURIComponent(rulerColor);
+                const sepiaLightPaper: Record<string, string> = {
+                  '1': '#F3E5C8',
+                  '2': '#EDE4CC',
+                  '3': '#F5E7CE',
+                  '4': '#EFE4CF',
+                  '5': '#F0E6CB',
+                };
+                const sepiaDarkPaper: Record<string, string> = {
+                  '1': '#251A10',
+                  '2': '#1B2219',
+                  '3': '#26191D',
+                  '4': '#1A2029',
+                  '5': '#161D17',
+                };
+                const resolvedSheetBg =
+                  !paperColor || paperColor === 'sepia' || paperColor === 'beige'
+                    ? isDarkThemeDoc
+                      ? sepiaDarkPaper[docDesignId] || '#251A10'
+                      : sepiaLightPaper[docDesignId] || '#F3E5C8'
+                    : paperColor === 'white'
+                      ? isDarkThemeDoc
+                        ? '#23211E'
+                        : '#FFFFFF'
+                      : paperColor === 'dark'
+                        ? '#14110E'
+                        : paperColor === 'mint'
+                          ? isDarkThemeDoc
+                            ? '#14241B'
+                            : '#E6F4EA'
+                          : paperColor === 'ice-blue'
+                            ? isDarkThemeDoc
+                              ? '#14202D'
+                              : '#E8F2FC'
+                            : paperColor;
+                const cleanBgHex = resolvedSheetBg.replace('#', '');
+                const parsedBgInt = cleanBgHex.length === 6 ? parseInt(cleanBgHex, 16) : NaN;
+                const sheetLum = !Number.isNaN(parsedBgInt)
+                  ? (0.2126 * ((parsedBgInt >> 16) & 255) +
+                      0.7152 * ((parsedBgInt >> 8) & 255) +
+                      0.0722 * (parsedBgInt & 255)) /
+                    255
+                  : isDarkThemeDoc
+                    ? 0.2
+                    : 0.86;
+                const isLightSheet = sheetLum > 0.52;
+                const effectiveRuleColor =
+                  rulerColor === '#d6c7b0'
+                    ? isLightSheet
+                      ? 'rgba(138, 102, 58, 0.24)'
+                      : 'rgba(220, 184, 134, 0.17)'
+                    : rulerColor;
+                const encColor = encodeURIComponent(effectiveRuleColor);
                 const ruleBg =
                   rulerStyle === 'solid'
-                    ? `repeating-linear-gradient(to bottom, transparent 0px, transparent ${h - 1}px, ${rulerColor} ${h - 1}px, ${rulerColor} ${h}px)`
+                    ? `repeating-linear-gradient(to bottom, transparent 0px, transparent ${h - 1}px, ${effectiveRuleColor} ${h - 1}px, ${effectiveRuleColor} ${h}px)`
                     : rulerStyle === 'double'
-                      ? `repeating-linear-gradient(to bottom, transparent 0px, transparent ${h - 4}px, ${rulerColor} ${h - 4}px, ${rulerColor} ${h - 3}px, transparent ${h - 3}px, transparent ${h - 1}px, ${rulerColor} ${h - 1}px, ${rulerColor} ${h}px)`
+                      ? `repeating-linear-gradient(to bottom, transparent 0px, transparent ${h - 4}px, ${effectiveRuleColor} ${h - 4}px, ${effectiveRuleColor} ${h - 3}px, transparent ${h - 3}px, transparent ${h - 1}px, ${effectiveRuleColor} ${h - 1}px, ${effectiveRuleColor} ${h}px)`
                       : `url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='96' height='${h}' shape-rendering='crispEdges'>${
                           rulerStyle === 'dotted'
                             ? `<line x1='0' y1='${h - 1}' x2='96' y2='${h - 1}' stroke='${encColor}' stroke-width='1' stroke-dasharray='2 4'/>`
@@ -3903,6 +4168,12 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                   minHeight: `${sheetMinHeightPx}px`,
                   minWidth: '340px',
                   cursor: sheetCursor,
+                  backgroundColor: resolvedSheetBg,
+                  ['--an-page' as string]: resolvedSheetBg,
+                  ['--an-ink' as string]: isLightSheet ? '#23160C' : '#F3E7D4',
+                  ['--an-muted' as string]: isLightSheet ? '#6B553E' : '#B7A28B',
+                  ['--an-rule' as string]: effectiveRuleColor,
+                  ['--an-margin' as string]: isLightSheet ? 'rgba(180,88,74,0.34)' : 'rgba(196,92,96,0.36)',
                   ['--an-nf' as string]: activeFontObj.family,
                   ['--lh' as string]: `${h}px`,
                   ['--an-rule-bg' as string]: ruleBg,

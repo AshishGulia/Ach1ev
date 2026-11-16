@@ -432,7 +432,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                           <div className="w-11 h-11 rounded-full bg-white p-1.5 shadow-md border border-amber-500/40 flex items-center justify-center">
                             <img
-                              src="./android-chrome-192x192.png"
+                              src="./android-chrome-192x192.png?v=2"
                               alt="Ach1ev Logo"
                               className="w-full h-full object-contain rounded-full"
                             />

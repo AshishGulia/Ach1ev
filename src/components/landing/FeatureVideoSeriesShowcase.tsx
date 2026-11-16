@@ -993,7 +993,7 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
 
       {/* ═══════════════ 4. STUDY WORKSPACE FAQ ACCORDION ═══════════════ */}
       <section aria-labelledby="medical-faq-heading" className="max-w-4xl mx-auto space-y-3 pb-4">
-        <h2 id="medical-faq-heading" className="text-lg sm:text-xl font-bold text-center text-[#1E1007] font-serif mb-4">
+        <h2 id="medical-faq-heading" className="text-lg sm:text-xl font-bold text-center text-[#241106] font-serif mb-4">
           Frequently Asked Questions
         </h2>
         {STUDY_FAQS.map((item, i) => {
@@ -1001,22 +1001,22 @@ export const FeatureVideoSeriesShowcase: React.FC = () => {
           return (
             <div
               key={item.q}
-              className="rounded-2xl border border-[#D4B47C]/55 bg-[#FFFBF2]/78 backdrop-blur-md overflow-hidden shadow-[0_4px_14px_rgba(78,50,15,0.05)]"
+              className="rounded-2xl border border-[#8C5621] bg-[#B67A3B] overflow-hidden shadow-[0_6px_18px_rgba(44,22,8,0.14)]"
             >
               <button
                 type="button"
                 onClick={() => setOpenFaqIdx(isOpen ? null : i)}
-                className="w-full px-4 py-3.5 text-left flex items-center justify-between gap-3 cursor-pointer hover:bg-[#FAF0D8]/70"
+                className="w-full px-4 py-3.5 text-left flex items-center justify-between gap-3 cursor-pointer bg-[#B67A3B] hover:bg-[#A66C30] transition-colors"
               >
-                <span className="text-xs sm:text-sm font-bold text-[#221208]">{item.q}</span>
+                <span className="text-xs sm:text-sm font-bold text-[#221006]">{item.q}</span>
                 {isOpen ? (
-                  <ChevronUp className="w-4 h-4 text-[#9B6A1F] shrink-0" />
+                  <ChevronUp className="w-4 h-4 text-[#221006] shrink-0" />
                 ) : (
-                  <ChevronDown className="w-4 h-4 text-[#9B6A1F] shrink-0" />
+                  <ChevronDown className="w-4 h-4 text-[#221006] shrink-0" />
                 )}
               </button>
               {isOpen && (
-                <div className="px-4 pb-3.5 text-xs sm:text-[13px] text-[#523B26] leading-relaxed border-t border-[#E6D1AA]/65 pt-2.5">
+                <div className="px-4 pb-3.5 text-xs sm:text-[13px] font-medium text-[#2A1508] bg-[#C98E4E]/45 leading-relaxed border-t border-[#8C5621]/50 pt-2.5">
                   {item.a}
                 </div>
               )}

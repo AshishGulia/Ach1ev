@@ -1022,8 +1022,8 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
         {/* Main View Area */}
         <main className="shelfwise-main">
           {/* Top Window Bar */}
-          <header className="shelfwise-header justify-end">
-            <div className="flex flex-wrap items-center gap-2 ml-auto">
+          <header className="shelfwise-header justify-start">
+            <div className="flex flex-wrap items-center gap-2">
               {/* Library Button */}
               <button
                 type="button"

@@ -386,43 +386,121 @@ export function getThemeAlmirahTrim(themeId: ShelfThemeId): ThemeAlmirahTrim {
   }
 }
 
-/* ───────────── DAYTIME FLUTTERING BUTTERFLIES (Themes 1 & 2 Day Mode) ───────────── */
+/* ───────────── DAYTIME RANDOMLY FLUTTERING BUTTERFLIES WITH PLANT PERCHING ───────────── */
+interface ButterflyFlightState {
+  leftPct: number;
+  topPct: number;
+  rotDeg: number;
+  scale: number;
+  durationMs: number;
+  perched: boolean;
+}
+
+const PLANT_PERCH_SPOTS: Array<{ left: number; top: number; rot: number }> = [
+  { left: 86.5, top: 58.0, rot: -14 },
+  { left: 90.2, top: 61.5, rot: 12 },
+  { left: 84.8, top: 63.0, rot: -8 },
+  { left: 89.0, top: 55.5, rot: 6 },
+];
+
 export const DayButterflies: React.FC<{ forestTone?: boolean }> = ({ forestTone = false }) => {
-  const butterflies = [
-    { top: '22%', left: '16%', color1: forestTone ? '#eab308' : '#f59e0b', color2: '#fef08a', delay: '0s', dur: '7.5s', size: 22 },
-    { top: '39%', left: '78%', color1: forestTone ? '#38bdf8' : '#fb923c', color2: '#fde68a', delay: '1.8s', dur: '8.8s', size: 20 },
-    { top: '16%', left: '74%', color1: '#a78bfa', color2: '#e9d5ff', delay: '0.9s', dur: '9.6s', size: 18 },
-  ];
+  const specs = React.useMemo(
+    () => [
+      { id: 0, color1: forestTone ? '#eab308' : '#f59e0b', color2: '#fef08a', size: 22 },
+      { id: 1, color1: forestTone ? '#38bdf8' : '#fb923c', color2: '#fde68a', size: 20 },
+      { id: 2, color1: '#a78bfa', color2: '#e9d5ff', size: 19 },
+    ],
+    [forestTone]
+  );
+
+  const [flights, setFlights] = React.useState<ButterflyFlightState[]>(() => [
+    { leftPct: 16, topPct: 24, rotDeg: -8, scale: 1, durationMs: 2600, perched: false },
+    { leftPct: 76, topPct: 36, rotDeg: 10, scale: 0.96, durationMs: 3100, perched: false },
+    { leftPct: 58, topPct: 18, rotDeg: -4, scale: 0.92, durationMs: 2900, perched: false },
+  ]);
+
+  React.useEffect(() => {
+    const timers: number[] = [];
+    let cancelled = false;
+
+    const scheduleStep = (idx: number, initialDelay: number) => {
+      const tick = () => {
+        if (cancelled) return;
+        const willPerchOnPlant = Math.random() < 0.34;
+        let nextLeft = 10 + Math.random() * 78;
+        let nextTop = 10 + Math.random() * 52;
+        let nextRot = (Math.random() - 0.5) * 32;
+        let durMs = 2100 + Math.round(Math.random() * 2400);
+
+        if (willPerchOnPlant) {
+          const spot = PLANT_PERCH_SPOTS[Math.floor(Math.random() * PLANT_PERCH_SPOTS.length)]!;
+          nextLeft = spot.left + (Math.random() - 0.5) * 2.2;
+          nextTop = spot.top + (Math.random() - 0.5) * 2.2;
+          nextRot = spot.rot;
+          durMs = 2400 + Math.round(Math.random() * 1100);
+        }
+
+        setFlights((prev) => {
+          const copy = [...prev];
+          copy[idx] = {
+            leftPct: nextLeft,
+            topPct: nextTop,
+            rotDeg: nextRot,
+            scale: willPerchOnPlant ? 0.92 : 0.9 + Math.random() * 0.22,
+            durationMs: durMs,
+            perched: willPerchOnPlant,
+          };
+          return copy;
+        });
+
+        const restExtra = willPerchOnPlant ? 2200 + Math.round(Math.random() * 2400) : 250 + Math.round(Math.random() * 700);
+        timers[idx] = window.setTimeout(tick, durMs + restExtra);
+      };
+      timers[idx] = window.setTimeout(tick, initialDelay);
+    };
+
+    specs.forEach((_, idx) => scheduleStep(idx, 450 + idx * 700));
+    return () => {
+      cancelled = true;
+      timers.forEach((t) => window.clearTimeout(t));
+    };
+  }, [specs]);
+
   return (
-    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 13 }}>
-      {butterflies.map((b, i) => (
-        <div
-          key={i}
-          style={{
-            position: 'absolute',
-            top: b.top,
-            left: b.left,
-            animation: `butterflyFlight ${b.dur} ease-in-out infinite alternate`,
-            animationDelay: b.delay,
-          }}
-        >
-          <svg
-            viewBox="0 0 36 28"
-            width={b.size}
-            height={Math.round(b.size * 0.78)}
+    <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 14 }}>
+      {specs.map((b, i) => {
+        const f = flights[i]!;
+        return (
+          <div
+            key={b.id}
             style={{
-              filter: 'drop-shadow(0 3px 5px rgba(0,0,0,0.28))',
-              animation: 'butterflyWing 0.36s ease-in-out infinite alternate',
+              position: 'absolute',
+              top: `${f.topPct}%`,
+              left: `${f.leftPct}%`,
+              transform: `translate(-50%, -50%) rotate(${f.rotDeg}deg) scale(${f.scale})`,
+              transition: `left ${f.durationMs}ms cubic-bezier(0.37, 0.01, 0.63, 0.99), top ${f.durationMs}ms cubic-bezier(0.37, 0.01, 0.63, 0.99), transform 900ms ease-in-out`,
             }}
           >
-            <path d="M18 14 C12 4, 2 3, 4 12 C6 17, 13 17, 18 15 Z" fill={b.color1} opacity="0.92" />
-            <path d="M18 15 C11 16, 6 22, 10 25 C14 27, 17 21, 18 16 Z" fill={b.color2} opacity="0.9" />
-            <path d="M18 14 C24 4, 34 3, 32 12 C30 17, 23 17, 18 15 Z" fill={b.color1} opacity="0.92" />
-            <path d="M18 15 C25 16, 30 22, 26 25 C22 27, 19 21, 18 16 Z" fill={b.color2} opacity="0.9" />
-            <rect x="17" y="8" width="2" height="12" rx="1" fill="#3f2718" />
-          </svg>
-        </div>
-      ))}
+            <svg
+              viewBox="0 0 36 28"
+              width={b.size}
+              height={Math.round(b.size * 0.78)}
+              style={{
+                filter: 'drop-shadow(0 3px 6px rgba(0,0,0,0.34))',
+                animation: `butterflyWing ${f.perched ? '1.35s' : '0.32s'} ease-in-out infinite alternate`,
+              }}
+            >
+              <path d="M18 14 C12 4, 2 3, 4 12 C6 17, 13 17, 18 15 Z" fill={b.color1} opacity="0.93" />
+              <path d="M18 15 C11 16, 6 22, 10 25 C14 27, 17 21, 18 16 Z" fill={b.color2} opacity="0.9" />
+              <path d="M18 14 C24 4, 34 3, 32 12 C30 17, 23 17, 18 15 Z" fill={b.color1} opacity="0.93" />
+              <path d="M18 15 C25 16, 30 22, 26 25 C22 27, 19 21, 18 16 Z" fill={b.color2} opacity="0.9" />
+              <circle cx="9.5" cy="9.5" r="1.4" fill="rgba(255,255,255,0.55)" />
+              <circle cx="26.5" cy="9.5" r="1.4" fill="rgba(255,255,255,0.55)" />
+              <rect x="17" y="8" width="2" height="12" rx="1" fill="#3f2718" />
+            </svg>
+          </div>
+        );
+      })}
     </div>
   );
 };
@@ -1329,147 +1407,151 @@ export const ShelfThemePlant: React.FC<{ night: boolean; themeId: ShelfThemeId }
   themeId,
 }) => {
   const foliageFilter = night
-    ? 'drop-shadow(-6px 10px 14px rgba(0,0,0,0.52)) brightness(0.86)'
-    : 'drop-shadow(-6px 10px 14px rgba(0,0,0,0.38))';
+    ? 'drop-shadow(-8px 14px 18px rgba(0,0,0,0.64)) brightness(0.84) saturate(1.06)'
+    : 'drop-shadow(-7px 13px 16px rgba(24,14,6,0.42)) contrast(1.04) saturate(1.08)';
 
   switch (themeId) {
     /* THEME 2: FOREST BOSTON FERN & FENESTRATED MONSTERA IN MOSSY TERRACOTTA POT */
     case '2':
       return (
-        <svg viewBox="0 0 176 232" width="148" height="198" style={{ filter: foliageFilter }}>
+        <svg viewBox="0 0 176 232" width="152" height="202" style={{ filter: foliageFilter }}>
           <defs>
             <linearGradient id="t2Terracotta" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#824027" />
-              <stop offset="32%" stopColor="#d47b56" />
-              <stop offset="68%" stopColor="#b55d3b" />
-              <stop offset="100%" stopColor="#69311c" />
+              <stop offset="0%" stopColor="#6f331d" />
+              <stop offset="26%" stopColor="#da835d" />
+              <stop offset="56%" stopColor="#b85f3c" />
+              <stop offset="86%" stopColor="#864026" />
+              <stop offset="100%" stopColor="#562514" />
             </linearGradient>
             <linearGradient id="t2MonsteraDark" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#356e43" />
-              <stop offset="60%" stopColor="#1e4929" />
-              <stop offset="100%" stopColor="#112b18" />
+              <stop offset="0%" stopColor="#3c7c4a" />
+              <stop offset="55%" stopColor="#1e4929" />
+              <stop offset="100%" stopColor="#0f2515" />
             </linearGradient>
             <linearGradient id="t2FernBright" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#72ad5f" />
-              <stop offset="60%" stopColor="#437d3a" />
-              <stop offset="100%" stopColor="#264d21" />
+              <stop offset="0%" stopColor="#86c26e" />
+              <stop offset="55%" stopColor="#45823b" />
+              <stop offset="100%" stopColor="#21451d" />
             </linearGradient>
+            <radialGradient id="t2ContactFloor" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="rgba(0,0,0,0.58)" />
+              <stop offset="70%" stopColor="rgba(0,0,0,0.22)" />
+              <stop offset="100%" stopColor="rgba(0,0,0,0)" />
+            </radialGradient>
           </defs>
 
-          {/* Soft floor shadow */}
-          <ellipse cx="88" cy="222" rx="46" ry="7.5" fill="rgba(0,0,0,0.46)" />
+          <ellipse cx="88" cy="223" rx="52" ry="8.5" fill="url(#t2ContactFloor)" />
 
-          {/* Back Tall Fenestrated Monstera Split-Leaves */}
-          <path d="M88 148 Q74 96 58 64" fill="none" stroke="#2f5c35" strokeWidth="3.8" strokeLinecap="round" />
-          <path d="M88 148 Q108 92 124 58" fill="none" stroke="#28502e" strokeWidth="3.6" strokeLinecap="round" />
+          <path d="M88 148 Q74 96 58 64" fill="none" stroke="#2d5a34" strokeWidth="4" strokeLinecap="round" />
+          <path d="M88 148 Q108 92 124 58" fill="none" stroke="#254c2b" strokeWidth="3.8" strokeLinecap="round" />
 
-          {/* Left Monstera Fenestrated Leaf */}
+          {/* Fenestrated Monstera Split-Leaves with Gloss Rim & Lateral Ribs */}
           <path
-            d="M58 68 C32 56 18 32 32 16 C44 4 68 12 76 34 L62 36 L78 44 C80 54 74 66 58 68 Z"
+            d="M58 68 C30 56 17 31 32 15 C45 3 69 12 76 34 L62 36 L78 44 C80 55 73 66 58 68 Z"
             fill="url(#t2MonsteraDark)"
           />
-          <path d="M56 64 Q49 42 40 24" fill="none" stroke="rgba(195,235,185,0.34)" strokeWidth="1.2" />
+          <path d="M56 64 Q49 42 40 23 M48 48 Q38 42 30 35 M52 38 Q46 30 43 22" fill="none" stroke="rgba(210,245,198,0.42)" strokeWidth="1.2" strokeLinecap="round" />
 
-          {/* Right Monstera Fenestrated Leaf */}
           <path
-            d="M122 64 C148 54 162 30 148 14 C134 2 110 12 104 34 L118 37 L102 45 C102 56 108 64 122 64 Z"
+            d="M122 64 C150 53 163 29 148 13 C134 1 110 12 104 34 L118 37 L102 45 C102 56 108 64 122 64 Z"
             fill="url(#t2MonsteraDark)"
           />
-          <path d="M122 60 Q130 40 138 22" fill="none" stroke="rgba(195,235,185,0.34)" strokeWidth="1.2" />
+          <path d="M122 60 Q130 40 138 21 M129 44 Q139 38 146 31 M124 35 Q131 27 134 20" fill="none" stroke="rgba(210,245,198,0.42)" strokeWidth="1.2" strokeLinecap="round" />
 
-          {/* Lush Arching Feathered Boston Fern Fronds */}
+          {/* Arching Feathered Boston Fern Fronds */}
           {[
-            { cx: 88, cy: 144, tx: 22, ty: 88, qx: 46, qy: 82 },
-            { cx: 88, cy: 142, tx: 154, ty: 90, qx: 130, qy: 84 },
-            { cx: 88, cy: 140, tx: 88, ty: 38, qx: 84, qy: 78 },
-            { cx: 88, cy: 144, tx: 36, ty: 122, qx: 56, qy: 112 },
-            { cx: 88, cy: 144, tx: 142, ty: 122, qx: 122, qy: 112 },
+            { cx: 88, cy: 144, tx: 20, ty: 86, qx: 45, qy: 80 },
+            { cx: 88, cy: 142, tx: 156, ty: 88, qx: 131, qy: 82 },
+            { cx: 88, cy: 140, tx: 88, ty: 34, qx: 84, qy: 76 },
+            { cx: 88, cy: 144, tx: 34, ty: 122, qx: 54, qy: 112 },
+            { cx: 88, cy: 144, tx: 144, ty: 122, qx: 124, qy: 112 },
           ].map((frond, fIdx) => (
             <g key={fIdx}>
               <path
                 d={`M${frond.cx} ${frond.cy} Q${frond.qx} ${frond.qy} ${frond.tx} ${frond.ty}`}
                 fill="none"
-                stroke="#436e36"
-                strokeWidth="2.1"
+                stroke="#3d6931"
+                strokeWidth="2.2"
                 strokeLinecap="round"
               />
-              {Array.from({ length: 7 }, (_, pIdx) => {
-                const t = 0.25 + pIdx * 0.11;
+              {Array.from({ length: 8 }, (_, pIdx) => {
+                const t = 0.22 + pIdx * 0.1;
                 const px = (1 - t) * (1 - t) * frond.cx + 2 * (1 - t) * t * frond.qx + t * t * frond.tx;
                 const py = (1 - t) * (1 - t) * frond.cy + 2 * (1 - t) * t * frond.qy + t * t * frond.ty;
                 const scale = 1 - pIdx * 0.08;
                 return (
                   <g key={pIdx} transform={`translate(${px}, ${py}) scale(${scale})`}>
-                    <ellipse cx="-6" cy="-2" rx="7.5" ry="2.6" transform="rotate(-24)" fill="url(#t2FernBright)" />
-                    <ellipse cx="6" cy="-2" rx="7.5" ry="2.6" transform="rotate(24)" fill="url(#t2FernBright)" />
+                    <ellipse cx="-6.5" cy="-2" rx="7.8" ry="2.7" transform="rotate(-24)" fill="url(#t2FernBright)" />
+                    <ellipse cx="6.5" cy="-2" rx="7.8" ry="2.7" transform="rotate(24)" fill="url(#t2FernBright)" />
                   </g>
                 );
               })}
             </g>
           ))}
 
-          {/* Velvet Forest Moss Mound on Pot Rim */}
-          <ellipse cx="88" cy="144" rx="40" ry="8.5" fill="#3a6332" />
-          <path d="M50 144 Q64 134 84 140 Q106 132 126 144" fill="#528246" />
+          <ellipse cx="88" cy="144" rx="41" ry="8.5" fill="#2f5228" />
+          <path d="M49 144 Q64 132 84 139 Q106 131 127 144" fill="#528246" />
+          <path d="M58 142 Q76 136 92 141 Q108 135 120 142" fill="#6ca05c" opacity="0.65" />
 
-          {/* Hand-Thrown Raw Clay Terracotta Rim & Tapered Vessel */}
+          {/* Raw Clay Terracotta Rim + Light Glaze & Saucer */}
           <path d="M46 144 L55 210 Q88 220 121 210 L130 144 Q88 153 46 144 Z" fill="url(#t2Terracotta)" />
-          <path d="M43 139 Q88 148 133 139 L131 151 Q88 160 45 151 Z" fill="url(#t2Terracotta)" stroke="#70351f" strokeWidth="1" />
-          {/* Terracotta Saucer Dish */}
-          <path d="M49 208 Q88 219 127 208 L122 217 Q88 226 54 217 Z" fill="#9c4f32" />
+          <path d="M58 152 L63 207" stroke="rgba(255,228,204,0.24)" strokeWidth="4.5" strokeLinecap="round" />
+          <path d="M43 139 Q88 148 133 139 L131 151 Q88 160 45 151 Z" fill="url(#t2Terracotta)" stroke="#682e1a" strokeWidth="1" />
+          <path d="M49 208 Q88 219 127 208 L122 217 Q88 226 54 217 Z" fill="#8f452a" />
         </svg>
       );
 
     /* THEME 3: COASTAL BIRD-OF-PARADISE & ARECA PALM IN WOVEN SEAGRASS BASKET */
     case '3':
       return (
-        <svg viewBox="0 0 176 232" width="148" height="198" style={{ filter: foliageFilter }}>
+        <svg viewBox="0 0 176 232" width="152" height="202" style={{ filter: foliageFilter }}>
           <defs>
             <linearGradient id="t3PalmLeaf" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#6eb368" />
-              <stop offset="55%" stopColor="#3c8044" />
-              <stop offset="100%" stopColor="#204f29" />
+              <stop offset="0%" stopColor="#80c274" />
+              <stop offset="52%" stopColor="#3c8044" />
+              <stop offset="100%" stopColor="#1d4724" />
             </linearGradient>
             <linearGradient id="t3PaddleLeaf" x1="0" y1="0" x2="0.8" y2="1">
-              <stop offset="0%" stopColor="#589e5a" />
+              <stop offset="0%" stopColor="#69b066" />
               <stop offset="58%" stopColor="#2e6b38" />
-              <stop offset="100%" stopColor="#1b4523" />
+              <stop offset="100%" stopColor="#173b1e" />
             </linearGradient>
             <linearGradient id="t3Seagrass" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#9c7e52" />
-              <stop offset="35%" stopColor="#dec496" />
-              <stop offset="70%" stopColor="#c9aa76" />
-              <stop offset="100%" stopColor="#7d613a" />
+              <stop offset="0%" stopColor="#8a6d44" />
+              <stop offset="30%" stopColor="#e6cd9f" />
+              <stop offset="68%" stopColor="#c7a56e" />
+              <stop offset="100%" stopColor="#6e5330" />
             </linearGradient>
+            <radialGradient id="t3ContactFloor" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="rgba(0,0,0,0.48)" />
+              <stop offset="72%" stopColor="rgba(0,0,0,0.16)" />
+              <stop offset="100%" stopColor="rgba(0,0,0,0)" />
+            </radialGradient>
           </defs>
 
-          {/* Soft floor shadow */}
-          <ellipse cx="88" cy="222" rx="44" ry="7" fill="rgba(0,0,0,0.4)" />
+          <ellipse cx="88" cy="222" rx="50" ry="8" fill="url(#t3ContactFloor)" />
 
-          {/* Tall Sweeping Strelitzia Paddle Leaves (Left & Right) */}
-          <path d="M86 146 Q68 92 48 48" fill="none" stroke="#397040" strokeWidth="4.2" strokeLinecap="round" />
-          <path d="M90 146 Q106 88 128 42" fill="none" stroke="#306137" strokeWidth="4.2" strokeLinecap="round" />
-          <path d="M88 146 Q88 76 86 24" fill="none" stroke="#46824d" strokeWidth="4.4" strokeLinecap="round" />
+          <path d="M86 146 Q68 92 48 48" fill="none" stroke="#366c3c" strokeWidth="4.4" strokeLinecap="round" />
+          <path d="M90 146 Q106 88 128 42" fill="none" stroke="#2c5932" strokeWidth="4.2" strokeLinecap="round" />
+          <path d="M88 146 Q88 76 86 24" fill="none" stroke="#427e49" strokeWidth="4.6" strokeLinecap="round" />
 
-          {/* Center Tall Sunlit Paddle Leaf */}
+          {/* Sunlit Strelitzia Paddle Leaves with Coastal Rim Sheen */}
           <path d="M86 68 C70 50 70 16 86 6 C102 16 102 50 86 68 Z" fill="url(#t3PaddleLeaf)" />
-          <path d="M86 64 V14" fill="none" stroke="rgba(220,248,200,0.42)" strokeWidth="1.3" />
+          <path d="M86 64 V12 M86 38 Q78 30 76 24 M86 38 Q94 30 96 24 M86 50 Q78 44 75 38 M86 50 Q94 44 97 38" fill="none" stroke="rgba(225,250,205,0.44)" strokeWidth="1.15" strokeLinecap="round" />
 
-          {/* Left Arching Banana/Strelitzia Leaf */}
           <path d="M52 72 C24 58 14 28 32 16 C48 8 66 36 58 66 Z" fill="url(#t3PalmLeaf)" />
-          <path d="M52 66 Q40 42 34 22" fill="none" stroke="rgba(225,248,210,0.36)" strokeWidth="1.2" />
+          <path d="M52 66 Q40 42 34 21 M44 46 Q35 42 29 36" fill="none" stroke="rgba(225,250,205,0.38)" strokeWidth="1.1" strokeLinecap="round" />
 
-          {/* Right Arching Paddle Leaf */}
           <path d="M124 68 C154 54 162 24 144 12 C126 6 110 34 118 62 Z" fill="url(#t3PaddleLeaf)" />
-          <path d="M124 62 Q136 38 142 20" fill="none" stroke="rgba(225,248,210,0.34)" strokeWidth="1.2" />
+          <path d="M124 62 Q136 38 142 19 M132 42 Q141 38 147 32" fill="none" stroke="rgba(225,250,205,0.38)" strokeWidth="1.1" strokeLinecap="round" />
 
-          {/* Graceful Feathered Coastal Areca Palm Fronds */}
+          {/* Feathered Coastal Areca Palm Fronds */}
           {[
             { qx: 52, qy: 90, tx: 16, ty: 102 },
             { qx: 124, qy: 88, tx: 158, ty: 100 },
           ].map((arc, idx) => (
             <g key={idx}>
-              <path d={`M88 144 Q${arc.qx} ${arc.qy} ${arc.tx} ${arc.ty}`} fill="none" stroke="#478246" strokeWidth="2.5" />
+              <path d={`M88 144 Q${arc.qx} ${arc.qy} ${arc.tx} ${arc.ty}`} fill="none" stroke="#447d43" strokeWidth="2.6" />
               {Array.from({ length: 6 }, (_, i) => {
                 const dir = idx === 0 ? -1 : 1;
                 const x = 88 + dir * (16 + i * 11);
@@ -1479,8 +1561,8 @@ export const ShelfThemePlant: React.FC<{ night: boolean; themeId: ShelfThemeId }
                     key={i}
                     d={`M${x} ${y} Q${x + dir * 8} ${y - 16} ${x + dir * 18} ${y - 4}`}
                     fill="none"
-                    stroke="#5fa35c"
-                    strokeWidth="3.2"
+                    stroke="#63a860"
+                    strokeWidth="3.3"
                     strokeLinecap="round"
                   />
                 );
@@ -1488,19 +1570,13 @@ export const ShelfThemePlant: React.FC<{ night: boolean; themeId: ShelfThemeId }
             </g>
           ))}
 
-          {/* Soil Bed */}
-          <ellipse cx="88" cy="144" rx="35" ry="7" fill="#3b2c1d" />
-
-          {/* Woven Seagrass Wicker Handles */}
+          <ellipse cx="88" cy="144" rx="35" ry="7.5" fill="#322417" />
           <path d="M47 148 C34 146 34 134 48 136" fill="none" stroke="#b39260" strokeWidth="3.5" strokeLinecap="round" />
           <path d="M129 148 C142 146 142 134 128 136" fill="none" stroke="#b39260" strokeWidth="3.5" strokeLinecap="round" />
 
-          {/* Hand-Braided Belly Seagrass Basket Planter */}
           <path d="M50 144 C40 176 46 206 58 214 Q88 223 118 214 C130 206 136 176 126 144 Q88 152 50 144 Z" fill="url(#t3Seagrass)" />
-          {/* Two-tone Dipped Natural Cream Lower Basket Weave */}
-          <path d="M49 184 Q88 194 127 184 C126 200 122 210 118 214 Q88 223 58 214 C54 210 50 200 49 184 Z" fill="rgba(244,236,216,0.52)" />
-          {/* Woven Chevron Texture Lines */}
-          <g stroke="rgba(104,76,40,0.34)" strokeWidth="1.2" fill="none">
+          <path d="M49 184 Q88 194 127 184 C126 200 122 210 118 214 Q88 223 58 214 C54 210 50 200 49 184 Z" fill="rgba(246,238,220,0.54)" />
+          <g stroke="rgba(104,76,40,0.38)" strokeWidth="1.25" fill="none">
             <path d="M48 158 Q88 168 128 158" />
             <path d="M46 171 Q88 181 130 171" />
             <path d="M49 184 Q88 194 127 184" />
@@ -1512,42 +1588,45 @@ export const ShelfThemePlant: React.FC<{ night: boolean; themeId: ShelfThemeId }
     /* THEME 4: RAIN-KISSED PEACE LILY & CASCADING POTHOS IN SLATE COBALT GLAZED URN */
     case '4':
       return (
-        <svg viewBox="0 0 176 232" width="148" height="198" style={{ filter: `${foliageFilter} drop-shadow(0 12px 18px rgba(0,0,0,0.42))` }}>
+        <svg viewBox="0 0 176 232" width="152" height="202" style={{ filter: `${foliageFilter} drop-shadow(0 12px 18px rgba(0,0,0,0.45))` }}>
           <defs>
             <linearGradient id="t4LilyDark" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#327a5f" />
+              <stop offset="0%" stopColor="#358265" />
               <stop offset="55%" stopColor="#194d3b" />
-              <stop offset="100%" stopColor="#0a241b" />
+              <stop offset="100%" stopColor="#092018" />
             </linearGradient>
             <linearGradient id="t4LilyGloss" x1="0.1" y1="0" x2="0.9" y2="1">
-              <stop offset="0%" stopColor="#6eb898" />
+              <stop offset="0%" stopColor="#7cc7a6" />
               <stop offset="48%" stopColor="#2f7559" />
-              <stop offset="100%" stopColor="#11382a" />
+              <stop offset="100%" stopColor="#0f3225" />
             </linearGradient>
             <linearGradient id="t4SlateUrn" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#1e242e" />
-              <stop offset="28%" stopColor="#4b5a73" />
-              <stop offset="58%" stopColor="#2d3748" />
-              <stop offset="100%" stopColor="#12161d" />
+              <stop offset="0%" stopColor="#191f28" />
+              <stop offset="28%" stopColor="#52627d" />
+              <stop offset="58%" stopColor="#2b3545" />
+              <stop offset="100%" stopColor="#10141b" />
             </linearGradient>
             <radialGradient id="t4SoilGrad" cx="50%" cy="45%" r="55%">
               <stop offset="0%" stopColor="#2d2219" />
-              <stop offset="100%" stopColor="#140e0a" />
+              <stop offset="100%" stopColor="#120c08" />
+            </radialGradient>
+            <radialGradient id="t4ContactFloor" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="rgba(0,0,0,0.58)" />
+              <stop offset="72%" stopColor="rgba(0,0,0,0.22)" />
+              <stop offset="100%" stopColor="rgba(0,0,0,0)" />
             </radialGradient>
           </defs>
 
-          <ellipse cx="88" cy="222" rx="44" ry="7.5" fill="rgba(0,0,0,0.52)" />
+          <ellipse cx="88" cy="222" rx="50" ry="8" fill="url(#t4ContactFloor)" />
 
-          {/* Back Foliage + Ambient Occlusion Leaf Shadows */}
           <path d="M84 142 C54 124 28 92 24 60 C44 63 72 96 86 140 Z" fill="url(#t4LilyDark)" />
           <path d="M92 142 C122 124 148 92 152 60 C132 63 104 96 90 140 Z" fill="url(#t4LilyDark)" />
           <path d="M88 142 C68 98 64 52 88 22 C112 52 108 98 88 142 Z" fill="url(#t4LilyGloss)" />
           <path d="M84 142 C46 136 20 116 16 90 C39 89 67 110 84 140 Z" fill="url(#t4LilyGloss)" />
           <path d="M92 142 C130 136 156 116 160 90 C137 89 109 110 92 140 Z" fill="url(#t4LilyGloss)" />
 
-          {/* Natural Botanical Midribs + Pinnate Lateral Leaf Veins */}
-          <g fill="none" stroke="rgba(220,250,238,0.42)" strokeWidth="1.05" strokeLinecap="round">
-            <path d="M88 136 V32" />
+          <g fill="none" stroke="rgba(220,250,238,0.46)" strokeWidth="1.05" strokeLinecap="round">
+            <path d="M88 136 V30" />
             <path d="M88 72 Q79 62 74 54 M88 92 Q78 82 72 72 M88 112 Q80 102 74 92" />
             <path d="M88 72 Q97 62 102 54 M88 92 Q98 82 104 72 M88 112 Q96 102 102 92" />
             <path d="M80 134 Q54 100 30 68" />
@@ -1568,24 +1647,24 @@ export const ShelfThemePlant: React.FC<{ night: boolean; themeId: ShelfThemeId }
             </g>
           ))}
 
-          <circle cx="44" cy="96" r="2.1" fill="#dbeafe" opacity="0.88" />
-          <circle cx="132" cy="98" r="2.2" fill="#dbeafe" opacity="0.85" />
-          <circle cx="84" cy="64" r="1.9" fill="#dbeafe" opacity="0.9" />
+          {/* Glistening Monsoon Water Droplets */}
+          <circle cx="44" cy="96" r="2.2" fill="#e0f2fe" opacity="0.92" />
+          <circle cx="132" cy="98" r="2.3" fill="#e0f2fe" opacity="0.88" />
+          <circle cx="84" cy="64" r="2.0" fill="#e0f2fe" opacity="0.94" />
 
-          {/* Dark Rich Potting Soil + Glazed Ceramic Rim Specular */}
-          <ellipse cx="88" cy="140" rx="42" ry="7.8" fill="url(#t4SoilGrad)" stroke="#60a5fa" strokeOpacity="0.45" strokeWidth="2" />
+          <ellipse cx="88" cy="140" rx="42" ry="7.8" fill="url(#t4SoilGrad)" stroke="#60a5fa" strokeOpacity="0.48" strokeWidth="2" />
           <path d="M46 140 L52 206 Q88 218 124 206 L130 140 Q88 149 46 140 Z" fill="url(#t4SlateUrn)" />
-          <path d="M60 148 L63 206" stroke="rgba(255,255,255,0.18)" strokeWidth="4" strokeLinecap="round" />
-          <g stroke="rgba(147,197,253,0.18)" strokeWidth="1.2">
+          <path d="M59 148 L62 205" stroke="rgba(255,255,255,0.22)" strokeWidth="4.5" strokeLinecap="round" />
+          <g stroke="rgba(147,197,253,0.2)" strokeWidth="1.2">
             {[60, 74, 88, 102, 116].map((x) => (
               <line key={x} x1={x} y1="146" x2={x + (x - 88) * 0.08} y2="210" />
             ))}
           </g>
 
-          <path d="M54 142 Q42 164 46 186" fill="none" stroke="#296348" strokeWidth="2" />
+          <path d="M54 142 Q42 164 46 186" fill="none" stroke="#296348" strokeWidth="2.1" />
           <path d="M46 154 C36 156 36 168 46 170 C54 168 54 156 46 154 Z" fill="#46916d" />
           <path d="M45 174 C36 176 37 188 46 189 C53 187 52 175 45 174 Z" fill="#357a59" />
-          <path d="M122 142 Q132 162 128 180" fill="none" stroke="#296348" strokeWidth="2" />
+          <path d="M122 142 Q132 162 128 180" fill="none" stroke="#296348" strokeWidth="2.1" />
           <path d="M128 158 C138 160 138 172 128 174 C120 172 120 160 128 158 Z" fill="#46916d" />
         </svg>
       );
@@ -1593,29 +1672,34 @@ export const ShelfThemePlant: React.FC<{ night: boolean; themeId: ShelfThemeId }
     /* THEME 5: ARCHITECTURAL VARIEGATED SNAKE PLANT IN PEDESTAL PLANTER */
     case '5':
       return (
-        <svg viewBox="0 0 176 232" width="148" height="198" style={{ filter: `${foliageFilter} drop-shadow(0 12px 18px rgba(0,0,0,0.42))` }}>
+        <svg viewBox="0 0 176 232" width="152" height="202" style={{ filter: `${foliageFilter} drop-shadow(0 12px 18px rgba(0,0,0,0.45))` }}>
           <defs>
             <linearGradient id="t5BladeDark" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#7bb05b" />
+              <stop offset="0%" stopColor="#8bc467" />
               <stop offset="16%" stopColor="#1f4a2a" />
-              <stop offset="84%" stopColor="#173820" />
-              <stop offset="100%" stopColor="#8ec46c" />
+              <stop offset="84%" stopColor="#15331d" />
+              <stop offset="100%" stopColor="#9cd179" />
             </linearGradient>
             <linearGradient id="t5BladeBright" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#c7e69c" />
+              <stop offset="0%" stopColor="#d4f0a8" />
               <stop offset="16%" stopColor="#357041" />
-              <stop offset="84%" stopColor="#265430" />
-              <stop offset="100%" stopColor="#d4f0aa" />
+              <stop offset="84%" stopColor="#224a2b" />
+              <stop offset="100%" stopColor="#def7b4" />
             </linearGradient>
             <linearGradient id="t5Pot" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor={night ? '#121316' : '#c0d1a8'} />
-              <stop offset="35%" stopColor={night ? '#2c2f36' : '#f4faeb'} />
-              <stop offset="70%" stopColor={night ? '#1c1e24' : '#d8e6c3'} />
-              <stop offset="100%" stopColor={night ? '#090a0c' : '#9eb384'} />
+              <stop offset="0%" stopColor={night ? '#121316' : '#b8cba0'} />
+              <stop offset="32%" stopColor={night ? '#32363e' : '#f7fcef'} />
+              <stop offset="68%" stopColor={night ? '#1c1e24' : '#d5e4be'} />
+              <stop offset="100%" stopColor={night ? '#090a0c' : '#96ab7b'} />
             </linearGradient>
+            <radialGradient id="t5ContactFloor" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="rgba(0,0,0,0.56)" />
+              <stop offset="72%" stopColor="rgba(0,0,0,0.20)" />
+              <stop offset="100%" stopColor="rgba(0,0,0,0)" />
+            </radialGradient>
           </defs>
 
-          <ellipse cx="88" cy="222" rx="42" ry="7.5" fill="rgba(0,0,0,0.48)" />
+          <ellipse cx="88" cy="222" rx="48" ry="8" fill="url(#t5ContactFloor)" />
 
           <path d="M62 146 C54 100 50 56 62 24 C74 56 76 100 76 146 Z" fill="url(#t5BladeDark)" />
           <path d="M100 146 C100 100 104 54 116 28 C126 56 122 102 114 146 Z" fill="url(#t5BladeDark)" />
@@ -1624,7 +1708,7 @@ export const ShelfThemePlant: React.FC<{ night: boolean; themeId: ShelfThemeId }
           <path d="M48 146 C38 108 32 76 42 48 C54 74 62 108 66 146 Z" fill="url(#t5BladeBright)" />
           <path d="M110 146 C114 110 124 76 134 52 C142 78 134 112 126 146 Z" fill="url(#t5BladeBright)" />
 
-          <g stroke="rgba(168,217,139,0.28)" strokeWidth="3" strokeLinecap="round" fill="none">
+          <g stroke="rgba(182,226,154,0.34)" strokeWidth="3" strokeLinecap="round" fill="none">
             <path d="M81 48 Q88 43 95 48" />
             <path d="M79 68 Q88 62 97 68" />
             <path d="M79 88 Q88 82 97 88" />
@@ -1641,47 +1725,52 @@ export const ShelfThemePlant: React.FC<{ night: boolean; themeId: ShelfThemeId }
           <ellipse cx="106" cy="144" rx="5.5" ry="2.8" fill={night ? '#4a4f59' : '#c9d6b6'} />
 
           <path d="M48 144 L52 204 Q88 214 124 204 L128 144 Q88 153 48 144 Z" fill="url(#t5Pot)" />
-          <path d="M60 150 L62 202" stroke="rgba(255,255,255,0.22)" strokeWidth="4" strokeLinecap="round" />
+          <path d="M59 150 L62 202" stroke="rgba(255,255,255,0.26)" strokeWidth="4.5" strokeLinecap="round" />
           <ellipse cx="88" cy="144" rx="40" ry="7" fill="none" stroke={night ? '#a8d98b' : '#7ea862'} strokeWidth="2.2" />
           <rect x="64" y="204" width="48" height="10" rx="2" fill={night ? '#141518' : '#73915a'} />
-          <line x1="50" y1="168" x2="126" y2="168" stroke={night ? 'rgba(168,217,139,0.28)' : 'rgba(84,122,58,0.22)'} strokeWidth="1.5" />
+          <line x1="50" y1="168" x2="126" y2="168" stroke={night ? 'rgba(168,217,139,0.28)' : 'rgba(84,122,58,0.24)'} strokeWidth="1.5" />
         </svg>
       );
 
     /* THEME 1: FIDDLE-LEAF FIG IN MATTE CREAM STONEWARE PLANTER (ULTRA-REALISTIC BOTANICAL) */
     default:
       return (
-        <svg viewBox="0 0 160 220" width="136" height="188" style={{ filter: `${foliageFilter} drop-shadow(0 12px 18px rgba(0,0,0,0.42))` }}>
+        <svg viewBox="0 0 160 220" width="142" height="196" style={{ filter: foliageFilter }}>
           <defs>
             <linearGradient id="figLeafDark" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0%" stopColor="#3d7346" />
-              <stop offset="55%" stopColor="#234a2b" />
-              <stop offset="100%" stopColor="#122817" />
+              <stop offset="0%" stopColor="#468250" />
+              <stop offset="52%" stopColor="#234a2b" />
+              <stop offset="100%" stopColor="#102415" />
             </linearGradient>
             <linearGradient id="figLeafMid" x1="0" y1="0" x2="0.8" y2="1">
-              <stop offset="0%" stopColor="#5d955f" />
+              <stop offset="0%" stopColor="#69a568" />
               <stop offset="55%" stopColor="#35683c" />
-              <stop offset="100%" stopColor="#1b3c21" />
+              <stop offset="100%" stopColor="#19381f" />
             </linearGradient>
             <linearGradient id="figLeafLight" x1="0.1" y1="0" x2="0.9" y2="1">
-              <stop offset="0%" stopColor="#7bb377" />
-              <stop offset="58%" stopColor="#467c49" />
-              <stop offset="100%" stopColor="#254c28" />
+              <stop offset="0%" stopColor="#89c484" />
+              <stop offset="56%" stopColor="#467c49" />
+              <stop offset="100%" stopColor="#224625" />
             </linearGradient>
             <linearGradient id="ceramicPotGrad" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#a08f78" />
-              <stop offset="28%" stopColor="#f5ede0" />
+              <stop offset="0%" stopColor="#94836d" />
+              <stop offset="28%" stopColor="#faf3e8" />
               <stop offset="62%" stopColor="#d8cab4" />
-              <stop offset="100%" stopColor="#7d6c56" />
+              <stop offset="100%" stopColor="#72624c" />
             </linearGradient>
             <linearGradient id="woodStandGrad" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0%" stopColor="#472b19" />
-              <stop offset="45%" stopColor="#7a4c2d" />
-              <stop offset="100%" stopColor="#331d10" />
+              <stop offset="0%" stopColor="#442918" />
+              <stop offset="45%" stopColor="#825130" />
+              <stop offset="100%" stopColor="#2e1a0e" />
             </linearGradient>
+            <radialGradient id="t1ContactFloor" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stopColor="rgba(0,0,0,0.56)" />
+              <stop offset="72%" stopColor="rgba(0,0,0,0.20)" />
+              <stop offset="100%" stopColor="rgba(0,0,0,0)" />
+            </radialGradient>
           </defs>
 
-          <ellipse cx="80" cy="212" rx="44" ry="7.5" fill="rgba(0,0,0,0.48)" />
+          <ellipse cx="80" cy="212" rx="48" ry="8" fill="url(#t1ContactFloor)" />
           <path d="M54 176 L46 210 L53 210 L62 178 Z" fill="url(#woodStandGrad)" />
           <path d="M106 176 L114 210 L107 210 L98 178 Z" fill="url(#woodStandGrad)" />
           <rect x="46" y="185" width="68" height="5" rx="2.5" fill="url(#woodStandGrad)" />
@@ -1701,8 +1790,7 @@ export const ShelfThemePlant: React.FC<{ night: boolean; themeId: ShelfThemeId }
           <path d="M82 114 C110 122 128 108 124 92 C120 76 94 82 82 102 C79 107 79 112 82 114 Z" fill="url(#figLeafLight)" />
           <path d="M79 84 C64 74 62 52 78 44 C94 38 100 62 84 82 C81 85 80 86 79 84 Z" fill="url(#figLeafLight)" />
 
-          {/* Detailed Midribs & Pinnate Side Veins for Hyper-Realism */}
-          <g fill="none" stroke="rgba(232, 248, 222, 0.38)" strokeWidth="1.05" strokeLinecap="round">
+          <g fill="none" stroke="rgba(235, 250, 226, 0.44)" strokeWidth="1.05" strokeLinecap="round">
             <path d="M78 50 Q76 30 70 15" />
             <path d="M75 34 Q66 28 62 22 M75 34 Q82 26 86 21" />
             <path d="M62 74 Q42 54 30 39" />
@@ -1717,12 +1805,12 @@ export const ShelfThemePlant: React.FC<{ night: boolean; themeId: ShelfThemeId }
           </g>
 
           <ellipse cx="80" cy="136" rx="34" ry="7" fill="#2c1d13" />
-          <ellipse cx="68" cy="136" rx="5" ry="2.2" fill="#4f3b2c" />
+          <ellipse cx="68" cy="136" rx="5" ry="2.2" fill="#523e2e" />
           <ellipse cx="90" cy="137" rx="6" ry="2.4" fill="#3a2a1e" />
           <path d="M44 136 L49 182 Q80 192 111 182 L116 136 Q80 144 44 136 Z" fill="url(#ceramicPotGrad)" />
-          <path d="M56 142 L59 179" stroke="rgba(255,255,255,0.28)" strokeWidth="4" strokeLinecap="round" />
-          <ellipse cx="80" cy="136" rx="36" ry="7.5" fill="none" stroke="#efe6d8" strokeWidth="2.4" />
-          <path d="M47 166 Q80 175 113 166" fill="none" stroke="rgba(110,92,70,0.28)" strokeWidth="1.2" />
+          <path d="M56 142 L59 179" stroke="rgba(255,255,255,0.32)" strokeWidth="4.2" strokeLinecap="round" />
+          <ellipse cx="80" cy="136" rx="36" ry="7.5" fill="none" stroke="#f3ebdd" strokeWidth="2.4" />
+          <path d="M47 166 Q80 175 113 166" fill="none" stroke="rgba(110,92,70,0.3)" strokeWidth="1.2" />
         </svg>
       );
   }

@@ -759,7 +759,7 @@ html[data-design]:not([data-design="1"]) :is(
   .an-btn.primary,
   .an-btn-primary,
   .an-paper-mini-pills button.active
-):not(.shelf-world-root):not(.shelf-world-root *):not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not([class*="bg-red-"]):not(.an-note-ribbon .an-ribbon-scroll *) {
+):not(.shelf-world-root):not(.shelf-world-root *):not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not([class*="bg-red-"]):not(.an-note-ribbon .an-ribbon-scroll *):not(.an-layout-toggle-btn) {
   background: var(--th-btn-active-bg) !important;
   color: var(--th-btn-active-ink, #ffffff) !important;
   border-color: var(--th-btn-active-border, transparent) !important;
@@ -771,7 +771,7 @@ html[data-design]:not([data-design="1"]) :is(
   button[class*="bg-amber-5"] *,
   button[class*="bg-amber-6"] *,
   button[class*="bg-amber-7"] *,
-  button[aria-pressed="true"]:not(:where(.atelier-sticky button, [data-swatch], [role="switch"])) *,
+  button[aria-pressed="true"]:not(:where(.atelier-sticky button, [data-swatch], [role="switch"], .an-layout-toggle-btn)) *,
   button[aria-selected="true"]:not(:where([data-swatch], [role="switch"])) *,
   .atelier-btn-ink *,
   .themed-tab-active *,
@@ -781,7 +781,7 @@ html[data-design]:not([data-design="1"]) :is(
   .rs-tab.active *,
   .an-btn.primary *,
   .an-paper-mini-pills button.active *
-):not(.shelf-world-root):not(.shelf-world-root *):not(.an-note-ribbon .an-ribbon-scroll *) {
+):not(.shelf-world-root):not(.shelf-world-root *):not(.an-note-ribbon .an-ribbon-scroll *):not(.an-layout-toggle-btn *) {
   color: var(--th-btn-active-ink, #ffffff) !important;
 }
 
@@ -1167,6 +1167,12 @@ html[data-design]:not([data-design="1"]) button:not([data-swatch]):not([role="sw
 @keyframes butterflyWing {
   0%   { transform: scaleX(1) scaleY(1); }
   100% { transform: scaleX(0.45) scaleY(0.96); }
+}
+
+@keyframes plantBreezeSway {
+  0%   { transform: rotate(-1.1deg) scaleY(1); }
+  50%  { transform: rotate(0.9deg) scaleY(1.01); }
+  100% { transform: rotate(-0.6deg) scaleY(0.996); }
 }
 
 @keyframes monsoonRainFall {
@@ -1922,7 +1928,7 @@ html.dark :is(
   button[class*="dark:bg-\[\#f0e5d5\]"],
   button[class*="dark:bg-\[\#f5ead9\]"],
   button[class*="dark:bg-\[\#e8be82\]"]
-):not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.atelier-bell):not([class*="bg-red-"]):not(.atelier-sticky button):not(.shelf-world-root):not(.shelf-world-root *):not(.an-note-ribbon .an-ribbon-scroll *) {
+):not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.atelier-bell):not([class*="bg-red-"]):not(.atelier-sticky button):not(.shelf-world-root):not(.shelf-world-root *):not(.an-note-ribbon .an-ribbon-scroll *):not(.an-layout-toggle-btn) {
   background-color: transparent !important;
   background-image: var(--th-btn-active-bg) !important;
   border-color: var(--th-btn-active-border, rgba(255, 255, 255, 0.35)) !important;
@@ -1987,7 +1993,7 @@ html.dark :is(
   button[class*="dark:bg-\[\#f0e5d5\]"],
   button[class*="dark:bg-\[\#f5ead9\]"],
   button[class*="dark:bg-\[\#e8be82\]"]
-):not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.atelier-bell):not([class*="bg-red-"]):not(.atelier-sticky button):not(.shelf-world-root):not(.shelf-world-root *):not(.an-note-ribbon .an-ribbon-scroll *) * {
+):not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.atelier-bell):not([class*="bg-red-"]):not(.atelier-sticky button):not(.shelf-world-root):not(.shelf-world-root *):not(.an-note-ribbon .an-ribbon-scroll *):not(.an-layout-toggle-btn) * {
   color: var(--th-btn-active-ink) !important;
   text-shadow: none !important;
 }

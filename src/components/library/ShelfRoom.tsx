@@ -238,7 +238,7 @@ const LOOK_CREAMY_CARAMEL: Look = {
   back: '#7a4923',
   plank: '#b47642',
   door: 'glass',
-  upperDoorType: 'fancy-caramel-glass',
+  upperDoorType: 'bifold-fold',
   lowerDoorType: 'solid-wood-door',
   face: '#8e572b',
   handle: '#4b2a17',
@@ -247,7 +247,7 @@ const LOOK_CREAMY_CARAMEL: Look = {
   grain: 0.28,
   wallType: 'charcoal-slats',
   legs: 'tapered-wood',
-  accentDesc: 'Caramel Honey Teak · Distinct warm CSS wood grain, crystal clear glass doors (upper) & solid carved doors (lower)',
+  accentDesc: 'Asymmetric Natural Caramel · Organic wavy CSS grain (lower solid wood) & crystal clear bi-fold glass doors (upper)',
   hasUpperDoor: true,
   hasSlideBars: true,
   isCapsule: true,
@@ -588,39 +588,43 @@ export function getWoodSurfaceStyle(
     };
   }
 
-  /* Almira 2 (Creamy Caramel): Dedicated layered CSS wood-grain texture distinct from Almira 1 walnut */
+  /* Almira 2 (Creamy Caramel): Asymmetric Natural Burl & Organic Flowing Wood Pattern */
   if (look.name === 'Creamy Caramel') {
     const isVert = orientation === 'v';
     const isPanel = orientation === 'panel';
-    const fiberAngle = isVert ? '90deg' : isPanel ? '14deg' : '0deg';
-    const ringBg =
-      'radial-gradient(ellipse 36% 78% at 32% 48%, rgba(92,44,14,0.16) 0%, rgba(168,98,42,0.08) 42%, transparent 72%), radial-gradient(ellipse 42% 84% at 74% 58%, rgba(84,40,12,0.15) 0%, rgba(235,178,108,0.10) 45%, transparent 74%)';
-    const fineFibers = `repeating-linear-gradient(${fiberAngle}, rgba(74,34,10,0.13) 0px, rgba(74,34,10,0.13) 2px, rgba(244,196,136,0.10) 2px, rgba(244,196,136,0.10) 5px, rgba(132,74,28,0.09) 5px, rgba(132,74,28,0.09) 9px, transparent 9px, transparent 15px)`;
-    const softPlanks = `repeating-linear-gradient(${fiberAngle}, rgba(56,24,6,0.10) 0px, transparent 3px, rgba(255,222,175,0.07) 18px, transparent 34px)`;
+    const angleA = isVert ? '84deg' : isPanel ? '17deg' : '-6deg';
+    const angleB = isVert ? '98deg' : isPanel ? '-11deg' : '8deg';
+    const asymRings =
+      'radial-gradient(ellipse 31% 69% at 19% 27%, rgba(78,34,9,0.22) 0%, rgba(162,92,38,0.10) 44%, transparent 74%), ' +
+      'radial-gradient(ellipse 46% 52% at 79% 66%, rgba(68,28,7,0.19) 0%, rgba(238,184,116,0.13) 48%, transparent 76%), ' +
+      'radial-gradient(ellipse 24% 82% at 44% 83%, rgba(96,46,16,0.15) 0%, transparent 68%), ' +
+      'radial-gradient(ellipse 38% 36% at 86% 18%, rgba(252,212,158,0.14) 0%, transparent 72%)';
+    const organicWaveA = `repeating-linear-gradient(${angleA}, rgba(66,30,8,0.12) 0px, rgba(66,30,8,0.12) 1.5px, transparent 1.5px, transparent 11px, rgba(246,198,136,0.09) 11px, rgba(246,198,136,0.09) 15px, transparent 15px, transparent 27px)`;
+    const organicWaveB = `repeating-linear-gradient(${angleB}, rgba(112,56,20,0.09) 0px, transparent 6px, rgba(255,224,182,0.07) 19px, rgba(56,24,6,0.09) 31px, transparent 41px)`;
     if (variant === 'back') {
       return {
         backgroundColor: look.back,
-        backgroundImage: `linear-gradient(180deg, rgba(46,20,6,0.52) 0%, rgba(122,73,35,0.22) 38%, rgba(46,20,6,0.56) 100%), ${ringBg}, ${fineFibers}`,
-        backgroundSize: '100% 100%, 260px 220px, 100% 100%',
+        backgroundImage: `linear-gradient(172deg, rgba(42,18,5,0.54) 0%, rgba(128,76,36,0.20) 44%, rgba(38,16,4,0.58) 100%), ${asymRings}, ${organicWaveA}`,
+        backgroundSize: '100% 100%, 310px 265px, 100% 100%',
         backgroundRepeat: 'no-repeat, repeat, no-repeat',
-        backgroundPosition: 'center, center, center',
+        backgroundPosition: 'center, 14% 28%, center',
       };
     }
     if (variant === 'plank') {
       return {
         backgroundColor: look.plank,
-        backgroundImage: `linear-gradient(180deg, rgba(255,244,224,0.38) 0%, rgba(255,228,186,0.12) 22%, transparent 50%, rgba(56,26,8,0.34) 100%), ${fineFibers}, ${softPlanks}`,
-        backgroundSize: '100% 100%, 100% 100%, 100% 100%',
-        backgroundRepeat: 'no-repeat, no-repeat, no-repeat',
-        backgroundPosition: 'center, center, center',
+        backgroundImage: `linear-gradient(178deg, rgba(255,246,226,0.36) 0%, rgba(255,226,184,0.12) 24%, transparent 52%, rgba(56,26,8,0.34) 100%), ${asymRings}, ${organicWaveA}, ${organicWaveB}`,
+        backgroundSize: '100% 100%, 340px 180px, 100% 100%, 100% 100%',
+        backgroundRepeat: 'no-repeat, repeat, no-repeat, no-repeat',
+        backgroundPosition: 'center, 22% 50%, center, center',
       };
     }
     return {
       backgroundColor: look.frame,
-      backgroundImage: `linear-gradient(${gradDir}, rgba(255,242,216,0.22) 0%, transparent 45%, rgba(52,22,6,0.28) 100%), ${ringBg}, ${fineFibers}, ${softPlanks}`,
-      backgroundSize: '100% 100%, 240px 260px, 100% 100%, 100% 100%',
+      backgroundImage: `linear-gradient(${gradDir}, rgba(255,240,214,0.22) 0%, transparent 48%, rgba(48,20,5,0.30) 100%), ${asymRings}, ${organicWaveA}, ${organicWaveB}`,
+      backgroundSize: '100% 100%, 330px 290px, 100% 100%, 100% 100%',
       backgroundRepeat: 'no-repeat, repeat, no-repeat, no-repeat',
-      backgroundPosition: 'center, center, center, center',
+      backgroundPosition: 'center, 27% 63%, center, center',
     };
   }
 
@@ -1075,6 +1079,8 @@ export function Room({
           bottom: FLOOR - 20,
           zIndex: 13,
           pointerEvents: 'none',
+          transformOrigin: 'bottom center',
+          animation: 'plantBreezeSway 6.5s ease-in-out infinite alternate',
         })}
       >
         <ShelfThemePlant night={night} themeId={themeId} />
@@ -3264,7 +3270,7 @@ export function CabinetDoors({
                 transformOrigin: left ? 'left center' : 'right center',
                 transform: open ? `translateX(${left ? '-100%' : '100%'}) scaleX(0.05)` : 'translateX(0%) scaleX(1)',
                 transition: 'transform 1.65s cubic-bezier(0.22, 1, 0.36, 1)',
-                border: `7px solid ${look.frame}`,
+                border: look.name === 'Creamy Caramel' ? `4px solid ${look.frame}` : `7px solid ${look.frame}`,
                 backgroundImage: glassSheen,
                 backgroundColor: 'rgba(255, 255, 255, 0.04)',
                 boxShadow: bevel,
@@ -4639,7 +4645,11 @@ export function Almirah({
 
         {/* Almirah Bottom Plinth (Touching Floor) with Embedded Switcher & Controls */}
         <div
+          onClick={(e) => e.stopPropagation()}
           style={{
+            position: 'relative',
+            zIndex: 45,
+            pointerEvents: 'auto',
             margin: look.isCapsule || look.isArched ? '0' : '0 -6px',
             minHeight: 44,
             padding: '6px 12px',
@@ -4659,7 +4669,10 @@ export function Almirah({
           <div className="flex items-center gap-1.5">
             <button
               type="button"
-              onClick={onPrevAlmirah}
+              onClick={(e) => {
+                e.stopPropagation();
+                onPrevAlmirah();
+              }}
               className="p-1.5 rounded-lg bg-black/25 hover:bg-black/40 border border-white/20 transition cursor-pointer"
               style={{ color: plinthInk, boxShadow: '0 2px 6px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.18)' }}
               title="Previous Almirah Style"
@@ -4669,7 +4682,10 @@ export function Almirah({
 
             <button
               type="button"
-              onClick={onNextAlmirah}
+              onClick={(e) => {
+                e.stopPropagation();
+                onNextAlmirah();
+              }}
               className="px-3 py-1 rounded-lg bg-black/25 hover:bg-black/40 border text-[11px] font-bold flex items-center gap-2 transition cursor-pointer"
               style={{
                 color: plinthInk,
@@ -5893,6 +5909,12 @@ export default function ShelfRoom({
                         idx={idx}
                         totalAlmirahs={data.length}
                         onPrevAlmirah={() => {
+                          setOpenMap((m) => {
+                            const next = { ...m };
+                            delete next[`${a.id}:top`];
+                            delete next[`${a.id}:bottom`];
+                            return next;
+                          });
                           if (data.length > 1) {
                             setAt((i) => (i - 1 + data.length) % data.length);
                           } else {
@@ -5909,6 +5931,12 @@ export default function ShelfRoom({
                           }
                         }}
                         onNextAlmirah={() => {
+                          setOpenMap((m) => {
+                            const next = { ...m };
+                            delete next[`${a.id}:top`];
+                            delete next[`${a.id}:bottom`];
+                            return next;
+                          });
                           if (data.length > 1) {
                             setAt((i) => (i + 1) % data.length);
                           } else {

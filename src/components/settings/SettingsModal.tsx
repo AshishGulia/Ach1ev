@@ -893,7 +893,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     { id: 'customizer', label: 'Goals', icon: Sparkles, iconClass: 'text-amber-500' },
                     { id: 'languages', label: 'Languages', icon: Globe, iconClass: 'text-amber-600 dark:text-amber-400' },
                     { id: 'subscription', label: 'Plans', icon: Crown, iconClass: 'text-amber-500' },
-                    { id: 'defaults', label: 'Backup & Reset', icon: RotateCcw },
+                    { id: 'defaults', label: 'Backup', icon: Download },
                   ] as Array<{ id: SettingsTabId; label: string; icon: React.ComponentType<any>; iconClass?: string }>
                 ).map((tab) => {
                   const TabIcon = tab.icon;
@@ -929,12 +929,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           )}
 
-          {/* Left Vertical Settings Sidebar (Expanded Drawer on Mobile matching Dashboard Sidebar, Static Column on Desktop) */}
+          {/* Left Vertical Settings Sidebar (Slim Column matching Dashboard Sidebar) */}
           <div
             className={`themed-glass-bar border-r border-stone-200/80 dark:border-[#382518] bg-stone-50/95 dark:bg-[#140e0a] p-1.5 flex-col justify-between gap-2 shrink-0 ${
               isMobileSidebarOpen
-                ? 'flex absolute inset-y-0 left-0 z-30 w-[200px] shadow-2xl sm:static sm:w-48 sm:shadow-none animate-in slide-in-from-left-4 duration-150'
-                : 'hidden sm:flex sm:w-48'
+                ? 'flex absolute inset-y-0 left-0 z-30 w-[164px] shadow-2xl sm:static sm:w-[136px] sm:shadow-none animate-in slide-in-from-left-4 duration-150'
+                : 'hidden sm:flex sm:w-[136px]'
             }`}
           >
             {/* Top Full-Width Arrow Action Matching Main Dashboard Sidebar (No "Back" label) */}
@@ -945,7 +945,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   onClick={onClose}
                   title="Return to Dashboard"
                   aria-label="Return to Dashboard"
-                  className="hidden sm:flex w-full group items-center justify-center py-1.5 rounded-xl transition-all hover:brightness-110 active:scale-[0.97] cursor-pointer bg-stone-200/75 hover:bg-stone-300/80 dark:bg-[#241911] dark:hover:bg-[#312116] text-stone-800 dark:text-[#efe4d4] border border-stone-300/80 dark:border-[#3e291b] shadow-2xs"
+                  className="hidden sm:flex w-full group items-center justify-center py-1 rounded-xl transition-all hover:brightness-110 active:scale-[0.97] cursor-pointer bg-stone-200/75 hover:bg-stone-300/80 dark:bg-[#241911] dark:hover:bg-[#312116] text-stone-800 dark:text-[#efe4d4] border border-stone-300/80 dark:border-[#3e291b] shadow-2xs"
                 >
                   <ArrowLeft className="w-3.5 h-3.5 stroke-[2.2] transition-transform duration-200 group-hover:-translate-x-1" />
                 </button>
@@ -955,7 +955,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 onClick={() => setIsMobileSidebarOpen(false)}
                 title="Collapse Settings Sidebar"
                 aria-label="Collapse Settings Sidebar"
-                className="sm:hidden w-full group flex items-center justify-center py-1.5 rounded-xl bg-stone-200/75 hover:bg-stone-300/80 dark:bg-[#241911] dark:hover:bg-[#312116] text-stone-700 dark:text-[#efe4d4] border border-stone-300/80 dark:border-[#3e291b] cursor-pointer transition-all"
+                className="sm:hidden w-full group flex items-center justify-center py-1 rounded-xl bg-stone-200/75 hover:bg-stone-300/80 dark:bg-[#241911] dark:hover:bg-[#312116] text-stone-700 dark:text-[#efe4d4] border border-stone-300/80 dark:border-[#3e291b] cursor-pointer transition-all"
               >
                 <ArrowLeft className="w-3.5 h-3.5 stroke-[2.2] transition-transform duration-200 group-hover:-translate-x-1" />
               </button>
@@ -976,7 +976,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     { id: 'customizer', label: 'Goals', icon: Sparkles, iconClass: 'text-amber-500' },
                     { id: 'languages', label: 'Languages', icon: Globe, iconClass: 'text-amber-600 dark:text-amber-400' },
                     { id: 'subscription', label: 'Plans', icon: Crown, iconClass: 'text-amber-500' },
-                    { id: 'defaults', label: 'Backup & Reset', icon: RotateCcw },
+                    { id: 'defaults', label: 'Backup', icon: Download },
                   ] as Array<{ id: SettingsTabId; label: string; icon: React.ComponentType<any>; iconClass?: string }>
                 ).map((tab) => {
                   const TabIcon = tab.icon;
@@ -989,13 +989,13 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                         setActiveTab(tab.id);
                         setIsMobileSidebarOpen(false);
                       }}
-                      className={`w-full min-h-[36px] sm:min-h-[32px] h-auto flex items-center gap-2 px-2 py-1.5 rounded-lg text-[12px] sm:text-xs font-medium transition-all cursor-pointer text-left ${
+                      className={`w-full min-h-[34px] sm:min-h-[30px] h-auto flex items-center gap-1.5 px-1.5 py-1.5 rounded-lg text-[11.5px] sm:text-[11px] font-medium transition-all cursor-pointer text-left ${
                         isActive
                           ? 'themed-tab-active bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 shadow-xs font-semibold'
                           : 'text-stone-700 dark:text-stone-300 hover:bg-stone-200/70 dark:hover:bg-[#251a12] hover:text-stone-900 dark:hover:text-stone-100'
                       }`}
                     >
-                      <div className="w-4 h-4 flex items-center justify-center shrink-0">
+                      <div className="w-3.5 h-3.5 flex items-center justify-center shrink-0">
                         <TabIcon className={`w-3.5 h-3.5 shrink-0 ${isActive ? '' : tab.iconClass || ''}`} />
                       </div>
                       <span className="leading-tight break-words whitespace-normal flex-1 min-w-0">
@@ -1047,7 +1047,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       customizer: 'Goals',
                       languages: 'Languages',
                       subscription: 'Plans',
-                      defaults: 'Backup & Reset',
+                      defaults: 'Backup',
                     } as Record<SettingsTabId, string>
                   )[activeTab]
                 }
@@ -2881,8 +2881,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             <div className="space-y-4">
               <div className="pb-2 border-b border-stone-200 dark:border-[#382518]">
                 <h4 className="text-lg font-bold text-stone-900 dark:text-stone-100 flex items-center gap-2">
-                  <RotateCcw className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                  <span>Backup &amp; Reset</span>
+                  <Download className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                  <span>Backup</span>
                 </h4>
               </div>
               {/* Google AI Studio Export Card */}

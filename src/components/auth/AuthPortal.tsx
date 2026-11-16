@@ -321,7 +321,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
         </div>
       )}
 
-      {/* Top Dark Login Screen Viewport (leaves organic bottom peek of misty espresso->caramel merge) */}
+      {/* Top Dark Login Screen Viewport */}
       <div
         className={
           isModal
@@ -332,19 +332,32 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
           isModal
             ? undefined
             : {
-                background:
-                  'radial-gradient(ellipse 90% 80% at 18% 20%, #2a1409 0%, #160904 54%, #0c0402 100%)',
+                backgroundColor: '#0c0402',
               }
         }
       >
-        {/* Uneven Organic Espresso Depth Spots */}
+        {/* Organic Espresso Radial Atmosphere (fades out completely to pure #0c0402 before bottom edge so zero horizontal border occurs) */}
         {!isModal && (
           <div
             className="absolute inset-0 pointer-events-none"
             aria-hidden="true"
             style={{
               background:
-                'radial-gradient(circle at 12% 18%, rgba(138, 72, 32, 0.25) 0%, transparent 44%), radial-gradient(circle at 82% 22%, rgba(154, 88, 38, 0.18) 0%, transparent 40%), radial-gradient(circle at 46% 78%, rgba(92, 46, 18, 0.22) 0%, transparent 46%)',
+                'radial-gradient(ellipse 90% 80% at 18% 20%, #2a1409 0%, #160904 54%, #0c0402 100%)',
+              maskImage: 'linear-gradient(180deg, #000 0%, #000 58%, transparent 100%)',
+              WebkitMaskImage: 'linear-gradient(180deg, #000 0%, #000 58%, transparent 100%)',
+            }}
+          />
+        )}
+        {!isModal && (
+          <div
+            className="absolute inset-0 pointer-events-none"
+            aria-hidden="true"
+            style={{
+              background:
+                'radial-gradient(circle at 12% 18%, rgba(138, 72, 32, 0.24) 0%, transparent 44%), radial-gradient(circle at 82% 22%, rgba(154, 88, 38, 0.16) 0%, transparent 40%), radial-gradient(circle at 46% 62%, rgba(92, 46, 18, 0.18) 0%, transparent 44%)',
+              maskImage: 'linear-gradient(180deg, #000 0%, #000 55%, transparent 96%)',
+              WebkitMaskImage: 'linear-gradient(180deg, #000 0%, #000 55%, transparent 96%)',
             }}
           />
         )}
@@ -913,47 +926,33 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
 
       {!isModal && (
         <>
-          {/* 3x Tall Organic Misty Brown Fog -> Thick Creamy Caramel Blend (No Straight Horizontal Seam) */}
+          {/* Borderless Cosine-Eased Vertical Transition matching Top Login Screen Height */}
           <div
             aria-hidden="true"
-            className="w-full h-56 sm:h-72 relative z-10 pointer-events-none shrink-0 overflow-hidden"
+            className="w-full min-h-[calc(100dvh-72px)] sm:min-h-[calc(100dvh-88px)] relative z-10 pointer-events-none shrink-0"
             style={{
               background:
-                'linear-gradient(180deg, #0c0402 0%, #180b05 12%, #2c160b 26%, #492815 41%, #6f4627 56%, #9e7147 71%, #cca578 85%, #e8cc9e 94%, #f4e2c2 100%)',
+                'linear-gradient(180deg, #0c0402 0%, #110603 6%, #180a05 13%, #231008 21%, #31170b 29%, #422110 38%, #562d17 47%, #6c3b1f 56%, #834d2b 65%, #9b613a 74%, #b37a4e 82%, #ca9567 89%, #ddaf83 94%, #ebca9f 97.5%, #f4e2c2 100%)',
             }}
-          >
-            {/* Layered Uneven Misty Fog Banks */}
-            <div
-              className="absolute -inset-x-12 top-2 bottom-0"
-              style={{
-                background:
-                  'radial-gradient(ellipse 46% 52% at 18% 48%, rgba(226, 179, 118, 0.24) 0%, rgba(164, 108, 60, 0.12) 45%, transparent 78%), radial-gradient(ellipse 50% 48% at 54% 58%, rgba(244, 226, 194, 0.28) 0%, rgba(198, 146, 88, 0.14) 48%, transparent 80%), radial-gradient(ellipse 48% 55% at 86% 42%, rgba(212, 162, 102, 0.22) 0%, rgba(120, 68, 34, 0.12) 50%, transparent 80%)',
-              }}
-            />
-            <div
-              className="absolute inset-x-0 bottom-0 h-36"
-              style={{
-                background:
-                  'radial-gradient(ellipse 65% 70% at 28% 85%, rgba(247, 232, 206, 0.52) 0%, transparent 72%), radial-gradient(ellipse 60% 65% at 75% 88%, rgba(235, 204, 158, 0.48) 0%, transparent 72%)',
-              }}
-            />
-          </div>
+          />
 
           <section
             aria-label="Achiev Medical Study Guide & Tour"
             className="w-full relative z-10 px-4 sm:px-8 pt-2 sm:pt-4 pb-16 sm:pb-20 text-[#23140A] overflow-hidden"
             style={{
               background:
-                'radial-gradient(circle at 14% 16%, rgba(224, 181, 120, 0.36) 0%, transparent 45%), radial-gradient(circle at 86% 24%, rgba(206, 152, 88, 0.26) 0%, transparent 48%), radial-gradient(circle at 48% 72%, rgba(255, 248, 234, 0.72) 0%, transparent 55%), linear-gradient(180deg, #f4e2c2 0%, #efe0c1 42%, #e8cfa4 100%)',
+                'linear-gradient(180deg, #f4e2c2 0%, #f1e0bf 36%, #ecd3ab 72%, #e6c797 100%)',
             }}
           >
-            {/* Subtle Frosted Glass Depth Veil Matching Top Atmospheric Design */}
+            {/* Cream Ambient Highlights Faded In Below Top Edge so Zero Seam Appears */}
             <div
               aria-hidden="true"
-              className="pointer-events-none absolute inset-0 backdrop-blur-[2px]"
+              className="pointer-events-none absolute inset-0"
               style={{
                 background:
-                  'radial-gradient(ellipse 75% 45% at 50% 0%, rgba(255, 249, 238, 0.38) 0%, transparent 70%)',
+                  'radial-gradient(circle at 14% 20%, rgba(224, 181, 120, 0.36) 0%, transparent 45%), radial-gradient(circle at 86% 28%, rgba(206, 152, 88, 0.26) 0%, transparent 48%), radial-gradient(circle at 48% 72%, rgba(255, 248, 234, 0.68) 0%, transparent 55%)',
+                maskImage: 'linear-gradient(180deg, transparent 0%, #000 18%, #000 100%)',
+                WebkitMaskImage: 'linear-gradient(180deg, transparent 0%, #000 18%, #000 100%)',
               }}
             />
             <div className="relative z-10">

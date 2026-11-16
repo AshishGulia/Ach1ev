@@ -2610,9 +2610,19 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({
     });
   };
 
-  // Filtered Wings and Slabs
+  // Filtered Wings and Slabs:
+  // Default view (activeCategoryFilter === null, no search, !showFavoritesOnly) shows only Favorite Wings.
+  const isAllWingsMode = activeCategoryFilter === '__all__';
   const filteredWings = wings
-    .filter((w) => !activeCategoryFilter || w.id === activeCategoryFilter)
+    .filter((w) => {
+      if (searchQuery.trim() || showFavoritesOnly || isAllWingsMode) {
+        return true;
+      }
+      if (activeCategoryFilter) {
+        return w.id === activeCategoryFilter;
+      }
+      return resolvedFavoriteWingIds.includes(w.id);
+    })
     .map((w) => {
       let slabs = w.slabs;
       if (showFavoritesOnly) {
@@ -2628,7 +2638,8 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({
         );
       }
       return { ...w, slabs };
-    });
+    })
+    .filter((w) => (!searchQuery.trim() && !showFavoritesOnly) || w.slabs.length > 0);
 
   // Calculate total counts
   const totalSlabsCount = wings.reduce((acc, w) => acc + w.slabs.length, 0);
@@ -2915,7 +2926,7 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({
                 type="button"
                 onClick={() => setMoreWingsOpen((v) => !v)}
                 className={`px-3 py-1 rounded-full text-[11px] font-mono uppercase whitespace-nowrap transition-all cursor-pointer flex items-center gap-1.5 border ${
-                  moreWingsOpen || (activeCategoryFilter !== null && !resolvedFavoriteWingIds.includes(activeCategoryFilter))
+                  moreWingsOpen || isAllWingsMode || (activeCategoryFilter !== null && !resolvedFavoriteWingIds.includes(activeCategoryFilter))
                     ? 'themed-tab-active bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 font-bold border-transparent shadow-xs'
                     : 'themed-glass-card bg-white dark:bg-[#160f0b] text-stone-700 dark:text-stone-300 border-stone-200 dark:border-[#382518] hover:border-amber-400'
                 }`}
@@ -2942,8 +2953,24 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({
                         : 'text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-[#251a12]'
                     }`}
                   >
-                    <span>ALL WINGS ({wings.length})</span>
+                    <span>FAVORITE WINGS ({resolvedFavoriteWingIds.length})</span>
                     {activeCategoryFilter === null && <Check className="w-3.5 h-3.5" />}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveCategoryFilter('__all__');
+                      setMoreWingsOpen(false);
+                    }}
+                    className={`w-full px-3 py-1.5 rounded-xl text-left text-[11px] font-mono font-bold flex items-center justify-between transition cursor-pointer ${
+                      isAllWingsMode
+                        ? 'bg-amber-500/20 text-amber-800 dark:text-amber-300'
+                        : 'text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-[#251a12]'
+                    }`}
+                  >
+                    <span>ALL WINGS ({wings.length})</span>
+                    {isAllWingsMode && <Check className="w-3.5 h-3.5" />}
                   </button>
 
                   <div className="h-px bg-stone-200/80 dark:bg-[#352317] my-1" />
@@ -3250,6 +3277,26 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({
               </section>
             );
           })}
+          {filteredWings.length === 0 && (
+            <div className="themed-glass-card rounded-2xl border border-stone-200 dark:border-[#382518] bg-white/80 dark:bg-[#18110c]/90 p-8 text-center space-y-3">
+              <p className="font-serif text-base font-semibold text-[#5c351c] dark:text-[#f5eedc]">
+                {showFavoritesOnly
+                  ? 'No starred slabs yet. Click the ★ icon on any slab card to pin it here.'
+                  : 'No matching slabs found.'}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowFavoritesOnly(false);
+                  setSearchQuery('');
+                  setActiveCategoryFilter(null);
+                }}
+                className="px-4 py-1.5 rounded-full bg-[#A47C43] hover:bg-[#8f6730] text-white text-xs font-semibold cursor-pointer transition-colors"
+              >
+                Show Favorite Wings
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

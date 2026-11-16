@@ -304,9 +304,26 @@ export const FlowchartStudio: React.FC<FlowchartStudioProps> = ({
   }, []);
 
   const canvasPaneRef = useRef<HTMLDivElement | null>(null);
+  const canvasScrollRef = useRef<HTMLDivElement | null>(null);
   const touchPinchRef = useRef<{ dist: number; startZoom: number } | null>(null);
   const [zoomLevel, setZoomLevel] = useState<number>(100);
   const [isFullscreen, setIsFullscreen] = useState(false);
+
+  // Native non-passive Ctrl/Cmd + Mouse Scroll zoom on canvas
+  useEffect(() => {
+    const el = canvasScrollRef.current;
+    if (!el) return;
+    const handleWheelZoom = (e: WheelEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault();
+        e.stopPropagation();
+        const step = e.deltaY < 0 ? 8 : -8;
+        setZoomLevel((z) => Math.max(40, Math.min(240, z + step)));
+      }
+    };
+    el.addEventListener('wheel', handleWheelZoom, { passive: false });
+    return () => el.removeEventListener('wheel', handleWheelZoom);
+  }, []);
 
   // Modals & Popovers
   const [newChartModalOpen, setNewChartModalOpen] = useState(false);
@@ -757,8 +774,17 @@ export const FlowchartStudio: React.FC<FlowchartStudioProps> = ({
           className="flex-1 min-w-0 flex flex-col bg-[#fcfbf8] dark:bg-[#0e0907] overflow-hidden relative"
         >
           <div
+            ref={canvasScrollRef}
             className="flex-1 overflow-auto p-6 relative custom-scrollbar bg-[#f8f5ee] dark:bg-[#0e0907]"
-            style={{ overflowX: 'auto', overflowY: 'auto', touchAction: 'pan-x pan-y pinch-zoom' }}
+            style={{
+              overflowX: 'auto',
+              overflowY: 'auto',
+              touchAction: 'pan-x pan-y pinch-zoom',
+              backgroundImage: isDarkThemeMode
+                ? `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Cline x1='0' y1='0' x2='28' y2='0' stroke='rgba(226,192,146,0.13)' stroke-width='1' stroke-dasharray='1.5 4'/%3E%3Cline x1='0' y1='0' x2='0' y2='28' stroke='rgba(226,192,146,0.13)' stroke-width='1' stroke-dasharray='1.5 4'/%3E%3C/svg%3E")`
+                : `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Cline x1='0' y1='0' x2='28' y2='0' stroke='rgba(104,78,48,0.13)' stroke-width='1' stroke-dasharray='1.5 4'/%3E%3Cline x1='0' y1='0' x2='0' y2='28' stroke='rgba(104,78,48,0.13)' stroke-width='1' stroke-dasharray='1.5 4'/%3E%3C/svg%3E")`,
+              backgroundSize: '28px 28px',
+            }}
             onTouchStart={(e) => {
               if (e.touches.length === 2) {
                 const dx = e.touches[0].clientX - e.touches[1].clientX;
@@ -773,18 +799,12 @@ export const FlowchartStudio: React.FC<FlowchartStudioProps> = ({
                 const d = Math.hypot(dx, dy);
                 if (touchPinchRef.current.dist > 0) {
                   const next = Math.round(touchPinchRef.current.startZoom * (d / touchPinchRef.current.dist));
-                  setZoomLevel(Math.max(45, Math.min(220, next)));
+                  setZoomLevel(Math.max(40, Math.min(240, next)));
                 }
               }
             }}
             onTouchEnd={() => {
               touchPinchRef.current = null;
-            }}
-            onWheel={(e) => {
-              if (e.ctrlKey || e.metaKey) {
-                e.preventDefault();
-                setZoomLevel((z) => Math.max(45, Math.min(220, Math.round(z - e.deltaY * 0.2))));
-              }
             }}
           >
             {!activeChart ? (
@@ -1252,37 +1272,6 @@ export const FlowchartStudio: React.FC<FlowchartStudioProps> = ({
             )}
           </div>
 
-          {/* CENTER FLOATING CANVAS ACTION PILL */}
-          {activeNode && (
-            <div className="pointer-events-auto mb-2.5 hidden sm:flex items-center gap-2 bg-stone-900/90 dark:bg-[#1c140e]/95 backdrop-blur-md text-white border border-stone-700/80 dark:border-[#382518] rounded-full px-3 py-1.5 shadow-xl">
-              <button
-                type="button"
-                onClick={() => setActiveViewMode(activeViewMode === 'tree' ? 'info' : 'tree')}
-                className="p-1.5 rounded-full hover:bg-stone-800 dark:hover:bg-[#2b1e15] text-stone-300 hover:text-white cursor-pointer"
-                title="Toggle Tree / Info View"
-              >
-                <Eye className="w-4 h-4" />
-              </button>
-              <div className="h-3 w-px bg-stone-700 dark:bg-[#382518]" />
-              <button
-                type="button"
-                onClick={() => handleAddBoxes(activeNode, 'sideways', addBoxCount)}
-                className="themed-accent-btn px-2.5 py-1 rounded-full bg-[#A47C43] hover:bg-[#8e6834] text-white text-xs font-semibold flex items-center gap-1 cursor-pointer"
-              >
-                <ArrowRight className="w-3.5 h-3.5" />
-                <span>+{addBoxCount} Sideways</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => handleAddBoxes(activeNode, 'below', addBoxCount)}
-                className="themed-accent-btn px-2.5 py-1 rounded-full bg-[#A47C43] hover:bg-[#8e6834] text-white text-xs font-semibold flex items-center gap-1 cursor-pointer"
-              >
-                <ArrowDown className="w-3.5 h-3.5" />
-                <span>+{addBoxCount} Below</span>
-              </button>
-            </div>
-          )}
-
           {/* RIGHT CHATBOX DRAWER: INSPECTOR */}
           <div className="pointer-events-auto flex flex-col items-end">
             {inspectorDrawerOpen ? (
@@ -1407,14 +1396,30 @@ export const FlowchartStudio: React.FC<FlowchartStudioProps> = ({
                       <div className="text-[10px] font-mono font-bold uppercase text-amber-700 dark:text-amber-400">
                         Quick Actions
                       </div>
-                      <div className="grid grid-cols-1 gap-2 text-xs">
+                      <div className="grid grid-cols-3 gap-1.5 text-xs">
+                        <button
+                          type="button"
+                          onClick={() => handleAddBoxes(activeNode, 'sideways', addBoxCount)}
+                          className="p-2 rounded-xl bg-white dark:bg-[#1a120d] border border-amber-400/40 dark:border-[#4b3322] hover:bg-amber-50 dark:hover:bg-[#2b1e15] text-stone-800 dark:text-[#efe4d4] font-semibold flex items-center justify-center gap-1 cursor-pointer"
+                        >
+                          <ArrowRight className="w-3 h-3 text-[#A47C43]" />
+                          <span>Sideways</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleAddBoxes(activeNode, 'below', addBoxCount)}
+                          className="p-2 rounded-xl bg-white dark:bg-[#1a120d] border border-amber-400/40 dark:border-[#4b3322] hover:bg-amber-50 dark:hover:bg-[#2b1e15] text-stone-800 dark:text-[#efe4d4] font-semibold flex items-center justify-center gap-1 cursor-pointer"
+                        >
+                          <ArrowDown className="w-3 h-3 text-[#A47C43]" />
+                          <span>Below</span>
+                        </button>
                         <button
                           type="button"
                           onClick={() => setActiveViewMode('info')}
-                          className="p-2 rounded-xl bg-white dark:bg-[#1a120d] border border-amber-400/40 dark:border-[#4b3322] hover:bg-amber-50 dark:hover:bg-[#2b1e15] text-stone-800 dark:text-[#efe4d4] font-semibold flex items-center justify-center gap-1.5 cursor-pointer"
+                          className="p-2 rounded-xl bg-white dark:bg-[#1a120d] border border-amber-400/40 dark:border-[#4b3322] hover:bg-amber-50 dark:hover:bg-[#2b1e15] text-stone-800 dark:text-[#efe4d4] font-semibold flex items-center justify-center gap-1 cursor-pointer"
                         >
-                          <BookOpen className="w-3.5 h-3.5 text-amber-500" />
-                          <span>Gather Info</span>
+                          <BookOpen className="w-3 h-3 text-amber-500" />
+                          <span>Info</span>
                         </button>
                       </div>
                     </div>

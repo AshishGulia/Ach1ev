@@ -3,16 +3,16 @@
   --an-bg: rgba(247, 243, 236, 0.16);
   --an-bg2: rgba(243, 236, 224, 0.68);
   --an-paper: rgba(253, 250, 244, 0.86);
-  --an-page: #FFFDF9;
-  --an-ink: #1E2622;
-  --an-muted: #6B6E67;
+  --an-page: #F3E5C8;
+  --an-ink: #23160C;
+  --an-muted: #6B553E;
   --an-line: #E1D8CA;
   --an-brass: #A47C43;
   --an-sage: #8f5f2c;
   --an-sage-soft: #F3E7D4;
   --an-brass-soft: #F3E9D7;
   --an-rose: #B4584A;
-  --an-rule: rgba(164, 124, 67, 0.22);
+  --an-rule: rgba(138, 102, 58, 0.24);
   --an-margin: rgba(180,88,74,.35);
   --an-shadow: 0 1px 0 rgba(255,255,255,.8) inset, 0 18px 40px -30px rgba(54,40,20,.45);
   --an-serif: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif);
@@ -27,16 +27,16 @@ html.dark .atelier-note-root {
   --an-bg: rgba(8, 4, 2, 0.24);
   --an-bg2: rgba(10, 5, 2, 0.72);
   --an-paper: rgba(16, 8, 4, 0.88);
-  --an-page: #180c07;
+  --an-page: #251A10;
   --an-ink: #f0e5d5;
-  --an-muted: #a69079;
+  --an-muted: #b7a28b;
   --an-line: #2e180c;
   --an-brass: #c49257;
   --an-sage: #c49257;
   --an-sage-soft: rgba(196,146,87,.16);
   --an-brass-soft: rgba(196,146,87,.16);
   --an-rose: #b0363b;
-  --an-rule: rgba(196,146,87,.12);
+  --an-rule: rgba(220, 184, 134, 0.17);
   --an-margin: rgba(176,54,59,.35);
   --an-shadow: 0 1px 0 rgba(255,232,200,.04) inset, 0 18px 40px -26px rgba(0,0,0,.9);
 }
@@ -175,15 +175,28 @@ html.dark .atelier-note-root {
   color: var(--an-ink);
 }
 
-.an-seg button[aria-pressed="true"] {
+.an-seg button[aria-pressed="true"]:not(.an-layout-toggle-btn) {
   background: var(--an-ink);
   color: var(--an-bg);
 }
 
-html[data-design="1"].dark .atelier-note-root .an-seg button[aria-pressed="true"] {
+html[data-design="1"].dark .atelier-note-root .an-seg button[aria-pressed="true"]:not(.an-layout-toggle-btn) {
   background: linear-gradient(180deg, #f5ead9 0%, #e1cbb0 100%);
   color: #140e0a;
   font-weight: 600;
+}
+
+/* Focus & Split layout buttons: keep ribbon surface color, show subtle theme-matched shadow */
+.an-seg.layouts button.an-layout-toggle-btn[aria-pressed="true"] {
+  background: var(--an-paper) !important;
+  background-image: none !important;
+  color: var(--an-ink) !important;
+  font-weight: 600;
+  border: 1px solid color-mix(in srgb, var(--th-accent, var(--an-brass)) 32%, transparent) !important;
+  box-shadow:
+    0 4px 12px -2px color-mix(in srgb, var(--th-accent, var(--an-brass)) 54%, rgba(0, 0, 0, 0.28)),
+    0 1px 4px color-mix(in srgb, var(--th-accent, var(--an-brass)) 30%, rgba(0, 0, 0, 0.16)),
+    inset 0 1px 0 color-mix(in srgb, var(--th-accent, var(--an-brass)) 22%, transparent) !important;
 }
 
 .an-more-layouts-menu {

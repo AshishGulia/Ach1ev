@@ -42,7 +42,8 @@ export type PaperColor =
   | 'dark'
   | 'sepia'
   | 'mint'
-  | 'ice-blue';
+  | 'ice-blue'
+  | (string & {});
 
 export interface InkStroke {
   points: { x: number; y: number }[];
