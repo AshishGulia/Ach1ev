@@ -65,8 +65,91 @@ export const DEFAULT_NOTES_FOLDER_ID = 'folder-general-notes';
 
 const sessionObjectUrls = new Map<string, string>();
 
-export function registerSessionFileUrl(fileId: string, url: string) {
+const IDB_DB_NAME = 'achiev_local_files_db';
+const IDB_STORE_NAME = 'file_blobs';
+
+function openFilesIdb(): Promise<IDBDatabase | null> {
+  if (typeof window === 'undefined' || !('indexedDB' in window)) {
+    return Promise.resolve(null);
+  }
+  return new Promise((resolve) => {
+    try {
+      const req = window.indexedDB.open(IDB_DB_NAME, 1);
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains(IDB_STORE_NAME)) {
+          db.createObjectStore(IDB_STORE_NAME);
+        }
+      };
+      req.onsuccess = () => resolve(req.result);
+      req.onerror = () => resolve(null);
+    } catch {
+      resolve(null);
+    }
+  });
+}
+
+export async function saveFileBlobToIdb(fileId: string, blob: Blob): Promise<void> {
+  const db = await openFilesIdb();
+  if (!db) return;
+  await new Promise<void>((resolve) => {
+    try {
+      const tx = db.transaction(IDB_STORE_NAME, 'readwrite');
+      tx.objectStore(IDB_STORE_NAME).put(blob, fileId);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => resolve();
+    } catch {
+      resolve();
+    }
+  });
+}
+
+export async function getFileBlobFromIdb(fileId: string): Promise<string | undefined> {
+  const existing = sessionObjectUrls.get(fileId);
+  if (existing) return existing;
+  const db = await openFilesIdb();
+  if (!db) return undefined;
+  return new Promise((resolve) => {
+    try {
+      const tx = db.transaction(IDB_STORE_NAME, 'readonly');
+      const req = tx.objectStore(IDB_STORE_NAME).get(fileId);
+      req.onsuccess = () => {
+        const blob = req.result as Blob | undefined;
+        if (blob instanceof Blob) {
+          const url = URL.createObjectURL(blob);
+          sessionObjectUrls.set(fileId, url);
+          resolve(url);
+        } else {
+          resolve(undefined);
+        }
+      };
+      req.onerror = () => resolve(undefined);
+    } catch {
+      resolve(undefined);
+    }
+  });
+}
+
+export async function deleteFileBlobFromIdb(fileId: string): Promise<void> {
+  const db = await openFilesIdb();
+  if (!db) return;
+  await new Promise<void>((resolve) => {
+    try {
+      const tx = db.transaction(IDB_STORE_NAME, 'readwrite');
+      tx.objectStore(IDB_STORE_NAME).delete(fileId);
+      tx.oncomplete = () => resolve();
+      tx.onerror = () => resolve();
+    } catch {
+      resolve();
+    }
+  });
+}
+
+export function registerSessionFileUrl(fileId: string, url: string, blob?: Blob) {
   sessionObjectUrls.set(fileId, url);
+  if (blob) {
+    void saveFileBlobToIdb(fileId, blob);
+  }
 }
 
 export function getSessionFileUrl(fileId: string): string | undefined {
@@ -243,6 +326,7 @@ export function deleteUploadedDocument(docId: string): void {
   const list = getUploadedDocuments();
   saveUploadedDocuments(list.filter((d) => d.id !== docId));
   sessionObjectUrls.delete(docId);
+  void deleteFileBlobFromIdb(docId);
 }
 
 export function touchUploadedDocument(docId: string): void {

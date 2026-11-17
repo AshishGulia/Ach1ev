@@ -99,6 +99,7 @@ import { Notebook, DesignId, MedicalBook } from '../../types';
 import { AUTO_NOTE_TEMPLATES, AutoNoteTemplate } from '../../data/noteTemplates';
 import { getPlanLimits, openSubscriptionUpgradeModal } from '../../utils/subscriptionLimits';
 import { getDrivePreviewUrl } from '../../services/googleDriveService';
+import { SmartDocumentFrame } from '../common/SmartDocumentFrame';
 import { useAuth } from '../../contexts/AuthContext';
 import {
   RoundColorColumnsPicker,
@@ -171,7 +172,7 @@ const INITIAL_DOCS: DocumentItem[] = [];
 const mapBookToDocItem = (b: MedicalBook): DocumentItem => {
   const driveOrPdfUrl = b.driveFileId
     ? getDrivePreviewUrl(b.driveFileId)
-    : b.pdfFileUrl && (b.pdfFileUrl.includes('drive.google.com') || b.pdfFileUrl.startsWith('http'))
+    : b.pdfFileUrl
     ? getDrivePreviewUrl(b.pdfFileUrl) || b.pdfFileUrl
     : undefined;
   if (driveOrPdfUrl) {
@@ -195,6 +196,37 @@ const mapBookToDocItem = (b: MedicalBook): DocumentItem => {
         `<div class="run"><span>${b.title} · ${p.keyTopic || b.subject}</span><span>Page ${p.pageNumber}</span></div><h2>${p.title}</h2>${p.contentHtml || ''}`
     ),
   };
+};
+
+/**
+ * Uncontrolled contentEditable block for floating text boxes so React never resets
+ * DOM text nodes or snaps the Backspace caret back to character index 0.
+ */
+const FloatingBoxEditable: React.FC<{
+  text: string;
+  locked: boolean;
+  onChangeText: (next: string) => void;
+}> = ({ text, locked, onChangeText }) => {
+  const ref = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    if (document.activeElement !== el && el.textContent !== text) {
+      el.textContent = text;
+    }
+  }, [text]);
+
+  return (
+    <div
+      ref={ref}
+      contentEditable={!locked}
+      suppressContentEditableWarning
+      onInput={(e) => onChangeText(e.currentTarget.textContent || '')}
+      onBlur={(e) => onChangeText(e.currentTarget.textContent || '')}
+      className="outline-none text-xs sm:text-sm leading-relaxed w-full h-full cursor-text"
+    />
+  );
 };
 
 const INITIAL_RESOURCES: AttachedResource[] = [];
@@ -902,9 +934,21 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
   // Attached Resources
   const [resources, setResources] = useState<AttachedResource[]>(INITIAL_RESOURCES);
 
-  // Floating Videos
+  // Floating Videos & Responsive Non-Overlap Bounds
   const [videoWindows, setVideoWindows] = useState<VideoWindowState[]>([]);
   const topZIndexRef = useRef(100);
+  const [viewportSize, setViewportSize] = useState<{ w: number; h: number }>(() => ({
+    w: typeof window !== 'undefined' ? window.innerWidth : 1280,
+    h: typeof window !== 'undefined' ? window.innerHeight : 800,
+  }));
+
+  useEffect(() => {
+    const onResize = () => {
+      setViewportSize({ w: window.innerWidth, h: window.innerHeight });
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
 
   // Tools Drawer, Direct Paper Border Drag Stretch (Width & Height) & Speech/Spelling State
   const [isToolsOpen, setIsToolsOpen] = useState(false);
@@ -1075,7 +1119,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
 
   const ensureTableDragHandles = useCallback(() => {
     const ed = editorRef.current;
-    if (!ed) return;
+    if (!ed || !ed.querySelector('table')) return;
     ed.querySelectorAll('table').forEach((tbl) => {
       const table = tbl as HTMLTableElement;
       table.setAttribute('contenteditable', 'true');
@@ -1164,6 +1208,18 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
     triggerSave();
   };
 
+  const noteTitleRef = useRef(noteTitle);
+  noteTitleRef.current = noteTitle;
+
+  // Keep H1 title synced cleanly without overwriting caret when user is actively typing/backspacing inside H1
+  useEffect(() => {
+    const el = sheetTitleRef.current;
+    if (!el) return;
+    if (document.activeElement !== el && el.textContent !== noteTitle) {
+      el.textContent = noteTitle;
+    }
+  }, [noteTitle]);
+
   // Debounced auto-save
   const saveTimeoutRef = useRef<any>(null);
   const triggerSave = useCallback(() => {
@@ -1174,7 +1230,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
       setSaveStatus('saved');
       if (onUpdateNotebook && editorRef.current) {
         const updatedHtml = editorRef.current.innerHTML;
-        const resolvedTitle = noteTitle.trim() || 'Untitled Note';
+        const resolvedTitle = (noteTitleRef.current || '').trim() || 'Untitled Note';
         if (notebook) {
           const pages = [...(notebook.pages || [])];
           if (pages[activePageIndex]) {
@@ -1233,12 +1289,21 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
         }
       }
     }, 700);
-  }, [notebook, onUpdateNotebook, activePageIndex, noteTitle, updateCounts]);
+  }, [notebook, onUpdateNotebook, activePageIndex, paperColor, updateCounts]);
 
   // Load/reset note content cleanly when switching notes or opening a new blank note
   useEffect(() => {
     const noteKey = `${notebook?.id || 'default'}::${activePageIndex}`;
     if (loadedNoteKeyRef.current !== noteKey) {
+      if (
+        editorRef.current?.contains(document.activeElement) &&
+        loadedNoteKeyRef.current === 'default::0' &&
+        notebook?.id
+      ) {
+        loadedNoteKeyRef.current = noteKey;
+        updateCounts();
+        return;
+      }
       loadedNoteKeyRef.current = noteKey;
       const nextTitle = notebook?.title || 'Untitled Note';
       const nextHtml = notebook?.pages?.[activePageIndex]?.contentHtml || '<p><br></p>';
@@ -1246,7 +1311,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
         setPaperColor(notebook.paperColor === 'beige' ? 'sepia' : notebook.paperColor);
       }
       setNoteTitle(nextTitle);
-      if (sheetTitleRef.current) {
+      if (sheetTitleRef.current && document.activeElement !== sheetTitleRef.current) {
         sheetTitleRef.current.textContent = nextTitle;
       }
       if (editorRef.current) {
@@ -1260,7 +1325,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
       setSaveStatus('saved');
     }
     updateCounts();
-  }, [notebook?.id, activePageIndex, updateCounts]);
+  }, [notebook?.id, activePageIndex, ensureTableDragHandles, updateCounts]);
 
   // Handle Selection in Document Panes
   useEffect(() => {
@@ -1504,6 +1569,62 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
     setVideoWindows((prev) =>
       prev.map((v) => (v.id === id ? { ...v, isMaximized: !v.isMaximized } : v))
     );
+  };
+
+  // Interactive Mouse-Hover Corner/Edge Resize for Bottom-Right Video Window
+  const startVideoResizeDrag = (
+    winId: string,
+    edge: 'top' | 'left' | 'top-left',
+    e: React.PointerEvent<HTMLDivElement>
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const targetWin = videoWindows.find((v) => v.id === winId);
+    if (!targetWin) return;
+
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const origW = targetWin.isMaximized
+      ? Math.min(920, window.innerWidth - 32)
+      : targetWin.width || 440;
+    const origH = targetWin.isMaximized
+      ? Math.min(Math.round(window.innerHeight * 0.72), 620)
+      : targetWin.height || 300;
+
+    document.body.style.userSelect = 'none';
+    document.body.style.cursor =
+      edge === 'top' ? 'ns-resize' : edge === 'left' ? 'ew-resize' : 'nwse-resize';
+
+    const onMove = (ev: PointerEvent) => {
+      const dx = startX - ev.clientX;
+      const dy = startY - ev.clientY;
+      const nextW =
+        edge === 'left' || edge === 'top-left'
+          ? Math.max(280, Math.min(Math.min(980, window.innerWidth - 32), Math.round(origW + dx)))
+          : origW;
+      const nextH =
+        edge === 'top' || edge === 'top-left'
+          ? Math.max(200, Math.min(Math.min(760, window.innerHeight - 96), Math.round(origH + dy)))
+          : origH;
+
+      setVideoWindows((prev) =>
+        prev.map((v) =>
+          v.id === winId
+            ? { ...v, isMaximized: false, width: nextW, height: nextH }
+            : v
+        )
+      );
+    };
+
+    const onUp = () => {
+      document.body.style.userSelect = '';
+      document.body.style.cursor = '';
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+    };
+
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
   };
 
   const handleBookPickerFileUpload = async (file: File) => {
@@ -2953,7 +3074,12 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
     if (doc.type === 'pdf' && doc.url) {
       return (
         <div className="an-file-view">
-          <iframe src={doc.url} title={doc.title} />
+          <SmartDocumentFrame
+            docId={doc.id}
+            srcUrl={doc.url}
+            title={doc.title}
+            className="w-full h-full border-0"
+          />
         </div>
       );
     }
@@ -4164,9 +4290,37 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
             </div>
 
             {/* Note Sheet + Vertical Category Attachments Ribbon */}
-            <div className="an-note-split-body">
+            {(() => {
+              const activeOpenVideo = videoWindows.find((v) => !v.isMinimized) || null;
+              const openVideoW = activeOpenVideo
+                ? activeOpenVideo.isMaximized
+                  ? Math.min(920, viewportSize.w - 32)
+                  : Math.min(activeOpenVideo.width || 440, viewportSize.w - 32)
+                : 0;
+              const openVideoH = activeOpenVideo
+                ? activeOpenVideo.isMaximized
+                  ? Math.min(Math.round(viewportSize.h * 0.72), 620)
+                  : Math.min(activeOpenVideo.height || 300, viewportSize.h - 96)
+                : 0;
+              const canSideReserve =
+                !activeOpenVideo ||
+                viewportSize.w - openVideoW - (isAttachmentsDrawerOpen ? 290 : 48) >= 400;
+              const noteSplitStyle: React.CSSProperties | undefined =
+                activeOpenVideo && !canSideReserve
+                  ? { maxHeight: `calc(100% - ${openVideoH + 24}px)` }
+                  : undefined;
+              const noteBodyStyle: React.CSSProperties | undefined =
+                activeOpenVideo && canSideReserve
+                  ? {
+                      paddingRight: `${Math.max(20, openVideoW + (isAttachmentsDrawerOpen ? 20 : 32))}px`,
+                    }
+                  : undefined;
+
+              return (
+            <div className="an-note-split-body" style={noteSplitStyle}>
             <div
               className="an-note-body"
+              style={noteBodyStyle}
               data-surround={noteSurroundDark === null ? undefined : noteSurroundDark ? 'dark' : 'light'}
             >
               {(() => {
@@ -4256,8 +4410,9 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                 data-hover-edge={hoverSheetEdge || undefined}
                 style={{
                   width: `${sheetWidthPx}px`,
+                  maxWidth: '100%',
                   minHeight: `${sheetMinHeightPx}px`,
-                  minWidth: '340px',
+                  minWidth: '300px',
                   cursor: sheetCursor,
                   backgroundColor: resolvedSheetBg,
                   ['--an-page' as string]: resolvedSheetBg,
@@ -4373,7 +4528,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                   <span>{todayDate}</span>
                 </div>
 
-                {/* Editable Note Title */}
+                {/* Editable Note Title (Uncontrolled DOM so Backspace never snaps caret to index 0) */}
                 <h1
                   className="an-note-title"
                   contentEditable
@@ -4383,9 +4538,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                     setNoteTitle(e.currentTarget.textContent || '');
                     triggerSave();
                   }}
-                >
-                  {noteTitle}
-                </h1>
+                />
 
                 {/* MS Word-Like Table Control Bar (Rows/Cols, Resize Controls & MS Word Table Color Formats) */}
                 {activeTableEl && (
@@ -4394,7 +4547,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                       <span className="an-table-handle px-1" title="Drag any column divider edge directly to resize">
                         <Move className="w-3.5 h-3.5" />
                       </span>
-                      <span className="text-[10px] font-mono font-bold text-stone-400 mr-1">TABLE</span>
+                      <span className="text-[10px] font-mono font-bold text-[var(--an-muted)] mr-1">TABLE</span>
 
                       <button type="button" className="an-table-word-btn" onClick={() => handleAddRow('above')} title="Insert row above">+ Row ↑</button>
                       <button type="button" className="an-table-word-btn" onClick={() => handleAddRow('below')} title="Insert row below">+ Row ↓</button>
@@ -4430,7 +4583,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
 
                       {/* Resize Width & Column Width */}
                       <div className="flex items-center gap-1" title="Resize Table & Selected Column">
-                        <span className="text-[9.5px] font-mono text-stone-400">Size:</span>
+                        <span className="text-[9.5px] font-mono text-[var(--an-muted)]">Size:</span>
                         {[55, 75, 100].map((pct) => (
                           <button
                             key={pct}
@@ -4451,7 +4604,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
 
                     {/* Row 2: MS Word Table Color Formats & Cell Shading */}
                     <div className="flex flex-wrap items-center gap-1.5 w-full pt-1 mt-1 border-t border-stone-200/70 dark:border-stone-700/70">
-                      <span className="text-[9.5px] font-mono text-stone-400 uppercase tracking-wider">Formats:</span>
+                      <span className="text-[9.5px] font-mono text-[var(--an-muted)] uppercase tracking-wider">Formats:</span>
                       {MS_WORD_TABLE_STYLES.map((st) => (
                         <button
                           key={st.id}
@@ -4478,7 +4631,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                       </button>
 
                       <div className="w-px h-3.5 bg-stone-200 dark:bg-stone-700 mx-0.5" />
-                      <span className="text-[9.5px] font-mono text-stone-400">Cell:</span>
+                      <span className="text-[9.5px] font-mono text-[var(--an-muted)]">Cell:</span>
                       <div className="flex items-center gap-1" title="Cell Background Shading">
                         {[
                           { label: 'Clear', hex: 'transparent' },
@@ -4622,16 +4775,18 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                                 prev.map((b) => (b.id === box.id ? { ...b, locked: !b.locked } : b))
                               )
                             }
-                            className={`w-5 h-5 p-0 rounded flex items-center justify-center cursor-pointer transition-colors ${
-                              box.locked ? 'bg-amber-600 text-white' : 'bg-black/10 text-[var(--an-ink)] hover:bg-black/15'
+                            className={`w-6 h-5 p-0 rounded flex items-center justify-center cursor-pointer transition-colors ${
+                              box.locked
+                                ? 'bg-red-500/20 text-red-700 dark:text-red-300 border border-red-500/45 hover:bg-red-500/30'
+                                : 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/45 hover:bg-emerald-500/30'
                             }`}
-                            title={box.locked ? 'Unlock Text Box' : 'Lock Text Box'}
+                            title={box.locked ? 'Locked (Subtle Red) — Click to Unlock' : 'Unlocked (Subtle Green) — Click to Lock'}
                             aria-label={box.locked ? 'Unlock Text Box' : 'Lock Text Box'}
                           >
                             {box.locked ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
                           </button>
 
-                          {/* Shape Selector */}
+                          {/* Shape Selector (High-contrast theme matched in light & dark mode) */}
                           <select
                             value={box.shape}
                             onChange={(e) =>
@@ -4641,7 +4796,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                                 )
                               )
                             }
-                            className="text-[10px] font-semibold bg-transparent border border-[var(--an-line)] rounded px-1 py-0.5 cursor-pointer"
+                            className="text-[10.5px] font-semibold bg-[var(--an-page)] text-[var(--an-ink)] border border-[var(--an-line)] rounded px-1.5 py-0.5 cursor-pointer outline-none"
                             title="Box Shape"
                           >
                             <option value="rect">Rect</option>
@@ -4661,7 +4816,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                                   : { boxId: box.id, mode: 'bg' }
                               )
                             }
-                            className="px-1.5 py-0.5 rounded text-[10px] font-bold border border-[var(--an-line)] flex items-center gap-1 cursor-pointer"
+                            className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[var(--an-page)] text-[var(--an-ink)] border border-[var(--an-line)] hover:border-[var(--an-brass)] flex items-center gap-1 cursor-pointer"
                             title="Box Background Color"
                           >
                             <span
@@ -4680,7 +4835,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                                   : { boxId: box.id, mode: 'text' }
                               )
                             }
-                            className="px-1.5 py-0.5 rounded text-[10px] font-bold border border-[var(--an-line)] flex items-center gap-1 cursor-pointer"
+                            className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-[var(--an-page)] text-[var(--an-ink)] border border-[var(--an-line)] hover:border-[var(--an-brass)] flex items-center gap-1 cursor-pointer"
                             title="Box Text Color"
                           >
                             <span
@@ -4737,19 +4892,15 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                         </div>
                       )}
 
-                      <div
-                        contentEditable={!box.locked}
-                        suppressContentEditableWarning
-                        onBlur={(e) => {
-                          const nextTxt = e.currentTarget.textContent || '';
+                      <FloatingBoxEditable
+                        text={box.text}
+                        locked={box.locked}
+                        onChangeText={(nextTxt) =>
                           setCustomBoxes((prev) =>
                             prev.map((b) => (b.id === box.id ? { ...b, text: nextTxt } : b))
-                          );
-                        }}
-                        className="outline-none text-xs sm:text-sm leading-relaxed w-full h-full cursor-text"
-                      >
-                        {box.text}
-                      </div>
+                          )
+                        }
+                      />
 
                       {!box.locked && (
                         <div
@@ -4801,13 +4952,15 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                       triggerSave();
                       showToast(nextLocked ? 'Picture position locked' : 'Picture unlocked — drag to reposition');
                     }}
-                    className={`px-2 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 cursor-pointer ${
-                      selectedImgLocked ? 'bg-amber-600 text-white' : 'bg-black/10'
+                    className={`px-2 py-1 rounded-lg text-[11px] font-bold flex items-center gap-1 cursor-pointer border ${
+                      selectedImgLocked
+                        ? 'bg-red-500/20 text-red-700 dark:text-red-300 border-red-500/45 hover:bg-red-500/30'
+                        : 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border-emerald-500/45 hover:bg-emerald-500/30'
                     }`}
                     title={selectedImgLocked ? 'Unlock Picture Position' : 'Lock Picture Position'}
                   >
                     {selectedImgLocked ? <Lock className="w-3.5 h-3.5" /> : <Unlock className="w-3.5 h-3.5" />}
-                    <span>{selectedImgLocked ? 'Locked' : 'Lock Pos'}</span>
+                    <span>{selectedImgLocked ? 'Locked' : 'Unlocked'}</span>
                   </button>
                   <button
                     type="button"
@@ -4817,7 +4970,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                       syncSelectedImgOverlay(selectedImgEl);
                       triggerSave();
                     }}
-                    className="px-2 py-1 rounded-lg bg-black/10 text-[11px] font-bold cursor-pointer"
+                    className="px-2 py-1 rounded-lg bg-[var(--an-page)] text-[var(--an-ink)] border border-[var(--an-line)] hover:border-[var(--an-brass)] text-[11px] font-bold cursor-pointer"
                     title="Decrease image width"
                   >
                     Size -
@@ -4830,7 +4983,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                       syncSelectedImgOverlay(selectedImgEl);
                       triggerSave();
                     }}
-                    className="px-2 py-1 rounded-lg bg-black/10 text-[11px] font-bold cursor-pointer"
+                    className="px-2 py-1 rounded-lg bg-[var(--an-page)] text-[var(--an-ink)] border border-[var(--an-line)] hover:border-[var(--an-brass)] text-[11px] font-bold cursor-pointer"
                     title="Increase image width"
                   >
                     Size +
@@ -5137,6 +5290,8 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
               </aside>
             )}
             </div>
+              );
+            })()}
           </div>
         )}
       </section>
@@ -5153,15 +5308,63 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
         </button>
       )}
 
-      {/* 4. Bottom-Docked Video Player Windows (Fixed to bottom side, no float or speed buttons) */}
+      {/* 4. Bottom-Right Hover-Resizable Video Player Windows (Never overlaps Paper) */}
       {videoWindows.map((win) => {
         if (win.isMinimized) return null;
+        const winWidth = win.isMaximized
+          ? Math.min(920, viewportSize.w - 32)
+          : Math.min(win.width || 440, viewportSize.w - 32);
+        const winHeight = win.isMaximized
+          ? Math.min(Math.round(viewportSize.h * 0.72), 620)
+          : Math.min(win.height || 300, viewportSize.h - 96);
         return (
           <div
             key={win.id}
             className={`an-vw ${win.isMaximized ? 'maximized' : ''}`}
-            style={{ zIndex: win.zIndex }}
+            style={{
+              zIndex: win.zIndex,
+              width: `${winWidth}px`,
+              height: `${winHeight}px`,
+            }}
           >
+            {/* Hover Resize Handles (Top edge, Left edge, Top-Left corner) */}
+            <div
+              className="an-vw-rz top"
+              title="Drag top edge to resize video height (Double-click to reset)"
+              onPointerDown={(e) => startVideoResizeDrag(win.id, 'top', e)}
+              onDoubleClick={() =>
+                setVideoWindows((prev) =>
+                  prev.map((v) =>
+                    v.id === win.id ? { ...v, isMaximized: false, width: 440, height: 300 } : v
+                  )
+                )
+              }
+            />
+            <div
+              className="an-vw-rz left"
+              title="Drag left edge to resize video width (Double-click to reset)"
+              onPointerDown={(e) => startVideoResizeDrag(win.id, 'left', e)}
+              onDoubleClick={() =>
+                setVideoWindows((prev) =>
+                  prev.map((v) =>
+                    v.id === win.id ? { ...v, isMaximized: false, width: 440, height: 300 } : v
+                  )
+                )
+              }
+            />
+            <div
+              className="an-vw-rz top-left"
+              title="Drag corner to resize video width & height (Double-click to reset)"
+              onPointerDown={(e) => startVideoResizeDrag(win.id, 'top-left', e)}
+              onDoubleClick={() =>
+                setVideoWindows((prev) =>
+                  prev.map((v) =>
+                    v.id === win.id ? { ...v, isMaximized: false, width: 440, height: 300 } : v
+                  )
+                )
+              }
+            />
+
             {/* Header Bar */}
             <div className="an-vw-h">
               <CirclePlay className="w-4 h-4 text-amber-400 shrink-0" />
@@ -5179,7 +5382,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
               </button>
               <button
                 className="vb"
-                title={win.isMaximized ? 'Compact bottom player' : 'Expand bottom player'}
+                title={win.isMaximized ? 'Compact bottom-right player' : 'Expand bottom-right player'}
                 onClick={() => toggleMaximizeVideo(win.id)}
               >
                 {win.isMaximized ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
@@ -5788,7 +5991,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
             <button
               type="button"
               onClick={() => setIsRulerMenuOpen(false)}
-              className="p-0.5 rounded hover:bg-black/10 cursor-pointer"
+              className="p-0.5 rounded text-[var(--an-ink)] hover:bg-[var(--an-sage-soft)] cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </button>
@@ -5863,7 +6066,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
             <button
               type="button"
               onClick={() => setIsPaperMenuOpen(false)}
-              className="p-0.5 rounded hover:bg-black/10 cursor-pointer"
+              className="p-0.5 rounded text-[var(--an-ink)] hover:bg-[var(--an-sage-soft)] cursor-pointer"
             >
               <X className="w-3.5 h-3.5" />
             </button>

@@ -663,16 +663,85 @@ export async function uploadPdfToPersonalDrive(
 }
 
 /**
- * Normalizes any Google Drive `/view` URL or File ID into an embeddable `/preview` URL.
+ * Extracts a Google Drive File ID from a raw ID or Drive URL, returning null for data:/blob:/non-Drive URLs.
+ */
+export function extractDriveFileId(driveFileIdOrUrl?: string): string | null {
+  if (!driveFileIdOrUrl) return null;
+  const trimmed = driveFileIdOrUrl.trim();
+  if (
+    trimmed.startsWith('data:') ||
+    trimmed.startsWith('blob:') ||
+    trimmed.startsWith('/') ||
+    trimmed.startsWith('#')
+  ) {
+    return null;
+  }
+  if (/^[a-zA-Z0-9_-]{12,}$/.test(trimmed)) {
+    return trimmed;
+  }
+  if (trimmed.includes('drive.google.com') || trimmed.includes('docs.google.com')) {
+    const pathMatch = trimmed.match(/\/d\/([a-zA-Z0-9_-]+)/);
+    if (pathMatch?.[1]) return pathMatch[1];
+    const queryMatch = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    if (queryMatch?.[1]) return queryMatch[1];
+  }
+  return null;
+}
+
+/**
+ * Normalizes any Google Drive `/view` URL or File ID into an embeddable `/preview` URL,
+ * while passing through `data:`, `blob:`, and standard URLs untouched.
  */
 export function getDrivePreviewUrl(driveFileIdOrUrl?: string): string | null {
   if (!driveFileIdOrUrl) return null;
-  if (!driveFileIdOrUrl.startsWith('http') && !driveFileIdOrUrl.startsWith('blob:')) {
-    return `https://drive.google.com/file/d/${driveFileIdOrUrl}/preview`;
+  const trimmed = driveFileIdOrUrl.trim();
+  if (!trimmed) return null;
+  if (trimmed.startsWith('data:') || trimmed.startsWith('blob:') || trimmed.startsWith('/')) {
+    return trimmed;
   }
-  const match = driveFileIdOrUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
-  if (match?.[1]) {
-    return `https://drive.google.com/file/d/${match[1]}/preview`;
+  const driveId = extractDriveFileId(trimmed);
+  if (driveId) {
+    return `https://drive.google.com/file/d/${driveId}/preview`;
   }
-  return driveFileIdOrUrl;
+  return trimmed;
+}
+
+const driveBlobUrlCache = new Map<string, string>();
+
+export function getValidDriveAccessToken(userId?: string): string | null {
+  const session = readStoredDriveSession(userId || 'local');
+  if (!session?.accessToken) return null;
+  if (session.expiresAt && session.expiresAt <= Date.now() + 15_000) return null;
+  return session.accessToken;
+}
+
+/**
+ * Downloads a Google Drive file directly into an authenticated same-origin Blob URL
+ * when a valid Drive session exists, eliminating Google Drive iframe cookie/403 issues.
+ */
+export async function fetchDriveFileBlobUrl(
+  driveFileIdOrUrl: string,
+  userId?: string
+): Promise<string | null> {
+  const driveId = extractDriveFileId(driveFileIdOrUrl);
+  if (!driveId) return null;
+  const cached = driveBlobUrlCache.get(driveId);
+  if (cached) return cached;
+
+  const token = getValidDriveAccessToken(userId);
+  if (!token) return null;
+
+  try {
+    const resp = await fetch(
+      `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(driveId)}?alt=media`,
+      { headers: { Authorization: `Bearer ${token}` } }
+    );
+    if (!resp.ok) return null;
+    const blob = await resp.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    driveBlobUrlCache.set(driveId, blobUrl);
+    return blobUrl;
+  } catch {
+    return null;
+  }
 }

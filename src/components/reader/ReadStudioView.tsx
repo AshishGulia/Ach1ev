@@ -4,11 +4,12 @@ import { SubjectCourse, MedicalBook, BookPage, SnippetScreenshot } from '../../t
 import { useAuth } from '../../contexts/AuthContext';
 import {
   DRIVE_APP_FOLDER_NAME,
-  getDrivePreviewUrl,
+  extractDriveFileId,
   uploadPdfToPersonalDrive,
 } from '../../services/googleDriveService';
 import {
   addUploadedDocument,
+  getFileBlobFromIdb,
   getSessionFileUrl,
   getUploadedDocuments,
   readFileAsDataUrl,
@@ -16,6 +17,7 @@ import {
   touchUploadedDocument,
   UploadedDocumentRecord,
 } from '../../services/uploadedFilesStore';
+import { SmartDocumentFrame } from '../common/SmartDocumentFrame';
 import {
   BookOpen,
   BookOpenText,
@@ -100,7 +102,7 @@ export const ReadStudioView: React.FC<ReadStudioViewProps> = ({
   const { driveAccount, getValidDriveAccessToken, connectGoogleDrive, disconnectGoogleDrive } = useAuth();
   const [driveUploadPct, setDriveUploadPct] = useState<number | null>(null);
   const [driveUploadErr, setDriveUploadErr] = useState<string | null>(null);
-  const [uploadTargetMode, setUploadTargetMode] = useState<'drive' | 'local'>('drive');
+  const [uploadTargetMode, setUploadTargetMode] = useState<'drive' | 'local'>('local');
   const [drivePickerFiles, setDrivePickerFiles] = useState<DriveListedPdf[]>([]);
   const [isLoadingDriveFiles, setIsLoadingDriveFiles] = useState<boolean>(false);
   const [hasLoadedDriveList, setHasLoadedDriveList] = useState<boolean>(false);
@@ -357,6 +359,23 @@ export const ReadStudioView: React.FC<ReadStudioViewProps> = ({
     const mediaUrl = getSessionFileUrl(doc.id) || doc.dataUrl || doc.pdfFileUrl;
     const isPdf = doc.ext.toLowerCase() === 'pdf' || doc.mimeType === 'application/pdf';
     const isImg = doc.mimeType.startsWith('image/') || ['png', 'jpg', 'jpeg', 'webp'].includes(doc.ext.toLowerCase());
+    if (!mediaUrl && doc.id) {
+      void getFileBlobFromIdb(doc.id).then((hydrated) => {
+        if (hydrated) {
+          setAttachedDocs((prev) =>
+            prev.map((d) =>
+              d.id === doc.id
+                ? {
+                    ...d,
+                    pdfUrl: isPdf ? hydrated : d.pdfUrl,
+                    imageUrl: isImg ? hydrated : d.imageUrl,
+                  }
+                : d
+            )
+          );
+        }
+      });
+    }
 
     let htmlParts = '';
     if (doc.extractedTables && doc.extractedTables.length > 0) {
@@ -578,7 +597,7 @@ export const ReadStudioView: React.FC<ReadStudioViewProps> = ({
         extractedTables,
         dataUrl,
       });
-      registerSessionFileUrl(savedRecord.id, localUrl);
+      registerSessionFileUrl(savedRecord.id, localUrl, file);
       setRecentUploadedDocs(getUploadedDocuments().slice(0, 20));
 
       const newDoc: AttachedDoc = {
@@ -1355,14 +1374,12 @@ export const ReadStudioView: React.FC<ReadStudioViewProps> = ({
                     )}
                   </div>
 
-                  {(currentAttachedDoc.driveFileId || currentAttachedDoc.pdfUrl) && (
-                    <div className="my-4 rounded-xl overflow-hidden border border-stone-200 dark:border-[#382518] bg-black/90 h-[62vh]">
-                      <iframe
-                        src={
-                          getDrivePreviewUrl(
-                            currentAttachedDoc.driveFileId || currentAttachedDoc.pdfUrl
-                          ) || undefined
-                        }
+                  {(currentAttachedDoc.driveFileId || extractDriveFileId(currentAttachedDoc.pdfUrl) || currentAttachedDoc.pdfUrl) && (
+                    <div className="my-4 rounded-xl overflow-hidden border border-stone-200 dark:border-[#382518] bg-black/90 h-[76vh]">
+                      <SmartDocumentFrame
+                        docId={currentAttachedDoc.id}
+                        driveFileId={currentAttachedDoc.driveFileId}
+                        srcUrl={currentAttachedDoc.pdfUrl}
                         title={currentAttachedDoc.title}
                         className="w-full h-full border-0"
                         allow="autoplay"
@@ -1429,7 +1446,7 @@ export const ReadStudioView: React.FC<ReadStudioViewProps> = ({
                     <span className="text-[10px] font-mono text-stone-400">P. {mainPageNum}</span>
                   </div>
 
-                  <article className="read-article-container max-w-xl mx-auto">
+                  <article className="read-article-container w-full max-w-none">
                     <div className="read-book-meta-header">
                       <p className="read-book-kicker">{currentMainPage.keyTopic}</p>
                       <h1 className="read-book-headline">{currentMainPage.title}</h1>
@@ -1478,7 +1495,7 @@ export const ReadStudioView: React.FC<ReadStudioViewProps> = ({
                         <span className="text-[10px] font-mono text-stone-400">P. {mainPageNum + 1}</span>
                       </div>
 
-                      <article className="read-article-container max-w-xl mx-auto">
+                      <article className="read-article-container w-full max-w-none">
                         <div className="read-book-meta-header">
                           <p className="read-book-kicker">{mainBook.pages[mainPageNum].keyTopic}</p>
                           <h1 className="read-book-headline">{mainBook.pages[mainPageNum].title}</h1>
@@ -1546,15 +1563,13 @@ export const ReadStudioView: React.FC<ReadStudioViewProps> = ({
                         </div>
                       )}
 
-                      {/* HTML Content or Drive PDF */}
+                      {/* HTML Content or Drive/Local PDF */}
                       {(mainBook.driveFileId || mainBook.pdfFileUrl) && (
-                        <div className="my-4 rounded-xl overflow-hidden border border-stone-200 dark:border-[#382518] bg-black/90 h-[66vh]">
-                          <iframe
-                            src={
-                              getDrivePreviewUrl(
-                                mainBook.driveFileId || mainBook.pdfFileUrl
-                              ) || undefined
-                            }
+                        <div className="my-4 rounded-xl overflow-hidden border border-stone-200 dark:border-[#382518] bg-black/90 h-[76vh]">
+                          <SmartDocumentFrame
+                            docId={mainBook.id}
+                            driveFileId={mainBook.driveFileId}
+                            srcUrl={mainBook.pdfFileUrl}
                             title={mainBook.title}
                             className="w-full h-full border-0"
                             allow="autoplay"
@@ -1608,13 +1623,11 @@ export const ReadStudioView: React.FC<ReadStudioViewProps> = ({
                         </div>
 
                         {(currentAttachedDoc.driveFileId || currentAttachedDoc.pdfUrl) && (
-                          <div className="my-4 rounded-xl overflow-hidden border border-stone-200 dark:border-[#382518] bg-black/90 h-[66vh]">
-                            <iframe
-                              src={
-                                getDrivePreviewUrl(
-                                  currentAttachedDoc.driveFileId || currentAttachedDoc.pdfUrl
-                                ) || undefined
-                              }
+                          <div className="my-4 rounded-xl overflow-hidden border border-stone-200 dark:border-[#382518] bg-black/90 h-[76vh]">
+                            <SmartDocumentFrame
+                              docId={currentAttachedDoc.id}
+                              driveFileId={currentAttachedDoc.driveFileId}
+                              srcUrl={currentAttachedDoc.pdfUrl}
                               title={currentAttachedDoc.title}
                               className="w-full h-full border-0"
                               allow="autoplay"

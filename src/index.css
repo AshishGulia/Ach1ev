@@ -699,6 +699,22 @@ button[class*="border"]:not([class*="bg-gradient"]):not([data-swatch]):not([role
   );
 }
 
+/* Theme-matched high-contrast native select controls & option popups in Light & Dark modes */
+.dark select {
+  color-scheme: dark;
+  color: var(--th-ink, #efe4d4);
+}
+.dark select option,
+.dark select optgroup {
+  background-color: var(--th-dark-surface, #18100c);
+  color: var(--th-ink, #efe4d4);
+}
+html:not(.dark) select option,
+html:not(.dark) select optgroup {
+  background-color: var(--th-surface, #fdfbf7);
+  color: var(--th-ink, #1c140e);
+}
+
 /* Crisp high-contrast bright text on dark buttons & UI labels (no fuzzy border/halo!) */
 button[class*="bg-stone-9"],
 button[class*="bg-slate-9"],

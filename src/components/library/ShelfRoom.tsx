@@ -1277,8 +1277,8 @@ function createRandomJugnooSpot(id: number): JugnooSpec {
     topPct: Math.round(topPct * 10) / 10,
     leftPct: Math.round(leftPct * 10) / 10,
     size: 6 + Math.floor(Math.random() * 4),
-    floatDur: Math.round((5.2 + Math.random() * 4.4) * 10) / 10,
-    glowDur: Math.round((1.7 + Math.random() * 1.6) * 10) / 10,
+    floatDur: Math.round((20.8 + Math.random() * 17.6) * 10) / 10,
+    glowDur: Math.round((6.8 + Math.random() * 6.4) * 10) / 10,
     delay: Math.round(Math.random() * 2.6 * 10) / 10,
     x1: rndSigned(10, 26),
     y1: rndSigned(10, 24),
@@ -1315,7 +1315,7 @@ function NightJugnoos({ bayIdx, themeId }: { bayIdx: number; themeId: ShelfTheme
           };
         })
       );
-    }, 9500);
+    }, 38000);
     return () => window.clearInterval(timer);
   }, [bayIdx, themeId]);
 
@@ -1334,7 +1334,7 @@ function NightJugnoos({ bayIdx, themeId }: { bayIdx: number; themeId: ShelfTheme
               borderRadius: '50%',
               background: '#fef08a',
               boxShadow: `0 0 ${Math.round(j.size * 1.25)}px ${Math.max(2, Math.round(j.size * 0.52))}px rgba(250, 204, 21, 0.64), 0 0 ${Math.round(j.size * 2.38)}px ${Math.round((j.size + 4) * 0.7)}px rgba(234, 179, 8, 0.31)`,
-              transition: 'top 5.5s ease-in-out, left 5.5s ease-in-out',
+              transition: 'top 22s ease-in-out, left 22s ease-in-out',
               animation: `jugnooFloat ${j.floatDur}s ease-in-out infinite alternate, jugnooGlow ${j.glowDur}s ease-in-out infinite alternate`,
               animationDelay: `${j.delay}s`,
               '--jf-x1': `${j.x1}px`,

@@ -871,7 +871,7 @@ html[data-design="1"].dark .atelier-note-root .an-seg button[aria-pressed="true"
   flex: 1;
   overflow: auto;
   background: var(--an-bg2);
-  padding: 20px;
+  padding: 12px 14px;
   scroll-behavior: smooth;
   position: relative;
 }
@@ -880,9 +880,10 @@ html[data-design="1"].dark .atelier-note-root .an-seg button[aria-pressed="true"
 .an-page {
   --z: 1;
   background: var(--an-page);
-  max-width: 720px;
-  margin: 0 auto 18px;
-  padding: 40px 46px 28px;
+  max-width: none;
+  width: 100%;
+  margin: 0 0 18px;
+  padding: 28px 34px 24px;
   border: 1px solid var(--an-line);
   border-radius: 4px;
   box-shadow: 0 14px 30px -24px rgba(40,30,15,.5);
@@ -1281,6 +1282,13 @@ mark.hit {
   box-shadow: none !important;
   border-radius: 6px;
   padding: 4px 20px 4px 6px !important;
+}
+
+.atelier-note-root select,
+.atelier-note-root select option,
+.atelier-note-root select optgroup {
+  background-color: var(--an-page, #fffaf3);
+  color: var(--an-ink, #23160c);
 }
 
 .an-sw {
@@ -2506,34 +2514,98 @@ html.dark .an-ed .an-hand-underline {
   padding-left: 4px;
 }
 
-/* Bottom-Docked Video Player Windows (Stuck firmly to bottom side) */
+/* Bottom-Right Video Player Window (Hover-Resizable, Never Overlaps Paper) */
 .an-vw {
   position: fixed;
-  left: 50%;
-  bottom: 0;
-  transform: translateX(-50%);
+  right: 16px;
+  bottom: 16px;
+  left: auto;
+  transform: none;
   z-index: 100;
-  width: min(500px, calc(100vw - 16px));
-  height: 295px;
-  max-width: calc(100vw - 16px);
-  max-height: calc(100vh - 76px);
-  background: #140e0a;
-  border-radius: 14px 14px 0 0;
-  box-shadow: 0 -10px 36px rgba(0, 0, 0, 0.55), 0 0 0 1px #382518;
+  width: min(440px, calc(100vw - 32px));
+  height: 300px;
+  max-width: calc(100vw - 32px);
+  max-height: calc(100vh - 88px);
+  background: var(--an-paper, #140e0a);
+  color: var(--an-ink, #efe4d4);
+  border: 1px solid var(--an-line, #382518);
+  border-radius: 14px;
+  box-shadow: 0 18px 46px rgba(0, 0, 0, 0.48);
   display: flex;
   flex-direction: column;
   overflow: hidden;
-  color: #efe4d4;
+  transition: box-shadow 0.16s ease, border-color 0.16s ease;
+}
+
+.an-vw:hover {
+  border-color: var(--an-brass, #b78d4a);
+  box-shadow: 0 22px 54px rgba(0, 0, 0, 0.56), 0 0 0 1px var(--an-brass, #b78d4a);
 }
 
 .an-vw.maximized {
-  width: min(920px, calc(100vw - 24px));
-  height: min(74vh, 620px);
+  width: min(920px, calc(100vw - 32px));
+  height: min(72vh, 620px);
 }
 
 .an-vw.min {
   visibility: hidden;
   pointer-events: none;
+}
+
+.an-vw-rz {
+  position: absolute;
+  z-index: 12;
+  opacity: 0;
+  transition: opacity 0.15s ease, background-color 0.15s ease;
+}
+
+.an-vw:hover .an-vw-rz {
+  opacity: 1;
+}
+
+.an-vw-rz.top {
+  top: 0;
+  left: 16px;
+  right: 16px;
+  height: 7px;
+  cursor: ns-resize;
+}
+
+.an-vw-rz.top:hover {
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--an-brass) 55%, transparent), transparent);
+}
+
+.an-vw-rz.left {
+  left: 0;
+  top: 16px;
+  bottom: 16px;
+  width: 7px;
+  cursor: ew-resize;
+}
+
+.an-vw-rz.left:hover {
+  background: linear-gradient(to right, color-mix(in srgb, var(--an-brass) 55%, transparent), transparent);
+}
+
+.an-vw-rz.top-left {
+  top: 0;
+  left: 0;
+  width: 16px;
+  height: 16px;
+  cursor: nwse-resize;
+  border-top-left-radius: 14px;
+}
+
+.an-vw-rz.top-left::after {
+  content: "";
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  width: 7px;
+  height: 7px;
+  border-top: 2px solid var(--an-brass, #b78d4a);
+  border-left: 2px solid var(--an-brass, #b78d4a);
+  border-top-left-radius: 2px;
 }
 
 .an-vw-h {
@@ -2542,15 +2614,19 @@ html.dark .an-ed .an-hand-underline {
   gap: 8px;
   padding: 7px 8px 7px 12px;
   user-select: none;
+  background: color-mix(in srgb, var(--an-bg2, #1c130d) 65%, transparent);
+  border-bottom: 1px solid var(--an-line, #382518);
 }
 
 .an-vw-h .t {
   flex: 1;
   min-width: 0;
   font-size: 12.5px;
+  font-weight: 600;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  color: var(--an-ink, #efe4d4);
 }
 
 .an-vw .vb {
@@ -2559,13 +2635,14 @@ html.dark .an-ed .an-hand-underline {
   border-radius: 8px;
   display: grid;
   place-items: center;
-  color: #B7B9B1;
+  color: var(--an-ink, #efe4d4);
+  opacity: 0.82;
   cursor: pointer;
 }
 
 .an-vw .vb:hover {
-  background: rgba(255,255,255,.08);
-  color: #fff;
+  background: var(--an-sage-soft, rgba(255,255,255,.1));
+  opacity: 1;
 }
 
 .an-vw-b {
@@ -2598,7 +2675,8 @@ html.dark .an-ed .an-hand-underline {
   align-items: center;
   gap: 4px;
   padding: 6px 8px;
-  border-top: 1px solid rgba(255,255,255,.07);
+  border-top: 1px solid var(--an-line, rgba(255,255,255,.1));
+  background: color-mix(in srgb, var(--an-bg2, #1c130d) 55%, transparent);
   flex-wrap: nowrap;
   overflow-x: auto;
   scrollbar-width: none;
@@ -2607,7 +2685,7 @@ html.dark .an-ed .an-hand-underline {
 .an-vw-c .time {
   font-family: var(--an-mono);
   font-size: 11px;
-  color: #B7B9B1;
+  color: var(--an-muted, #B7B9B1);
   padding: 0 6px;
   min-width: 44px;
 }
@@ -2617,18 +2695,20 @@ html.dark .an-ed .an-hand-underline {
   align-items: center;
   gap: 6px;
   font-size: 11.5px;
+  font-weight: 600;
   padding: 5px 9px;
   border-radius: 8px;
-  background: var(--an-sage);
-  color: #140e0a;
+  background: var(--th-btn-active-bg, var(--an-sage));
+  color: var(--th-btn-active-ink, #ffffff);
   white-space: nowrap;
   cursor: pointer;
 }
 
 .an-dock {
   position: fixed;
-  left: 50%;
-  transform: translateX(-50%);
+  right: 16px;
+  left: auto;
+  transform: none;
   bottom: 16px;
   z-index: 105;
   display: flex;
@@ -3195,10 +3275,16 @@ html[data-design] .atelier-note-root .an-card {
   padding: 4px 7px;
   border-radius: 11px;
   background: var(--an-paper);
+  color: var(--an-ink);
   border: 1px solid var(--an-line);
   box-shadow: 0 10px 24px -6px rgba(0, 0, 0, 0.32);
   z-index: 42;
   white-space: nowrap;
+}
+
+.an-floating-textbox-controls select {
+  background-color: var(--an-page);
+  color: var(--an-ink);
 }
 .an-textbox-resize {
   position: absolute;

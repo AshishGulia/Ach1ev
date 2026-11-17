@@ -7,6 +7,7 @@ import {
   UploadedDocumentRecord,
   addUploadedDocument,
   deleteUploadedDocument,
+  getFileBlobFromIdb,
   getLibraryFolders,
   getNotebookFolderMap,
   getSessionFileUrl,
@@ -254,7 +255,7 @@ export const LibraryWorkspaceView: React.FC<LibraryWorkspaceViewProps> = ({
       parsedEventsCount,
       dataUrl,
     });
-    registerSessionFileUrl(record.id, localUrl);
+    registerSessionFileUrl(record.id, localUrl, file);
 
     if (ext === 'pdf' && onAddBook) {
       onAddBook({
@@ -301,8 +302,11 @@ export const LibraryWorkspaceView: React.FC<LibraryWorkspaceViewProps> = ({
   };
 
   // Explorer Download / Share / Delete Helpers
-  const triggerDownloadFile = (doc: UploadedDocumentRecord) => {
-    const url = getSessionFileUrl(doc.id) || doc.pdfFileUrl || doc.dataUrl;
+  const triggerDownloadFile = async (doc: UploadedDocumentRecord) => {
+    const idbUrl = !getSessionFileUrl(doc.id) && !doc.pdfFileUrl && !doc.dataUrl
+      ? await getFileBlobFromIdb(doc.id)
+      : undefined;
+    const url = getSessionFileUrl(doc.id) || idbUrl || doc.pdfFileUrl || doc.dataUrl;
     const link = document.createElement('a');
     if (url) {
       link.href = url;
@@ -1379,6 +1383,7 @@ export const LibraryWorkspaceView: React.FC<LibraryWorkspaceViewProps> = ({
                 badge: previewDoc.ext?.toUpperCase() || 'PDF',
                 dataUrl: previewDoc.dataUrl,
                 pdfFileUrl: previewDoc.pdfFileUrl,
+                driveFileId: previewDoc.driveFileId,
                 extractedText: previewDoc.extractedText,
                 extractedTables: previewDoc.extractedTables,
               } as WebViewDocPayload)

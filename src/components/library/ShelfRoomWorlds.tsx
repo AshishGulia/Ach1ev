@@ -167,7 +167,7 @@ const CelestialSkyOrb: React.FC<{
                 borderRadius: '50%',
                 background: '#f8fafc',
                 boxShadow: '0 0 6px 1.5px rgba(226, 232, 240, 0.85)',
-                animation: `jugnooGlow ${2.4 + (idx % 3) * 0.7}s ease-in-out infinite alternate`,
+                animation: `jugnooGlow ${9.6 + (idx % 3) * 2.8}s ease-in-out infinite alternate`,
                 animationDelay: s.delay,
               }}
             />

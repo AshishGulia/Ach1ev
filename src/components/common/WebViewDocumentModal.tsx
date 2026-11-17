@@ -12,9 +12,12 @@ import {
 } from 'lucide-react';
 import {
   UploadedDocumentRecord,
+  getFileBlobFromIdb,
   getSessionFileUrl,
 } from '../../services/uploadedFilesStore';
+import { extractDriveFileId } from '../../services/googleDriveService';
 import { getPlanLimits, openSubscriptionUpgradeModal } from '../../utils/subscriptionLimits';
+import { SmartDocumentFrame } from './SmartDocumentFrame';
 
 export interface WebViewDocPayload {
   id: string;
@@ -26,6 +29,7 @@ export interface WebViewDocPayload {
   badge?: string;
   dataUrl?: string;
   pdfFileUrl?: string;
+  driveFileId?: string;
   extractedText?: string;
   extractedTables?: UploadedDocumentRecord['extractedTables'];
   pages?: Array<{
@@ -75,23 +79,36 @@ export const WebViewDocumentModal: React.FC<WebViewDocumentModalProps> = ({
 }) => {
   const [isFav, setIsFav] = useState(false);
   const [ribbonFeedback, setRibbonFeedback] = useState<string | null>(null);
+  const [idbBlobUrl, setIdbBlobUrl] = useState<string | undefined>(undefined);
 
   useEffect(() => {
-    if (!doc) return;
+    if (!doc) {
+      setIdbBlobUrl(undefined);
+      return;
+    }
     setIsFav(isDocInFavourites(doc.id, doc.title));
     setRibbonFeedback(null);
+    const cached = getSessionFileUrl(doc.id);
+    if (cached) {
+      setIdbBlobUrl(cached);
+    } else {
+      setIdbBlobUrl(undefined);
+      void getFileBlobFromIdb(doc.id).then((url) => {
+        if (url) setIdbBlobUrl(url);
+      });
+    }
   }, [doc]);
 
   if (!doc) return null;
 
-  const mediaUrl = getSessionFileUrl(doc.id) || doc.pdfFileUrl || doc.dataUrl || '';
+  const mediaUrl = idbBlobUrl || getSessionFileUrl(doc.id) || doc.pdfFileUrl || doc.dataUrl || '';
+  const detectedDriveId = doc.driveFileId || extractDriveFileId(doc.pdfFileUrl) || undefined;
   const lowExt = (doc.ext || doc.fileName?.split('.').pop() || 'pdf').toLowerCase();
   const isHtmlContent =
     mediaUrl.startsWith('data:text/html') || doc.mimeType?.includes('html');
   const isPdfEmbed =
     !isHtmlContent &&
-    (lowExt === 'pdf' || doc.mimeType === 'application/pdf') &&
-    Boolean(mediaUrl);
+    ((lowExt === 'pdf' || doc.mimeType === 'application/pdf') && (Boolean(mediaUrl) || Boolean(detectedDriveId)));
   const isImage =
     ['png', 'jpg', 'jpeg', 'webp', 'gif', 'svg'].includes(lowExt) ||
     Boolean(doc.mimeType?.startsWith('image/'));
@@ -205,11 +222,11 @@ export const WebViewDocumentModal: React.FC<WebViewDocumentModalProps> = ({
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/65 backdrop-blur-sm flex items-center justify-center p-2 sm:p-5"
+      className="fixed inset-0 z-50 bg-black/65 backdrop-blur-sm flex items-center justify-center p-1 sm:p-2"
       onClick={onClose}
     >
       <div
-        className="w-full max-w-5xl h-[90vh] rounded-2xl bg-[#fdfcfa] dark:bg-[#140e0a] border border-stone-200 dark:border-[#382518] shadow-2xl flex flex-col overflow-hidden"
+        className="w-full max-w-none h-[96vh] rounded-2xl bg-[#fdfcfa] dark:bg-[#140e0a] border border-stone-200 dark:border-[#382518] shadow-2xl flex flex-col overflow-hidden"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-label={`Web View Window — ${doc.title}`}
@@ -307,29 +324,27 @@ export const WebViewDocumentModal: React.FC<WebViewDocumentModalProps> = ({
         </div>
 
         {/* Web View Content Viewport */}
-        <div className="flex-1 min-h-0 overflow-y-auto bg-stone-100/70 dark:bg-[#0e0906] p-3 sm:p-5 space-y-4 custom-scrollbar">
-          {isHtmlContent && mediaUrl ? (
-            <iframe
-              src={mediaUrl}
-              title={doc.title}
-              className="w-full h-full min-h-[68vh] rounded-xl border border-stone-200 dark:border-[#352317] bg-white shadow-sm"
-            />
-          ) : isPdfEmbed ? (
-            <iframe
-              src={mediaUrl}
-              title={doc.title}
-              className="w-full h-full min-h-[68vh] rounded-xl border border-stone-200 dark:border-[#352317] bg-white shadow-sm"
-            />
+        <div className="flex-1 min-h-0 overflow-y-auto bg-stone-100/70 dark:bg-[#0e0906] p-2 sm:p-4 space-y-4 custom-scrollbar">
+          {(isHtmlContent && mediaUrl) || isPdfEmbed ? (
+            <div className="w-full h-[78vh] rounded-xl overflow-hidden border border-stone-200 dark:border-[#352317] bg-white dark:bg-[#140e0a] shadow-sm">
+              <SmartDocumentFrame
+                docId={doc.id}
+                driveFileId={detectedDriveId}
+                srcUrl={mediaUrl}
+                title={doc.title}
+                className="w-full h-full border-0"
+              />
+            </div>
           ) : isImage && mediaUrl ? (
             <div className="flex items-center justify-center rounded-xl bg-black/5 dark:bg-black/40 p-4 border border-stone-200 dark:border-[#352317]">
               <img
                 src={mediaUrl}
                 alt={doc.title}
-                className="max-h-[70vh] w-auto object-contain rounded-lg shadow"
+                className="max-h-[78vh] w-auto object-contain rounded-lg shadow"
               />
             </div>
           ) : doc.pages && doc.pages.length > 0 ? (
-            <div className="space-y-4 max-w-3xl mx-auto">
+            <div className="space-y-4 w-full max-w-none">
               {doc.pages.map((p) => (
                 <div
                   key={p.pageNumber}
@@ -350,13 +365,13 @@ export const WebViewDocumentModal: React.FC<WebViewDocumentModalProps> = ({
             </div>
           ) : doc.contentHtml ? (
             <div
-              className="max-w-3xl mx-auto p-6 rounded-2xl bg-white dark:bg-[#1a120d] border border-stone-200 dark:border-[#352317] prose prose-sm dark:prose-invert"
+              className="w-full max-w-none p-6 rounded-2xl bg-white dark:bg-[#1a120d] border border-stone-200 dark:border-[#352317] prose prose-sm dark:prose-invert"
               dangerouslySetInnerHTML={{ __html: doc.contentHtml }}
             />
           ) : null}
 
           {doc.extractedTables && doc.extractedTables.length > 0 && (
-            <div className="max-w-4xl mx-auto space-y-3">
+            <div className="w-full max-w-none space-y-3">
               {doc.extractedTables.map((tbl, tIdx) => (
                 <div
                   key={tIdx}
@@ -396,7 +411,7 @@ export const WebViewDocumentModal: React.FC<WebViewDocumentModalProps> = ({
           )}
 
           {!isHtmlContent && !isPdfEmbed && !isImage && !doc.pages?.length && !doc.contentHtml && (
-            <div className="max-w-3xl mx-auto p-6 rounded-2xl bg-white dark:bg-[#1a120d] border border-stone-200 dark:border-[#352317] text-xs text-stone-700 dark:text-stone-300 whitespace-pre-wrap">
+            <div className="w-full max-w-none p-6 rounded-2xl bg-white dark:bg-[#1a120d] border border-stone-200 dark:border-[#352317] text-xs text-stone-700 dark:text-stone-300 whitespace-pre-wrap">
               {doc.extractedText || 'Document stored safely in Ach1ev Library. Use Save to Device or Share from the top ribbon.'}
             </div>
           )}

@@ -763,7 +763,7 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
     } catch {}
   };
 
-  const [taskFilter, setTaskFilter] = useState<'all' | 'pending' | 'due' | 'done'>('all');
+  const [taskFilter, setTaskFilter] = useState<'all' | 'pending' | 'done'>('all');
   const [newTaskInput, setNewTaskInput] = useState('');
 
   const handleToggleTaskDone = (id: string) => {
@@ -782,15 +782,14 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
       id: `task-${Date.now()}`,
       t: newTaskInput.trim(),
       done: false,
-      due: taskFilter === 'due',
+      due: false,
     };
     saveStickyTasks([...stickyTasks, newTask]);
     setNewTaskInput('');
   };
 
   const filteredTasks = stickyTasks.filter((t) => {
-    if (taskFilter === 'pending') return !t.done && !t.due;
-    if (taskFilter === 'due') return !t.done && Boolean(t.due);
+    if (taskFilter === 'pending') return !t.done;
     if (taskFilter === 'done') return t.done;
     return true;
   });
@@ -1285,13 +1284,6 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
                       onClick={() => setTaskFilter('pending')}
                     >
                       Pending
-                    </button>
-                    <button
-                      type="button"
-                      aria-pressed={taskFilter === 'due'}
-                      onClick={() => setTaskFilter('due')}
-                    >
-                      Due
                     </button>
                     <button
                       type="button"

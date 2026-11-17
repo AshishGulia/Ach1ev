@@ -18,7 +18,7 @@ import {
 import { getPlanLimits, openSubscriptionUpgradeModal } from '../../utils/subscriptionLimits';
 import {
   DRIVE_APP_FOLDER_NAME,
-  getDrivePreviewUrl,
+  extractDriveFileId,
   prefetchGoogleOAuth,
   uploadPdfToPersonalDrive,
 } from '../../services/googleDriveService';
@@ -31,6 +31,7 @@ import {
   RecentOpenedFileRecord,
   UploadedDocumentRecord,
 } from '../../services/uploadedFilesStore';
+import { SmartDocumentFrame } from '../common/SmartDocumentFrame';
 import {
   INITIAL_FLOWCHART_DOCS,
   MedicalFlowchartDoc,
@@ -1181,12 +1182,12 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
               {recentDocModal && (
                 <div
-                  className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs"
+                  className="fixed inset-0 z-50 flex items-center justify-center p-1 sm:p-2 bg-black/70 backdrop-blur-xs"
                   onClick={() => setRecentDocModal(null)}
                 >
                   <div
                     onClick={(e) => e.stopPropagation()}
-                    className="w-full max-w-3xl max-h-[88vh] rounded-3xl bg-[#fcfaf7] dark:bg-[#160f0a] border border-stone-200 dark:border-[#382518] shadow-2xl flex flex-col overflow-hidden"
+                    className="w-full max-w-none max-h-[96vh] rounded-2xl bg-[#fcfaf7] dark:bg-[#160f0a] border border-stone-200 dark:border-[#382518] shadow-2xl flex flex-col overflow-hidden"
                   >
                     <div className="px-5 py-3 border-b border-stone-200 dark:border-[#382518] flex items-center justify-between gap-2">
                       <div className="min-w-0">
@@ -1205,18 +1206,29 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                         <X className="w-4 h-4" />
                       </button>
                     </div>
-                    <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar">
+                    <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 custom-scrollbar">
                       {(() => {
                         const url = getSessionFileUrl(recentDocModal.id) || recentDocModal.dataUrl || recentDocModal.pdfFileUrl;
-                        if (url && (recentDocModal.ext === 'pdf' || recentDocModal.mimeType === 'application/pdf')) {
+                        const isPdfOrHtml =
+                          recentDocModal.ext === 'pdf' ||
+                          recentDocModal.mimeType === 'application/pdf' ||
+                          recentDocModal.mimeType?.includes('html') ||
+                          Boolean(recentDocModal.driveFileId);
+                        if (isPdfOrHtml) {
                           return (
-                            <div className="h-[420px] rounded-2xl overflow-hidden border border-stone-200 dark:border-[#382518]">
-                              <iframe src={url} title={recentDocModal.fileName} className="w-full h-full border-0" />
+                            <div className="h-[74vh] w-full rounded-xl overflow-hidden border border-stone-200 dark:border-[#382518]">
+                              <SmartDocumentFrame
+                                docId={recentDocModal.id}
+                                driveFileId={recentDocModal.driveFileId}
+                                srcUrl={url}
+                                title={recentDocModal.fileName}
+                                className="w-full h-full border-0"
+                              />
                             </div>
                           );
                         }
                         if (url && recentDocModal.mimeType.startsWith('image/')) {
-                          return <img src={url} alt={recentDocModal.fileName} className="max-h-[380px] mx-auto rounded-xl" />;
+                          return <img src={url} alt={recentDocModal.fileName} className="max-h-[74vh] mx-auto rounded-xl" />;
                         }
                         return null;
                       })()}
@@ -1687,8 +1699,8 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
       {/* Quick Book Reader Modal */}
       {activeBookModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-sm">
-          <div className="themed-glass-card relative w-full max-w-4xl max-h-[88vh] bg-white dark:bg-[#18110c] rounded-2xl border border-stone-200 dark:border-[#382518] shadow-2xl flex flex-col overflow-hidden">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-1 sm:p-2 bg-black/75 backdrop-blur-sm">
+          <div className="themed-glass-card relative w-full max-w-none max-h-[96vh] bg-white dark:bg-[#18110c] rounded-2xl border border-stone-200 dark:border-[#382518] shadow-2xl flex flex-col overflow-hidden">
             <div className="themed-glass-bar p-4 border-b border-stone-200 dark:border-[#382518] flex items-center justify-between bg-stone-50 dark:bg-[#140e0a]">
               <div className="flex items-center gap-2.5 min-w-0">
                 <BookLogoBadge
@@ -1725,9 +1737,13 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                   <Palette className="w-3 h-3" />
                   <span>Edit Cover</span>
                 </button>
-                {activeBookModal.pdfFileUrl && (
+                {(activeBookModal.driveFileId || extractDriveFileId(activeBookModal.pdfFileUrl)) && (
                   <a
-                    href={activeBookModal.pdfFileUrl}
+                    href={
+                      activeBookModal.pdfFileUrl && activeBookModal.pdfFileUrl.startsWith('http')
+                        ? activeBookModal.pdfFileUrl
+                        : `https://drive.google.com/file/d/${activeBookModal.driveFileId || extractDriveFileId(activeBookModal.pdfFileUrl)}/view`
+                    }
                     target="_blank"
                     rel="noreferrer"
                     className="themed-soft-pill px-2.5 py-1 rounded-lg bg-amber-600/15 hover:bg-amber-600/25 border border-amber-600/35 text-amber-800 dark:text-amber-300 text-[11px] font-semibold flex items-center gap-1"
@@ -1745,30 +1761,32 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
               </div>
             </div>
 
-            <div className="p-4 sm:p-6 overflow-y-auto space-y-4">
+            <div className="p-3 sm:p-4 overflow-y-auto space-y-4">
               {(activeBookModal.driveFileId || activeBookModal.pdfFileUrl) && (
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold font-mono text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
                       <HardDrive className="w-3.5 h-3.5" />
-                      <span>Direct Google Drive PDF Stream</span>
+                      <span>
+                        {activeBookModal.driveFileId || extractDriveFileId(activeBookModal.pdfFileUrl)
+                          ? 'Google Drive PDF Stream'
+                          : 'Document Stream'}
+                      </span>
                     </span>
                     <button
                       type="button"
                       onClick={() => setShowInlineDriveReader((p) => !p)}
                       className="text-[11px] font-semibold text-amber-700 dark:text-amber-400 underline cursor-pointer"
                     >
-                      {showInlineDriveReader ? 'Collapse PDF Viewer' : 'Expand PDF Viewer'}
+                      {showInlineDriveReader ? 'Collapse Document Viewer' : 'Expand Document Viewer'}
                     </button>
                   </div>
                   {showInlineDriveReader && (
-                    <div className="rounded-xl overflow-hidden border border-stone-200 dark:border-[#382518] bg-black/90 h-[440px]">
-                      <iframe
-                        src={
-                          getDrivePreviewUrl(
-                            activeBookModal.driveFileId || activeBookModal.pdfFileUrl
-                          ) || undefined
-                        }
+                    <div className="rounded-xl overflow-hidden border border-stone-200 dark:border-[#382518] bg-black/90 h-[72vh]">
+                      <SmartDocumentFrame
+                        docId={activeBookModal.id}
+                        driveFileId={activeBookModal.driveFileId}
+                        srcUrl={activeBookModal.pdfFileUrl}
                         title={activeBookModal.title}
                         className="w-full h-full border-0"
                         allow="autoplay"
