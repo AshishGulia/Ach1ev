@@ -354,7 +354,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
         className={
           isModal
             ? 'relative z-10 w-full max-w-4xl grid grid-cols-1 lg:grid-cols-12 gap-6 items-center'
-            : 'relative w-full min-h-[84dvh] flex items-center justify-center px-4 sm:px-8 pt-6 pb-12 sm:py-12 overflow-hidden shrink-0'
+            : 'relative w-full min-h-[94dvh] flex items-center justify-center px-4 sm:px-8 pt-6 pb-20 sm:pt-12 sm:pb-28 overflow-hidden shrink-0'
         }
         style={
           isModal
@@ -708,13 +708,14 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                   <button
                     type="submit"
                     disabled={!!submitting}
-                    className="group relative overflow-hidden w-auto min-w-[116px] sm:min-w-[126px] py-1.5 px-5 rounded-xl text-[#1b1007] font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 disabled:opacity-50"
+                    className="group relative overflow-hidden w-auto min-w-[132px] sm:min-w-[146px] py-2 px-6 rounded-xl text-[#fff7ea] hover:text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50"
                     style={{
-                      background:
-                        'linear-gradient(135deg, #f6dea3 0%, #dca952 44%, #ecc774 72%, #b67d29 100%)',
+                      background: 'rgba(26, 11, 4, 0.10)',
+                      backdropFilter: 'blur(12px)',
+                      WebkitBackdropFilter: 'blur(12px)',
                       boxShadow:
-                        'inset 0 1.5px 0 rgba(255, 250, 232, 0.85), inset 0 -2px 2px rgba(105, 62, 12, 0.35), 0 10px 26px -4px rgba(218, 165, 76, 0.45)',
-                      border: '1px solid rgba(255, 235, 185, 0.65)',
+                        'inset 0 1px 0 rgba(255, 224, 178, 0.08), 0 10px 26px -6px rgba(6, 2, 0, 0.55)',
+                      border: '1px solid rgba(30, 12, 5, 0.35)',
                     }}
                   >
                     <span
@@ -876,13 +877,14 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                   <button
                     type="submit"
                     disabled={!!submitting}
-                    className="group relative overflow-hidden w-auto min-w-[116px] sm:min-w-[126px] py-1.5 px-5 rounded-xl text-[#1b1007] font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer hover:-translate-y-0.5 hover:brightness-105 active:translate-y-0 disabled:opacity-50"
+                    className="group relative overflow-hidden w-auto min-w-[132px] sm:min-w-[146px] py-2 px-6 rounded-xl text-[#fff7ea] hover:text-white font-bold text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer hover:-translate-y-0.5 active:translate-y-0 disabled:opacity-50"
                     style={{
-                      background:
-                        'linear-gradient(135deg, #f6dea3 0%, #dca952 44%, #ecc774 72%, #b67d29 100%)',
+                      background: 'rgba(26, 11, 4, 0.10)',
+                      backdropFilter: 'blur(12px)',
+                      WebkitBackdropFilter: 'blur(12px)',
                       boxShadow:
-                        'inset 0 1.5px 0 rgba(255, 250, 232, 0.85), inset 0 -2px 2px rgba(105, 62, 12, 0.35), 0 10px 26px -4px rgba(218, 165, 76, 0.45)',
-                      border: '1px solid rgba(255, 235, 185, 0.65)',
+                        'inset 0 1px 0 rgba(255, 224, 178, 0.08), 0 10px 26px -6px rgba(6, 2, 0, 0.55)',
+                      border: '1px solid rgba(30, 12, 5, 0.35)',
                     }}
                   >
                     <span

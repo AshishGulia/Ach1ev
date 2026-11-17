@@ -1573,6 +1573,7 @@ export default function App() {
               currentSubject={currentSubject}
               onOpenNotebook={(nb) => handleOpenNotebook(nb.id)}
               onCreateBlankNote={handleCreateBlankNote}
+              onDeleteNotebook={handleDeleteNotebook}
               onAddBook={handleAddBook}
               onOpenInRead={(doc) => {
                 try {

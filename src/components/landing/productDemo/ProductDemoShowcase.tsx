@@ -13,8 +13,76 @@ import { DEMO_SCENES } from './productDemoData';
 import { LaptopFrame, TabletFrame } from './ProductDemoDevices';
 import { SUBSCRIPTION_TIERS } from '../../../data/subscriptionData';
 import studentsStudyPhoto from '../../../assets/images/students_study_discussion_1794823058129.jpg';
+import studentNotesReaderPhoto from '../../../assets/images/student_notes_reader_1794933139826.jpg';
+import studentShelfFlowchartsPhoto from '../../../assets/images/student_shelf_flowcharts_1794933139670.jpg';
+import studentTablesLibraryPhoto from '../../../assets/images/student_tables_library_1794933140110.jpg';
+import studentFocusTimersPhoto from '../../../assets/images/student_focus_timers_1794933140912.jpg';
 
 const SCENE_MS = 6500;
+
+interface StudyEnvironmentPhoto {
+  id: string;
+  src: string;
+  alt: string;
+  eyebrow: string;
+  featureLabel: string;
+  environment: string;
+  headline: string;
+  description: string;
+}
+
+const STUDY_GALLERY_PHOTOS: StudyEnvironmentPhoto[] = [
+  {
+    id: 'notes-reader',
+    src: studentNotesReaderPhoto,
+    alt: 'Single medical student at an oak desk beside a rainy arched library window reading a textbook PDF side-by-side with lined clinical notes and a pinned lecture video',
+    eyebrow: '01 · Rainy Library Window · Split Textbook & Notes',
+    featureLabel: 'Dual PDF + Lined Notes',
+    environment: 'Oak Library Alcove',
+    headline: 'Read Harrison beside lined handwriting or serif notes with your lecture pinned in the corner.',
+    description: 'Zero tab-switching—highlight textbooks on the left while capturing recall pearls and docked video timestamps on the right.',
+  },
+  {
+    id: 'shelf-flowcharts',
+    src: studentShelfFlowchartsPhoto,
+    alt: 'Single scholar studying at night by a warm amber banker lamp in a mahogany wood study nook surrounded by indoor plants while viewing a 3D bookshelf almirah and branching flowchart on tablet',
+    eyebrow: '02 · Amber Lamp Timber Nook · 3D Almirah & Flowcharts',
+    featureLabel: '3D Shelf & Flowcharts',
+    environment: 'Evening Mahogany Study',
+    headline: 'Carry up to 5 backlit 3D bookshelf almirahs paired with interactive multi-level clinical flowcharts.',
+    description: 'Pull books off tactile shelves straight into split-screen reading and map pathology cascades cleanly.',
+  },
+  {
+    id: 'tables-library',
+    src: studentTablesLibraryPhoto,
+    alt: 'Single university student at a sunlit Scandinavian pine loft desk typing on an ultrabook showing extracted classification tables beside an organized file explorer folder list',
+    eyebrow: '03 · Sunlit Pine Loft · Picture-to-Table & File Explorer',
+    featureLabel: 'Tables & Recent Files',
+    environment: 'Morning Nordic Loft',
+    headline: 'Turn textbook photographs into editable tables and browse every PDF or note in one scrollable vault.',
+    description: 'Organize class rosters, schedules, DOCX handouts, and subject folders with instant multi-select download, move, and share.',
+  },
+  {
+    id: 'focus-timers',
+    src: studentFocusTimersPhoto,
+    alt: 'Single young scholar relaxing in a cognac leather armchair beside a twilight bookshop window holding a tablet displaying habit trackers, a 20-20-20 eye rest countdown, and calm leisure soundscapes',
+    eyebrow: '04 · Twilight Bookshop Corner · Habit Trackers & Eye Rest Timer',
+    featureLabel: 'Trackers & Eye Wellness',
+    environment: 'Café Reading Armchair',
+    headline: 'Track study hours, MCQs, 20-20-20 eye rest breaks, and peaceful rain soundscapes without leaving focus.',
+    description: 'Stay fresh through marathon revision blocks with gentle ocular rest alerts and 15-minute leisure resets.',
+  },
+  {
+    id: 'group-study',
+    src: studentsStudyPhoto,
+    alt: 'Students seated around a cozy espresso-toned lounge table collaborating across laptops and tablets on clinical tables and revision flowcharts',
+    eyebrow: '05 · Shared Study Lounge · Study Circle & Mnemonics',
+    featureLabel: 'Collaborative Revision',
+    environment: 'Espresso Study Table',
+    headline: 'When notes, flowcharts, and reference books open together—every group discussion moves twice as fast.',
+    description: 'Compare shared mnemonic decks, revise high-yield tables together, and sync progress seamlessly across Mac, Windows, and iPad.',
+  },
+];
 
 const PRODUCT_FAQS = [
   {
@@ -98,10 +166,12 @@ export const ProductDemoShowcase: React.FC = () => {
   const [laptopIdx, setLaptopIdx] = useState(0);
   const [tabletIdx, setTabletIdx] = useState(1 % total);
   const [openFaqIdx, setOpenFaqIdx] = useState<number | null>(0);
-  const [photoLoadError, setPhotoLoadError] = useState(false);
+  const [activePhotoIdx, setActivePhotoIdx] = useState(0);
+  const [failedPhotoIds, setFailedPhotoIds] = useState<Record<string, boolean>>({});
 
   const laptopScene = DEMO_SCENES[laptopIdx]!;
   const tabletScene = DEMO_SCENES[tabletIdx]!;
+  const activePhoto = STUDY_GALLERY_PHOTOS[activePhotoIdx] || STUDY_GALLERY_PHOTOS[0]!;
 
   useEffect(() => {
     if (prefersReducedMotion()) return;
@@ -147,8 +217,8 @@ export const ProductDemoShowcase: React.FC = () => {
     >
       <style>{SHOWCASE_CSS}</style>
 
-      {/* ═══════════════ 0. SEO INTRO IN DEEP GLOOMY DARK CHOCOLATE ZONE ═══════════════ */}
-      <div className="w-full px-4 sm:px-8 pt-4 pb-16 sm:pb-20">
+      {/* ═══════════════ 0. SEO INTRO SHIFTED LOWER IN DEEP GLOOMY DARK CHOCOLATE ZONE ═══════════════ */}
+      <div className="w-full px-4 sm:px-8 pt-20 sm:pt-32 pb-16 sm:pb-24">
         <div className="max-w-4xl mx-auto text-center px-3 space-y-3">
           <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#f5d093] drop-shadow-[0_1px_6px_rgba(6,2,0,0.85)]">
             Cheapest Medical Note-Making &amp; Focus Study Platform · ₹0 Free, ₹100 Pro &amp; ₹300 Master
@@ -291,42 +361,120 @@ export const ProductDemoShowcase: React.FC = () => {
         </div>
       </div>
 
-      {/* ═══════════════ 4. DSLR COZY STUDY TABLE PHOTO BELOW TABLET ═══════════════ */}
-      <div className="max-w-5xl mx-auto">
+      {/* ═══════════════ 4. 5 DSLR COZY STUDY ROOMS & SINGLE-STUDENT FEATURE SHOWCASE ═══════════════ */}
+      <div className="max-w-5xl mx-auto space-y-5">
+        <div className="text-center space-y-1.5 max-w-2xl mx-auto px-2">
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#5c2c09]">
+            Inside Everyday Study Environments · 5 Real Desk Stories
+          </p>
+          <h3 className="text-xl sm:text-3xl font-bold text-[#190802] font-serif leading-snug">
+            Every study corner—solitary or together—paired with a dedicated Ach1ev workspace tool.
+          </h3>
+        </div>
+
+        {/* Main Active DSLR 16:9 Scene */}
         <div className="relative rounded-3xl overflow-hidden border border-[#6E411A]/35 shadow-[0_24px_60px_rgba(32,16,6,0.22)] bg-[#1f1008]">
-          {!photoLoadError ? (
+          {!failedPhotoIds[activePhoto.id] ? (
             <img
-              src={studentsStudyPhoto}
-              alt="Three medical students in a cozy espresso-toned library lounge naturally discussing clinical tables and notes opened across a laptop and tablet"
+              key={activePhoto.id}
+              src={activePhoto.src}
+              alt={activePhoto.alt}
               referrerPolicy="no-referrer"
-              onError={() => setPhotoLoadError(true)}
-              className="w-full aspect-[16/9] object-cover object-center block"
+              onError={() =>
+                setFailedPhotoIds((prev) => ({ ...prev, [activePhoto.id]: true }))
+              }
+              className="w-full aspect-[16/9] object-cover object-center block transition-opacity duration-300"
             />
           ) : (
             <div className="w-full aspect-[16/9] flex flex-col items-center justify-center p-8 text-center bg-gradient-to-br from-[#2a1409] via-[#1c0c05] to-[#0f0603] text-[#efe4d4]">
-              <p className="font-serif text-xl font-semibold">Built for Real Study Tables</p>
-              <p className="text-xs text-[#d6ba8e] mt-1 max-w-md">
-                Discuss pharmacology mechanisms, compare flowcharts, and revise together seamlessly across laptop and tablet.
-              </p>
+              <p className="font-serif text-xl font-semibold">{activePhoto.featureLabel}</p>
+              <p className="text-xs text-[#d6ba8e] mt-1 max-w-md">{activePhoto.description}</p>
             </div>
           )}
 
-          {/* Subtle Warm Espresso Bottom Scrim for High-Contrast Editorial Caption */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#140803]/88 via-[#140803]/22 to-transparent"
+            className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#140803]/90 via-[#140803]/22 to-transparent"
           />
 
+          {/* Prev / Next arrows on photo */}
+          <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() =>
+                setActivePhotoIdx((i) => (i - 1 + STUDY_GALLERY_PHOTOS.length) % STUDY_GALLERY_PHOTOS.length)
+              }
+              aria-label="Previous study room photo"
+              className="w-9 h-9 rounded-full bg-[#140803]/75 hover:bg-[#140803] text-[#fff6e8] border border-[#f5d093]/35 flex items-center justify-center cursor-pointer transition-colors"
+            >
+              <ChevronLeft className="w-4 h-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => setActivePhotoIdx((i) => (i + 1) % STUDY_GALLERY_PHOTOS.length)}
+              aria-label="Next study room photo"
+              className="w-9 h-9 rounded-full bg-[#140803]/75 hover:bg-[#140803] text-[#fff6e8] border border-[#f5d093]/35 flex items-center justify-center cursor-pointer transition-colors"
+            >
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+
           <div className="absolute inset-x-0 bottom-0 p-5 sm:p-8 flex flex-col sm:flex-row sm:items-end justify-between gap-3 text-[#f8efe2]">
-            <div className="max-w-2xl space-y-1">
+            <div className="max-w-2xl space-y-1.5">
               <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[#e5be76]">
-                Shared Study Tables · Ward Prep Together
+                {activePhoto.eyebrow}
               </p>
               <h3 className="font-serif text-lg sm:text-2xl font-bold leading-snug">
-                When notes, flowcharts, and reference books open together—every group discussion moves twice as fast.
+                {activePhoto.headline}
               </h3>
+              <p className="text-xs sm:text-[13px] text-[#f3dfc1]/95 leading-relaxed">
+                {activePhoto.description}
+              </p>
             </div>
           </div>
+        </div>
+
+        {/* All 5 Cozy Study Spaces & Distinct App Features Selector Grid */}
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+          {STUDY_GALLERY_PHOTOS.map((photo, idx) => {
+            const isSelected = idx === activePhotoIdx;
+            return (
+              <button
+                key={photo.id}
+                type="button"
+                onClick={() => setActivePhotoIdx(idx)}
+                className={`group rounded-2xl overflow-hidden border text-left transition-all cursor-pointer flex flex-col ${
+                  isSelected
+                    ? 'border-[#6b3810] ring-2 ring-[#a66c24]/45 shadow-md bg-[#fff9ee]'
+                    : 'border-[#6b3810]/25 hover:border-[#6b3810]/60 bg-[#fffaf2]/80'
+                }`}
+              >
+                <div className="relative w-full aspect-[16/10] bg-[#1f1008] overflow-hidden">
+                  {!failedPhotoIds[photo.id] ? (
+                    <img
+                      src={photo.src}
+                      alt={photo.alt}
+                      referrerPolicy="no-referrer"
+                      onError={() =>
+                        setFailedPhotoIds((prev) => ({ ...prev, [photo.id]: true }))
+                      }
+                      className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-[#2a1409] to-[#120703]" />
+                  )}
+                </div>
+                <div className="p-2.5 space-y-0.5">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-[#85532d] truncate">
+                    {photo.environment}
+                  </p>
+                  <p className="text-xs font-bold text-[#1e0b03] leading-tight line-clamp-1">
+                    {photo.featureLabel}
+                  </p>
+                </div>
+              </button>
+            );
+          })}
         </div>
       </div>
 

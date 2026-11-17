@@ -1890,22 +1890,90 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
     }, 20);
   };
 
-  // Keyboard shortcut Ctrl+K
+  // Standard Mac (Cmd) & Windows (Ctrl) Rich-Text Keyboard Shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+      const mod = e.ctrlKey || e.metaKey;
+      const key = e.key.toLowerCase();
+      const inEditor =
+        !!editorRef.current &&
+        (document.activeElement === editorRef.current ||
+          editorRef.current.contains(document.activeElement));
+
+      if (mod && !e.shiftKey && !e.altKey && key === 'k') {
         e.preventDefault();
         setIsToolsOpen((prev) => !prev);
-      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'l' && document.activeElement === editorRef.current) {
+      } else if (mod && e.shiftKey && key === 'k' && inEditor) {
         e.preventDefault();
         saveRange();
         setLinkLabelInput(window.getSelection()?.toString().trim() || '');
         setLinkUrlInput('https://');
         setIsLinkModalOpen(true);
-      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z' && document.activeElement === editorRef.current) {
+      } else if (mod && !e.shiftKey && !e.altKey && key === 'l' && inEditor) {
+        e.preventDefault();
+        saveRange();
+        setLinkLabelInput(window.getSelection()?.toString().trim() || '');
+        setLinkUrlInput('https://');
+        setIsLinkModalOpen(true);
+      } else if (mod && key === 's') {
+        e.preventDefault();
+        triggerSave();
+        showToast('Note saved');
+      } else if (mod && !e.shiftKey && !e.altKey && key === 'b' && inEditor) {
+        e.preventDefault();
+        executeCommand('bold');
+      } else if (mod && !e.shiftKey && !e.altKey && key === 'i' && inEditor) {
+        e.preventDefault();
+        executeCommand('italic');
+      } else if (mod && !e.shiftKey && !e.altKey && key === 'u' && inEditor) {
+        e.preventDefault();
+        executeCommand('underline');
+      } else if (mod && e.shiftKey && key === 'x' && inEditor) {
+        e.preventDefault();
+        executeCommand('strikeThrough');
+      } else if (mod && e.shiftKey && (key === '7' || e.code === 'Digit7') && inEditor) {
+        e.preventDefault();
+        executeCommand('insertOrderedList');
+      } else if (mod && e.shiftKey && (key === '8' || e.code === 'Digit8') && inEditor) {
+        e.preventDefault();
+        executeCommand('insertUnorderedList');
+      } else if (mod && e.shiftKey && key === 'l' && inEditor) {
+        e.preventDefault();
+        executeCommand('justifyLeft');
+      } else if (mod && e.shiftKey && key === 'e' && inEditor) {
+        e.preventDefault();
+        executeCommand('justifyCenter');
+      } else if (mod && e.shiftKey && key === 'r' && inEditor) {
+        e.preventDefault();
+        executeCommand('justifyRight');
+      } else if (mod && e.shiftKey && key === 'j' && inEditor) {
+        e.preventDefault();
+        executeCommand('justifyFull');
+      } else if (mod && e.altKey && (key === '1' || e.code === 'Digit1') && inEditor) {
+        e.preventDefault();
+        executeCommand('formatBlock', 'H1');
+      } else if (mod && e.altKey && (key === '2' || e.code === 'Digit2') && inEditor) {
+        e.preventDefault();
+        executeCommand('formatBlock', 'H2');
+      } else if (mod && e.altKey && (key === '3' || e.code === 'Digit3') && inEditor) {
+        e.preventDefault();
+        executeCommand('formatBlock', 'H3');
+      } else if (mod && e.altKey && (key === '0' || e.code === 'Digit0') && inEditor) {
+        e.preventDefault();
+        executeCommand('formatBlock', 'P');
+      } else if (mod && key === ']' && inEditor) {
+        e.preventDefault();
+        executeCommand('indent');
+      } else if (mod && key === '[' && inEditor) {
+        e.preventDefault();
+        executeCommand('outdent');
+      } else if (mod && key === '\\' && inEditor) {
+        e.preventDefault();
+        executeCommand('removeFormat');
+      } else if (mod && key === 'z' && inEditor) {
         e.preventDefault();
         performHistoryStep(e.shiftKey ? 1 : -1);
-      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y' && document.activeElement === editorRef.current) {
+      } else if (mod && key === 'y' && inEditor) {
         e.preventDefault();
         performHistoryStep(1);
       } else if (e.key === 'Escape') {
@@ -4457,6 +4525,30 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                   onClick={handleEditorClick}
                   onMouseMove={handleEditorMouseMove}
                   onPointerDown={handleEditorPointerDown}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Tab') {
+                      e.preventDefault();
+                      const sel = window.getSelection();
+                      const anchor = sel?.anchorNode as HTMLElement | null;
+                      const cell = anchor?.nodeType === 3 ? anchor.parentElement?.closest('td,th') : anchor?.closest?.('td,th');
+                      const tbl = cell?.closest('table');
+                      if (cell && tbl) {
+                        const cells = Array.from(tbl.querySelectorAll('td,th')) as HTMLElement[];
+                        const idx = cells.indexOf(cell as HTMLElement);
+                        const nextCell = cells[e.shiftKey ? idx - 1 : idx + 1];
+                        if (nextCell) {
+                          nextCell.focus();
+                          const r = document.createRange();
+                          r.selectNodeContents(nextCell);
+                          r.collapse(false);
+                          sel?.removeAllRanges();
+                          sel?.addRange(r);
+                        }
+                      } else {
+                        executeCommand(e.shiftKey ? 'outdent' : 'indent');
+                      }
+                    }
+                  }}
                   onKeyUp={() => {
                     saveRange();
                     handleCanvasMouseUp();

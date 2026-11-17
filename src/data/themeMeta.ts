@@ -361,7 +361,7 @@ export const THEME_META_MAP: Record<ThemeId, ThemeMeta> = {
   '1': {
     id: '1',
     name: 'Heritage Atelier Study',
-    tagline: 'Original Walnut & Brass Linen Study · Espresso Night · HD Botanical Backdrop',
+    tagline: 'Original Walnut & Brass Linen Study · Espresso Night · Highland Stillness Backdrop',
     lightBg: '#f6f2ea',
     lightSurface: 'rgba(253, 251, 247, 0.84)',
     lightRaised: 'rgba(239, 228, 212, 0.88)',
@@ -382,7 +382,7 @@ export const THEME_META_MAP: Record<ThemeId, ThemeMeta> = {
     darkAccentSoft: 'rgba(212, 163, 115, 0.16)',
     shapeName: 'Soft Pill',
     buttonRadius: '11px',
-    lightWallpaperUri: resolvePublicAsset('assets/aistudio/theme_1_light_2e14c0c5.webp'),
+    lightWallpaperUri: resolvePublicAsset('assets/aistudio/kellen-riggin-GHyl3680YJs-unsplash_result_0db549ed.webp'),
     darkWallpaperUri: resolvePublicAsset('assets/aistudio/theme_1_dark_6824bab3.webp'),
     sidebar: {
       light: {

@@ -116,8 +116,8 @@ export interface MasterEdition {
 export const MASTER_EDITIONS: MasterEdition[] = [
   {
     id: '1',
-    title: '1. Heritage Atelier Study',
-    badge: '1 · Default',
+    title: 'Heritage Atelier Study',
+    badge: 'Default',
     category: 'Linen & Walnut Atelier · Espresso Night',
     tagline: 'Calacatta marble Leisure (Light), warm walnut & espresso (Dark), Soft Pill buttons',
     description: 'Signature Heritage Study with warm linen Light Mode, smooth dark walnut & espresso Dark Mode, Soft Pill buttons, daytime butterflies & nighttime fireflies.',
@@ -131,8 +131,8 @@ export const MASTER_EDITIONS: MasterEdition[] = [
   },
   {
     id: '2',
-    title: '2. Twilight Sunset',
-    badge: '2 · Plum, Blush & Coral',
+    title: 'Twilight Sunset',
+    badge: 'Plum, Blush & Coral',
     category: 'Twilight Plum #473E66 · Orchid #BD83B8 · Coral #F1916D',
     tagline: 'Twilight plum depth, orchid mauve mist, rose blush surfaces & coral peach glow accents',
     description: 'Signature atelier layout dressed in a serene twilight horizon palette: deep #473E66 plum, soft #BD83B8 orchid, airy #F5D7DB rose blush, and warm #F1916D sunset coral.',
@@ -146,8 +146,8 @@ export const MASTER_EDITIONS: MasterEdition[] = [
   },
   {
     id: '3',
-    title: '3. Royal Blush & Plum',
-    badge: '3 · Pastel Beige-Pink',
+    title: 'Royal Blush & Plum',
+    badge: 'Pastel Beige-Pink',
     category: 'Royal Blush #FBF3F2 · Warm Beige #F5E6E7 · Plum Cocoa #6E4253',
     tagline: 'Cushioned royal baby-pink & warm beige by day, velvety deep plum by night',
     description: 'Royal pastel baby-pink & warm antique beige surfaces paired with refined plum-cocoa buttons and generous cushioned borders.',
@@ -161,8 +161,8 @@ export const MASTER_EDITIONS: MasterEdition[] = [
   },
   {
     id: '4',
-    title: '4. Muted Slate & Cobalt',
-    badge: '4 · Matte Architectural Grey-Blue',
+    title: 'Muted Slate & Cobalt',
+    badge: 'Matte Architectural Grey-Blue',
     category: 'Soft Mist #F1F5F8 · Matte Cobalt #56728F · Dark Slate #131921',
     tagline: 'Restrained matte slate & muted cobalt blue by day, deep charcoal slate by night',
     description: 'Calm architectural contrast pairing desaturated slate mist surfaces with muted matte cobalt accents and razor-crisp 90° geometric corners.',
@@ -176,8 +176,8 @@ export const MASTER_EDITIONS: MasterEdition[] = [
   },
   {
     id: '5',
-    title: '5. Forest Emerald & Gold',
-    badge: '5 · Evergreen, Champagne & Gold',
+    title: 'Forest Emerald & Gold',
+    badge: 'Evergreen, Champagne & Gold',
     category: 'Forest #002a23 · Champagne #d8c2aa · Gold · Obsidian #090e0e',
     tagline: 'Deep forest evergreen #002a23, warm champagne #d8c2aa, brushed gold & obsidian #090e0e',
     description: 'Rich greenish forest study sanctuary pairing deep #002a23 evergreen and #090e0e obsidian night with warm #d8c2aa champagne sand and brushed metallic gold accents.',
@@ -1224,7 +1224,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                               {edition.title}
                             </span>
                             <span className="text-[9px] sm:text-[10px] font-mono px-1.5 sm:px-2 py-0.5 rounded-full bg-stone-200/80 dark:bg-[#251a12] text-stone-700 dark:text-stone-300 font-semibold">
-                              Theme {edition.badge}
+                              {edition.badge}
                             </span>
                           </div>
 

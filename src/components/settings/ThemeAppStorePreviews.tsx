@@ -348,7 +348,7 @@ export const ThemeAppStorePreviews: React.FC<ThemeAppStorePreviewsProps> = ({
                 className="flex items-center justify-between text-[5.5px] sm:text-[6px] font-mono border-t pt-0.5"
                 style={{ borderColor: tBorder, color: tMuted }}
               >
-                <span>Theme {editionId}</span>
+                <span>{meta.name}</span>
                 <span className="font-bold" style={{ color: tAccent }}>
                   All Sections Active
                 </span>

@@ -138,15 +138,15 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
   activeDesign = '1',
 }) => {
 
-  // Dynamic Panel Resizing (Compact 50% default with Mouse-Drag Joystick)
+  // Dynamic Panel Resizing (Generous 320px default height with Mouse-Drag Joystick)
   const [calHeight, setCalHeight] = useState<number>(() => {
-    return parseInt(localStorage.getItem('medden_panel_cal_h') || '160', 10);
+    return parseInt(localStorage.getItem('medden_panel_cal_h_v2') || '320', 10);
   });
   const [remHeight, setRemHeight] = useState<number>(() => {
-    return parseInt(localStorage.getItem('medden_panel_rem_h') || '160', 10);
+    return parseInt(localStorage.getItem('medden_panel_rem_h_v2') || '320', 10);
   });
   const [noteHeight, setNoteHeight] = useState<number>(() => {
-    return parseInt(localStorage.getItem('medden_panel_note_h') || '160', 10);
+    return parseInt(localStorage.getItem('medden_panel_note_h_v2') || '320', 10);
   });
 
   const startResize = (e: React.MouseEvent, type: 'cal' | 'rem' | 'note') => {
@@ -156,16 +156,16 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
 
     const onMouseMove = (moveEvent: MouseEvent) => {
       const deltaY = moveEvent.clientY - startY;
-      const newH = Math.max(120, Math.min(500, Math.round(initialH + deltaY)));
+      const newH = Math.max(220, Math.min(640, Math.round(initialH + deltaY)));
       if (type === 'cal') {
         setCalHeight(newH);
-        localStorage.setItem('medden_panel_cal_h', String(newH));
+        localStorage.setItem('medden_panel_cal_h_v2', String(newH));
       } else if (type === 'rem') {
         setRemHeight(newH);
-        localStorage.setItem('medden_panel_rem_h', String(newH));
+        localStorage.setItem('medden_panel_rem_h_v2', String(newH));
       } else {
         setNoteHeight(newH);
-        localStorage.setItem('medden_panel_note_h', String(newH));
+        localStorage.setItem('medden_panel_note_h_v2', String(newH));
       }
     };
 
@@ -1312,15 +1312,16 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
                       </li>
                     ) : (
                       filteredTasks.map((t) => (
-                        <li key={t.id} className={`atelier-task ${t.done ? 'done' : ''} group flex items-center justify-between gap-1`}>
-                          <div className="flex items-center gap-2 min-w-0 flex-1">
+                        <li key={t.id} className={`atelier-task ${t.done ? 'done' : ''} group flex items-start justify-between gap-2`}>
+                          <div className="flex items-start gap-2 min-w-0 flex-1">
                             <input
                               type="checkbox"
                               id={`chk-${t.id}`}
                               checked={t.done}
                               onChange={() => handleToggleTaskDone(t.id)}
+                              className="mt-1"
                             />
-                            <label htmlFor={`chk-${t.id}`} className="truncate">{t.t}</label>
+                            <label htmlFor={`chk-${t.id}`}>{t.t}</label>
                           </div>
                           <button
                             type="button"
