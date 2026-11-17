@@ -31,6 +31,12 @@ import { AuthPortal } from './components/auth/AuthPortal';
 import type { SettingsTabId } from './components/settings/SettingsModal';
 import type { DeletedItem } from './components/recycle/RecycleBinView';
 import { AchievBrand } from './components/common/AchievBrand';
+import { PrivacyPolicyModal } from './components/common/PrivacyPolicyModal';
+import {
+  getPlanLimits,
+  openSubscriptionUpgradeModal,
+  type UpgradeBannerDetail,
+} from './utils/subscriptionLimits';
 
 const MyDenHome = lazy(() => import('./components/home/MyDenHome').then((m) => ({ default: m.MyDenHome })));
 const NotebookShelfView = lazy(() => import('./components/notebook/NotebookShelfView').then((m) => ({ default: m.NotebookShelfView })));
@@ -138,14 +144,34 @@ export default function App() {
   const [currentSubject, setCurrentSubject] = useState<SubjectCourse>('Pharmacology');
   const [userProfile, setUserProfile] = useState<UserProfile>(INITIAL_USER_PROFILE);
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState<boolean>(false);
+  const [subscriptionBanner, setSubscriptionBanner] = useState<UpgradeBannerDetail | null>(null);
+  const [isPrivacyPolicyOpen, setIsPrivacyPolicyOpen] = useState<boolean>(false);
 
   const currentSubjectRef = React.useRef<SubjectCourse>(currentSubject);
   currentSubjectRef.current = currentSubject;
 
   useEffect(() => {
-    const handleOpenSub = () => setIsSubscriptionModalOpen(true);
+    const handleOpenSub = (ev: Event) => {
+      const detail = (ev as CustomEvent<UpgradeBannerDetail>)?.detail;
+      setSubscriptionBanner(detail && detail.title ? detail : null);
+      setIsSubscriptionModalOpen(true);
+    };
+    const handleOpenPrivacy = () => setIsPrivacyPolicyOpen(true);
     const handleSkipCreateNote = () => {
       enterGuestMode();
+      const limits = getPlanLimits();
+      try {
+        const raw = localStorage.getItem('medden_notebooks');
+        const currentList = raw ? JSON.parse(raw) : [];
+        if (Array.isArray(currentList) && currentList.length >= limits.maxNotes) {
+          openSubscriptionUpgradeModal({
+            title: `Note Limit Reached (${limits.maxNotes} Free Notes)`,
+            message: 'Free tier includes up to 10 notes. Upgrade to ₹100/mo Scholar Pro for unlimited notes.',
+            requiredPlanId: 'scholar-pro',
+          });
+          return;
+        }
+      } catch {}
       const today = new Date().toISOString().split('T')[0];
       const nowIso = new Date().toISOString();
       const ts = Date.now();
@@ -187,9 +213,11 @@ export default function App() {
     };
 
     window.addEventListener('achiev_open_subscription', handleOpenSub);
+    window.addEventListener('achiev_open_privacy_policy', handleOpenPrivacy);
     window.addEventListener('achiev_skip_create_note', handleSkipCreateNote);
     return () => {
       window.removeEventListener('achiev_open_subscription', handleOpenSub);
+      window.removeEventListener('achiev_open_privacy_policy', handleOpenPrivacy);
       window.removeEventListener('achiev_skip_create_note', handleSkipCreateNote);
     };
   }, [enterGuestMode]);
@@ -311,8 +339,27 @@ export default function App() {
           if (cleaned.length !== parsed.length) {
             localStorage.setItem('medden_roster', JSON.stringify(cleaned));
           }
-          return cleaned;
+          if (cleaned.length > 0 || localStorage.getItem('achiev_roster_seeded_v1') === '1') {
+            return cleaned;
+          }
         }
+      }
+      if (localStorage.getItem('achiev_roster_seeded_v1') !== '1') {
+        const today = new Date();
+        const sampleEvent: RosterEvent = {
+          id: 'roster-sample-achiev-1',
+          title: 'Pharmacology Case Seminar & Study Sprint',
+          date: today.toISOString().split('T')[0],
+          dayOfWeek: today.toLocaleDateString('en-US', { weekday: 'long' }),
+          startTime: '09:00',
+          endTime: '10:30',
+          subject: 'Pharmacology',
+          type: 'seminar',
+          venue: 'Lecture Hall A · Ach1ev Sample',
+        };
+        localStorage.setItem('achiev_roster_seeded_v1', '1');
+        localStorage.setItem('medden_roster', JSON.stringify([sampleEvent]));
+        return [sampleEvent];
       }
     } catch {}
     return [];
@@ -985,6 +1032,15 @@ export default function App() {
   };
 
   const handleCreateBlankNote = () => {
+    const limits = getPlanLimits();
+    if (notebooks.length >= limits.maxNotes) {
+      openSubscriptionUpgradeModal({
+        title: `Free Plan Limit Reached (${limits.maxNotes} Notes)`,
+        message: 'You have created 10 notes on the Free plan. Upgrade to ₹100/mo Scholar Pro for unlimited notebooks.',
+        requiredPlanId: 'scholar-pro',
+      });
+      return;
+    }
     const today = new Date().toISOString().split('T')[0];
     const nowIso = new Date().toISOString();
     const newNb: Notebook = {
@@ -1092,10 +1148,16 @@ export default function App() {
 
   if (!user && !googleUser && !phoneUser && !isGuestMode) {
     return (
-      <AuthPortal
-        isDarkMode={true}
-        onToggleDarkMode={() => setIsDarkMode((prev) => !prev)}
-      />
+      <>
+        <AuthPortal
+          isDarkMode={true}
+          onToggleDarkMode={() => setIsDarkMode((prev) => !prev)}
+        />
+        <PrivacyPolicyModal
+          isOpen={isPrivacyPolicyOpen}
+          onClose={() => setIsPrivacyPolicyOpen(false)}
+        />
+      </>
     );
   }
 
@@ -1110,7 +1172,7 @@ export default function App() {
         <div className="dark-ambient-mesh-1" />
         <div className="dark-ambient-mesh-2" />
       </div>
-      {/* Crisp Theme Marble (Theme 1 Light) & Sober Abstract / Custom Wallpapers */}
+      {/* Crisp Theme Backdrops & HD Uploaded / Custom Wallpapers (zero stretch across every screen ratio) */}
       {appWallpaperUri && activeView !== 'leisure' && (
         <div
           className="app-theme-wallpaper"
@@ -1118,12 +1180,9 @@ export default function App() {
           style={{
             zIndex: 1,
             backgroundImage: appWallpaperUri,
-            backgroundSize: customWallpaperUri
-              ? customWallpaperUri.trim().startsWith('url(')
-                ? 'cover'
-                : '100% 100%'
-              : undefined,
-            backgroundPosition: customWallpaperUri ? 'center' : undefined,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center center',
+            backgroundRepeat: 'no-repeat',
             opacity: appWallpaperOpacity,
           }}
         />
@@ -1142,6 +1201,14 @@ export default function App() {
         onNavigate={(view) => {
           if (isGuestOnly && (view === 'settings' || view === 'recycle-bin')) {
             exitGuestToLogin();
+            return;
+          }
+          if (view === 'community' && !getPlanLimits().canAccessClub) {
+            openSubscriptionUpgradeModal({
+              title: "Achiever's Club Requires Scholar Pro (₹100/mo)",
+              message: "Free accounts can read, take up to 10 notes, and upload 5 files. Upgrade to ₹100/mo Scholar Pro to join Achiever's Club study circles.",
+              requiredPlanId: 'scholar-pro',
+            });
             return;
           }
           setIsSettingsOpen(false);
@@ -1312,6 +1379,14 @@ export default function App() {
                         setActiveView('settings');
                       }}
               onNavigate={(view) => {
+                if (view === 'community' && !getPlanLimits().canAccessClub) {
+                  openSubscriptionUpgradeModal({
+                    title: "Achiever's Club Requires Scholar Pro (₹100/mo)",
+                    message: "Upgrade to ₹100/mo Scholar Pro to join Achiever's Club study circles and peer feeds.",
+                    requiredPlanId: 'scholar-pro',
+                  });
+                  return;
+                }
                 setIsEditingNote(false);
                 setIsSettingsOpen(false);
                 setActiveView(view as any);
@@ -1615,9 +1690,18 @@ export default function App() {
         {isSubscriptionModalOpen && (
           <SubscriptionModal
             isOpen={isSubscriptionModalOpen}
-            onClose={() => setIsSubscriptionModalOpen(false)}
+            upgradeBanner={subscriptionBanner}
+            onClose={() => {
+              setIsSubscriptionModalOpen(false);
+              setSubscriptionBanner(null);
+            }}
           />
         )}
+
+        <PrivacyPolicyModal
+          isOpen={isPrivacyPolicyOpen}
+          onClose={() => setIsPrivacyPolicyOpen(false)}
+        />
 
         {/* Roster Calendar & AI Scanner Modal */}
         {isRosterModalOpen && (

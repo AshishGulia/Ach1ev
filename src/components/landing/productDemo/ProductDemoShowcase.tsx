@@ -77,15 +77,16 @@ const SHOWCASE_CSS = `
     -webkit-tap-highlight-color: transparent !important;
   }
   .pds-faq-btn {
-    background: linear-gradient(180deg, #b87430 0%, #a56222 100%) !important;
-    background-color: #ad6826 !important;
-    color: #221006 !important;
+    background: linear-gradient(180deg, #ecd4ac 0%, #e1bf8b 100%) !important;
+    background-color: #e6c99a !important;
+    color: #3b1e0d !important;
     border: none !important;
     box-shadow: none !important;
   }
   .pds-faq-btn:hover {
-    background: linear-gradient(180deg, #ac6926 0%, #96561b 100%) !important;
-    background-color: #9e5c1f !important;
+    background: linear-gradient(180deg, #e5c899 0%, #d8b279 100%) !important;
+    background-color: #deb984 !important;
+    color: #2c1408 !important;
   }
 `;
 
@@ -131,7 +132,7 @@ export const ProductDemoShowcase: React.FC = () => {
         </span>
       );
     }
-    return <span className="text-[11.5px] font-semibold text-[#2C180A] tabular-nums">{val}</span>;
+    return <span className="text-[11.5px] font-semibold text-[#3b1e0d] tabular-nums">{val}</span>;
   };
 
   return (
@@ -141,19 +142,32 @@ export const ProductDemoShowcase: React.FC = () => {
     >
       <style>{SHOWCASE_CSS}</style>
 
+      {/* ═══════════════ 0. SEO & VALUE PROPOSITION INTRO ON SEAMLESS MERGE BAND ═══════════════ */}
+      <div className="max-w-4xl mx-auto text-center px-3 pt-2 pb-4 space-y-3">
+        <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#fdf2df] drop-shadow-[0_1px_4px_rgba(35,14,4,0.45)]">
+          Cheapest Medical Note-Making &amp; Focus Study Platform · ₹0 Free, ₹100 Pro &amp; ₹300 Master
+        </p>
+        <h2 className="text-2xl sm:text-4xl font-serif font-bold text-[#fffaf0] leading-tight text-balance drop-shadow-[0_2px_10px_rgba(35,14,4,0.38)]">
+          Side-by-Side Textbooks, Ruled Notes, 3D Almirahs &amp; Focus Timers in One Workspace
+        </h2>
+        <p className="text-sm sm:text-base text-[#faebd3] max-w-2xl mx-auto leading-relaxed drop-shadow-[0_1px_4px_rgba(35,14,4,0.35)]">
+          Built for MBBS, NEET-PG, USMLE, Nursing, and deep learners: read PDFs/DOCX beside handwriting or serif notes, pin timestamped YouTube lectures, build multi-level flowcharts, and organize every file neatly.
+        </p>
+      </div>
+
       {/* ═══════════════ 1. MACBOOK PRO SHOWCASE WITH ITS OWN SIDE ARROWS ═══════════════ */}
       <div>
         <div className="space-y-1.5 text-center mb-6 sm:mb-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8f5f2c]">
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#4a2511]">
             Desktop Studio · MacBook View
           </p>
           <h2
             id="product-demo-heading"
-            className="text-xl sm:text-3xl font-bold text-[#1E1007] font-serif leading-[1.2] text-balance"
+            className="text-xl sm:text-3xl font-bold text-[#3b1e0d] font-serif leading-[1.2] text-balance"
           >
             {laptopScene.title}
           </h2>
-          <p className="text-sm text-[#4E3721] leading-relaxed max-w-2xl mx-auto">
+          <p className="text-sm text-[#4a2511] leading-relaxed max-w-2xl mx-auto">
             {laptopScene.caption}
           </p>
         </div>
@@ -404,9 +418,9 @@ export const ProductDemoShowcase: React.FC = () => {
         </div>
       </div>
 
-      {/* ═══════════════ 6. FREQUENTLY ASKED QUESTIONS — DARK CARAMEL BUTTON + CREAM ANSWER ═══════════════ */}
+      {/* ═══════════════ 6. FREQUENTLY ASKED QUESTIONS — CHOCOLATE BROWN QUESTION & ANSWER TEXT ═══════════════ */}
       <div className="max-w-4xl mx-auto space-y-3">
-        <h3 className="text-xl sm:text-2xl font-bold text-center text-[#241106] font-serif mb-4">
+        <h3 className="text-xl sm:text-2xl font-bold text-center text-[#3b1e0d] font-serif mb-4">
           Frequently Asked Questions
         </h3>
         {PRODUCT_FAQS.map((item, i) => {
@@ -414,22 +428,22 @@ export const ProductDemoShowcase: React.FC = () => {
           return (
             <div
               key={item.q}
-              className="rounded-2xl border border-[#8E531C] bg-[#F4E2C2] overflow-hidden shadow-[0_6px_18px_rgba(68,36,12,0.12)]"
+              className="rounded-2xl border border-[#b98a55] bg-[#F4E2C2] overflow-hidden shadow-[0_6px_18px_rgba(68,36,12,0.10)]"
             >
               <button
                 type="button"
                 onClick={() => setOpenFaqIdx(isOpen ? null : i)}
                 className="pds-faq-btn raw-icon-btn w-full px-4 py-3.5 text-left flex items-center justify-between gap-3 cursor-pointer transition-colors"
               >
-                <span className="text-xs sm:text-sm font-bold text-[#221006]">{item.q}</span>
+                <span className="text-xs sm:text-sm font-bold text-[#3b1e0d]">{item.q}</span>
                 {isOpen ? (
-                  <ChevronUp className="w-4 h-4 text-[#221006] shrink-0" />
+                  <ChevronUp className="w-4 h-4 text-[#3b1e0d] shrink-0" />
                 ) : (
-                  <ChevronDown className="w-4 h-4 text-[#221006] shrink-0" />
+                  <ChevronDown className="w-4 h-4 text-[#3b1e0d] shrink-0" />
                 )}
               </button>
               {isOpen && (
-                <div className="px-4 pb-3.5 text-xs sm:text-[13px] font-medium text-[#2A1508] bg-[#F4E2C2] leading-relaxed border-t border-[#9B5E24]/30 pt-2.5">
+                <div className="px-4 pb-3.5 text-xs sm:text-[13px] font-medium text-[#4a2511] bg-[#f8ebd4] leading-relaxed border-t border-[#b98a55]/35 pt-2.5">
                   {item.a}
                 </div>
               )}
@@ -437,6 +451,27 @@ export const ProductDemoShowcase: React.FC = () => {
           );
         })}
       </div>
+
+      {/* ═══════════════ 7. QUIET LEGAL & PRIVACY FOOTER ═══════════════ */}
+      <footer className="max-w-4xl mx-auto pt-4 border-t border-[#8C5621]/25 flex flex-wrap items-center justify-between gap-3 text-xs text-[#4a2511]">
+        <span className="font-semibold">© {new Date().getFullYear()} Ach1ev — Settle Ideas</span>
+        <div className="flex items-center gap-4">
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent('achiev_open_privacy_policy'))}
+            className="font-semibold text-[#3b1e0d] hover:underline underline-offset-4 cursor-pointer"
+          >
+            Privacy Policy
+          </button>
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new CustomEvent('achiev_skip_create_note'))}
+            className="font-semibold text-[#3b1e0d] hover:underline underline-offset-4 cursor-pointer"
+          >
+            Open Studio
+          </button>
+        </div>
+      </footer>
     </section>
   );
 };

@@ -11,6 +11,12 @@ import ShelfRoom, { type Book as ShelfBook, COVER as SHELF_COVER } from './Shelf
 import { getThemeMeta } from '../../data/themeMeta';
 import { useAuth } from '../../contexts/AuthContext';
 import {
+  ACHIEV_FEATURES_GUIDE_PAGES,
+  ACHIEV_GUIDE_DOC_ID,
+  buildAchievGuideDataUrl,
+} from '../../data/achievSampleDocs';
+import { getPlanLimits, openSubscriptionUpgradeModal } from '../../utils/subscriptionLimits';
+import {
   DRIVE_APP_FOLDER_NAME,
   getDrivePreviewUrl,
   prefetchGoogleOAuth,
@@ -236,6 +242,19 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
   const handleUploadBookToPersonalDrive = async (e: React.FormEvent) => {
     e.preventDefault();
+    const limits = getPlanLimits();
+    const userDocsCount = getUploadedDocuments().filter((d) => !d.id.startsWith('doc-sample-')).length;
+    if (userDocsCount >= limits.maxDocuments) {
+      openSubscriptionUpgradeModal({
+        title: `Document Upload Limit (${limits.maxDocuments} Files)`,
+        message:
+          limits.planId === 'free'
+            ? 'Free plan supports up to 5 documents. Upgrade to ₹100/mo Scholar Pro for 50 documents.'
+            : 'Scholar Pro supports up to 50 documents. Upgrade to ₹300/mo Master Ultimate for unlimited uploads.',
+        requiredPlanId: limits.planId === 'free' ? 'scholar-pro' : 'master-ultimate',
+      });
+      return;
+    }
     if (!drivePdfFile) {
       setDriveUploadError('Please select a PDF textbook or medical document to upload.');
       return;
@@ -837,6 +856,36 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
       subtitle: 'Shelf Book',
       source: 'shelf',
     });
+
+    if (
+      shelfBook.id === 'achiev-features-guide-pdf' ||
+      shelfBook.id === 'achiev-guide-custom-cover' ||
+      shelfBook.id === ACHIEV_GUIDE_DOC_ID ||
+      shelfBook.title.toLowerCase().includes('achiev features') ||
+      shelfBook.title.toLowerCase().includes('achiev study handbook')
+    ) {
+      setActiveBookModal({
+        id: shelfBook.id,
+        title: shelfBook.title,
+        subject: 'Pharmacology',
+        author: 'Ach1ev Editorial',
+        edition: '3-Page Illustrated Guide',
+        coverColor: shelfBook.thumbnail?.bgColor || SHELF_COVER[shelfBook.cover]?.from || '#7c4521',
+        thumbnail: shelfBook.thumbnail,
+        pdfFileUrl: buildAchievGuideDataUrl(),
+        bookmarks: [1, 3],
+        pages: ACHIEV_FEATURES_GUIDE_PAGES.map((p) => ({
+          pageNumber: p.pageNumber,
+          title: p.heading,
+          keyTopic: p.subtitle,
+          summaryPearl: p.highlight || p.subtitle,
+          contentHtml: `<div class="space-y-3"><p><strong>${p.subtitle}</strong></p>${p.sections
+            .map((s) => `<h4>${s.title}</h4><p>${s.body}</p>`)
+            .join('')}${p.highlight ? `<div class="callout">${p.highlight}</div>` : ''}</div>`,
+        })),
+      });
+      return;
+    }
 
     const found =
       CURATED_MEDICAL_BOOKS.find(

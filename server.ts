@@ -10,7 +10,7 @@ const envFiles = ['.env.local', '.env'].filter((file) =>
   fs.existsSync(path.resolve(process.cwd(), file))
 );
 if (envFiles.length > 0) {
-  dotenv.config({ path: envFiles });
+  dotenv.config({ path: envFiles, override: true });
 }
 
 const __filename = fileURLToPath(import.meta.url);

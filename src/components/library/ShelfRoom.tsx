@@ -47,6 +47,7 @@ import type { BookThumbnailConfig, Notebook, MedicalBook, DesignId } from '../..
 import { BookLogoBadge } from './BookLogoBadge';
 import { BookThumbnailEditorModal } from './BookThumbnailEditorModal';
 import { getDefaultThumbnail } from '../../data/thumbnailMeta';
+import { getPlanLimits, openSubscriptionUpgradeModal } from '../../utils/subscriptionLimits';
 import {
   resolveShelfThemeId,
   resolveShelfAssetCssUrl,
@@ -367,6 +368,28 @@ export const mk = (
   folders: folders ?? [],
 });
 
+const DEFAULT_ACHIEV_SHELF_BOOKS: Book[] = [
+  {
+    id: 'achiev-features-guide-pdf',
+    title: 'Achiev Features & Subscription Guide',
+    cover: 'Maroon',
+  },
+  {
+    id: 'achiev-guide-custom-cover',
+    title: 'Achiev Study Handbook',
+    cover: 'Emerald',
+    thumbnail: {
+      displayMode: 'concise',
+      kind: 'icon',
+      letter: 'AC',
+      iconName: 'Sparkles',
+      bgColor: '#1c4d3a',
+      fgColor: '#f5e7c4',
+      conciseTitle: 'Achiev Guide',
+    },
+  },
+];
+
 export const seed = (): AlmirahT[] => [
   {
     id: 'alm-dark-chocolate',
@@ -374,7 +397,12 @@ export const seed = (): AlmirahT[] => [
     design: 'Dark Chocolate',
     hasUpperDoor: false,
     shelves: [
-      mk('Section 1', []),
+      {
+        id: uid(),
+        name: 'Section 1',
+        books: [...DEFAULT_ACHIEV_SHELF_BOOKS],
+        folders: [],
+      },
       mk('Section 2', []),
       mk('Lower Section', []),
     ],
@@ -457,9 +485,29 @@ export function useStored(): [AlmirahT[], (next: AlmirahT[]) => void] {
               );
             migrated = [migrated[0]!, ...nonEmptyExtra];
           }
+          if (localStorage.getItem('achiev_shelf_v2_seeded') !== '1' && migrated.length > 0) {
+            const firstAlmirah = migrated[0]!;
+            const firstShelf = firstAlmirah.shelves[0];
+            if (firstShelf) {
+              const existingIds = new Set(firstShelf.books.map((b) => b.id));
+              const missing = DEFAULT_ACHIEV_SHELF_BOOKS.filter((b) => !existingIds.has(b.id));
+              if (missing.length > 0) {
+                migrated[0] = {
+                  ...firstAlmirah,
+                  shelves: [
+                    { ...firstShelf, books: [...missing, ...firstShelf.books] },
+                    ...firstAlmirah.shelves.slice(1),
+                  ],
+                };
+              }
+            }
+            localStorage.setItem('achiev_shelf_v2_seeded', '1');
+          }
           setValue(migrated);
           localStorage.setItem(KEY, JSON.stringify(migrated));
         }
+      } else {
+        localStorage.setItem('achiev_shelf_v2_seeded', '1');
       }
     } catch {
       /* keep seed */
@@ -3818,9 +3866,24 @@ function ShelfRow({
             const bookHeight = 82 + ((n + shelfIdx) % 3) * 3;
             const hasCustomBg = Boolean(b.thumbnail?.bgColor);
             const isPicked = pickedBook?.book.id === b.id && pickedBook?.fromShelfId === shelf.id;
+            const initials = (b.title || 'BK')
+              .trim()
+              .split(/\s+/)
+              .filter(Boolean)
+              .map((w) => w[0]?.toUpperCase() || '')
+              .join('')
+              .slice(0, 3) || 'BK';
             return (
               <div
                 key={b.id}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  flex: 'none',
+                }}
+              >
+              <div
                 role="button"
                 tabIndex={0}
                 draggable={accessible}
@@ -3951,6 +4014,26 @@ function ShelfRow({
                     borderRadius: 1,
                   }}
                 />
+              </div>
+              <span
+                title={b.title}
+                style={{
+                  fontSize: 9,
+                  lineHeight: '11px',
+                  marginTop: 3,
+                  maxWidth: 62,
+                  color: look.light ? '#3b2416' : '#f3e7d3',
+                  fontFamily: 'ui-monospace, monospace',
+                  fontWeight: 700,
+                  textAlign: 'center',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  textShadow: look.light ? 'none' : '0 1px 2px rgba(0,0,0,0.65)',
+                }}
+              >
+                {initials}...
+              </span>
               </div>
             );
           })}
@@ -5909,6 +5992,15 @@ export default function ShelfRoom({
                         idx={idx}
                         totalAlmirahs={data.length}
                         onPrevAlmirah={() => {
+                          const limits = getPlanLimits();
+                          if (limits.maxAlmirahs <= 1) {
+                            openSubscriptionUpgradeModal({
+                              title: 'Almirah Access Locked (Free Plan: 1 Almirah)',
+                              message: 'Free plan opens the 1st Almirah only. Upgrade to ₹100/mo Scholar Pro to unlock 3 Almirahs, or ₹300/mo Master Ultimate for all 5.',
+                              requiredPlanId: 'scholar-pro',
+                            });
+                            return;
+                          }
                           setOpenMap((m) => {
                             const next = { ...m };
                             delete next[`${a.id}:top`];
@@ -5916,11 +6008,12 @@ export default function ShelfRoom({
                             return next;
                           });
                           if (data.length > 1) {
-                            setAt((i) => (i - 1 + data.length) % data.length);
+                            setAt((i) => (i - 1 + data.length) % Math.min(data.length, limits.maxAlmirahs));
                           } else {
-                            const curPos = DESIGNS.indexOf(a.design as DesignName);
-                            const prevPos = (curPos <= 0 ? DESIGNS.length - 1 : curPos - 1);
-                            const nextDesign = DESIGNS[prevPos]!;
+                            const allowedDesigns = DESIGNS.slice(0, limits.maxAlmirahs);
+                            const curPos = allowedDesigns.indexOf(a.design as DesignName);
+                            const prevPos = curPos <= 0 ? allowedDesigns.length - 1 : curPos - 1;
+                            const nextDesign = allowedDesigns[prevPos]!;
                             const nextLook = LOOKS[nextDesign];
                             patch(a.id, (x) => ({
                               ...x,
@@ -5931,6 +6024,15 @@ export default function ShelfRoom({
                           }
                         }}
                         onNextAlmirah={() => {
+                          const limits = getPlanLimits();
+                          if (limits.maxAlmirahs <= 1) {
+                            openSubscriptionUpgradeModal({
+                              title: 'Unlock More Almirahs with Scholar Pro (₹100/mo)',
+                              message: 'Free accounts include the 1st Almirah. Upgrade to ₹100/mo Scholar Pro to unlock the first 3 Almirahs, or ₹300/mo Master Ultimate for all 5.',
+                              requiredPlanId: 'scholar-pro',
+                            });
+                            return;
+                          }
                           setOpenMap((m) => {
                             const next = { ...m };
                             delete next[`${a.id}:top`];
@@ -5938,10 +6040,27 @@ export default function ShelfRoom({
                             return next;
                           });
                           if (data.length > 1) {
-                            setAt((i) => (i + 1) % data.length);
+                            const nextIdx = (idx + 1) % data.length;
+                            if (nextIdx >= limits.maxAlmirahs) {
+                              openSubscriptionUpgradeModal({
+                                title: 'Unlock All 5 Almirahs with Master Ultimate (₹300/mo)',
+                                message: 'Scholar Pro unlocks the first 3 Almirahs. Upgrade to ₹300/mo Master Ultimate to access all 5 Cabinets.',
+                                requiredPlanId: 'master-ultimate',
+                              });
+                              return;
+                            }
+                            setAt(nextIdx);
                           } else {
                             const curPos = DESIGNS.indexOf(a.design as DesignName);
                             const nextPos = ((curPos < 0 ? 0 : curPos) + 1) % DESIGNS.length;
+                            if (nextPos >= limits.maxAlmirahs) {
+                              openSubscriptionUpgradeModal({
+                                title: 'Unlock All 5 Almirahs with Master Ultimate (₹300/mo)',
+                                message: 'Scholar Pro unlocks the first 3 Almirah designs. Upgrade to ₹300/mo Master Ultimate to open all 5.',
+                                requiredPlanId: 'master-ultimate',
+                              });
+                              return;
+                            }
                             const nextDesign = DESIGNS[nextPos]!;
                             const nextLook = LOOKS[nextDesign];
                             patch(a.id, (x) => ({
@@ -5953,7 +6072,26 @@ export default function ShelfRoom({
                           }
                         }}
                         onAddShelf={() => handleAddShelfToAlmirah(a.id)}
-                        onOpenNewAlmirah={() => setIsNewAlmirahModalOpen(true)}
+                        onOpenNewAlmirah={() => {
+                          const limits = getPlanLimits();
+                          if (data.length >= limits.maxAlmirahs) {
+                            openSubscriptionUpgradeModal({
+                              title:
+                                limits.planId === 'free'
+                                  ? 'Almirah Limit Reached (1 Free Almirah)'
+                                  : limits.planId === 'scholar-pro'
+                                  ? 'Almirah Limit Reached (3 Almirahs on ₹100 Plan)'
+                                  : 'Maximum 5 Cabinets Open',
+                              message:
+                                limits.planId === 'free'
+                                  ? 'Free plan supports 1st Almirah only. Upgrade to ₹100/mo Scholar Pro for 3 Almirahs or ₹300/mo Master Ultimate for all 5.'
+                                  : 'Upgrade to ₹300/mo Master Ultimate to unlock all 5 Almirahs.',
+                              requiredPlanId: limits.planId === 'free' ? 'scholar-pro' : 'master-ultimate',
+                            });
+                            return;
+                          }
+                          setIsNewAlmirahModalOpen(true);
+                        }}
                         onRenameAlmirah={(newName) => patch(a.id, (x) => ({ ...x, name: newName }))}
                         night={night}
                         lit={lit}

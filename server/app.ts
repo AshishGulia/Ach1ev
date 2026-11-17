@@ -153,6 +153,229 @@ export function attachApiRoutes(app: express.Express): express.Express {
     });
   });
 
+  // Public Supabase Client Config Discovery (URL & publishable anon key)
+  app.get('/api/supabase/config', (_req, res) => {
+    const rawUrl = (
+      process.env.VITE_SUPABASE_URL ||
+      process.env.SUPABASE_URL ||
+      process.env.NEXT_PUBLIC_SUPABASE_URL ||
+      'https://koghxdkvdrsfszeykdok.supabase.co'
+    ).trim();
+    const rawKey = (
+      process.env.VITE_SUPABASE_ANON_KEY ||
+      process.env.SUPABASE_ANON_KEY ||
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ||
+      'sb_publishable_rzt6vajMvhi7amv47VBY8Q_-eBSeXhN'
+    ).trim();
+    const urlValid =
+      /^https?:\/\/[a-z0-9.-]+/i.test(rawUrl) &&
+      !rawUrl.includes('YOUR_PROJECT_ID') &&
+      !rawUrl.includes('YOUR_SUPABASE');
+    const keyValid =
+      Boolean(rawKey) &&
+      rawKey !== 'VITE_SUPABASE_ANON_KEY' &&
+      rawKey !== 'SUPABASE_ANON_KEY' &&
+      !rawKey.includes('YOUR_SUPABASE') &&
+      rawKey.length >= 20;
+
+    res.json({
+      configured: Boolean(urlValid && keyValid),
+      url: urlValid ? rawUrl : 'https://koghxdkvdrsfszeykdok.supabase.co',
+      anonKey: keyValid ? rawKey : 'sb_publishable_rzt6vajMvhi7amv47VBY8Q_-eBSeXhN',
+    });
+  });
+
+  // Razorpay Order Creation Endpoint
+  app.post('/api/razorpay/create-order', async (req, res) => {
+    try {
+      const { amountInr, planId, billingCycle = 'monthly', userEmail = '' } = req.body || {};
+      const numericAmount = Math.round(Number(amountInr) || 0);
+      if (numericAmount <= 0 || !planId) {
+        return res.status(400).json({ error: 'Valid amountInr and planId are required.' });
+      }
+
+      const keyId = (process.env.RAZORPAY_KEY_ID || process.env.VITE_RAZORPAY_KEY_ID || 'rzp_live_U0sX2QgzwryN0q').trim();
+      const keySecret = (process.env.RAZORPAY_KEY_SECRET || '').trim();
+      const amountPaise = numericAmount * 100;
+      const receipt = `achiev_${planId}_${Date.now()}`.slice(0, 40);
+
+      if (!keySecret) {
+        return res.status(200).json({
+          orderId: null,
+          directCheckoutMode: true,
+          keyId,
+          amount: amountPaise,
+          currency: 'INR',
+          receipt,
+          message: 'RAZORPAY_KEY_SECRET not configured on Node server; launching standard Razorpay Checkout with Key ID.',
+        });
+      }
+
+      const authHeader = Buffer.from(`${keyId}:${keySecret}`).toString('base64');
+      const rzpRes = await fetch('https://api.razorpay.com/v1/orders', {
+        method: 'POST',
+        headers: {
+          Authorization: `Basic ${authHeader}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          amount: amountPaise,
+          currency: 'INR',
+          receipt,
+          notes: { planId, billingCycle, userEmail },
+        }),
+      });
+
+      const rzpData = await rzpRes.json();
+      if (!rzpRes.ok || !rzpData?.id) {
+        return res.status(rzpRes.status || 502).json({
+          error: rzpData?.error?.description || 'Failed to create Razorpay order.',
+        });
+      }
+
+      return res.json({
+        orderId: rzpData.id,
+        directCheckoutMode: false,
+        keyId,
+        amount: rzpData.amount,
+        currency: rzpData.currency || 'INR',
+        receipt: rzpData.receipt,
+      });
+    } catch (err: any) {
+      return res.status(500).json({ error: err?.message || 'Razorpay order creation failed.' });
+    }
+  });
+
+  // Razorpay Payment Signature Verification + Supabase Subscription Sync
+  app.post('/api/razorpay/verify-payment', async (req, res) => {
+    try {
+      const {
+        razorpay_order_id,
+        razorpay_payment_id,
+        razorpay_signature,
+        planId,
+        billingCycle = 'monthly',
+        amountInr = 0,
+        userEmail = '',
+        userId = null,
+      } = req.body || {};
+
+      if (!razorpay_payment_id || !planId) {
+        return res.status(400).json({ verified: false, error: 'Missing razorpay_payment_id or planId.' });
+      }
+
+      const keySecret = (process.env.RAZORPAY_KEY_SECRET || '').trim();
+      const supabaseUrl = (
+        process.env.VITE_SUPABASE_URL ||
+        process.env.SUPABASE_URL ||
+        'https://koghxdkvdrsfszeykdok.supabase.co'
+      ).trim();
+
+      // Prefer forwarding to deployed Supabase Edge Function if configured
+      const edgeFnUrl = `${supabaseUrl.replace(/\/$/, '')}/functions/v1/verify-razorpay-payment`;
+      const publishableKey = (
+        process.env.VITE_SUPABASE_ANON_KEY ||
+        process.env.SUPABASE_ANON_KEY ||
+        'sb_publishable_rzt6vajMvhi7amv47VBY8Q_-eBSeXhN'
+      ).trim();
+
+      if (!keySecret) {
+        // Attempt verification via Supabase Edge Function (where RAZORPAY_KEY_SECRET lives in Supabase Secrets)
+        try {
+          const fnRes = await fetch(edgeFnUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              apikey: publishableKey,
+              Authorization: `Bearer ${publishableKey}`,
+            },
+            body: JSON.stringify(req.body),
+          });
+          if (fnRes.ok) {
+            const fnData = await fnRes.json();
+            if (fnData?.verified) {
+              return res.json(fnData);
+            }
+            return res.status(403).json(fnData);
+          }
+        } catch {
+          // Edge function may not be deployed yet
+        }
+        return res.status(400).json({
+          verified: false,
+          error:
+            'Signature verification requires RAZORPAY_KEY_SECRET in server env or Supabase Edge Function secrets.',
+        });
+      }
+
+      if (!razorpay_order_id || !razorpay_signature) {
+        return res.status(400).json({
+          verified: false,
+          error: 'Missing razorpay_order_id or razorpay_signature.',
+        });
+      }
+
+      const generatedSignature = crypto
+        .createHmac('sha256', keySecret)
+        .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+        .digest('hex');
+
+      const sigA = Buffer.from(generatedSignature.toLowerCase(), 'utf8');
+      const sigB = Buffer.from(String(razorpay_signature).toLowerCase(), 'utf8');
+      const isValid = sigA.length === sigB.length && crypto.timingSafeEqual(sigA, sigB);
+
+      if (!isValid) {
+        return res.status(403).json({
+          verified: false,
+          error: 'Invalid Razorpay signature. Subscription was not activated.',
+        });
+      }
+
+      // Persist verified subscription to Supabase if service role key is set
+      const serviceKey = (process.env.SUPABASE_SERVICE_ROLE_KEY || '').trim();
+      if (serviceKey && userEmail) {
+        const now = new Date();
+        const expires = new Date(now);
+        expires.setDate(expires.getDate() + (billingCycle === 'annual' ? 365 : 30));
+        await fetch(`${supabaseUrl.replace(/\/$/, '')}/rest/v1/user_subscriptions?on_conflict=user_email`, {
+          method: 'POST',
+          headers: {
+            apikey: serviceKey,
+            Authorization: `Bearer ${serviceKey}`,
+            'Content-Type': 'application/json',
+            Prefer: 'resolution=merge-duplicates,return=representation',
+          },
+          body: JSON.stringify({
+            user_id: userId || null,
+            user_email: String(userEmail).toLowerCase().trim(),
+            plan_id: planId,
+            billing_cycle: billingCycle,
+            status: 'active',
+            amount_inr: Number(amountInr) || 0,
+            razorpay_payment_id,
+            razorpay_order_id,
+            razorpay_signature,
+            signature_verified: true,
+            activated_at: now.toISOString(),
+            expires_at: expires.toISOString(),
+            updated_at: now.toISOString(),
+          }),
+        }).catch(() => {});
+      }
+
+      return res.json({
+        verified: true,
+        planId,
+        billingCycle,
+        razorpay_payment_id,
+        razorpay_order_id,
+        message: 'Razorpay signature verified cleanly.',
+      });
+    } catch (err: any) {
+      return res.status(500).json({ verified: false, error: err?.message || 'Verification failed.' });
+    }
+  });
+
   // Google Drive Server-Side OAuth Configuration & Code Exchange Helpers
   app.get('/api/auth/google/config', (_req, res) => {
     const clientId = process.env.GOOGLE_CLIENT_ID || process.env.VITE_GOOGLE_CLIENT_ID || '';

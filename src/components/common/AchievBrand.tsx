@@ -16,11 +16,11 @@ const resolveAssetUrl = (relativePath: string): string => {
   return `${normalizedBase}${relativePath.replace(/^\/+/, '')}`;
 };
 
-export const ACHIEV_DEFAULT_LOGO_URL = resolveAssetUrl('default-logo-and-name.png?v=1');
-export const ACHIEV_LOGO_URL = resolveAssetUrl('achiev-emblem-3d.png?v=1');
-export const ACHIEV_EMBLEM_URL = resolveAssetUrl('achiev-emblem-3d.png?v=1');
-export const ACHIEV_WORDMARK_URL = resolveAssetUrl('default-logo-and-name.png?v=1');
-export const ACHIEV_LOCKUP_URL = resolveAssetUrl('default-logo-and-name.png?v=1');
+export const ACHIEV_DEFAULT_LOGO_URL = resolveAssetUrl('assets/aistudio/Final_Logo_webp_1000_x_350_e6e85d30.PNG');
+export const ACHIEV_LOGO_URL = resolveAssetUrl('assets/aistudio/Final_Logo_webp_1000_x_350_e6e85d30.PNG');
+export const ACHIEV_EMBLEM_URL = resolveAssetUrl('assets/aistudio/Final_Logo_webp_1000_x_350_e6e85d30.PNG');
+export const ACHIEV_WORDMARK_URL = resolveAssetUrl('assets/aistudio/Final_Logo_webp_1000_x_350_e6e85d30.PNG');
+export const ACHIEV_LOCKUP_URL = resolveAssetUrl('assets/aistudio/Final_Logo_webp_1000_x_350_e6e85d30.PNG');
 export const ACHIEV_LEATHER_HERO_URL = '';
 export const ACHIEV_LEATHER_LOGIN_URL = '';
 
@@ -28,7 +28,7 @@ const GoldEmblem3D: React.FC<{
   sizeClass: string;
   isDarkMode?: boolean;
   ariaLabel?: string;
-}> = ({ sizeClass, isDarkMode = true, ariaLabel = 'ACH1EV emblem' }) => (
+}> = ({ sizeClass, isDarkMode = true, ariaLabel = 'ACH1EV logo' }) => (
   <img
     src={ACHIEV_EMBLEM_URL}
     alt={ariaLabel}
@@ -37,7 +37,7 @@ const GoldEmblem3D: React.FC<{
     style={{
       filter: isDarkMode
         ? 'drop-shadow(0 4px 10px rgba(0, 0, 0, 0.55))'
-        : 'drop-shadow(0 2px 6px rgba(42, 22, 6, 0.28))',
+        : 'drop-shadow(0 2px 6px rgba(42, 22, 6, 0.25))',
     }}
   />
 );
@@ -45,7 +45,6 @@ const GoldEmblem3D: React.FC<{
 export const AchievBrand: React.FC<AchievBrandProps> = ({
   variant = 'compact',
   isDarkMode,
-  showTagline = true,
   className = '',
   imgClassName = '',
   title = 'ACH1EV — Settle Ideas',
@@ -55,9 +54,9 @@ export const AchievBrand: React.FC<AchievBrandProps> = ({
   if (variant === 'emblem') {
     return (
       <GoldEmblem3D
-        sizeClass={imgClassName || 'w-7 h-7'}
+        sizeClass={imgClassName || 'h-8 w-auto max-w-[120px]'}
         isDarkMode={darkFlag}
-        ariaLabel="ACH1EV emblem"
+        ariaLabel="ACH1EV logo"
       />
     );
   }
@@ -74,10 +73,10 @@ export const AchievBrand: React.FC<AchievBrandProps> = ({
           draggable={false}
           className={
             imgClassName ||
-            'h-[76px] sm:h-[94px] w-auto max-w-full object-contain bg-transparent select-none'
+            'h-[84px] sm:h-[104px] w-auto max-w-full object-contain bg-transparent select-none'
           }
           style={{
-            filter: 'drop-shadow(0 6px 14px rgba(0, 0, 0, 0.55))',
+            filter: 'drop-shadow(0 6px 16px rgba(0, 0, 0, 0.45))',
           }}
         />
       </div>
@@ -87,32 +86,30 @@ export const AchievBrand: React.FC<AchievBrandProps> = ({
   if (variant === 'inline') {
     return (
       <div className={`inline-flex items-center gap-1.5 bg-transparent select-none ${className}`} title={title}>
-        <GoldEmblem3D sizeClass={imgClassName || 'w-5 h-5'} isDarkMode={darkFlag} ariaLabel="ACH1EV" />
-        <span className="font-serif font-extrabold tracking-[0.1em] text-[13px] text-[#7c5318] dark:text-[#eccb82] uppercase">
-          ACH1EV
-        </span>
+        <img
+          src={ACHIEV_DEFAULT_LOGO_URL}
+          alt="ACH1EV"
+          draggable={false}
+          className={imgClassName || 'h-6 w-auto object-contain bg-transparent select-none'}
+        />
       </div>
     );
   }
 
-  // Default: 'compact' — Sidebar header brand with transparent 3D gold emblem + original ACH1EV name
+  // Default: 'compact' — Sidebar header brand displaying the crisp full ACH1EV Settle Ideas logo
   return (
-    <div className={`flex items-center gap-2 bg-transparent select-none min-w-0 w-full py-0.5 ${className}`} title={title}>
-      <GoldEmblem3D
-        sizeClass={imgClassName || 'w-[30px] h-[30px]'}
-        isDarkMode={darkFlag}
-        ariaLabel="ACH1EV emblem"
+    <div className={`flex items-center justify-start bg-transparent select-none min-w-0 w-full py-0.5 ${className}`} title={title}>
+      <img
+        src={ACHIEV_DEFAULT_LOGO_URL}
+        alt={title}
+        draggable={false}
+        className={imgClassName || 'h-[36px] max-w-[165px] w-auto object-contain bg-transparent select-none'}
+        style={{
+          filter: darkFlag
+            ? 'drop-shadow(0 3px 8px rgba(0, 0, 0, 0.5))'
+            : 'drop-shadow(0 2px 6px rgba(42, 22, 6, 0.22))',
+        }}
       />
-      <div className="min-w-0 flex-1 flex flex-col justify-center leading-none">
-        <span className="font-serif font-extrabold tracking-[0.11em] text-[14.5px] text-[#7c5318] dark:text-[#eccb82] uppercase truncate">
-          ACH1EV
-        </span>
-        {showTagline && (
-          <span className="mt-0.5 text-[7.5px] font-mono uppercase tracking-[0.22em] text-stone-500 dark:text-[#bfa37a] truncate">
-            SETTLE IDEAS
-          </span>
-        )}
-      </div>
     </div>
   );
 };

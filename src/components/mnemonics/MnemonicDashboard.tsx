@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo, useRef } from 'react';
 import './mnemonicAtelier.css';
 import { SubjectCourse, SnippetScreenshot } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
+import { getPlanLimits, openSubscriptionUpgradeModal } from '../../utils/subscriptionLimits';
 import {
   Search,
   Sparkles,
@@ -413,6 +414,14 @@ export const MnemonicDashboard: React.FC<MnemonicDashboardProps> = ({
 
   // Generate Mnemonic using Gemini / AI
   const handleGenerateWithGemini = async () => {
+    if (!getPlanLimits().canUseGemini) {
+      openSubscriptionUpgradeModal({
+        title: 'Unlock Gemini Mnemonic Generator (₹300/mo)',
+        message: 'AI-powered Gemini memory aid generation is included exclusively in the ₹300/mo Master Ultimate plan.',
+        requiredPlanId: 'master-ultimate',
+      });
+      return;
+    }
     if (!draft.title.trim()) {
       setStatusMessage('Please add a medical topic first to generate a memory aid.');
       return;

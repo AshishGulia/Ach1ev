@@ -35,7 +35,12 @@ import {
   StickyNote,
   Loader2,
   FolderOpen,
+  MoreVertical,
+  FolderInput,
+  Eye,
 } from 'lucide-react';
+import { WebViewDocumentModal, WebViewDocPayload } from '../common/WebViewDocumentModal';
+import { getPlanLimits, openSubscriptionUpgradeModal } from '../../utils/subscriptionLimits';
 
 interface LibraryWorkspaceViewProps {
   notebooks: Notebook[];
@@ -80,6 +85,8 @@ export const LibraryWorkspaceView: React.FC<LibraryWorkspaceViewProps> = ({
   const [isUploading, setIsUploading] = useState(false);
   const [uploadStatus, setUploadStatus] = useState<string | null>(null);
   const [previewDoc, setPreviewDoc] = useState<UploadedDocumentRecord | null>(null);
+  const [openMenuDocId, setOpenMenuDocId] = useState<string | null>(null);
+  const [movingDocId, setMovingDocId] = useState<string | null>(null);
 
   useEffect(() => {
     const syncAll = () => {
@@ -136,6 +143,22 @@ export const LibraryWorkspaceView: React.FC<LibraryWorkspaceViewProps> = ({
     const file = e.target.files?.[0];
     e.target.value = '';
     if (!file) return;
+
+    const limits = getPlanLimits();
+    const userDocsCount = uploadedDocs.filter(
+      (d) => !d.id.startsWith('doc-sample-')
+    ).length;
+    if (userDocsCount >= limits.maxDocuments) {
+      openSubscriptionUpgradeModal({
+        title: `Document Upload Limit (${limits.maxDocuments} Files)`,
+        message:
+          limits.planId === 'free'
+            ? 'Free plan supports up to 5 uploaded documents. Upgrade to ₹100/mo Scholar Pro for 50 documents.'
+            : 'Scholar Pro plan supports up to 50 documents. Upgrade to ₹300/mo Master Ultimate for unlimited uploads.',
+        requiredPlanId: limits.planId === 'free' ? 'scholar-pro' : 'master-ultimate',
+      });
+      return;
+    }
 
     setIsUploading(true);
     setUploadStatus(`Processing "${file.name}"...`);
@@ -227,7 +250,7 @@ export const LibraryWorkspaceView: React.FC<LibraryWorkspaceViewProps> = ({
     setUploadStatus(
       extractedTables.length > 0
         ? `Saved "${file.name}" (${extractedTables.length} table(s) extracted).`
-        : `Saved "${file.name}" to PDFs & Files.`
+        : `Saved "${file.name}" to Recent Files.`
     );
     setIsUploading(false);
     setTimeout(() => setUploadStatus(null), 4000);
@@ -322,7 +345,7 @@ export const LibraryWorkspaceView: React.FC<LibraryWorkspaceViewProps> = ({
               }`}
             >
               <FileText className="w-3.5 h-3.5" />
-              <span>PDFs &amp; Files ({uploadedDocs.length + uploadedWorkspaceBooks.length})</span>
+              <span>Recent Files ({uploadedDocs.length + uploadedWorkspaceBooks.length})</span>
             </button>
           </div>
 
@@ -332,7 +355,7 @@ export const LibraryWorkspaceView: React.FC<LibraryWorkspaceViewProps> = ({
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={activeTab === 'notes' ? 'Search notes...' : 'Search PDFs & files...'}
+              placeholder={activeTab === 'notes' ? 'Search notes...' : 'Search recent files...'}
               className="pl-8 pr-3 py-1.5 rounded-xl border border-stone-200 dark:border-[#382518] bg-white/90 dark:bg-[#1a120d] text-xs text-stone-800 dark:text-stone-100 outline-none focus:border-[#A47C43] w-44 sm:w-52"
             />
           </div>
@@ -575,76 +598,155 @@ export const LibraryWorkspaceView: React.FC<LibraryWorkspaceViewProps> = ({
                 <>
                   {filteredDocs.length > 0 && (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
-                      {filteredDocs.map((doc) => (
-                        <div
-                          key={doc.id}
-                          onClick={() => handleSingleClickDoc(doc)}
-                          className="themed-glass-card group p-4 rounded-2xl border border-stone-200/90 dark:border-[#382518] bg-white/85 dark:bg-[#1c130d]/90 hover:border-[#A47C43] shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between gap-3"
-                        >
-                          <div className="flex items-start gap-3">
-                            <div className="w-10 h-10 rounded-xl bg-amber-500/12 border border-amber-500/25 flex items-center justify-center shrink-0">
-                              {renderFileIcon(doc.ext)}
-                            </div>
-                            <div className="min-w-0 flex-1">
-                              <h3 className="font-serif font-bold text-sm text-stone-900 dark:text-[#f2e6d5] truncate group-hover:text-[#8f5f2c] dark:group-hover:text-amber-300">
-                                {doc.title || doc.fileName}
-                              </h3>
-                              <p className="text-[10.5px] font-mono text-stone-500 dark:text-[#a69079] truncate">
-                                {doc.ext.toUpperCase()} · {doc.sizeLabel} · {doc.source}
-                              </p>
-                              {(doc.extractedTables?.length || 0) > 0 && (
-                                <span className="mt-1 inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-500/12 px-2 py-0.5 rounded-md">
-                                  <Table2 className="w-3 h-3" />
-                                  {doc.extractedTables!.length} Table(s) Detected
-                                </span>
-                              )}
-                            </div>
-                          </div>
-
+                      {filteredDocs.map((doc) => {
+                        const currentFolder = fileFolders.find(
+                          (f) => f.id === (doc.folderId || DEFAULT_FILES_FOLDER_ID)
+                        );
+                        const isMenuOpen = openMenuDocId === doc.id;
+                        const isMoving = movingDocId === doc.id;
+                        return (
                           <div
-                            className="pt-2 border-t border-stone-100 dark:border-[#312015] flex items-center justify-between gap-2"
-                            onClick={(e) => e.stopPropagation()}
+                            key={doc.id}
+                            onClick={() => {
+                              setOpenMenuDocId(null);
+                              handleSingleClickDoc(doc);
+                            }}
+                            className="themed-glass-card group relative p-4 rounded-2xl border border-stone-200/90 dark:border-[#382518] bg-white/85 dark:bg-[#1c130d]/90 hover:border-[#A47C43] shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between gap-3"
                           >
-                            <select
-                              value={doc.folderId || DEFAULT_FILES_FOLDER_ID}
-                              onChange={(e) => {
-                                updateUploadedDocumentFolder(doc.id, e.target.value);
-                                setUploadedDocs(getUploadedDocuments());
-                              }}
-                              className="text-[10.5px] px-2 py-1 rounded-lg bg-stone-100 dark:bg-[#271b13] border border-stone-200 dark:border-[#3b2719] text-stone-700 dark:text-stone-200 outline-none cursor-pointer max-w-[130px]"
+                            <div className="flex items-start gap-3">
+                              <div className="w-10 h-10 rounded-xl bg-amber-500/12 border border-amber-500/25 flex items-center justify-center shrink-0">
+                                {renderFileIcon(doc.ext)}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <h3 className="font-serif font-bold text-sm text-stone-900 dark:text-[#f2e6d5] truncate group-hover:text-[#8f5f2c] dark:group-hover:text-amber-300">
+                                  {doc.title || doc.fileName}
+                                </h3>
+                                <p className="text-[10.5px] font-mono text-stone-500 dark:text-[#a69079] truncate">
+                                  {doc.ext.toUpperCase()} · {doc.sizeLabel} · {doc.source}
+                                </p>
+                                {(doc.extractedTables?.length || 0) > 0 && (
+                                  <span className="mt-1 inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-700 dark:text-emerald-300 bg-emerald-500/12 px-2 py-0.5 rounded-md">
+                                    <Table2 className="w-3 h-3" />
+                                    {doc.extractedTables!.length} Table(s) Detected
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+
+                            <div
+                              className="pt-2 border-t border-stone-100 dark:border-[#312015] flex items-center justify-between gap-2 relative"
+                              onClick={(e) => e.stopPropagation()}
                             >
-                              {fileFolders.map((f) => (
-                                <option key={f.id} value={f.id}>
-                                  📁 {f.name}
-                                </option>
-                              ))}
-                            </select>
-                            <div className="flex items-center gap-1.5">
-                              {onOpenInRead && (
-                                <button
-                                  type="button"
-                                  onClick={() => onOpenInRead(doc)}
-                                  className="text-[10.5px] font-semibold px-2 py-1 rounded-lg bg-[#A47C43]/15 hover:bg-[#A47C43]/25 text-[#7c5321] dark:text-amber-300 cursor-pointer"
-                                  title="Open inside Read Studio"
-                                >
-                                  Read
-                                </button>
-                              )}
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  deleteUploadedDocument(doc.id);
-                                  setUploadedDocs(getUploadedDocuments());
-                                }}
-                                className="p-1 rounded-lg text-stone-400 hover:text-red-500 cursor-pointer"
-                                title="Remove file"
-                              >
-                                <Trash2 className="w-3.5 h-3.5" />
-                              </button>
+                              <span className="inline-flex items-center gap-1.5 text-[10.5px] px-2.5 py-1 rounded-lg bg-stone-100 dark:bg-[#271b13] border border-stone-200 dark:border-[#3b2719] text-stone-700 dark:text-stone-200 truncate max-w-[155px]">
+                                <Folder className="w-3 h-3 shrink-0 text-[#A47C43]" />
+                                <span className="truncate">{currentFolder?.name || 'Recent Files'}</span>
+                              </span>
+
+                              <div className="flex items-center gap-1">
+                                {onOpenInRead && (
+                                  <button
+                                    type="button"
+                                    onClick={() => onOpenInRead(doc)}
+                                    className="text-[10.5px] font-semibold px-2 py-1 rounded-lg bg-[#A47C43]/15 hover:bg-[#A47C43]/25 text-[#7c5321] dark:text-amber-300 cursor-pointer"
+                                    title="Open inside Read Studio"
+                                  >
+                                    Read
+                                  </button>
+                                )}
+
+                                {/* 3-Dots File Action & Move Menu */}
+                                <div className="relative">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setMovingDocId(null);
+                                      setOpenMenuDocId(isMenuOpen ? null : doc.id);
+                                    }}
+                                    className="p-1.5 rounded-lg text-stone-500 hover:text-stone-900 dark:text-stone-300 dark:hover:text-white hover:bg-stone-100 dark:hover:bg-[#2b1d14] cursor-pointer transition-colors"
+                                    title="File options & Move to folder"
+                                    aria-label="File options"
+                                  >
+                                    <MoreVertical className="w-4 h-4" />
+                                  </button>
+
+                                  {isMenuOpen && (
+                                    <div className="absolute right-0 bottom-9 z-30 w-52 rounded-xl bg-[#fcfaf7] dark:bg-[#1a120d] border border-stone-200 dark:border-[#3b281a] shadow-2xl p-1.5 space-y-0.5 text-xs">
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          setOpenMenuDocId(null);
+                                          handleSingleClickDoc(doc);
+                                        }}
+                                        className="w-full px-2.5 py-1.5 rounded-lg text-left hover:bg-stone-100 dark:hover:bg-[#281b12] flex items-center gap-2 text-stone-800 dark:text-stone-100 cursor-pointer"
+                                      >
+                                        <Eye className="w-3.5 h-3.5 text-[#A47C43]" />
+                                        <span>Open in Web View</span>
+                                      </button>
+
+                                      <button
+                                        type="button"
+                                        onClick={() => setMovingDocId(isMoving ? null : doc.id)}
+                                        className="w-full px-2.5 py-1.5 rounded-lg text-left hover:bg-stone-100 dark:hover:bg-[#281b12] flex items-center justify-between text-stone-800 dark:text-stone-100 cursor-pointer"
+                                      >
+                                        <span className="flex items-center gap-2">
+                                          <FolderInput className="w-3.5 h-3.5 text-[#A47C43]" />
+                                          <span>Move File to Folder</span>
+                                        </span>
+                                        <span className="text-[10px] opacity-60">▾</span>
+                                      </button>
+
+                                      {isMoving && (
+                                        <div className="mx-1 my-1 p-1 rounded-lg bg-stone-100/80 dark:bg-[#120c08] border border-stone-200/80 dark:border-[#352317] space-y-0.5 max-h-36 overflow-y-auto custom-scrollbar">
+                                          {fileFolders.map((f) => {
+                                            const activeFolder = (doc.folderId || DEFAULT_FILES_FOLDER_ID) === f.id;
+                                            return (
+                                              <button
+                                                key={f.id}
+                                                type="button"
+                                                onClick={() => {
+                                                  updateUploadedDocumentFolder(doc.id, f.id);
+                                                  setUploadedDocs(getUploadedDocuments());
+                                                  setMovingDocId(null);
+                                                  setOpenMenuDocId(null);
+                                                  setUploadStatus(`Moved "${doc.title}" to "${f.name}".`);
+                                                  setTimeout(() => setUploadStatus(null), 3000);
+                                                }}
+                                                className={`w-full px-2 py-1 rounded-md text-left text-[11px] flex items-center gap-1.5 cursor-pointer ${
+                                                  activeFolder
+                                                    ? 'bg-[#A47C43]/20 font-bold text-[#7c4d1e] dark:text-amber-200'
+                                                    : 'hover:bg-white dark:hover:bg-[#231810] text-stone-700 dark:text-stone-300'
+                                                }`}
+                                              >
+                                                <Folder className="w-3 h-3 shrink-0" style={{ color: f.color }} />
+                                                <span className="truncate">{f.name}</span>
+                                              </button>
+                                            );
+                                          })}
+                                        </div>
+                                      )}
+
+                                      <div className="my-1 border-t border-stone-200/70 dark:border-[#352317]" />
+
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          deleteUploadedDocument(doc.id);
+                                          setUploadedDocs(getUploadedDocuments());
+                                          setOpenMenuDocId(null);
+                                        }}
+                                        className="w-full px-2.5 py-1.5 rounded-lg text-left hover:bg-red-500/10 text-red-600 dark:text-red-400 flex items-center gap-2 cursor-pointer"
+                                      >
+                                        <Trash2 className="w-3.5 h-3.5" />
+                                        <span>Delete File</span>
+                                      </button>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
                             </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
 
@@ -780,137 +882,35 @@ export const LibraryWorkspaceView: React.FC<LibraryWorkspaceViewProps> = ({
         </div>
       )}
 
-      {/* Single-Click Document & Extracted Tables Viewer Modal */}
-      {previewDoc && (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs"
-          onClick={() => setPreviewDoc(null)}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="w-full max-w-4xl max-h-[90vh] rounded-3xl bg-[#fcfaf7] dark:bg-[#160f0a] border border-stone-200 dark:border-[#382518] shadow-2xl flex flex-col overflow-hidden"
-          >
-            <div className="px-5 py-3.5 border-b border-stone-200 dark:border-[#382518] flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2.5 min-w-0">
-                {renderFileIcon(previewDoc.ext)}
-                <div className="min-w-0">
-                  <h3 className="font-serif font-bold text-sm sm:text-base text-stone-900 dark:text-[#efe4d4] truncate">
-                    {previewDoc.fileName}
-                  </h3>
-                  <p className="text-[11px] font-mono text-stone-500 truncate">
-                    {previewDoc.ext.toUpperCase()} · {previewDoc.sizeLabel} · Source: {previewDoc.source}
-                  </p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                {onOpenInRead && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      onOpenInRead(previewDoc);
-                      setPreviewDoc(null);
-                    }}
-                    className="themed-accent-btn px-3 py-1.5 rounded-xl bg-[#8f5f2c] text-white text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
-                  >
-                    <BookOpen className="w-3.5 h-3.5" />
-                    <span>Open in Read</span>
-                  </button>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setPreviewDoc(null)}
-                  className="p-1.5 rounded-lg text-stone-400 hover:text-stone-800 dark:hover:text-white cursor-pointer"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-5 space-y-5 custom-scrollbar">
-              {/* Inline Image / PDF preview when available */}
-              {(() => {
-                const mediaUrl =
-                  getSessionFileUrl(previewDoc.id) || previewDoc.dataUrl || previewDoc.pdfFileUrl;
-                if (!mediaUrl) return null;
-                if (previewDoc.mimeType.startsWith('image/') || ['png', 'jpg', 'jpeg', 'webp'].includes(previewDoc.ext)) {
-                  return (
-                    <div className="rounded-2xl overflow-hidden border border-stone-200 dark:border-[#382518] bg-black/5 flex justify-center p-2">
-                      <img src={mediaUrl} alt={previewDoc.fileName} className="max-h-[420px] object-contain rounded-xl" />
-                    </div>
-                  );
-                }
-                if (previewDoc.ext === 'pdf' || previewDoc.mimeType === 'application/pdf') {
-                  const frameSrc = previewDoc.driveFileId
-                    ? `https://drive.google.com/file/d/${previewDoc.driveFileId}/preview`
-                    : mediaUrl;
-                  return (
-                    <div className="h-[440px] rounded-2xl overflow-hidden border border-stone-200 dark:border-[#382518]">
-                      <iframe src={frameSrc} title={previewDoc.fileName} className="w-full h-full border-0" />
-                    </div>
-                  );
-                }
-                return null;
-              })()}
-
-              {/* Extracted Structured Tables */}
-              {previewDoc.extractedTables && previewDoc.extractedTables.length > 0 && (
-                <div className="space-y-4">
-                  <h4 className="text-xs font-mono uppercase tracking-wider font-bold text-[#8f5f2c] dark:text-amber-300 flex items-center gap-1.5">
-                    <Table2 className="w-4 h-4" />
-                    <span>Extracted Tables ({previewDoc.extractedTables.length})</span>
-                  </h4>
-                  {previewDoc.extractedTables.map((tbl) => (
-                    <div
-                      key={tbl.id}
-                      className="rounded-2xl border border-stone-200 dark:border-[#382518] overflow-hidden bg-white dark:bg-[#1c130d]"
-                    >
-                      <div className="px-4 py-2 bg-stone-100 dark:bg-[#241912] border-b border-stone-200 dark:border-[#382518] text-xs font-bold text-stone-800 dark:text-stone-100">
-                        {tbl.title}
-                      </div>
-                      <div className="overflow-x-auto">
-                        <table className="w-full text-left text-xs border-collapse">
-                          <thead className="bg-stone-50 dark:bg-[#1a120d] text-stone-700 dark:text-stone-300 border-b border-stone-200 dark:border-[#352317]">
-                            <tr>
-                              {tbl.headers.map((h, hIdx) => (
-                                <th key={hIdx} className="px-3 py-2 font-semibold whitespace-nowrap">
-                                  {h || `Col ${hIdx + 1}`}
-                                </th>
-                              ))}
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-stone-100 dark:divide-[#2e1e14] text-stone-800 dark:text-stone-200">
-                            {tbl.rows.map((row, rIdx) => (
-                              <tr key={rIdx} className="hover:bg-stone-50 dark:hover:bg-[#221710]">
-                                {tbl.headers.map((_, cIdx) => (
-                                  <td key={cIdx} className="px-3 py-2">
-                                    {row[cIdx] || '—'}
-                                  </td>
-                                ))}
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Extracted Text Fallback / Transcript */}
-              {previewDoc.extractedText && (
-                <div className="space-y-2">
-                  <h4 className="text-xs font-mono uppercase tracking-wider font-bold text-stone-500 dark:text-stone-400">
-                    Extracted Document Content
-                  </h4>
-                  <pre className="p-4 rounded-2xl bg-stone-50 dark:bg-[#120c08] border border-stone-200 dark:border-[#382518] text-xs text-stone-800 dark:text-stone-200 whitespace-pre-wrap font-sans leading-relaxed max-h-[320px] overflow-y-auto custom-scrollbar">
-                    {previewDoc.extractedText}
-                  </pre>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Unified Web View Window with Top Ribbon: Share, Save to Device, Mark Favourite */}
+      <WebViewDocumentModal
+        doc={
+          previewDoc
+            ? ({
+                id: previewDoc.id,
+                title: previewDoc.title || previewDoc.fileName,
+                fileName: previewDoc.fileName,
+                ext: previewDoc.ext,
+                mimeType: previewDoc.mimeType,
+                subject: previewDoc.subject,
+                badge: previewDoc.ext?.toUpperCase() || 'PDF',
+                dataUrl: previewDoc.dataUrl,
+                pdfFileUrl: previewDoc.pdfFileUrl,
+                extractedText: previewDoc.extractedText,
+                extractedTables: previewDoc.extractedTables,
+              } as WebViewDocPayload)
+            : null
+        }
+        onClose={() => setPreviewDoc(null)}
+        onOpenInRead={
+          onOpenInRead && previewDoc
+            ? () => {
+                onOpenInRead(previewDoc);
+                setPreviewDoc(null);
+              }
+            : undefined
+        }
+      />
     </div>
   );
 };

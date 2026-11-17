@@ -6,26 +6,76 @@ export interface SupabaseRuntimeConfig {
   source: 'env' | 'local' | 'none';
 }
 
+const DEFAULT_SUPABASE_URL = 'https://koghxdkvdrsfszeykdok.supabase.co';
+const DEFAULT_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_rzt6vajMvhi7amv47VBY8Q_-eBSeXhN';
 const LS_SUPABASE_URL = 'medden_supabase_url';
 const LS_SUPABASE_KEY = 'medden_supabase_anon_key';
 
-export function getSupabaseConfig(): SupabaseRuntimeConfig {
-  const envUrl = (import.meta.env?.VITE_SUPABASE_URL as string | undefined)?.trim() || '';
-  const envKey = (import.meta.env?.VITE_SUPABASE_ANON_KEY as string | undefined)?.trim() || '';
+function isValidHttpUrl(val: string): boolean {
+  return /^https?:\/\/[a-z0-9.-]+/i.test(val) && !val.includes('YOUR_PROJECT_ID') && !val.includes('YOUR_SUPABASE');
+}
 
-  if (envUrl && envKey && !envUrl.includes('YOUR_SUPABASE')) {
-    return { url: envUrl, anonKey: envKey, source: 'env' };
+function isValidSupabaseKey(val: string): boolean {
+  if (!val) return false;
+  if (val === 'VITE_SUPABASE_ANON_KEY' || val === 'SUPABASE_ANON_KEY' || val === 'NEXT_PUBLIC_SUPABASE_ANON_KEY') {
+    return false;
+  }
+  if (val.includes('YOUR_SUPABASE')) return false;
+  return val.length >= 20;
+}
+
+let runtimeServerUrl = '';
+let runtimeServerKey = '';
+
+export function getSupabaseConfig(): SupabaseRuntimeConfig {
+  const envUrlRaw = (import.meta.env?.VITE_SUPABASE_URL as string | undefined)?.trim() || '';
+  const envUrl = isValidHttpUrl(envUrlRaw) ? envUrlRaw : DEFAULT_SUPABASE_URL;
+  const envKeyRaw = (import.meta.env?.VITE_SUPABASE_ANON_KEY as string | undefined)?.trim() || '';
+
+  if (envUrl && isValidSupabaseKey(envKeyRaw)) {
+    return { url: envUrl, anonKey: envKeyRaw, source: 'env' };
+  }
+
+  if (isValidHttpUrl(runtimeServerUrl) && isValidSupabaseKey(runtimeServerKey)) {
+    return { url: runtimeServerUrl, anonKey: runtimeServerKey, source: 'env' };
   }
 
   if (typeof window !== 'undefined') {
-    const localUrl = localStorage.getItem(LS_SUPABASE_URL)?.trim() || '';
+    const localUrlRaw = localStorage.getItem(LS_SUPABASE_URL)?.trim() || '';
+    const localUrl = isValidHttpUrl(localUrlRaw) ? localUrlRaw : DEFAULT_SUPABASE_URL;
     const localKey = localStorage.getItem(LS_SUPABASE_KEY)?.trim() || '';
-    if (localUrl && localKey) {
+    if (localUrl && isValidSupabaseKey(localKey)) {
       return { url: localUrl, anonKey: localKey, source: 'local' };
     }
   }
 
-  return { url: '', anonKey: '', source: 'none' };
+  return {
+    url: DEFAULT_SUPABASE_URL,
+    anonKey: DEFAULT_SUPABASE_PUBLISHABLE_KEY,
+    source: 'env',
+  };
+}
+
+export async function hydrateSupabaseConfigFromServer(): Promise<boolean> {
+  const current = getSupabaseConfig();
+  if (current.url && current.anonKey) return false;
+  try {
+    const res = await fetch('/api/supabase/config');
+    if (!res.ok) return false;
+    const data = await res.json();
+    const url = String(data?.url || '').trim();
+    const anonKey = String(data?.anonKey || '').trim();
+    if (isValidHttpUrl(url) && isValidSupabaseKey(anonKey)) {
+      runtimeServerUrl = url;
+      runtimeServerKey = anonKey;
+      cachedClient = null;
+      cachedSignature = '';
+      return true;
+    }
+  } catch {
+    // Ignore offline error
+  }
+  return false;
 }
 
 let cachedClient: SupabaseClient | null = null;
@@ -33,12 +83,12 @@ let cachedSignature = '';
 
 export function isSupabaseConfigured(): boolean {
   const cfg = getSupabaseConfig();
-  return Boolean(cfg.url && cfg.anonKey);
+  return Boolean(isValidHttpUrl(cfg.url) && isValidSupabaseKey(cfg.anonKey));
 }
 
 export function getSupabaseClient(): SupabaseClient | null {
   const cfg = getSupabaseConfig();
-  if (!cfg.url || !cfg.anonKey) {
+  if (!isValidHttpUrl(cfg.url) || !isValidSupabaseKey(cfg.anonKey)) {
     return null;
   }
 

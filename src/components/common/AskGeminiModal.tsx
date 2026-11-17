@@ -16,6 +16,7 @@ import {
   FileCheck,
 } from 'lucide-react';
 import { SubjectCourse } from '../../types';
+import { getPlanLimits, openSubscriptionUpgradeModal } from '../../utils/subscriptionLimits';
 
 interface AskGeminiModalProps {
   isOpen: boolean;
@@ -146,6 +147,15 @@ export const AskGeminiModal: React.FC<AskGeminiModalProps> = ({
   };
 
   const handleAsk = async (promptText?: string) => {
+    if (!getPlanLimits().canUseGemini) {
+      openSubscriptionUpgradeModal({
+        title: 'Unlock Gemini Study AI with Master Ultimate (₹300/mo)',
+        message: 'Gemini AI clinical mechanisms, USMLE pearls, and explanations require the ₹300/mo Master Ultimate subscription.',
+        requiredPlanId: 'master-ultimate',
+      });
+      return;
+    }
+
     const qToSend = promptText || question;
     if (!qToSend.trim() && !attachedFile) return;
 

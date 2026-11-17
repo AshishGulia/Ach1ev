@@ -226,14 +226,53 @@ html.dark .atelier-root {
   margin-bottom: 3px;
 }
 
-/* Trackers Gallery - 50% Reduced Compact Size per User Request */
+/* Trackers Gallery - Horizontal Slide Bar per User Request */
 .atelier-trackers {
-  display: grid;
+  display: flex;
+  flex-wrap: nowrap;
   gap: 12px;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  overflow-x: auto;
+  overflow-y: visible;
+  padding: 2px 2px 8px;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: var(--at-brass-soft) transparent;
+}
+
+.atelier-trackers::-webkit-scrollbar,
+.atelier-fav-bar::-webkit-scrollbar {
+  height: 5px;
+}
+
+.atelier-trackers::-webkit-scrollbar-thumb,
+.atelier-fav-bar::-webkit-scrollbar-thumb {
+  background: var(--at-brass-soft);
+  border-radius: 999px;
+}
+
+.atelier-fav-bar {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 12px;
+  overflow-x: auto;
+  overflow-y: visible;
+  padding: 2px 2px 8px;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: var(--at-brass-soft) transparent;
+}
+
+.atelier-fav-card {
+  flex: 0 0 220px;
+  min-width: 210px;
+  max-width: 240px;
+  scroll-snap-align: start;
 }
 
 .atelier-tracker {
+  flex: 0 0 165px;
+  min-width: 155px;
+  scroll-snap-align: start;
   padding: 8px 12px 10px;
   display: flex;
   flex-direction: column;
@@ -243,6 +282,12 @@ html.dark .atelier-root {
   transition: transform .25s, border-color .25s;
   position: relative;
   border-radius: 14px;
+}
+
+.atelier-tr-add {
+  flex: 0 0 150px;
+  min-width: 145px;
+  scroll-snap-align: start;
 }
 
 .atelier-tracker:hover {
@@ -1170,10 +1215,14 @@ html.dark .atelier-sticky,
     font-size: 16px;
   }
   .atelier-trackers {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
     gap: 10px;
   }
   .atelier-tracker, .atelier-tr-add {
+    flex: 0 0 152px;
+    min-width: 145px;
     min-height: 112px;
     padding: 10px;
     border-radius: 12px;

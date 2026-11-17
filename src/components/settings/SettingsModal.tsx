@@ -1387,11 +1387,11 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
               </div>
 
-              {/* 10 Curated Abstract Designs: 5 Dark + 5 Light */}
+              {/* 20 Curated HD Photography Wallpapers (Landscape, Cosmic & Botanical) */}
               <div className="space-y-4">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <h5 className="text-xs font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400">
-                    10 Abstract Wallpaper Designs (5 Dark · 5 Light)
+                    20 HD Curated Wallpapers (Original Aspect · Zero Stretch)
                   </h5>
                   <button
                     type="button"
@@ -1407,162 +1407,171 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   </button>
                 </div>
 
-                {/* 5 DARK ABSTRACT WALLPAPERS */}
-                <div className="space-y-2">
-                  <div className="text-[11px] font-mono font-bold uppercase tracking-wider flex items-center gap-1.5" style={{ color: 'var(--th-muted)' }}>
-                    <Moon className="w-3.5 h-3.5" style={themeAccentIconStyle} />
-                    <span>5 Dark Abstract Wallpapers</span>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {[
-                      {
-                        id: 'dark-abs-1',
-                        title: 'Espresso Ripple Silk',
-                        desc: 'Layered deep cocoa ribbons & brass light',
-                        uri: 'radial-gradient(ellipse 75% 55% at 18% 22%, rgba(212,158,72,0.22), transparent 60%), conic-gradient(from 210deg at 78% 72%, rgba(111,66,37,0.34), rgba(14,7,3,0.95) 45%, rgba(164,124,67,0.18) 78%, rgba(14,7,3,0.98))',
-                      },
-                      {
-                        id: 'dark-abs-2',
-                        title: 'Velvet Plum Aurora',
-                        desc: 'Abstract plum & orchid dusk waves',
-                        uri: 'radial-gradient(circle at 22% 75%, rgba(212,154,166,0.24), transparent 52%), conic-gradient(from 145deg at 68% 26%, rgba(110,66,83,0.44), rgba(22,12,16,0.96) 52%, rgba(71,62,102,0.34) 80%, rgba(16,9,13,0.98))',
-                      },
-                      {
-                        id: 'dark-abs-3',
-                        title: 'Muted Cobalt Facets',
-                        desc: 'Architectural geometric slate shards',
-                        uri: 'linear-gradient(125deg, rgba(125,154,181,0.14) 0%, transparent 44%), repeating-linear-gradient(135deg, rgba(86,114,143,0.09) 0px, rgba(86,114,143,0.09) 28px, transparent 28px, transparent 62px), radial-gradient(circle at 80% 24%, rgba(86,114,143,0.28), transparent 50%), linear-gradient(145deg, #0d131a 0%, #16202b 54%, #0c1016 100%)',
-                      },
-                      {
-                        id: 'dark-abs-4',
-                        title: 'Emerald Gold Nebula',
-                        desc: 'Deep botanical canopy & molten gold arc',
-                        uri: 'radial-gradient(ellipse 68% 48% at 72% 22%, rgba(209,168,84,0.20), transparent 55%), radial-gradient(circle at 20% 80%, rgba(14,119,82,0.26), transparent 52%), conic-gradient(from 90deg at 35% 35%, rgba(0,42,35,0.9), #051612 58%, rgba(209,168,84,0.14) 85%, #070d0c)',
-                      },
-                      {
-                        id: 'dark-abs-5',
-                        title: 'Obsidian Contour Grid',
-                        desc: 'Minimalist nocturnal contour rings',
-                        uri: 'repeating-radial-gradient(circle at 75% 30%, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 2px, transparent 2px, transparent 28px), radial-gradient(circle at 25% 25%, rgba(180,140,85,0.16), transparent 55%), linear-gradient(160deg, #0c0c0f 0%, #17171c 58%, #09090b 100%)',
-                      },
-                    ].map((preset) => {
-                      const isSelected = customWallpaper === preset.uri;
-                      return (
-                        <button
-                          key={preset.id}
-                          type="button"
-                          onClick={() => applyCustomWallpaper(preset.uri, customWallpaperOpacity)}
-                          className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col gap-2 themed-glass-card ${
-                            isSelected ? 'shadow-sm' : ''
-                          }`}
-                          style={
-                            isSelected
-                              ? {
-                                  borderColor: 'var(--th-accent)',
-                                  backgroundColor: 'var(--th-accent-soft)',
-                                  boxShadow: '0 0 0 2px color-mix(in srgb, var(--th-accent) 26%, transparent)',
-                                }
-                              : undefined
-                          }
-                        >
-                          <div
-                            className="h-20 w-full rounded-xl border border-black/15 dark:border-white/10 shadow-inner"
-                            style={{ background: preset.uri }}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                  {[
+                    {
+                      id: 'wp-1',
+                      title: 'Sunrise Mountains Mist',
+                      desc: 'Golden mountain ridges at first light',
+                      path: '/assets/aistudio/ahmetyuksek-sunrise-mountains-9821308_1920_result_fe248584.webp',
+                    },
+                    {
+                      id: 'wp-2',
+                      title: 'Artemis Moon & Earthrise',
+                      desc: 'Orbital lunar horizon & Earth glow',
+                      path: '/assets/aistudio/wallpaperswide.com-artemis-ii---moon-a-setting-earth-wallpaper-2560x1440_result_70398d70.webp',
+                    },
+                    {
+                      id: 'wp-3',
+                      title: 'Autumn Twilight Leaves',
+                      desc: 'Deep amber foliage under dusk sky',
+                      path: '/assets/aistudio/wallpaperswide.com-autumn-leaves-against-a-twilight-sky-wallpaper-2560x1440_result_4a72cf04.webp',
+                    },
+                    {
+                      id: 'wp-4',
+                      title: 'Midnight Stallion',
+                      desc: 'Dramatic equestrian dark portrait',
+                      path: '/assets/aistudio/wallpaperswide.com-black-horse-5-wallpaper-2560x1440_result_b109a16e.webp',
+                    },
+                    {
+                      id: 'wp-5',
+                      title: 'Milky Way Galactic Core',
+                      desc: 'Crystal night sky starfields',
+                      path: '/assets/aistudio/wallpaperswide.com-milky-way-galactic-core-across-the-night-sky-wallpaper-2560x1440_result_6dffa9c5.webp',
+                    },
+                    {
+                      id: 'wp-6',
+                      title: 'Coniferous Sun Rays',
+                      desc: 'Warm forest road bathed in sunlight',
+                      path: '/assets/aistudio/wallpaperswide.com-coniferous-forest-road-sun-rays-shines-through-trees-wallpaper-2560x1440_result_9e59136e.webp',
+                    },
+                    {
+                      id: 'wp-7',
+                      title: 'Brittany Sea Cliffs',
+                      desc: 'Atlantic waves at Plougrescant coast',
+                      path: '/assets/aistudio/wallpaperswide.com-le-gouffre-plougrescant-brittany-coast-wallpaper-2560x1440_result_b2864272.webp',
+                    },
+                    {
+                      id: 'wp-8',
+                      title: 'Aspen Autumn Avenue',
+                      desc: 'Golden-leaf forest study sanctuary',
+                      path: '/assets/aistudio/wallpaperswide.com-scenic-autumn-road-through-aspen-forest-wallpaper-2560x1440_result_85124750.webp',
+                    },
+                    {
+                      id: 'wp-9',
+                      title: 'Cathedral Valley Mesa',
+                      desc: 'Utah sandstone peaks in soft desert sun',
+                      path: '/assets/aistudio/wallpaperswide.com-cathedral-valley-capitol-reef-national-park-utah-us-wallpaper-2560x1440_result_59b95122.webp',
+                    },
+                    {
+                      id: 'wp-10',
+                      title: 'Alpine Serenity',
+                      desc: 'Crisp high-altitude still horizon',
+                      path: '/assets/aistudio/alena-ganzhela-_OLiar50J-A-unsplash_result_90183260.webp',
+                    },
+                    {
+                      id: 'wp-11',
+                      title: 'Coastal Horizon Calm',
+                      desc: 'Balanced blue ocean & stone shore',
+                      path: '/assets/aistudio/paul-carroll-pLD6UKygDCU-unsplash_result_7388935e.webp',
+                    },
+                    {
+                      id: 'wp-12',
+                      title: 'Warm Evening Peak',
+                      desc: 'Quiet dusk light across high ridges',
+                      path: '/assets/aistudio/kev-chan-KB9z4FsemnQ-unsplash_result_171fea34.webp',
+                    },
+                    {
+                      id: 'wp-13',
+                      title: 'Botanical Dew Shade',
+                      desc: 'Deep natural green leaf close-up',
+                      path: '/assets/aistudio/pexels-brenocardosofotografia-8240133_result_7894c6b8.webp',
+                    },
+                    {
+                      id: 'wp-14',
+                      title: 'Canyon Silence',
+                      desc: 'Earth tones & warm mineral textures',
+                      path: '/assets/aistudio/braden-egli-yHEKf0FkET4-unsplash_result_099169e8.webp',
+                    },
+                    {
+                      id: 'wp-15',
+                      title: 'Solitude Pass',
+                      desc: 'Clean mountain silhouette vista',
+                      path: '/assets/aistudio/daniel-stiel-FG1Ny76EO38-unsplash_result_2cd60d1b.webp',
+                    },
+                    {
+                      id: 'wp-16',
+                      title: 'Timber & Fog Valley',
+                      desc: 'Low clouds gliding through pine hills',
+                      path: '/assets/aistudio/victor-de-santiago-eW1YRNtb2No-unsplash_result_5138de46.webp',
+                    },
+                    {
+                      id: 'wp-17',
+                      title: 'Golden Meadow Breeze',
+                      desc: 'Warm daylight over tranquil fields',
+                      path: '/assets/aistudio/philipp-dusel-tEtVuxPBLNI-unsplash_result_bb8cf3f7.webp',
+                    },
+                    {
+                      id: 'wp-18',
+                      title: 'Highland Stillness',
+                      desc: 'Atmospheric mist over slate cliffs',
+                      path: '/assets/aistudio/kellen-riggin-GHyl3680YJs-unsplash_result_0db549ed.webp',
+                    },
+                    {
+                      id: 'wp-19',
+                      title: 'Terra Desert Glow',
+                      desc: 'Rich burnt terracotta sunset dunes',
+                      path: '/assets/aistudio/john-towner-JgOeRuGD_Y4-unsplash_result_6d8f7593.webp',
+                    },
+                    {
+                      id: 'wp-20',
+                      title: 'Emerald Woodland',
+                      desc: 'Calm forest light for deep reading',
+                      path: '/assets/aistudio/rebeca-trifan-dATa8H-S-NQ-unsplash_result_be2735e6.webp',
+                    },
+                  ].map((preset) => {
+                    const uri = `url("${preset.path}")`;
+                    const isSelected = customWallpaper === uri;
+                    return (
+                      <button
+                        key={preset.id}
+                        type="button"
+                        onClick={() => applyCustomWallpaper(uri, customWallpaperOpacity)}
+                        className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col gap-2 themed-glass-card ${
+                          isSelected ? 'shadow-sm' : ''
+                        }`}
+                        style={
+                          isSelected
+                            ? {
+                                borderColor: 'var(--th-accent)',
+                                backgroundColor: 'var(--th-accent-soft)',
+                                boxShadow: '0 0 0 2px color-mix(in srgb, var(--th-accent) 26%, transparent)',
+                              }
+                            : undefined
+                        }
+                      >
+                        <div className="h-24 w-full rounded-xl overflow-hidden border border-black/15 dark:border-white/10 shadow-inner bg-stone-900">
+                          <img
+                            src={preset.path}
+                            alt={preset.title}
+                            loading="lazy"
+                            className="w-full h-full object-cover object-center"
                           />
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="min-w-0">
-                              <div className="text-xs font-bold text-stone-900 dark:text-stone-100 truncate">
-                                {preset.title}
-                              </div>
-                              <div className="text-[10.5px] text-stone-500 dark:text-stone-400 truncate">
-                                {preset.desc}
-                              </div>
+                        </div>
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="min-w-0">
+                            <div className="text-xs font-bold text-stone-900 dark:text-stone-100 truncate">
+                              {preset.title}
                             </div>
-                            {isSelected && <CheckCircle2 className="w-4 h-4 shrink-0" style={themeAccentIconStyle} />}
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* 5 LIGHT ABSTRACT WALLPAPERS */}
-                <div className="space-y-2 pt-2">
-                  <div className="text-[11px] font-mono font-bold uppercase tracking-wider flex items-center gap-1.5" style={{ color: 'var(--th-muted)' }}>
-                    <Sun className="w-3.5 h-3.5" style={themeAccentIconStyle} />
-                    <span>5 Light Abstract Wallpapers</span>
-                  </div>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                    {[
-                      {
-                        id: 'light-abs-1',
-                        title: 'Warm Caramel Cloud',
-                        desc: 'Creamy parchment with amber silk swirl',
-                        uri: 'radial-gradient(ellipse 70% 55% at 22% 20%, rgba(217,155,67,0.22), transparent 60%), conic-gradient(from 195deg at 75% 75%, rgba(242,222,192,0.9), rgba(252,248,240,0.98) 52%, rgba(226,198,151,0.55) 82%, #fdfaf3)',
-                      },
-                      {
-                        id: 'light-abs-2',
-                        title: 'Royal Rose Marble',
-                        desc: 'Soft pastel blush & ivory organic waves',
-                        uri: 'radial-gradient(circle at 76% 24%, rgba(212,154,166,0.28), transparent 52%), radial-gradient(circle at 20% 78%, rgba(229,190,194,0.34), transparent 54%), linear-gradient(135deg, #fdf7f6 0%, #f7eaeb 52%, #f1dede 100%)',
-                      },
-                      {
-                        id: 'light-abs-3',
-                        title: 'Nordic Slate Prisms',
-                        desc: 'Airy architectural cool grey & cobalt mist',
-                        uri: 'repeating-linear-gradient(120deg, rgba(86,114,143,0.06) 0px, rgba(86,114,143,0.06) 34px, transparent 34px, transparent 74px), radial-gradient(circle at 78% 22%, rgba(125,154,181,0.26), transparent 50%), linear-gradient(145deg, #f8fafc 0%, #edf2f7 55%, #e2e8f0 100%)',
-                      },
-                      {
-                        id: 'light-abs-4',
-                        title: 'Champagne Dune Curves',
-                        desc: 'Warm sunlit ripples on antique sand',
-                        uri: 'repeating-radial-gradient(circle at 18% 82%, rgba(182,140,82,0.06) 0px, rgba(182,140,82,0.06) 2px, transparent 2px, transparent 32px), radial-gradient(circle at 80% 18%, rgba(216,194,170,0.45), transparent 55%), linear-gradient(135deg, #faf6ee 0%, #efe5d2 55%, #e6d7be 100%)',
-                      },
-                      {
-                        id: 'light-abs-5',
-                        title: 'Pearl Sage Origami',
-                        desc: 'Serene botanical ivory geometric facets',
-                        uri: 'conic-gradient(from 40deg at 65% 32%, rgba(132,169,140,0.16), rgba(249,250,246,0.96) 45%, rgba(216,226,214,0.65) 75%, #f5f7f2), linear-gradient(155deg, #f8faf7 0%, #edf2eb 58%, #e4ebe2 100%)',
-                      },
-                    ].map((preset) => {
-                      const isSelected = customWallpaper === preset.uri;
-                      return (
-                        <button
-                          key={preset.id}
-                          type="button"
-                          onClick={() => applyCustomWallpaper(preset.uri, customWallpaperOpacity)}
-                          className={`p-3 rounded-2xl border text-left transition-all cursor-pointer flex flex-col gap-2 themed-glass-card ${
-                            isSelected ? 'shadow-sm' : ''
-                          }`}
-                          style={
-                            isSelected
-                              ? {
-                                  borderColor: 'var(--th-accent)',
-                                  backgroundColor: 'var(--th-accent-soft)',
-                                  boxShadow: '0 0 0 2px color-mix(in srgb, var(--th-accent) 26%, transparent)',
-                                }
-                              : undefined
-                          }
-                        >
-                          <div
-                            className="h-20 w-full rounded-xl border border-black/10 dark:border-white/10 shadow-inner"
-                            style={{ background: preset.uri }}
-                          />
-                          <div className="flex items-center justify-between gap-2">
-                            <div className="min-w-0">
-                              <div className="text-xs font-bold text-stone-900 dark:text-stone-100 truncate">
-                                {preset.title}
-                              </div>
-                              <div className="text-[10.5px] text-stone-500 dark:text-stone-400 truncate">
-                                {preset.desc}
-                              </div>
+                            <div className="text-[10.5px] text-stone-500 dark:text-stone-400 truncate">
+                              {preset.desc}
                             </div>
-                            {isSelected && <CheckCircle2 className="w-4 h-4 shrink-0" style={themeAccentIconStyle} />}
                           </div>
-                        </button>
-                      );
-                    })}
-                  </div>
+                          {isSelected && <CheckCircle2 className="w-4 h-4 shrink-0" style={themeAccentIconStyle} />}
+                        </div>
+                      </button>
+                    );
+                  })}
                 </div>
               </div>
             </div>
@@ -3213,20 +3222,29 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="p-4 rounded-xl bg-stone-50 dark:bg-[#18110c] border border-stone-200 dark:border-[#382518] flex items-center justify-between gap-3 flex-wrap">
                 <div>
                   <h4 className="text-xs font-bold text-stone-800 dark:text-stone-200 mb-0.5">
-                    Account &amp; Workspace Session
+                    Privacy Policy &amp; Account Session
                   </h4>
                   <p className="text-[11px] text-stone-500 dark:text-stone-400">
                     {user?.email ? `Signed in as ${user.email}` : 'Local browser session · Sign out to return to Login screen'}
                   </p>
                 </div>
-                <button
-                  type="button"
-                  onClick={handleSettingsLogout}
-                  className="px-4 py-1.5 rounded-xl bg-[#7f1d1d] hover:bg-[#962d32] text-[#fdf2f2] text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
-                >
-                  <LogOut className="w-3.5 h-3.5" />
-                  <span>Log Out</span>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => window.dispatchEvent(new CustomEvent('achiev_open_privacy_policy'))}
+                    className="px-3.5 py-1.5 rounded-xl bg-stone-200 dark:bg-[#251a12] hover:bg-stone-300 dark:hover:bg-[#322318] text-stone-800 dark:text-stone-200 text-xs font-semibold transition-colors cursor-pointer"
+                  >
+                    Privacy Policy
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSettingsLogout}
+                    className="px-4 py-1.5 rounded-xl bg-[#7f1d1d] hover:bg-[#962d32] text-[#fdf2f2] text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
+                  >
+                    <LogOut className="w-3.5 h-3.5" />
+                    <span>Log Out</span>
+                  </button>
+                </div>
               </div>
 
               <div className="p-4 rounded-xl bg-[#7f1d1d]/10 dark:bg-[#6e171b]/25 border border-[#7f1d1d]/25 dark:border-[#962d32]/50">

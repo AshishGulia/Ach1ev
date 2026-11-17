@@ -1,3 +1,12 @@
+import {
+  ACHIEV_GUIDE_DOC_ID,
+  ACHIEV_FEATURES_GUIDE_PAGES,
+  LECTURE_SCHEDULE_DOC_ID,
+  LECTURE_SCHEDULE_SAMPLE_ROWS,
+  buildAchievGuideDataUrl,
+  buildLectureScheduleDataUrl,
+} from '../data/achievSampleDocs';
+
 export interface ExtractedTableData {
   id: string;
   title: string;
@@ -49,6 +58,7 @@ const LS_UPLOADED_FILES = 'achiev_uploaded_files_v1';
 const LS_RECENT_OPENED = 'achiev_recent_opened_files_v1';
 const LS_LIBRARY_FOLDERS = 'achiev_library_folders_v1';
 const LS_NOTEBOOK_FOLDER_MAP = 'achiev_notebook_folder_map_v1';
+const LS_SEEDED_V2 = 'achiev_files_seeded_v2';
 
 export const DEFAULT_FILES_FOLDER_ID = 'folder-pdfs-files';
 export const DEFAULT_NOTES_FOLDER_ID = 'folder-general-notes';
@@ -79,13 +89,83 @@ export function readFileAsDataUrl(file: File): Promise<string> {
   });
 }
 
+function buildDefaultSeedDocuments(): UploadedDocumentRecord[] {
+  const now = new Date().toISOString();
+  const lectureScheduleDoc: UploadedDocumentRecord = {
+    id: LECTURE_SCHEDULE_DOC_ID,
+    title: 'Lecture schedule',
+    fileName: 'Lecture schedule.pdf',
+    ext: 'pdf',
+    mimeType: 'text/html',
+    sizeBytes: 48_200,
+    sizeLabel: '48.2 KB · Sample Roster',
+    source: 'roster',
+    subject: 'Pharmacology',
+    folderId: DEFAULT_FILES_FOLDER_ID,
+    uploadedAt: now,
+    lastOpenedAt: now,
+    parsedEventsCount: LECTURE_SCHEDULE_SAMPLE_ROWS.length,
+    extractedText: LECTURE_SCHEDULE_SAMPLE_ROWS.map(
+      (r) => `${r.day} (${r.time}) — ${r.subject}: ${r.topic} @ ${r.room} [${r.faculty}]`
+    ).join('\n'),
+    extractedTables: [
+      {
+        id: 'tbl-lecture-schedule-sample',
+        title: 'Weekly Academic Lecture & Lab Schedule',
+        headers: ['Day', 'Time', 'Subject', 'Session Topic', 'Venue', 'Faculty'],
+        rows: LECTURE_SCHEDULE_SAMPLE_ROWS.map((r) => [
+          r.day,
+          r.time,
+          r.subject,
+          r.topic,
+          r.room,
+          r.faculty,
+        ]),
+      },
+    ],
+    dataUrl: buildLectureScheduleDataUrl(),
+  };
+
+  const achievGuideDoc: UploadedDocumentRecord = {
+    id: ACHIEV_GUIDE_DOC_ID,
+    title: 'Achiev Features & Subscription Guide',
+    fileName: 'Achiev Features & Subscription Guide.pdf',
+    ext: 'pdf',
+    mimeType: 'text/html',
+    sizeBytes: 86_400,
+    sizeLabel: '3 Pages · PDF Guide',
+    source: 'library',
+    subject: 'Study Guide',
+    folderId: DEFAULT_FILES_FOLDER_ID,
+    uploadedAt: now,
+    lastOpenedAt: now,
+    extractedText: ACHIEV_FEATURES_GUIDE_PAGES.map(
+      (p) => `${p.heading} (${p.subtitle})\n${p.highlight || p.sections.map((s) => s.body).join(' ')}`
+    ).join('\n\n'),
+    dataUrl: buildAchievGuideDataUrl(),
+  };
+
+  return [lectureScheduleDoc, achievGuideDoc];
+}
+
 export function getUploadedDocuments(): UploadedDocumentRecord[] {
   if (typeof window === 'undefined') return [];
   try {
     const raw = localStorage.getItem(LS_UPLOADED_FILES);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    const parsed: UploadedDocumentRecord[] = raw ? JSON.parse(raw) : [];
+    const list = Array.isArray(parsed) ? parsed : [];
+    if (localStorage.getItem(LS_SEEDED_V2) !== '1') {
+      const seeds = buildDefaultSeedDocuments();
+      const existingIds = new Set(list.map((d) => d.id));
+      const merged = [
+        ...seeds.filter((s) => !existingIds.has(s.id)),
+        ...list,
+      ];
+      localStorage.setItem(LS_SEEDED_V2, '1');
+      localStorage.setItem(LS_UPLOADED_FILES, JSON.stringify(merged.slice(0, 60)));
+      return merged;
+    }
+    return list;
   } catch {
     return [];
   }
@@ -227,7 +307,7 @@ export function getLibraryFolders(): LibraryFolderItem[] {
     },
     {
       id: DEFAULT_FILES_FOLDER_ID,
-      name: 'PDFs & Files',
+      name: 'Recent Files',
       color: '#7c4521',
       kind: 'files',
       createdAt: new Date(0).toISOString(),
@@ -239,7 +319,12 @@ export function getLibraryFolders(): LibraryFolderItem[] {
     if (!raw) return defaults;
     const parsed = JSON.parse(raw) as LibraryFolderItem[];
     if (!Array.isArray(parsed)) return defaults;
-    const byId = new Map(parsed.map((f) => [f.id, f]));
+    const byId = new Map(
+      parsed.map((f) => [
+        f.id,
+        f.id === DEFAULT_FILES_FOLDER_ID ? { ...f, name: 'Recent Files' } : f,
+      ])
+    );
     defaults.forEach((d) => {
       if (!byId.has(d.id)) byId.set(d.id, d);
     });

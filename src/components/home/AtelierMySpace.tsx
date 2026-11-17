@@ -29,7 +29,17 @@ import {
   Pencil,
   Minus,
   Maximize2,
+  ArrowLeft,
+  Folder,
+  FileText,
 } from 'lucide-react';
+import { WebViewDocumentModal, WebViewDocPayload } from '../common/WebViewDocumentModal';
+import {
+  ACHIEV_GUIDE_DOC_ID,
+  ACHIEV_FEATURES_GUIDE_PAGES,
+  buildAchievGuideDataUrl,
+} from '../../data/achievSampleDocs';
+import { getPlanLimits, openSubscriptionUpgradeModal } from '../../utils/subscriptionLimits';
 
 export interface TrackerItem {
   id: string;
@@ -83,7 +93,12 @@ export const MEDICAL_TRACKER_PRESETS: TrackerPreset[] = [
   { name: 'Pomodoro Focus Blocks', category: 'Wellness', type: 'dots', val: 4, goal: 8, unit: 'blocks', step: 1, icon: '🍅', desc: '25-minute deep focus sprints' },
 ];
 
-const DEFAULT_TRACKERS: TrackerItem[] = [];
+const DEFAULT_TRACKERS: TrackerItem[] = [
+  { id: 'tr-default-1', n: 'Study Hours', type: 'arch', v: 3.5, g: 8, u: 'hrs', step: 0.5 },
+  { id: 'tr-default-2', n: 'QBank MCQs', type: 'ring', v: 42, g: 100, u: 'mcqs', step: 5 },
+  { id: 'tr-default-3', n: 'Flashcard Reviews', type: 'bars', v: 88, g: 150, u: 'cards', step: 10 },
+  { id: 'tr-default-4', n: 'Pomodoro Focus Blocks', type: 'dots', v: 4, g: 8, u: 'blocks', step: 1 },
+];
 
 const ACCENTS_BY_THEME: Record<string, string[]> = {
   '1': ['#A47C43', '#8f5f2c', '#3F4E6B', '#8A5A3B', '#6B4A5E', '#b47b44'],
@@ -229,7 +244,8 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
 
   interface CockpitFavouriteItem {
     id: string;
-    type: 'book' | 'note' | 'custom';
+    type: 'book' | 'note' | 'custom' | 'folder';
+    kind?: 'pdf' | 'folder';
     sourceId?: string;
     title: string;
     subject: string;
@@ -238,24 +254,96 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
     pdfFileUrl?: string;
     driveFileId?: string;
     contentHtml?: string;
+    isStarred?: boolean;
+    children?: CockpitFavouriteItem[];
   }
 
-  // User-managed Favourites (empty by default, fully editable + addable, opens in Read format)
+  const buildDefaultFavourites = (): CockpitFavouriteItem[] => {
+    const guidePdfItem: CockpitFavouriteItem = {
+      id: 'fav-achiev-features-pdf',
+      type: 'book',
+      kind: 'pdf',
+      sourceId: ACHIEV_GUIDE_DOC_ID,
+      title: 'Achiev Features & Subscription Guide',
+      subject: 'App Guide & Plans · 3 Pages',
+      badge: 'PDF ★',
+      coverColor: '#7c4521',
+      pdfFileUrl: buildAchievGuideDataUrl(),
+      isStarred: true,
+    };
+    const nestedGuidePdf: CockpitFavouriteItem = {
+      ...guidePdfItem,
+      id: 'fav-achiev-features-pdf-nested',
+    };
+    return [
+      guidePdfItem,
+      {
+        id: 'fav-folder-achiev-library',
+        type: 'folder',
+        kind: 'folder',
+        title: 'Achiev Study Pack',
+        subject: '1 Subfolder · Guided Tour',
+        badge: 'Folder',
+        coverColor: '#A47C43',
+        children: [
+          {
+            id: 'fav-subfolder-core-guides',
+            type: 'folder',
+            kind: 'folder',
+            title: 'Core Guides & Plans',
+            subject: '1 PDF inside',
+            badge: 'Subfolder',
+            coverColor: '#8f5f2c',
+            children: [nestedGuidePdf],
+          },
+        ],
+      },
+    ];
+  };
+
+  // User-managed Favourites (seeded once with Achiev Guide PDF ★ + Folder -> Subfolder -> Guide PDF)
   const [favourites, setFavourites] = useState<CockpitFavouriteItem[]>(() => {
     try {
       const saved = localStorage.getItem('medden_cockpit_favourites_v1');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) return parsed;
+        if (Array.isArray(parsed) && (parsed.length > 0 || localStorage.getItem('achiev_cockpit_v2_seeded') === '1')) {
+          return parsed;
+        }
       }
+      const defaults = buildDefaultFavourites();
+      localStorage.setItem('medden_cockpit_favourites_v1', JSON.stringify(defaults));
+      return defaults;
     } catch {}
     return [];
   });
+
+  const [favFolderStack, setFavFolderStack] = useState<CockpitFavouriteItem[]>([]);
+  const [webViewFavDoc, setWebViewFavDoc] = useState<WebViewDocPayload | null>(null);
+
+  useEffect(() => {
+    const syncFavs = () => {
+      try {
+        const raw = localStorage.getItem('medden_cockpit_favourites_v1');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed)) setFavourites(parsed);
+        }
+      } catch {}
+    };
+    window.addEventListener('achiev_favourites_updated', syncFavs);
+    window.addEventListener('storage', syncFavs);
+    return () => {
+      window.removeEventListener('achiev_favourites_updated', syncFavs);
+      window.removeEventListener('storage', syncFavs);
+    };
+  }, []);
 
   const saveFavourites = (next: CockpitFavouriteItem[]) => {
     setFavourites(next);
     try {
       localStorage.setItem('medden_cockpit_favourites_v1', JSON.stringify(next));
+      window.dispatchEvent(new Event('achiev_favourites_updated'));
     } catch {}
   };
 
@@ -362,13 +450,65 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
   };
 
   const handleOpenFavouriteInRead = (fav: CockpitFavouriteItem) => {
-    if (fav.type === 'book') {
+    if (fav.type === 'folder' || fav.kind === 'folder' || Array.isArray(fav.children)) {
+      setFavFolderStack((prev) => [...prev, fav]);
+      return;
+    }
+
+    if (
+      fav.sourceId === ACHIEV_GUIDE_DOC_ID ||
+      fav.title.includes('Achiev Features & Subscription Guide')
+    ) {
+      setWebViewFavDoc({
+        id: fav.sourceId || fav.id,
+        title: fav.title,
+        fileName: 'Achiev Features & Subscription Guide.pdf',
+        ext: 'pdf',
+        mimeType: 'text/html',
+        subject: fav.subject || 'App Guide & Plans',
+        badge: 'PDF ★',
+        dataUrl: buildAchievGuideDataUrl(),
+        pages: ACHIEV_FEATURES_GUIDE_PAGES.map((p) => ({
+          pageNumber: p.pageNumber,
+          title: p.heading,
+          keyTopic: p.subtitle,
+          summaryPearl: p.highlight,
+          contentHtml: p.sections.map((s) => `<h4>${s.title}</h4><p>${s.body}</p>`).join(''),
+        })),
+      });
+      return;
+    }
+
+    if (fav.type === 'book' || fav.kind === 'pdf') {
       const matchedBook = books.find((b) => b.id === fav.sourceId || b.title === fav.title);
       if (matchedBook) {
-        openPayloadInReader(matchedBook);
+        setWebViewFavDoc({
+          id: matchedBook.id,
+          title: matchedBook.title,
+          fileName: `${matchedBook.title}.pdf`,
+          ext: 'pdf',
+          mimeType: matchedBook.mimeType || 'application/pdf',
+          subject: matchedBook.subject,
+          badge: fav.badge,
+          pdfFileUrl: matchedBook.pdfFileUrl,
+          pages: matchedBook.pages,
+        });
         return;
       }
+      setWebViewFavDoc({
+        id: fav.sourceId || fav.id,
+        title: fav.title,
+        fileName: `${fav.title}.pdf`,
+        ext: 'pdf',
+        subject: fav.subject,
+        badge: fav.badge,
+        dataUrl: fav.pdfFileUrl,
+        pdfFileUrl: fav.pdfFileUrl,
+        contentHtml: fav.contentHtml,
+      });
+      return;
     }
+
     if (fav.type === 'note') {
       const matchedNote = notebooks.find((n) => n.id === fav.sourceId || n.title === fav.title);
       if (matchedNote) {
@@ -411,7 +551,7 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
   // Search input state
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Trackers State
+  // Trackers State (Seeded with 4 starter trackers once)
   const [trackers, setTrackers] = useState<TrackerItem[]>(() => {
     try {
       const saved = localStorage.getItem('medden_atelier_trackers');
@@ -426,12 +566,13 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
               (tr?.id === '4' && tr?.n === 'Study streak');
             return !isSeed;
           });
-          if (cleaned.length !== parsed.length) {
-            localStorage.setItem('medden_atelier_trackers', JSON.stringify(cleaned));
+          if (cleaned.length > 0 || localStorage.getItem('achiev_cockpit_v2_seeded') === '1') {
+            return cleaned;
           }
-          return cleaned;
         }
       }
+      localStorage.setItem('medden_atelier_trackers', JSON.stringify(DEFAULT_TRACKERS));
+      return DEFAULT_TRACKERS;
     } catch {}
     return DEFAULT_TRACKERS;
   });
@@ -576,12 +717,19 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
     );
   }, [rosterEvents, selectedDayObj]);
 
-  // Tasks State (Sticky note)
+  // Tasks State (Sticky note: Pending, Due, Completed)
   interface AtelierTask {
     id: string;
     t: string;
     done: boolean;
+    due?: boolean;
   }
+
+  const DEFAULT_STICKY_TASKS: AtelierTask[] = [
+    { id: 'task-sample-pending-1', t: 'Review Pharmacology Cholinergics & Muscarinic Agonists note', done: false, due: false },
+    { id: 'task-sample-due-1', t: 'Complete Lecture schedule practice worksheet (Due Today)', done: false, due: true },
+    { id: 'task-sample-done-1', t: 'Set up Ach1ev workspace folders & Shelf guide', done: true, due: false },
+  ];
 
   const [stickyTasks, setStickyTasks] = useState<AtelierTask[]>(() => {
     try {
@@ -597,14 +745,15 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
               (t?.id === 't4' && t?.t === 'Take 20-20-20 screen rest after reading');
             return !isSeed;
           });
-          if (cleaned.length !== parsed.length) {
-            localStorage.setItem('medden_atelier_tasks', JSON.stringify(cleaned));
+          if (cleaned.length > 0 || localStorage.getItem('achiev_cockpit_v2_seeded') === '1') {
+            return cleaned;
           }
-          return cleaned;
         }
       }
+      localStorage.setItem('medden_atelier_tasks', JSON.stringify(DEFAULT_STICKY_TASKS));
+      return DEFAULT_STICKY_TASKS;
     } catch {}
-    return [];
+    return DEFAULT_STICKY_TASKS;
   });
 
   const saveStickyTasks = (tasks: AtelierTask[]) => {
@@ -614,7 +763,7 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
     } catch {}
   };
 
-  const [taskFilter, setTaskFilter] = useState<'all' | 'pending' | 'done'>('all');
+  const [taskFilter, setTaskFilter] = useState<'all' | 'pending' | 'due' | 'done'>('all');
   const [newTaskInput, setNewTaskInput] = useState('');
 
   const handleToggleTaskDone = (id: string) => {
@@ -633,20 +782,22 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
       id: `task-${Date.now()}`,
       t: newTaskInput.trim(),
       done: false,
+      due: taskFilter === 'due',
     };
     saveStickyTasks([...stickyTasks, newTask]);
     setNewTaskInput('');
   };
 
   const filteredTasks = stickyTasks.filter((t) => {
-    if (taskFilter === 'pending') return !t.done;
+    if (taskFilter === 'pending') return !t.done && !t.due;
+    if (taskFilter === 'due') return !t.done && Boolean(t.due);
     if (taskFilter === 'done') return t.done;
     return true;
   });
 
   const completedCount = stickyTasks.filter((t) => t.done).length;
 
-  // Reminders State (persisted in localStorage, zero pre-seeded samples)
+  // Reminders State (seeded with 2 helpful study reminders once)
   interface AtelierReminder {
     id: string;
     time: string;
@@ -655,6 +806,11 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
     title: string;
     active: boolean;
   }
+
+  const DEFAULT_REMINDERS: AtelierReminder[] = [
+    { id: 'rem-sample-1', time: '08:00', ampm: 'AM', category: 'Study Plan', title: 'Review Lecture schedule & daily QBank targets', active: true },
+    { id: 'rem-sample-2', time: '04:30', ampm: 'PM', category: 'Eye Rest', title: '20-20-20 Eye Break & 15-min Leisure reset', active: true },
+  ];
 
   const [reminders, setReminders] = useState<AtelierReminder[]>(() => {
     try {
@@ -669,14 +825,17 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
               (r?.id === 'r3' && r?.title === 'USMLE QBank Block — 40 Renal / Cardio');
             return !isSeed;
           });
-          if (cleaned.length !== parsed.length) {
-            localStorage.setItem('medden_atelier_reminders', JSON.stringify(cleaned));
+          if (cleaned.length > 0 || localStorage.getItem('achiev_cockpit_v2_seeded') === '1') {
+            localStorage.setItem('achiev_cockpit_v2_seeded', '1');
+            return cleaned;
           }
-          return cleaned;
         }
       }
+      localStorage.setItem('medden_atelier_reminders', JSON.stringify(DEFAULT_REMINDERS));
+      localStorage.setItem('achiev_cockpit_v2_seeded', '1');
+      return DEFAULT_REMINDERS;
     } catch {}
-    return [];
+    return DEFAULT_REMINDERS;
   });
 
   const saveReminders = (updated: AtelierReminder[]) => {
@@ -1129,6 +1288,13 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
                     </button>
                     <button
                       type="button"
+                      aria-pressed={taskFilter === 'due'}
+                      onClick={() => setTaskFilter('due')}
+                    >
+                      Due
+                    </button>
+                    <button
+                      type="button"
                       aria-pressed={taskFilter === 'done'}
                       onClick={() => setTaskFilter('done')}
                     >
@@ -1360,6 +1526,19 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
             className="atelier-btn"
             style={{ padding: '6px 14px', fontSize: '12px' }}
             onClick={() => {
+              const limits = getPlanLimits();
+              if (
+                favourites.length >= limits.maxLeisureFavourites &&
+                limits.planId !== 'master-ultimate'
+              ) {
+                openSubscriptionUpgradeModal({
+                  title: 'Favourites Limit Reached (5 Items)',
+                  message:
+                    'Your plan allows up to 5 pinned Favourites. Upgrade to ₹300/mo Master Ultimate for unlimited favourites.',
+                  requiredPlanId: 'master-ultimate',
+                });
+                return;
+              }
               setEditingFavId(null);
               setFavTitleInput('');
               setFavSubjectInput(String(currentSubject));
@@ -1372,72 +1551,179 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
           </button>
         </div>
 
-        {favourites.length > 0 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-3.5">
-            {favourites.map((fav) => (
+        {/* Inline Favourites Folder Top Ribbon (Left Back Arrow + Current Folder Title) */}
+        {favFolderStack.length > 0 && (
+          <div
+            className="mb-3 px-3.5 py-2.5 rounded-xl border flex items-center justify-between gap-3"
+            style={{
+              background: 'var(--at-paper)',
+              borderColor: 'var(--at-line)',
+              color: 'var(--at-ink)',
+            }}
+          >
+            <div className="flex items-center gap-2.5 min-w-0">
+              <button
+                type="button"
+                onClick={() => setFavFolderStack((prev) => prev.slice(0, -1))}
+                className="p-1.5 rounded-lg border hover:brightness-95 transition-all cursor-pointer shrink-0 flex items-center gap-1"
+                style={{
+                  borderColor: 'var(--at-line)',
+                  background: 'var(--at-brass-soft)',
+                  color: 'var(--at-ink)',
+                }}
+                aria-label="Back to previous favourites folder"
+              >
+                <ArrowLeft className="w-4 h-4" />
+              </button>
+              <Folder className="w-4 h-4 shrink-0" style={{ color: 'var(--at-brass)' }} />
+              <span className="font-serif font-bold text-sm truncate">
+                {favFolderStack[favFolderStack.length - 1].title}
+              </span>
+              <span className="text-[10px] font-mono opacity-65 shrink-0">
+                {favFolderStack.map((f) => f.title).join(' / ')}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {(() => {
+          const displayedFavs =
+            favFolderStack.length > 0
+              ? favFolderStack[favFolderStack.length - 1].children || []
+              : favourites;
+
+          if (displayedFavs.length === 0) {
+            return (
               <div
-                key={fav.id}
-                onClick={() => handleOpenFavouriteInRead(fav)}
-                className="p-3.5 rounded-xl border shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group relative"
+                className="p-4 rounded-xl border text-xs text-center opacity-75"
                 style={{
                   background: 'var(--at-paper)',
                   borderColor: 'var(--at-line)',
-                  color: 'var(--at-ink)',
-                  backdropFilter: 'blur(10px)',
+                  color: 'var(--at-muted)',
                 }}
               >
-                <div>
-                  <div className="flex items-center justify-between gap-1.5 mb-2">
-                    <span
-                      className="px-1.5 py-0.5 rounded text-[9.5px] font-mono font-bold truncate"
-                      style={{ background: 'var(--at-brass-soft)', color: 'var(--at-brass)' }}
-                    >
-                      {fav.badge || 'Favourite'}
-                    </span>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <button
-                        type="button"
-                        title="Edit favourite"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setEditingFavId(fav.id);
-                          setFavTitleInput(fav.title);
-                          setFavSubjectInput(fav.subject);
-                          setFavBadgeInput(fav.badge);
-                          setIsFavModalOpen(true);
+                This favourites folder is empty.
+              </div>
+            );
+          }
+
+          return (
+            <div className="atelier-fav-bar">
+              {displayedFavs.map((fav) => {
+                const isFolder =
+                  fav.type === 'folder' || fav.kind === 'folder' || Array.isArray(fav.children);
+                const isStarredPdf = !isFolder && (fav.isStarred || fav.kind === 'pdf' || fav.type === 'book');
+
+                return (
+                  <div
+                    key={fav.id}
+                    onClick={() => handleOpenFavouriteInRead(fav)}
+                    className="atelier-fav-card p-3.5 rounded-xl border shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group relative overflow-hidden"
+                    style={{
+                      background: 'var(--at-paper)',
+                      borderColor: 'var(--at-line)',
+                      color: 'var(--at-ink)',
+                      backdropFilter: 'blur(10px)',
+                    }}
+                  >
+                    <div>
+                      {/* Thumbnail / Preview Banner */}
+                      <div
+                        className="relative h-20 rounded-lg mb-2.5 px-3 py-2 flex items-center gap-2.5 border overflow-hidden"
+                        style={{
+                          background: isFolder
+                            ? 'linear-gradient(135deg, rgba(164,124,67,0.18), rgba(124,69,33,0.12))'
+                            : 'linear-gradient(135deg, rgba(124,69,33,0.22), rgba(74,37,17,0.12))',
+                          borderColor: 'var(--at-line)',
                         }}
-                        className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
-                        style={{ color: 'var(--at-muted)' }}
                       >
-                        <Pencil className="w-3 h-3" />
-                      </button>
-                      <button
-                        type="button"
-                        title="Remove from favourites"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          saveFavourites(favourites.filter((item) => item.id !== fav.id));
-                        }}
-                        className="p-1 rounded hover:bg-red-500/10 hover:text-red-500 transition-colors cursor-pointer"
-                        style={{ color: 'var(--at-muted)' }}
-                      >
-                        <Trash2 className="w-3 h-3" />
-                      </button>
+                        <div
+                          className="w-9 h-11 rounded-md shadow-xs flex items-center justify-center text-white shrink-0"
+                          style={{ backgroundColor: fav.coverColor || '#7c4521' }}
+                        >
+                          {isFolder ? (
+                            <Folder className="w-5 h-5" />
+                          ) : (
+                            <FileText className="w-5 h-5" />
+                          )}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <span
+                            className="px-1.5 py-0.5 rounded text-[9.5px] font-mono font-bold inline-block"
+                            style={{ background: 'var(--at-brass-soft)', color: 'var(--at-brass)' }}
+                          >
+                            {fav.badge || (isFolder ? 'Folder' : 'PDF')}
+                          </span>
+                          <p className="text-[10px] font-mono mt-1 truncate opacity-75">
+                            {isFolder
+                              ? `${fav.children?.length || 0} item(s) · Open inside`
+                              : 'Web View Document'}
+                          </p>
+                        </div>
+
+                        {/* Bottom-right corner Star badge on PDF thumbnail */}
+                        {isStarredPdf && (
+                          <div
+                            className="absolute bottom-1.5 right-1.5 w-6 h-6 rounded-full bg-amber-500 text-white shadow flex items-center justify-center"
+                            title="Starred Favourite"
+                          >
+                            <Star className="w-3.5 h-3.5 fill-white" />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="flex items-start justify-between gap-1.5">
+                        <h4
+                          className="text-[13px] font-bold line-clamp-2 leading-snug"
+                          style={{ color: 'var(--at-ink)' }}
+                        >
+                          {fav.title}
+                        </h4>
+                        {favFolderStack.length === 0 && (
+                          <div className="flex items-center gap-0.5 shrink-0">
+                            <button
+                              type="button"
+                              title="Edit favourite"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setEditingFavId(fav.id);
+                                setFavTitleInput(fav.title);
+                                setFavSubjectInput(fav.subject);
+                                setFavBadgeInput(fav.badge);
+                                setIsFavModalOpen(true);
+                              }}
+                              className="p-1 rounded hover:bg-black/5 dark:hover:bg-white/10 transition-colors cursor-pointer"
+                              style={{ color: 'var(--at-muted)' }}
+                            >
+                              <Pencil className="w-3 h-3" />
+                            </button>
+                            <button
+                              type="button"
+                              title="Remove from favourites"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                saveFavourites(favourites.filter((item) => item.id !== fav.id));
+                              }}
+                              className="p-1 rounded hover:bg-red-500/10 hover:text-red-500 transition-colors cursor-pointer"
+                              style={{ color: 'var(--at-muted)' }}
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                      {fav.subject && (
+                        <p className="text-[10px] mt-1 truncate" style={{ color: 'var(--at-muted)' }}>
+                          {fav.subject}
+                        </p>
+                      )}
                     </div>
                   </div>
-                  <h4 className="text-[13.5px] font-bold line-clamp-2 leading-snug" style={{ color: 'var(--at-ink)' }}>
-                    {fav.title}
-                  </h4>
-                  {fav.subject && (
-                    <p className="text-[10px] mt-1" style={{ color: 'var(--at-muted)' }}>
-                      {fav.subject}
-                    </p>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+                );
+              })}
+            </div>
+          );
+        })()}
 
 
 
@@ -1931,6 +2217,25 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
       )}
 
 
+      {/* Unified Web View Window Modal for Cockpit Favourites */}
+      <WebViewDocumentModal
+        doc={webViewFavDoc}
+        onClose={() => setWebViewFavDoc(null)}
+        onOpenInRead={(doc) => {
+          openPayloadInReader({
+            id: doc.id,
+            title: doc.title,
+            subject: doc.subject,
+            author: 'Favourites',
+            edition: doc.badge || 'Saved PDF',
+            coverColor: '#7c4521',
+            pdfFileUrl: doc.pdfFileUrl || doc.dataUrl,
+            pages: doc.pages,
+            contentHtml: doc.contentHtml,
+          });
+          setWebViewFavDoc(null);
+        }}
+      />
     </div>
   );
 };

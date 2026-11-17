@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { getPlanLimits, openSubscriptionUpgradeModal } from '../../utils/subscriptionLimits';
 import {
   SCRAMBLE_WORDS,
   FUN_VOCAB_QUESTIONS,
@@ -1588,6 +1589,16 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({
   const toggleFavoriteWing = (wingId: string, e?: React.MouseEvent) => {
     e?.stopPropagation();
     const base = resolvedFavoriteWingIds;
+    const totalStarredSlabs = Object.values(starredSlabs).filter(Boolean).length;
+    const limits = getPlanLimits();
+    if (!base.includes(wingId) && limits.maxLeisureFavourites !== Infinity && totalStarredSlabs + base.length >= limits.maxLeisureFavourites) {
+      openSubscriptionUpgradeModal({
+        title: `Leisure Favourites Limit (${limits.maxLeisureFavourites} Max)`,
+        message: 'You can pin up to 5 favourites in Leisure on your current plan. Upgrade to ₹300/mo Master Ultimate for unlimited Leisure favourites.',
+        requiredPlanId: 'master-ultimate',
+      });
+      return;
+    }
     let next: string[];
     if (base.includes(wingId)) {
       const remaining = base.filter((id) => id !== wingId);
@@ -1604,6 +1615,19 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({
 
   const handleToggleStar = (slabId: string, e: React.MouseEvent) => {
     e.stopPropagation();
+    const limits = getPlanLimits();
+    const isCurrentlyStarred = Boolean(starredSlabs[slabId]);
+    if (!isCurrentlyStarred && limits.maxLeisureFavourites !== Infinity) {
+      const starredCount = Object.values(starredSlabs).filter(Boolean).length;
+      if (starredCount >= limits.maxLeisureFavourites) {
+        openSubscriptionUpgradeModal({
+          title: `Leisure Favourites Limit (${limits.maxLeisureFavourites} Max)`,
+          message: 'Free and Scholar Pro (₹100/mo) allow up to 5 Leisure favourites. Upgrade to ₹300/mo Master Ultimate for unlimited favourites.',
+          requiredPlanId: 'master-ultimate',
+        });
+        return;
+      }
+    }
     setStarredSlabs((prev) => {
       const updated = { ...prev, [slabId]: !prev[slabId] };
       localStorage.setItem('medden_starred_slabs', JSON.stringify(updated));
@@ -1853,6 +1877,14 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({
   const playSound = (type: PeaceSoundType) => {
     if (isAudioPlaying && audioType === type) {
       stopAudio();
+      return;
+    }
+    if (type !== 'rain' && getPlanLimits().maxPeaceSounds <= 1) {
+      openSubscriptionUpgradeModal({
+        title: 'Unlock All Peaceful Soundscapes (₹100/mo)',
+        message: 'Free tier includes Rain ambience only. Upgrade to ₹100/mo Scholar Pro or higher to unlock Forest, Ocean, Fireplace, Zen Bowl, and all calming sounds.',
+        requiredPlanId: 'scholar-pro',
+      });
       return;
     }
     if (audioIntervalRef.current) clearInterval(audioIntervalRef.current);
@@ -2406,7 +2438,22 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({
   const [liveNewsAutoRefresh, setLiveNewsAutoRefresh] = useState(true);
   const [liveNewsLastUpdated, setLiveNewsLastUpdated] = useState<string>('Ready');
 
-  const fetchLiveGeminiNews = async (category: 'All' | 'World' | 'India' | 'Medical' | 'Tech' = liveNewsCategory) => {
+  const fetchLiveGeminiNews = async (
+    category: 'All' | 'World' | 'India' | 'Medical' | 'Tech' = liveNewsCategory,
+    manualTrigger: boolean = false
+  ) => {
+    if (!getPlanLimits().canUseGemini) {
+      if (manualTrigger) {
+        openSubscriptionUpgradeModal({
+          title: 'Unlock Live Gemini News Wire (₹300/mo)',
+          message: 'Live AI-powered Gemini news summaries require the ₹300/mo Master Ultimate plan.',
+          requiredPlanId: 'master-ultimate',
+        });
+      }
+      setLiveNewsItems(buildLocalInshortsFallback(category));
+      setLiveNewsLastUpdated(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
+      return;
+    }
     setLiveNewsLoading(true);
     try {
       const resp = await fetch('/api/gemini/leisure-news', {
@@ -4121,7 +4168,7 @@ export const LeisureDashboard: React.FC<LeisureDashboardProps> = ({
                       </label>
                       <button
                         type="button"
-                        onClick={() => fetchLiveGeminiNews(liveNewsCategory)}
+                        onClick={() => fetchLiveGeminiNews(liveNewsCategory, true)}
                         disabled={liveNewsLoading}
                         className="px-3 py-1 rounded-lg bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
                       >

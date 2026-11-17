@@ -298,12 +298,12 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
         isModal
           ? 'fixed inset-0 z-50 bg-black/55 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto overflow-x-hidden'
           : 'min-h-[100dvh] w-full relative overflow-y-auto overflow-x-hidden flex flex-col'
-      } transition-colors duration-300 text-[#efe4d4]`}
+      } transition-colors duration-300 text-[#fff8ee]`}
       style={
         isModal
           ? undefined
           : {
-              backgroundColor: '#0c0402',
+              backgroundColor: '#221007',
             }
       }
     >
@@ -313,7 +313,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-2.5 rounded-xl backdrop-blur-xl transition-all cursor-pointer shadow-lg bg-[#1a0d07]/80 text-[#efe4d4] hover:bg-[#2a150b]"
+            className="p-2.5 rounded-xl backdrop-blur-xl transition-all cursor-pointer shadow-lg bg-[#241108]/90 text-[#fff8ee] hover:bg-[#3a1c0e]"
             title="Close Authentication Portal"
           >
             <X className="w-4 h-4" />
@@ -321,45 +321,82 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
         </div>
       )}
 
-      {/* Top Dark Login Screen Viewport */}
+      {/* Dark Chocolaty Brown Main Login Screen Viewport with Subtle Blurry Pattern */}
       <div
         className={
           isModal
             ? 'relative z-10 w-full max-w-4xl grid grid-cols-1 lg:grid-cols-12 gap-6 items-center'
-            : 'relative w-full min-h-[calc(100dvh-118px)] sm:min-h-[calc(100dvh-136px)] flex items-center justify-center px-4 sm:px-8 py-4 sm:py-6 overflow-hidden shrink-0'
+            : 'relative w-full min-h-[82dvh] flex items-center justify-center px-4 sm:px-8 pt-6 pb-10 sm:py-10 overflow-hidden shrink-0'
         }
         style={
           isModal
             ? undefined
             : {
-                backgroundColor: '#0c0402',
+                background:
+                  'radial-gradient(ellipse at 22% 28%, #34190c 0%, #241108 46%, #180b04 100%)',
               }
         }
       >
-        {/* Organic Espresso Radial Atmosphere (fades out completely to pure #0c0402 before bottom edge so zero horizontal border occurs) */}
+        {/* Subtle Blurry Pattern Backdrop Layer */}
         {!isModal && (
           <div
-            className="absolute inset-0 pointer-events-none"
             aria-hidden="true"
-            style={{
-              background:
-                'radial-gradient(ellipse 90% 80% at 18% 20%, #2a1409 0%, #160904 54%, #0c0402 100%)',
-              maskImage: 'linear-gradient(180deg, #000 0%, #000 58%, transparent 100%)',
-              WebkitMaskImage: 'linear-gradient(180deg, #000 0%, #000 58%, transparent 100%)',
-            }}
-          />
-        )}
-        {!isModal && (
-          <div
-            className="absolute inset-0 pointer-events-none"
-            aria-hidden="true"
-            style={{
-              background:
-                'radial-gradient(circle at 12% 18%, rgba(138, 72, 32, 0.24) 0%, transparent 44%), radial-gradient(circle at 82% 22%, rgba(154, 88, 38, 0.16) 0%, transparent 40%), radial-gradient(circle at 46% 62%, rgba(92, 46, 18, 0.18) 0%, transparent 44%)',
-              maskImage: 'linear-gradient(180deg, #000 0%, #000 55%, transparent 96%)',
-              WebkitMaskImage: 'linear-gradient(180deg, #000 0%, #000 55%, transparent 96%)',
-            }}
-          />
+            className="pointer-events-none absolute inset-0 overflow-hidden select-none"
+          >
+            {/* Soft blurry cocoa & amber glow clouds */}
+            <div
+              className="absolute -top-24 -left-24 w-[420px] h-[420px] rounded-full opacity-45"
+              style={{
+                background: 'radial-gradient(circle, rgba(112, 59, 28, 0.55) 0%, rgba(36, 17, 8, 0) 70%)',
+                filter: 'blur(56px)',
+              }}
+            />
+            <div
+              className="absolute top-[28%] right-[-8%] w-[460px] h-[460px] rounded-full opacity-40"
+              style={{
+                background: 'radial-gradient(circle, rgba(138, 76, 36, 0.42) 0%, rgba(28, 12, 5, 0) 72%)',
+                filter: 'blur(68px)',
+              }}
+            />
+            <div
+              className="absolute -bottom-24 left-[32%] w-[520px] h-[320px] rounded-full opacity-35"
+              style={{
+                background: 'radial-gradient(circle, rgba(89, 44, 19, 0.5) 0%, rgba(24, 11, 4, 0) 72%)',
+                filter: 'blur(64px)',
+              }}
+            />
+
+            {/* Subtle blurry architectural/botanical lattice pattern */}
+            <div
+              className="absolute inset-0 opacity-75"
+              style={{
+                backgroundImage: `url("data:image/svg+xml,${encodeURIComponent(
+                  `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
+                    <circle cx="48" cy="48" r="26" fill="none" stroke="#d9a566" stroke-opacity="0.14" stroke-width="1.2"/>
+                    <path d="M48 4 L92 48 L48 92 L4 48 Z" fill="none" stroke="#c88d4d" stroke-opacity="0.11" stroke-width="1"/>
+                    <circle cx="0" cy="0" r="14" fill="none" stroke="#e4b982" stroke-opacity="0.1" stroke-width="1"/>
+                    <circle cx="96" cy="0" r="14" fill="none" stroke="#e4b982" stroke-opacity="0.1" stroke-width="1"/>
+                    <circle cx="0" cy="96" r="14" fill="none" stroke="#e4b982" stroke-opacity="0.1" stroke-width="1"/>
+                    <circle cx="96" cy="96" r="14" fill="none" stroke="#e4b982" stroke-opacity="0.1" stroke-width="1"/>
+                    <circle cx="48" cy="48" r="4" fill="#e6be8a" fill-opacity="0.12"/>
+                  </svg>`
+                )}")`,
+                backgroundSize: '96px 96px',
+                filter: 'blur(2.5px)',
+                transform: 'scale(1.04)',
+                maskImage: 'radial-gradient(ellipse 85% 80% at 50% 45%, black 35%, transparent 92%)',
+                WebkitMaskImage: 'radial-gradient(ellipse 85% 80% at 50% 45%, black 35%, transparent 92%)',
+              }}
+            />
+
+            {/* Seamless bottom edge blend into showcase transition */}
+            <div
+              className="absolute inset-x-0 bottom-0 h-24"
+              style={{
+                background: 'linear-gradient(180deg, rgba(34, 16, 7, 0) 0%, #221007 100%)',
+              }}
+            />
+          </div>
         )}
 
       {/* Clean Split Layout: Vertically Centered Brand Panel Beside Slightly Lower Compact Login Box */}
@@ -369,17 +406,9 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
           <div className="flex flex-col items-center lg:items-start gap-3 w-full">
             <div className="relative flex items-center justify-center lg:justify-start mb-0.5 select-none max-w-full">
               <div
-                aria-hidden="true"
-                className="pointer-events-none absolute -inset-x-10 -inset-y-6 rounded-full opacity-55"
-                style={{
-                  background:
-                    'radial-gradient(ellipse 70% 65% at 50% 50%, rgba(10, 4, 1, 0.5) 0%, rgba(22, 10, 4, 0.18) 56%, transparent 82%)',
-                }}
-              />
-              <div
                 className="relative z-10 max-w-full"
                 style={{
-                  filter: 'drop-shadow(0 12px 26px rgba(10, 4, 1, 0.36))',
+                  filter: 'drop-shadow(0 12px 26px rgba(24, 10, 3, 0.38))',
                 }}
               >
                 <AchievBrand variant="lockup" />
@@ -387,8 +416,8 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
             </div>
 
             <p
-              className="leading-relaxed max-w-xs italic font-serif text-[#d3ba94] opacity-85"
-              style={{ fontSize: 'clamp(0.84rem, 1.45vw, 0.98rem)' }}
+              className="leading-relaxed max-w-xs italic font-serif text-[#fff5e4] opacity-95"
+              style={{ fontSize: 'clamp(0.88rem, 1.5vw, 1.02rem)' }}
             >
               A quiet space to settle thoughts, write clinical notes, and carry your study desk everywhere.
             </p>
@@ -396,14 +425,14 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
         </div>
 
         {/* Right: Compact Borderless Frosted-Glass Login Card Positioned Breathably Lower + External Skip Link */}
-        <div className="lg:col-span-7 lg:mt-14 w-full max-w-md mx-auto flex flex-col items-center">
+        <div className="lg:col-span-7 lg:mt-8 w-full max-w-md mx-auto flex flex-col items-center">
         <div
           className="rounded-3xl p-4 sm:p-6 backdrop-blur-xl backdrop-saturate-150 flex flex-col justify-between transition-all w-full"
           style={{
             background:
-              'linear-gradient(160deg, rgba(38, 19, 10, 0.72) 0%, rgba(18, 8, 4, 0.58) 100%)',
+              'linear-gradient(160deg, rgba(43, 21, 10, 0.86) 0%, rgba(25, 11, 5, 0.88) 100%)',
             boxShadow:
-              'inset 0 1.5px 1px rgba(255, 224, 178, 0.14), inset 0 -2px 6px rgba(0, 0, 0, 0.45), 0 24px 60px rgba(0, 0, 0, 0.55)',
+              'inset 0 1.5px 1px rgba(255, 228, 186, 0.14), inset 0 -2px 6px rgba(12, 4, 1, 0.45), 0 24px 60px rgba(10, 4, 1, 0.58)',
           }}
         >
           <div>
@@ -907,16 +936,24 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
           </div>
         </div>
 
-        {/* Outside & Below Login Box: Skip and create note */}
+        {/* Outside & Below Login Box: Skip and create note + Privacy Policy */}
         {!isModal && (
-          <div className="mt-4 text-center">
+          <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-center">
             <button
               type="button"
               onClick={() => window.dispatchEvent(new CustomEvent('achiev_skip_create_note'))}
-              className="inline-flex items-center gap-1.5 text-xs sm:text-[13.5px] font-semibold text-[#f3d9a8] hover:text-white underline underline-offset-4 decoration-amber-400/80 hover:decoration-amber-200 transition-colors cursor-pointer"
+              className="inline-flex items-center gap-1.5 text-xs sm:text-[13.5px] font-semibold text-[#fff3dd] hover:text-white underline underline-offset-4 decoration-amber-300/80 hover:decoration-amber-100 transition-colors cursor-pointer"
             >
               <span>Skip and create note</span>
               <ArrowRight className="w-3.5 h-3.5" />
+            </button>
+            <span className="text-[#d9b88c]/50 text-xs" aria-hidden="true">·</span>
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new CustomEvent('achiev_open_privacy_policy'))}
+              className="text-xs font-medium text-[#f5dec0] hover:text-white underline underline-offset-4 decoration-[#e2be8f]/60 transition-colors cursor-pointer"
+            >
+              Privacy Policy
             </button>
           </div>
         )}
@@ -925,55 +962,24 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
       </div>
 
       {!isModal && (
-        <>
-          {/* Borderless Cosine-Eased Vertical Transition with Bottom-Edge Glimpse on Initial Viewport */}
-          <div
-            aria-hidden="true"
-            className="w-full min-h-[calc(100dvh-72px)] sm:min-h-[calc(100dvh-88px)] relative z-10 pointer-events-none shrink-0 flex flex-col justify-start items-center pt-4"
-            style={{
-              background:
-                'linear-gradient(180deg, #0c0402 0%, #1c0c04 4.5%, #341809 10%, #512811 17%, #6d3a1c 27%, #8a4f2b 40%, #a5673e 54%, #be8154 68%, #d39b6d 80%, #e3b88b 89%, #eed0ab 94.5%, #f3dcc0 98%, #f4e2c2 100%)',
-            }}
-          >
-            <div className="flex flex-col items-center gap-1 opacity-75 animate-bounce">
-              <span className="w-5 h-5 rounded-full border border-[#e7bc82]/35 bg-[#2a1307]/45 flex items-center justify-center text-[#f1cc96]">
-                <svg viewBox="0 0 16 16" className="w-3 h-3" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M4 6.5l4 4 4-4" />
-                </svg>
-              </span>
-            </div>
+        <section
+          aria-label="Achiev Medical Study Guide & Tour"
+          className="w-full relative z-10 px-4 sm:px-8 pt-6 pb-16 sm:pb-20 text-[#3b1e0d] overflow-hidden"
+          style={{
+            background:
+              'linear-gradient(180deg, #221007 0%, #34190c 5%, #4a2511 11%, #68381d 18%, #8b522f 26%, #b1744a 35%, #d49f6f 45%, #e8c398 55%, #f4e2c2 66%, #f2dfc0 84%, #ecd3ab 100%)',
+          }}
+        >
+          <div className="relative z-10">
+            {showShowcase ? (
+              <Suspense fallback={<div className="w-full max-w-6xl mx-auto mt-4 h-48 rounded-3xl bg-[#E8D2AA]/60 animate-pulse" />}>
+                <ProductDemoShowcase />
+              </Suspense>
+            ) : (
+              <div className="w-full max-w-6xl mx-auto h-32" />
+            )}
           </div>
-
-          <section
-            aria-label="Achiev Medical Study Guide & Tour"
-            className="w-full relative z-10 -mt-20 sm:-mt-28 pt-20 sm:pt-28 px-4 sm:px-8 pb-16 sm:pb-20 text-[#23140A] overflow-hidden"
-            style={{
-              background:
-                'linear-gradient(180deg, rgba(244, 226, 194, 0) 0%, rgba(244, 226, 194, 0.48) 90px, #f4e2c2 170px, #f2dfc0 38%, #ecd3ab 74%, #e5c392 100%)',
-            }}
-          >
-            {/* Cream Ambient Highlights Faded In Below Feathered Join */}
-            <div
-              aria-hidden="true"
-              className="pointer-events-none absolute inset-0"
-              style={{
-                background:
-                  'radial-gradient(circle at 14% 24%, rgba(224, 181, 120, 0.34) 0%, transparent 45%), radial-gradient(circle at 86% 30%, rgba(206, 152, 88, 0.24) 0%, transparent 48%), radial-gradient(circle at 48% 72%, rgba(255, 248, 234, 0.65) 0%, transparent 55%)',
-                maskImage: 'linear-gradient(180deg, transparent 0%, transparent 14%, #000 30%, #000 100%)',
-                WebkitMaskImage: 'linear-gradient(180deg, transparent 0%, transparent 14%, #000 30%, #000 100%)',
-              }}
-            />
-            <div className="relative z-10">
-              {showShowcase ? (
-                <Suspense fallback={<div className="w-full max-w-6xl mx-auto mt-4 h-48 rounded-3xl bg-[#E8D2AA]/60 animate-pulse" />}>
-                  <ProductDemoShowcase />
-                </Suspense>
-              ) : (
-                <div className="w-full max-w-6xl mx-auto h-32" />
-              )}
-            </div>
-          </section>
-        </>
+        </section>
       )}
     </div>
   );

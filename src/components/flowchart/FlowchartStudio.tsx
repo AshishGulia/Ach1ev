@@ -229,6 +229,113 @@ interface FlowchartStudioProps {
   onSnipToNote?: (snip: any) => void;
 }
 
+const ACHIEV_FOCUS_WORKFLOW_CHART: StudioFlowchart = {
+  id: 'chart-achiev-focus-workflow',
+  title: 'How to Focus and Study Using Ach1ev',
+  subtitle: '4-Level Deep Focus, Split-Screen Learning, Eye Rest & 15-Min Leisure Recovery Loop',
+  category: 'Study Workflow Blueprint',
+  nodesCount: 5,
+  levelsCount: 4,
+  infoCount: 5,
+  lastUpdated: new Date().toISOString().split('T')[0],
+  levelColors: {
+    1: '#A47C43',
+    2: '#2e5f5a',
+    3: '#6e4253',
+    4: '#8f5f2c',
+  },
+  childrenHeading: 'Next Step in Focus Loop',
+  notesHeading: 'Action Checklist',
+  nodes: [
+    {
+      id: 'n-l1-plan',
+      parentId: null,
+      level: 1,
+      columnIndex: 0,
+      phraseTag: 'Start / Trigger',
+      title: 'Level 1 · Plan Goals & Create Note',
+      subtitle: 'Cockpit Trackers + Calendar + Note Studio',
+      description:
+        'Open Cockpit to set daily Study Hours & MCQ Trackers, check Lecture Schedule on the Calendar, and open Create a Note with a structured Handwriting or Sans template.',
+      pearls: [
+        'Log 1 Pending goal on the sticky note before starting.',
+        'Pick a Note Template matching your lecture style.',
+      ],
+      connections: ['n-l2-split', 'n-l2-eyetimer'],
+      badge: 'Level 1',
+      isStarred: true,
+    },
+    {
+      id: 'n-l2-split',
+      parentId: 'n-l1-plan',
+      level: 2,
+      columnIndex: 0,
+      phraseTag: 'Process Step',
+      title: 'Level 2 · Open Note + Textbook PDF + YouTube',
+      subtitle: 'Split-Screen Active Learning Workspace',
+      description:
+        'Keep your structured Note open side-by-side with your Textbook PDF on the Desk/Shelf and stream the embedded timestamped YouTube explanation in one zero-distraction screen.',
+      pearls: [
+        'Use timestamped lecture links embedded right inside templates.',
+        'Snip key tables directly from PDF into your Note.',
+      ],
+      connections: ['n-l3-rest'],
+      badge: 'Level 2',
+    },
+    {
+      id: 'n-l2-eyetimer',
+      parentId: 'n-l1-plan',
+      level: 2,
+      columnIndex: 1,
+      phraseTag: 'Parallel Action',
+      title: 'Eye Timers · Rest Box (20-20-20)',
+      subtitle: 'Ocular Protection & Pomodoro Cadence',
+      description:
+        'Keep the Eye Rest Timer running beside your study desk. Every 20 minutes look 20 feet away for 20 seconds, then unlock a planned rest break without losing momentum.',
+      pearls: [
+        'Prevents digital eye strain during multi-hour revision.',
+        'Tracks rest cycles automatically alongside focus sprints.',
+      ],
+      connections: ['n-l3-rest'],
+      badge: 'Eye Rest',
+    },
+    {
+      id: 'n-l3-rest',
+      parentId: 'n-l2-split',
+      level: 3,
+      columnIndex: 0,
+      phraseTag: 'Sub-routine',
+      title: 'Level 3 · Leisure Sounds & Study Circle Posts',
+      subtitle: 'Peaceful Ambience + Achiever’s Club Feed',
+      description:
+        'When your break timer rings, step into the Leisure Lounge to play calming Rain/Ambient sounds or browse high-yield Study Circle posts & mnemonics shared by peers.',
+      pearls: [
+        'Switch between Rain noise and Study Circle flashcards.',
+        'Avoid doomscrolling—stay inside calm Ach1ev zones.',
+      ],
+      connections: ['n-l4-return'],
+      badge: 'Level 3',
+    },
+    {
+      id: 'n-l4-return',
+      parentId: 'n-l3-rest',
+      level: 4,
+      columnIndex: 0,
+      phraseTag: 'Loop / Re-evaluate',
+      title: 'Level 4 · Return to Studies After 15 Min',
+      subtitle: 'Rest Reminder Ends -> Resume Next Sprint',
+      description:
+        'As soon as the 15-minute Leisure rest reminder completes, close the break window and jump straight back to your open Note & PDF to mark your Tracker progress.',
+      pearls: [
+        'Update your Cockpit Tracker count after every sprint.',
+        'Cycle back to Level 1–2 for the next subject block.',
+      ],
+      badge: 'Level 4',
+      isStarred: true,
+    },
+  ],
+};
+
 export const FlowchartStudio: React.FC<FlowchartStudioProps> = ({
   onBackToLibrary,
 }) => {
@@ -248,14 +355,24 @@ export const FlowchartStudio: React.FC<FlowchartStudioProps> = ({
               childrenHeading: c.childrenHeading || 'Connected Next Steps',
               notesHeading: c.notesHeading || 'Key Notes & Criteria',
             }));
+          const hasFocusChart = cleaned.some((c: any) => c?.id === ACHIEV_FOCUS_WORKFLOW_CHART.id);
+          if (!hasFocusChart && localStorage.getItem('achiev_flowchart_seeded_v1') !== '1') {
+            const withSample = [ACHIEV_FOCUS_WORKFLOW_CHART, ...cleaned];
+            localStorage.setItem('achiev_flowchart_seeded_v1', '1');
+            localStorage.setItem('medden_studio_flowcharts', JSON.stringify(withSample));
+            return withSample;
+          }
           if (cleaned.length !== parsed.length) {
             localStorage.setItem('medden_studio_flowcharts', JSON.stringify(cleaned));
           }
           return cleaned;
         }
       }
+      localStorage.setItem('achiev_flowchart_seeded_v1', '1');
+      localStorage.setItem('medden_studio_flowcharts', JSON.stringify([ACHIEV_FOCUS_WORKFLOW_CHART]));
+      return [ACHIEV_FOCUS_WORKFLOW_CHART];
     } catch {}
-    return [];
+    return [ACHIEV_FOCUS_WORKFLOW_CHART];
   });
 
   const [activeChartId, setActiveChartId] = useState<string>(() => charts[0]?.id || '');

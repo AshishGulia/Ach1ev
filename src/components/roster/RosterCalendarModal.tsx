@@ -40,6 +40,8 @@ import {
   RoundColorColumnsPicker,
   UNIFIED_COLOR_COLUMNS,
 } from '../common/RoundColorColumnsPicker';
+import { WebViewDocumentModal, WebViewDocPayload } from '../common/WebViewDocumentModal';
+import { getPlanLimits, openSubscriptionUpgradeModal } from '../../utils/subscriptionLimits';
 
 interface RosterCalendarModalProps {
   isOpen: boolean;
@@ -299,6 +301,19 @@ export const RosterCalendarModal: React.FC<RosterCalendarModalProps> = ({
 
   // Universal AI Document & Roster Parsing (PDF, Word, Excel, CSV, TXT, Images)
   const runDocumentScan = async (file: File) => {
+    const limits = getPlanLimits();
+    const userDocsCount = recentRosterFiles.filter((d) => !d.id.startsWith('doc-sample-')).length;
+    if (userDocsCount >= limits.maxDocuments) {
+      openSubscriptionUpgradeModal({
+        title: `Document Limit Reached (${limits.maxDocuments} Files)`,
+        message:
+          limits.planId === 'free'
+            ? 'Free plan supports up to 5 uploaded files. Upgrade to ₹100/mo Scholar Pro for 50 uploads.'
+            : 'Scholar Pro supports up to 50 documents. Upgrade to ₹300/mo Master Ultimate for unlimited documents.',
+        requiredPlanId: limits.planId === 'free' ? 'scholar-pro' : 'master-ultimate',
+      });
+      return;
+    }
     setIsScanning(true);
     setUploadedFileName(file.name);
     setScanStatus(`Scanning "${file.name}" & detecting tables...`);
@@ -1381,30 +1396,28 @@ export const RosterCalendarModal: React.FC<RosterCalendarModalProps> = ({
           </div>
         )}
 
-        {/* VIEW 3: Document Scanner & Recent Scanned Files (Hides big upload card once a file is uploaded, leaving only the top ribbon's Roster File AI Scan button + Recent Files below) */}
+        {/* VIEW 3: Document Scanner & Recent Scanned Files (Upload dropzone ALWAYS visible + Recent Files below) */}
         {viewMode === 'upload-pdf' && (
           <div className="space-y-5">
-            {recentRosterFiles.length === 0 && !uploadedFileName && (
-              <div className="p-8 border-2 border-dashed border-stone-300 dark:border-[#382518] rounded-2xl text-center bg-stone-50 dark:bg-[#120c08]">
-                <Upload className="w-8 h-8 mx-auto text-[#A47C43] mb-2.5" />
-                <h4 className="text-base font-bold text-stone-800 dark:text-stone-200 font-serif mb-1">
-                  Upload Roster, Timetable, Excel, Word or PDF
-                </h4>
-                <p className="text-xs text-stone-500 mb-4">
-                  Automatically detects schedules &amp; tables across PDF, Word (.docx), Excel (.xlsx/.xls), CSV, TXT, and images.
-                </p>
+            <div className="p-6 sm:p-8 border-2 border-dashed border-stone-300 dark:border-[#382518] rounded-2xl text-center bg-stone-50 dark:bg-[#120c08]">
+              <Upload className="w-8 h-8 mx-auto text-[#A47C43] mb-2.5" />
+              <h4 className="text-base font-bold text-stone-800 dark:text-stone-200 font-serif mb-1">
+                Upload Roster, Timetable, Excel, Word or PDF
+              </h4>
+              <p className="text-xs text-stone-500 mb-4">
+                Uploaded files appear right below in Recent Files and Library → Recent Files. Click any file to open in Web View.
+              </p>
 
-                <button
-                  type="button"
-                  onClick={() => rosterFileInputRef.current?.click()}
-                  disabled={isScanning}
-                  className="themed-accent-btn cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-[#A47C43] hover:bg-[#8e6834] text-white rounded-xl text-xs font-semibold shadow-xs transition-colors"
-                >
-                  <Upload className="w-4 h-4" />
-                  <span>{isScanning ? 'Scanning...' : 'Choose File'}</span>
-                </button>
-              </div>
-            )}
+              <button
+                type="button"
+                onClick={() => rosterFileInputRef.current?.click()}
+                disabled={isScanning}
+                className="themed-accent-btn cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-[#A47C43] hover:bg-[#8e6834] text-white rounded-xl text-xs font-semibold shadow-xs transition-colors"
+              >
+                <Upload className="w-4 h-4" />
+                <span>{isScanning ? 'Scanning...' : 'Upload Roster File'}</span>
+              </button>
+            </div>
 
             {scanStatus && (
               <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl text-xs text-amber-900 dark:text-amber-200 flex items-center justify-between gap-2">
@@ -1489,124 +1502,32 @@ export const RosterCalendarModal: React.FC<RosterCalendarModalProps> = ({
               </div>
             )}
 
-            {/* Single-Click In-App File & Table Viewer Modal */}
-            {viewingRosterFile && (
-              <div
-                className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs"
-                onClick={() => setViewingRosterFile(null)}
-              >
-                <div
-                  onClick={(e) => e.stopPropagation()}
-                  className="w-full max-w-4xl max-h-[88vh] rounded-3xl bg-[#fcfaf7] dark:bg-[#160f0a] border border-stone-200 dark:border-[#382518] shadow-2xl flex flex-col overflow-hidden"
-                >
-                  <div className="px-5 py-3.5 border-b border-stone-200 dark:border-[#382518] flex items-center justify-between gap-2">
-                    <div className="min-w-0">
-                      <h3 className="font-serif font-bold text-base text-stone-900 dark:text-stone-100 truncate">
-                        {viewingRosterFile.fileName}
-                      </h3>
-                      <p className="text-[11px] font-mono text-stone-500">
-                        {viewingRosterFile.ext.toUpperCase()} · {viewingRosterFile.sizeLabel}
-                      </p>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => setViewingRosterFile(null)}
-                      className="p-1.5 rounded-lg text-stone-400 hover:text-stone-800 dark:hover:text-white cursor-pointer"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
-                  </div>
-
-                  <div className="flex-1 overflow-y-auto p-5 space-y-5 custom-scrollbar">
-                    {(() => {
-                      const url =
-                        getSessionFileUrl(viewingRosterFile.id) ||
-                        viewingRosterFile.dataUrl ||
-                        viewingRosterFile.pdfFileUrl;
-                      if (!url) return null;
-                      if (
-                        viewingRosterFile.ext === 'pdf' ||
-                        viewingRosterFile.mimeType === 'application/pdf'
-                      ) {
-                        return (
-                          <div className="h-[420px] rounded-2xl overflow-hidden border border-stone-200 dark:border-[#382518]">
-                            <iframe
-                              src={url}
-                              title={viewingRosterFile.fileName}
-                              className="w-full h-full border-0"
-                            />
-                          </div>
-                        );
-                      }
-                      if (viewingRosterFile.mimeType.startsWith('image/')) {
-                        return (
-                          <img
-                            src={url}
-                            alt={viewingRosterFile.fileName}
-                            className="max-h-[400px] mx-auto rounded-2xl border border-stone-200 dark:border-[#382518]"
-                          />
-                        );
-                      }
-                      return null;
-                    })()}
-
-                    {viewingRosterFile.extractedTables && viewingRosterFile.extractedTables.length > 0 && (
-                      <div className="space-y-4">
-                        <h4 className="text-xs font-mono uppercase tracking-wider font-bold text-[#8f5f2c] dark:text-amber-300 flex items-center gap-1.5">
-                          <Table2 className="w-4 h-4" />
-                          <span>Extracted Tables ({viewingRosterFile.extractedTables.length})</span>
-                        </h4>
-                        {viewingRosterFile.extractedTables.map((tbl) => (
-                          <div
-                            key={tbl.id}
-                            className="rounded-2xl border border-stone-200 dark:border-[#382518] overflow-hidden bg-white dark:bg-[#1c130d]"
-                          >
-                            <div className="px-4 py-2 bg-stone-100 dark:bg-[#241912] border-b border-stone-200 dark:border-[#382518] text-xs font-bold text-stone-800 dark:text-stone-100">
-                              {tbl.title}
-                            </div>
-                            <div className="overflow-x-auto">
-                              <table className="w-full text-left text-xs border-collapse">
-                                <thead className="bg-stone-50 dark:bg-[#1a120d] text-stone-700 dark:text-stone-300 border-b border-stone-200 dark:border-[#352317]">
-                                  <tr>
-                                    {tbl.headers.map((h, hi) => (
-                                      <th key={hi} className="px-3 py-2 font-semibold whitespace-nowrap">
-                                        {h || `Column ${hi + 1}`}
-                                      </th>
-                                    ))}
-                                  </tr>
-                                </thead>
-                                <tbody className="divide-y divide-stone-100 dark:divide-[#2e1e14] text-stone-800 dark:text-stone-200">
-                                  {tbl.rows.map((row, ri) => (
-                                    <tr key={ri}>
-                                      {tbl.headers.map((_, ci) => (
-                                        <td key={ci} className="px-3 py-2">
-                                          {row[ci] || '—'}
-                                        </td>
-                                      ))}
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-
-                    {viewingRosterFile.extractedText && (
-                      <div className="space-y-2">
-                        <h4 className="text-xs font-mono uppercase tracking-wider font-bold text-stone-500">
-                          Extracted Content
-                        </h4>
-                        <pre className="p-4 rounded-2xl bg-stone-50 dark:bg-[#120c08] border border-stone-200 dark:border-[#382518] text-xs whitespace-pre-wrap font-sans text-stone-800 dark:text-stone-200 max-h-[300px] overflow-y-auto custom-scrollbar">
-                          {viewingRosterFile.extractedText}
-                        </pre>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
+            {/* Web View Window Modal with Share, Save to Device, Mark Favourite top ribbon */}
+            <WebViewDocumentModal
+              doc={
+                viewingRosterFile
+                  ? ({
+                      id: viewingRosterFile.id,
+                      title: viewingRosterFile.title || viewingRosterFile.fileName,
+                      fileName: viewingRosterFile.fileName,
+                      ext: viewingRosterFile.ext,
+                      mimeType: viewingRosterFile.mimeType,
+                      subject: viewingRosterFile.subject,
+                      badge: 'Roster',
+                      dataUrl: viewingRosterFile.dataUrl,
+                      pdfFileUrl: viewingRosterFile.pdfFileUrl,
+                      extractedText: viewingRosterFile.extractedText,
+                      extractedTables: viewingRosterFile.extractedTables,
+                    } as WebViewDocPayload)
+                  : null
+              }
+              onClose={() => setViewingRosterFile(null)}
+              onImportRosterTable={(doc) => {
+                if (doc.extractedTables) setScannedTables(doc.extractedTables);
+                setViewingRosterFile(null);
+                setViewMode('table');
+              }}
+            />
           </div>
         )}
       </div>

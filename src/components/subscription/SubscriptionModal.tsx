@@ -61,11 +61,20 @@ const INDIAN_BANKS = [
   'Yes Bank',
 ];
 
+import { useAuth } from '../../contexts/AuthContext';
+import { getSupabaseConfig } from '../../lib/supabaseClient';
+import { UpgradeBannerDetail } from '../../utils/subscriptionLimits';
+
+const RAZORPAY_KEY_ID =
+  ((import.meta as any).env?.VITE_RAZORPAY_KEY_ID as string | undefined)?.trim() ||
+  'rzp_live_U0sX2QgzwryN0q';
+
 interface SubscriptionModalProps {
   isOpen: boolean;
   onClose: () => void;
   currentTierId?: string;
   onUpgradeTier?: (tierId: string) => void;
+  upgradeBanner?: UpgradeBannerDetail | null;
 }
 
 export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
@@ -73,13 +82,16 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   onClose,
   currentTierId = 'free',
   onUpgradeTier,
+  upgradeBanner = null,
 }) => {
+  const { user, googleUser } = useAuth();
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual');
   const [activeTier, setActiveTier] = useState<string>(() => {
     return localStorage.getItem('medden_user_tier') || currentTierId;
   });
   const [upgradedFeedback, setUpgradedFeedback] = useState<string | null>(null);
   const [payoutConfig, setPayoutConfig] = useState<MerchantPayoutConfig>(() => readMerchantPayout());
+  const [bannerDetail, setBannerDetail] = useState<UpgradeBannerDetail | null>(upgradeBanner);
 
   // Checkout state
   const [checkoutTier, setCheckoutTier] = useState<SubscriptionTier | null>(null);
@@ -93,12 +105,29 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   const [cardCvv, setCardCvv] = useState('');
   const [selectedBank, setSelectedBank] = useState(INDIAN_BANKS[0]);
   const [checkoutError, setCheckoutError] = useState<string | null>(null);
+  const [isProcessingRazorpay, setIsProcessingRazorpay] = useState(false);
   const [receiptInfo, setReceiptInfo] = useState<{
     tierName: string;
     amountInr: number;
     methodLabel: string;
     txnId: string;
   } | null>(null);
+
+  useEffect(() => {
+    if (upgradeBanner) {
+      setBannerDetail(upgradeBanner);
+      return;
+    }
+    if (isOpen) {
+      try {
+        const raw = sessionStorage.getItem('achiev_upgrade_banner_v1');
+        if (raw) {
+          setBannerDetail(JSON.parse(raw));
+          sessionStorage.removeItem('achiev_upgrade_banner_v1');
+        }
+      } catch {}
+    }
+  }, [isOpen, upgradeBanner]);
 
   useEffect(() => {
     const syncPayout = () => setPayoutConfig(readMerchantPayout());
@@ -150,10 +179,193 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
   if (!isOpen) return null;
 
+  const loadRazorpayScript = (): Promise<boolean> => {
+    return new Promise((resolve) => {
+      if ((window as any).Razorpay) {
+        resolve(true);
+        return;
+      }
+      const script = document.createElement('script');
+      script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+      script.async = true;
+      script.onload = () => resolve(Boolean((window as any).Razorpay));
+      script.onerror = () => resolve(false);
+      document.body.appendChild(script);
+    });
+  };
+
+  const launchRazorpayCheckout = async (tier: SubscriptionTier) => {
+    const amountInr = billingCycle === 'annual' ? tier.priceAnnual : tier.priceMonthly;
+    if (amountInr <= 0) return;
+
+    setCheckoutError(null);
+    setIsProcessingRazorpay(true);
+
+    try {
+      const sdkReady = await loadRazorpayScript();
+      if (!sdkReady || !(window as any).Razorpay) {
+        setCheckoutError('Unable to load Razorpay Checkout SDK. Check your internet connection or use UPI/Card below.');
+        setIsProcessingRazorpay(false);
+        return;
+      }
+
+      const customerEmail = user?.email || googleUser?.email || 'scholar@achiev.com';
+      const customerName =
+        (user?.user_metadata?.full_name as string | undefined) ||
+        googleUser?.name ||
+        'Ach1ev Scholar';
+
+      // Create Razorpay order on Express/Vercel backend
+      let orderId: string | undefined;
+      try {
+        const orderRes = await fetch('/api/razorpay/create-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            amountInr,
+            planId: tier.id,
+            billingCycle,
+            userEmail: customerEmail,
+          }),
+        });
+        if (orderRes.ok) {
+          const orderData = await orderRes.json();
+          if (orderData?.orderId) {
+            orderId = orderData.orderId;
+          }
+        }
+      } catch {
+        // Fallback: open checkout without pre-created orderId if offline
+      }
+
+      const options: Record<string, any> = {
+        key: RAZORPAY_KEY_ID,
+        amount: amountInr * 100,
+        currency: 'INR',
+        name: 'Ach1ev — Settle Ideas',
+        description: `${tier.name} (${billingCycle === 'annual' ? '12 Months' : 'Monthly'})`,
+        image: `${window.location.origin}/assets/aistudio/Final_Logo_webp_1000_x_350_e6e85d30.PNG`,
+        ...(orderId ? { order_id: orderId } : {}),
+        prefill: {
+          name: customerName,
+          email: customerEmail,
+        },
+        notes: {
+          plan_id: tier.id,
+          billing_cycle: billingCycle,
+          user_email: customerEmail,
+        },
+        theme: {
+          color: '#6f3d1d',
+        },
+        modal: {
+          ondismiss: () => {
+            setIsProcessingRazorpay(false);
+          },
+        },
+        handler: async (rzpResponse: {
+          razorpay_payment_id: string;
+          razorpay_order_id?: string;
+          razorpay_signature?: string;
+        }) => {
+          try {
+            const payload = {
+              razorpay_order_id: rzpResponse.razorpay_order_id || orderId || '',
+              razorpay_payment_id: rzpResponse.razorpay_payment_id,
+              razorpay_signature: rzpResponse.razorpay_signature || '',
+              planId: tier.id,
+              billingCycle,
+              amountInr,
+              userEmail: customerEmail,
+              userId: user?.id || null,
+            };
+
+            let verified = false;
+            let verifyError = '';
+
+            // 1. Verify via Express / Vercel backend route
+            try {
+              const verifyRes = await fetch('/api/razorpay/verify-payment', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+              });
+              const verifyJson = await verifyRes.json();
+              if (verifyRes.ok && verifyJson?.verified) {
+                verified = true;
+              } else if (verifyJson?.error) {
+                verifyError = verifyJson.error;
+              }
+            } catch {}
+
+            // 2. Fallback: verify via deployed Supabase Edge Function directly
+            if (!verified) {
+              const sbCfg = getSupabaseConfig();
+              if (sbCfg.url && sbCfg.anonKey) {
+                try {
+                  const fnRes = await fetch(
+                    `${sbCfg.url.replace(/\/$/, '')}/functions/v1/verify-razorpay-payment`,
+                    {
+                      method: 'POST',
+                      headers: {
+                        'Content-Type': 'application/json',
+                        apikey: sbCfg.anonKey,
+                        Authorization: `Bearer ${sbCfg.anonKey}`,
+                      },
+                      body: JSON.stringify(payload),
+                    }
+                  );
+                  const fnJson = await fnRes.json();
+                  if (fnRes.ok && fnJson?.verified) {
+                    verified = true;
+                  } else if (fnJson?.error && !verifyError) {
+                    verifyError = fnJson.error;
+                  }
+                } catch {}
+              }
+            }
+
+            if (!verified) {
+              setCheckoutError(
+                verifyError ||
+                  `Payment ${rzpResponse.razorpay_payment_id} captured, but server/Supabase signature verification failed (check RAZORPAY_KEY_SECRET).`
+              );
+              setIsProcessingRazorpay(false);
+              return;
+            }
+
+            setIsProcessingRazorpay(false);
+            finalizeUpgrade(
+              tier,
+              'Razorpay Verified Checkout',
+              rzpResponse.razorpay_payment_id
+            );
+          } catch (err: any) {
+            setIsProcessingRazorpay(false);
+            setCheckoutError(err?.message || 'Razorpay signature verification failed.');
+          }
+        },
+      };
+
+      const rzp = new (window as any).Razorpay(options);
+      rzp.on('payment.failed', (failure: any) => {
+        setIsProcessingRazorpay(false);
+        setCheckoutError(
+          failure?.error?.description || 'Razorpay payment failed or was cancelled.'
+        );
+      });
+      rzp.open();
+    } catch (err: any) {
+      setIsProcessingRazorpay(false);
+      setCheckoutError(err?.message || 'Unable to launch Razorpay checkout.');
+    }
+  };
+
   const finalizeUpgrade = (tier: SubscriptionTier, methodLabel: string, txnRef?: string) => {
     const txnId = txnRef || `ACH-${Date.now().toString().slice(-8)}`;
     setActiveTier(tier.id);
     localStorage.setItem('medden_user_tier', tier.id);
+    window.dispatchEvent(new CustomEvent('achiev_tier_updated', { detail: { tierId: tier.id } }));
     onUpgradeTier?.(tier.id);
     setReceiptInfo({
       tierName: tier.name,
@@ -163,6 +375,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
     });
     setCheckoutTier(null);
     setCheckoutError(null);
+    setBannerDetail(null);
     setUpgradedFeedback(tier.name);
     setTimeout(() => setUpgradedFeedback(null), 4000);
   };
@@ -174,6 +387,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
     if (price === 0) {
       setActiveTier(tier.id);
       localStorage.setItem('medden_user_tier', tier.id);
+      window.dispatchEvent(new CustomEvent('achiev_tier_updated', { detail: { tierId: tier.id } }));
       onUpgradeTier?.(tier.id);
       setUpgradedFeedback(tier.name);
       setTimeout(() => setUpgradedFeedback(null), 3000);
@@ -255,8 +469,8 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
               </h3>
               <p className="text-xs text-stone-500 dark:text-stone-400">
                 {checkoutTier
-                  ? `Direct settlement to ${payoutConfig.accountName} (${payoutConfig.bankName})`
-                  : 'Transparent student pricing · Free, ₹1,200/yr (₹100/mo), and ₹3,600/yr (₹300/mo)'}
+                  ? `Secured by Razorpay (${RAZORPAY_KEY_ID}) & Supabase Verification`
+                  : 'Transparent student pricing · Free (₹0), Scholar Pro (₹100/mo), and Master Ultimate (₹300/mo)'}
               </p>
             </div>
           </div>
@@ -270,6 +484,23 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
             <X className="w-5 h-5" />
           </button>
         </div>
+
+        {bannerDetail && (
+          <div className="mx-6 mt-4 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/35 text-rose-900 dark:text-rose-200 text-xs flex items-start justify-between gap-3">
+            <div>
+              <div className="font-bold text-sm">{bannerDetail.title}</div>
+              <p className="mt-0.5 opacity-90">{bannerDetail.message}</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setBannerDetail(null)}
+              className="p-1 rounded-lg hover:bg-black/10 cursor-pointer shrink-0"
+              aria-label="Dismiss notice"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+        )}
 
         {/* Billing Toggle & Feedback */}
         {!checkoutTier && (
@@ -356,8 +587,31 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                   </span>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-1.5 text-xs">
+                <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-2.5 text-xs">
                   <div className="font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                    <span>Razorpay Live Gateway ({RAZORPAY_KEY_ID})</span>
+                  </div>
+                  <p className="text-[11px] text-stone-700 dark:text-stone-300 leading-relaxed">
+                    Instant UPI, Cards, NetBanking &amp; Wallets verified via HMAC-SHA256 Supabase signature verification before unlocking your subscription.
+                  </p>
+                  <button
+                    type="button"
+                    disabled={isProcessingRazorpay}
+                    onClick={() => launchRazorpayCheckout(checkoutTier)}
+                    className="themed-accent-btn w-full py-2.5 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow disabled:opacity-60"
+                  >
+                    <Zap className="w-4 h-4" />
+                    <span>
+                      {isProcessingRazorpay
+                        ? 'Opening Razorpay Checkout...'
+                        : `Pay ₹${checkoutAmount.toLocaleString('en-IN')} with Razorpay`}
+                    </span>
+                  </button>
+                </div>
+
+                <div className="p-3.5 rounded-xl bg-stone-100/80 dark:bg-[#120c08] border border-stone-200 dark:border-[#352317] space-y-1.5 text-xs">
+                  <div className="font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">
                     <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                     <span>Direct Settlement Account</span>
                   </div>

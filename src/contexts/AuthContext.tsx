@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react';
 import { Session, User } from '@supabase/supabase-js';
-import { getSupabaseClient, getSupabaseConfig, isSupabaseConfigured } from '../lib/supabaseClient';
+import { getSupabaseClient, getSupabaseConfig, hydrateSupabaseConfigFromServer, isSupabaseConfigured } from '../lib/supabaseClient';
 import { CloudSyncStatus, GoogleDriveAccount } from '../types';
 import {
   connectPersonalGoogleDrive,
@@ -230,8 +230,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(null);
       setUser(null);
       setSyncStatus('local-only');
-      setIsLoading(false);
-      return;
+      let active = true;
+      void hydrateSupabaseConfigFromServer().then((hydrated) => {
+        if (!active) return;
+        if (hydrated) {
+          setClientRevision((r) => r + 1);
+        } else {
+          setIsLoading(false);
+        }
+      });
+      return () => {
+        active = false;
+      };
     }
 
     let mounted = true;

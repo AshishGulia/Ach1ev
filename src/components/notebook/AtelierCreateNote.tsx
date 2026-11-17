@@ -93,8 +93,11 @@ import {
   Lock,
   Unlock,
   SlidersHorizontal,
+  LayoutTemplate,
 } from 'lucide-react';
 import { Notebook, DesignId, MedicalBook } from '../../types';
+import { AUTO_NOTE_TEMPLATES, AutoNoteTemplate } from '../../data/noteTemplates';
+import { getPlanLimits, openSubscriptionUpgradeModal } from '../../utils/subscriptionLimits';
 import { getDrivePreviewUrl } from '../../services/googleDriveService';
 import { useAuth } from '../../contexts/AuthContext';
 import {
@@ -683,6 +686,63 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
     setCustomBoxes((prev) => [...prev, newBox]);
     setActiveTextBoxId(newId);
     showToast('Text Box added — drag to position or lock');
+  };
+
+  const [isTemplatePickerOpen, setIsTemplatePickerOpen] = useState(false);
+
+  const handleApplyAutoTemplate = (tpl: AutoNoteTemplate) => {
+    setNoteTitle(tpl.title);
+    setFontStyle(tpl.fontKey);
+    setPaperColor(tpl.paperColor);
+    if (sheetTitleRef.current) {
+      sheetTitleRef.current.textContent = tpl.title;
+    }
+    if (editorRef.current) {
+      editorRef.current.innerHTML = tpl.htmlContent;
+      ensureTableDragHandles();
+      pushHistorySnapshot(tpl.htmlContent);
+      updateCounts();
+    }
+    const stamp = Date.now();
+    setCustomBoxes(
+      tpl.floatingBoxes.map((b, idx) => ({
+        ...b,
+        id: `${b.id}-${stamp}-${idx}`,
+      }))
+    );
+    const ytRes: AttachedResource = {
+      id: tpl.resourceId,
+      type: 'youtube',
+      title: tpl.youtubeTitle,
+      vid: tpl.youtubeId,
+      url: tpl.youtubeUrl,
+      meta: `YouTube @ ${tpl.timestampLabel}`,
+    };
+    setResources((prev) => (prev.some((r) => r.id === tpl.resourceId) ? prev : [...prev, ytRes]));
+
+    if (onUpdateNotebook && notebook) {
+      const pages = [...(notebook.pages || [])];
+      if (pages[activePageIndex]) {
+        pages[activePageIndex] = {
+          ...pages[activePageIndex],
+          title: tpl.title,
+          contentHtml: tpl.htmlContent,
+          updatedAt: new Date().toISOString(),
+        };
+      }
+      onUpdateNotebook({
+        ...notebook,
+        title: tpl.title,
+        paperColor: tpl.paperColor,
+        pages,
+        updatedAt: new Date().toISOString(),
+      });
+    } else {
+      triggerSave();
+    }
+
+    setIsTemplatePickerOpen(false);
+    showToast(`Applied template: ${tpl.title} (${tpl.fontLabel})`);
   };
 
   // Selected Attached/Inline Image toolbar state (Lock Position + Move + Width + Delete)
@@ -1957,9 +2017,20 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
     if (tsBtn) {
       const resId = tsBtn.dataset.res;
       const targetTime = Number(tsBtn.dataset.t || '0');
+      const fallbackVid = tsBtn.dataset.vid;
       const targetRes = resources.find((r) => r.id === resId);
       if (targetRes) {
         openVideoWindow(targetRes, targetTime);
+      } else if (fallbackVid) {
+        const synthesized: AttachedResource = {
+          id: resId || `yt-${fallbackVid}`,
+          type: 'youtube',
+          title: 'Embedded Lecture Video',
+          vid: fallbackVid,
+          meta: 'YouTube',
+        };
+        setResources((prev) => (prev.some((r) => r.id === synthesized.id) ? prev : [...prev, synthesized]));
+        openVideoWindow(synthesized, targetTime);
       } else {
         showToast('That video is no longer attached');
       }
@@ -2732,6 +2803,15 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
   // Ask Gemini AI for Selected Medical Term
   const handleAskGeminiForSelectedText = async (text: string) => {
     if (!text) return;
+    if (!getPlanLimits().canUseGemini) {
+      setCanvasSelection((p) => ({ ...p, visible: false }));
+      openSubscriptionUpgradeModal({
+        title: 'Unlock Gemini AI Explanations (₹300/mo)',
+        message: 'Inline Gemini AI concept explanations inside Create a Note require the ₹300/mo Master Ultimate plan.',
+        requiredPlanId: 'master-ultimate',
+      });
+      return;
+    }
     setGeminiExplainTerm(text);
     setIsGeminiLoading(true);
     setCanvasSelection((p) => ({ ...p, visible: false }));
@@ -2959,6 +3039,18 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
         >
           <BookOpen className="w-4 h-4" />
           <span className="lbl">Book</span>
+        </button>
+
+        {/* Choose Template Button in Header */}
+        <button
+          type="button"
+          className="an-btn"
+          style={{ borderColor: 'var(--an-brass)', color: 'var(--an-brass)' }}
+          onClick={() => setIsTemplatePickerOpen(true)}
+          title="Choose from 5 auto-created Ach1ev study templates"
+        >
+          <LayoutTemplate className="w-4 h-4" />
+          <span className="lbl">Choose Template</span>
         </button>
 
         {/* Large Prominent Save Note Button (Requires Sign Up / Sign In for Guests) */}
@@ -3470,6 +3562,15 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
               </button>
 
               <div className="an-ribbon-scroll" ref={ribbonScrollRef}>
+                <button
+                  type="button"
+                  className="an-ribbon-feat"
+                  title="Choose from 5 auto-created Ach1ev note templates"
+                  onClick={() => setIsTemplatePickerOpen(true)}
+                >
+                  <LayoutTemplate className="w-4 h-4 text-[#8f5f2c] dark:text-[#c49257]" />
+                  <span>Templates</span>
+                </button>
                 <button
                   type="button"
                   className="an-ribbon-feat"
@@ -5734,6 +5835,121 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
               showStandardRow
               swatchSizeClass="w-4 h-4"
             />
+          </div>
+        </div>
+      )}
+
+      {/* Choose Note Template Modal (5 Auto-Created Ach1ev Benefit Notes) */}
+      {isTemplatePickerOpen && (
+        <div
+          className="fixed inset-0 z-[130] bg-black/55 backdrop-blur-sm flex items-center justify-center p-4"
+          onClick={() => setIsTemplatePickerOpen(false)}
+        >
+          <div
+            className="w-full max-w-4xl max-h-[88vh] rounded-2xl border shadow-2xl overflow-hidden flex flex-col"
+            style={{
+              background: 'var(--an-paper)',
+              borderColor: 'var(--an-line)',
+              color: 'var(--an-ink)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div
+              className="px-5 py-4 border-b flex items-center justify-between gap-3"
+              style={{ borderColor: 'var(--an-line)' }}
+            >
+              <div>
+                <h2 className="text-lg font-extrabold flex items-center gap-2">
+                  <LayoutTemplate className="w-5 h-5 text-[#A47C43]" />
+                  <span>Choose Template · 5 Auto-Created Ach1ev Notes</span>
+                </h2>
+                <p className="text-xs opacity-75 mt-0.5">
+                  Handwriting, Sans-Serif &amp; Serif notes preloaded with Ach1ev benefits, embedded diagrams, timestamped YouTube links &amp; stacked text boxes.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsTemplatePickerOpen(false)}
+                className="p-1.5 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 cursor-pointer"
+                aria-label="Close templates"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-5 overflow-y-auto grid grid-cols-1 md:grid-cols-2 gap-4 custom-scrollbar">
+              {AUTO_NOTE_TEMPLATES.map((tpl) => (
+                <div
+                  key={tpl.id}
+                  className="rounded-xl border p-4 flex flex-col justify-between gap-3 transition-all hover:shadow-lg"
+                  style={{
+                    borderColor: 'var(--an-line)',
+                    background: 'var(--an-page)',
+                  }}
+                >
+                  <div className="space-y-2.5">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <span
+                        className="text-[10.5px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md text-white"
+                        style={{ backgroundColor: tpl.accentHex }}
+                      >
+                        {tpl.fontCategory} · {tpl.fontLabel.split(' ')[0]}
+                      </span>
+                      <span className="text-[10.5px] font-mono opacity-75">
+                        ▶ YT @ {tpl.timestampLabel} · {tpl.floatingBoxes.length} Text Boxes
+                      </span>
+                    </div>
+
+                    <h3
+                      className="text-lg font-bold leading-snug"
+                      style={{ fontFamily: tpl.fontFamilyPreview }}
+                    >
+                      {tpl.title}
+                    </h3>
+
+                    <p className="text-xs opacity-80 leading-relaxed">{tpl.subtitle}</p>
+
+                    <div className="rounded-lg overflow-hidden border border-black/10 dark:border-white/10">
+                      <img
+                        src={tpl.previewImageSrc}
+                        alt={tpl.title}
+                        className="w-full h-28 object-cover"
+                      />
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-1.5 text-[10.5px] opacity-80">
+                      <span className="px-2 py-0.5 rounded border border-current/20">
+                        Benefit: {tpl.benefitTag}
+                      </span>
+                      <span className="px-2 py-0.5 rounded border border-current/20">
+                        Boxes: {tpl.floatingBoxes.map((b) => b.shape).join(' + ')}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between gap-2 pt-2 border-t" style={{ borderColor: 'var(--an-line)' }}>
+                    <a
+                      href={tpl.youtubeUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs font-semibold underline flex items-center gap-1 hover:opacity-80"
+                      style={{ color: tpl.accentHex }}
+                    >
+                      <CirclePlay className="w-3.5 h-3.5" />
+                      <span>YT Video ({tpl.timestampLabel})</span>
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => handleApplyAutoTemplate(tpl)}
+                      className="px-3.5 py-1.5 rounded-lg text-xs font-bold text-white shadow cursor-pointer hover:opacity-90"
+                      style={{ backgroundColor: tpl.accentHex }}
+                    >
+                      Use Template
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       )}
