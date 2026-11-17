@@ -66,7 +66,7 @@ export interface TrackerPreset {
 export const MEDICAL_TRACKER_PRESETS: TrackerPreset[] = [
   // Academics & Exams
   { name: 'Study Hours', category: 'Academics', type: 'arch', val: 3.5, goal: 8, unit: 'hrs', step: 0.5, icon: '⏱️', desc: 'Active textbook & notes reading' },
-  { name: 'QBank MCQs', category: 'Academics', type: 'ring', val: 42, goal: 100, unit: 'mcqs', step: 5, icon: '❓', desc: 'NEET-PG / USMLE question solving' },
+  { name: 'QBank MCQs', category: 'Academics', type: 'ring', val: 42, goal: 100, unit: 'mcqs', step: 5, icon: '❓', desc: 'Daily MCQ question solving' },
   { name: 'Flashcard Reviews', category: 'Academics', type: 'bars', val: 88, goal: 150, unit: 'cards', step: 10, icon: '🗂️', desc: 'Spaced repetition recall deck' },
   { name: 'Textbook Pages', category: 'Academics', type: 'bars', val: 18, goal: 40, unit: 'pages', step: 2, icon: '📖', desc: 'Core textbook syllabus coverage' },
   { name: 'Pharmacology Drug Cards', category: 'Academics', type: 'dots', val: 12, goal: 30, unit: 'drugs', step: 2, icon: '💊', desc: 'Drug mechanism and adverse effects' },
@@ -1332,7 +1332,7 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
                   <form className="atelier-add" onSubmit={handleAddNewTask}>
                     <input
                       id="new-task"
-                      placeholder="Add a task…"
+                      aria-label="New task"
                       autoComplete="off"
                       value={newTaskInput}
                       onChange={(e) => setNewTaskInput(e.target.value)}

@@ -359,7 +359,7 @@ html[data-design="1"].dark .atelier-note-root .an-seg button[aria-pressed="true"
 
 /* Windows Folder Style Mouse Cursor Resize Joystick Layout */
 .an-ws.has-resizer {
-  display: flex !important;
+  display: grid !important;
   gap: 0 !important;
   padding: 14px 18px 18px;
   overflow: hidden;
@@ -367,7 +367,7 @@ html[data-design="1"].dark .atelier-note-root .an-seg button[aria-pressed="true"
 }
 
 .an-ws.has-resizer[data-layout="stacked"] {
-  flex-direction: column !important;
+  display: grid !important;
 }
 
 .an-ws.is-resizing {
@@ -546,17 +546,94 @@ html[data-design="1"].dark .atelier-note-root .an-seg button[aria-pressed="true"
   overflow: hidden;
   box-shadow: var(--an-shadow);
   transition: all .2s ease-out;
+  position: relative;
+}
+
+.an-pane.is-dragging-pane {
+  opacity: 0.72;
+  transform: scale(0.992);
+}
+
+.an-pane.is-drop-target {
+  border-color: var(--th-accent, var(--an-brass)) !important;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--th-accent, var(--an-brass)) 42%, transparent), var(--an-shadow) !important;
+}
+
+.an-pane-edge-rz {
+  position: absolute;
+  top: 10px;
+  bottom: 10px;
+  width: 9px;
+  z-index: 32;
+  cursor: ew-resize;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+  opacity: 0;
+  transition: opacity 0.16s ease, background-color 0.16s ease;
+}
+
+.an-pane-edge-rz.left {
+  left: 0;
+  border-radius: 18px 0 0 18px;
+}
+
+.an-pane-edge-rz.right {
+  right: 0;
+  border-radius: 0 18px 18px 0;
+}
+
+.an-pane-edge-rz::after {
+  content: "";
+  width: 3px;
+  height: 44px;
+  border-radius: 999px;
+  background: var(--th-accent, var(--an-brass));
+  box-shadow: 0 0 8px color-mix(in srgb, var(--th-accent, var(--an-brass)) 45%, transparent);
+}
+
+.an-pane-edge-rz:hover,
+.an-pane-edge-rz.active {
+  opacity: 1;
+  background: color-mix(in srgb, var(--th-accent, var(--an-brass)) 11%, transparent);
+}
+
+.an-drag-handle {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 6px;
+  border-radius: 7px;
+  color: var(--an-muted);
+  cursor: grab;
+  flex-shrink: 0;
+  transition: background-color 0.14s ease, color 0.14s ease;
+}
+
+.an-drag-handle:hover {
+  background: color-mix(in srgb, var(--th-accent, var(--an-brass)) 14%, transparent);
+  color: var(--th-accent, var(--an-brass));
+}
+
+.an-drag-handle:active {
+  cursor: grabbing;
 }
 
 .an-pane-h {
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 9px 10px 9px 14px;
+  padding: 9px 10px 9px 10px;
   border-bottom: 1px solid var(--an-line);
   min-height: 52px;
   background: var(--an-paper);
   flex-shrink: 0;
+  cursor: grab;
+}
+
+.an-pane-h:active {
+  cursor: grabbing;
 }
 
 /* Window Folder Titlebar Action Controls */
@@ -1320,19 +1397,9 @@ mark.hit {
   flex: 1;
   min-width: 0;
   overflow: auto;
-  background: var(--an-bg2);
+  background: var(--th-bg, var(--an-bg2));
   padding: 22px 20px;
   transition: background-color 0.24s ease;
-}
-
-.an-note-body[data-surround="dark"] {
-  background-color: #130b06 !important;
-  background-image: radial-gradient(circle at 50% 25%, rgba(164, 124, 67, 0.1), transparent 65%) !important;
-}
-
-.an-note-body[data-surround="light"] {
-  background-color: #ece1ce !important;
-  background-image: radial-gradient(circle at 50% 25%, rgba(255, 252, 244, 0.55), transparent 65%) !important;
 }
 
 /* Unboxed Split Underline / Color & Highlight Glyphs inside Note Ribbon */

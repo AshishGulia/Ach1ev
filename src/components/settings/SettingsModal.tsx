@@ -27,6 +27,21 @@ import {
   saveUserSubscription,
 } from '../../utils/subscriptionLimits';
 import {
+  GOALS_UPDATED_EVENT,
+  formatDurationWords,
+  formatLogDateLabel,
+  getDailyImageQGoal,
+  getDailyMcqGoal,
+  getFocusTargetConfig,
+  getFocusTimerLogs,
+  getLocalDateKey,
+  getPracticeLogs,
+  logTodayPracticeCount,
+  setDailyImageQGoalValue,
+  setDailyMcqGoalValue,
+  setFocusTargetGoal,
+} from '../../utils/studyGoalsStore';
+import {
   User,
   Settings,
   Eye,
@@ -39,7 +54,6 @@ import {
   Sparkles,
   Palette,
   ShieldCheck,
-  Zap,
   ExternalLink,
   Copy,
   Globe,
@@ -68,6 +82,8 @@ import {
   ArrowLeft,
   ArrowRight,
   Menu,
+  Timer,
+  Clock,
   Image as ImageIcon,
 } from 'lucide-react';
 
@@ -789,13 +805,54 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     }, 1000);
   };
   const [accentTheme, setAccentTheme] = useState<string>(() => localStorage.getItem('medden_accent_theme') || '#A47C43');
-  const [autoSaveFreq, setAutoSaveFreq] = useState<string>(() => localStorage.getItem('medden_autosave_freq') || 'instant');
-  const [dailyHoursGoal, setDailyHoursGoal] = useState<number>(() => Number(localStorage.getItem('medden_daily_hours')) || 5);
-  const [dailyQBankGoal, setDailyQBankGoal] = useState<number>(() => Number(localStorage.getItem('medden_daily_qbank')) || 40);
-  const [distractionFree, setDistractionFree] = useState<boolean>(() => localStorage.getItem('medden_distraction_free') === 'true');
+  const [dailyHoursGoal, setDailyHoursGoal] = useState<number>(() => getFocusTargetConfig().hours);
+  const [dailyMinutesGoal, setDailyMinutesGoal] = useState<number>(() => getFocusTargetConfig().minutes);
+  const [dailyMcqGoal, setDailyMcqGoal] = useState<number>(() => getDailyMcqGoal());
+  const [dailyMcqDraft, setDailyMcqDraft] = useState<string>(() => String(getDailyMcqGoal()));
+  const [dailyImageQGoal, setDailyImageQGoal] = useState<number>(() => getDailyImageQGoal());
+  const [dailyImageQDraft, setDailyImageQDraft] = useState<string>(() => String(getDailyImageQGoal()));
+  const [todayMcqDone, setTodayMcqDone] = useState<number>(() => {
+    const logs = getPracticeLogs('mcq');
+    return logs[getLocalDateKey()]?.completed ?? 0;
+  });
+  const [todayImageQDone, setTodayImageQDone] = useState<number>(() => {
+    const logs = getPracticeLogs('image');
+    return logs[getLocalDateKey()]?.completed ?? 0;
+  });
+  const [mcqLogs, setMcqLogs] = useState<Record<string, { completed: number; target: number }>>(() =>
+    getPracticeLogs('mcq')
+  );
+  const [imageQLogs, setImageQLogs] = useState<Record<string, { completed: number; target: number }>>(() =>
+    getPracticeLogs('image')
+  );
+  const [focusTimerLogs, setFocusTimerLogs] = useState<Record<string, number>>(() => getFocusTimerLogs());
   const [currentFont, setCurrentFont] = useState<string>(() => {
     return localStorage.getItem('medden_app_font') || 'Baskerville';
   });
+
+  useEffect(() => {
+    const syncGoalsFromStore = () => {
+      const cfg = getFocusTargetConfig();
+      setDailyHoursGoal(cfg.hours);
+      setDailyMinutesGoal(cfg.minutes);
+      const mcq = getDailyMcqGoal();
+      const imgQ = getDailyImageQGoal();
+      setDailyMcqGoal(mcq);
+      setDailyMcqDraft(String(mcq));
+      setDailyImageQGoal(imgQ);
+      setDailyImageQDraft(String(imgQ));
+      const mLogs = getPracticeLogs('mcq');
+      const iLogs = getPracticeLogs('image');
+      setMcqLogs(mLogs);
+      setImageQLogs(iLogs);
+      const todayKey = getLocalDateKey();
+      setTodayMcqDone(mLogs[todayKey]?.completed ?? 0);
+      setTodayImageQDone(iLogs[todayKey]?.completed ?? 0);
+      setFocusTimerLogs(getFocusTimerLogs());
+    };
+    window.addEventListener(GOALS_UPDATED_EVENT, syncGoalsFromStore);
+    return () => window.removeEventListener(GOALS_UPDATED_EVENT, syncGoalsFromStore);
+  }, []);
   const [fontScale, setFontScale] = useState<number>(() => {
     const saved = localStorage.getItem('medden_font_scale');
     return saved ? parseInt(saved, 10) : 100;
@@ -877,31 +934,48 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     setTimeout(() => setSavedFeedback(false), 1500);
   };
 
-  const handleUpdateAutoSave = (freq: string) => {
-    setAutoSaveFreq(freq);
-    localStorage.setItem('medden_autosave_freq', freq);
+  const handleUpdateFocusTarget = (hrs: number, mins: number) => {
+    const safeHrs = Math.max(0, Math.min(24, Math.floor(Number.isFinite(hrs) ? hrs : 0)));
+    const safeMins = safeHrs === 24 ? 0 : Math.max(0, Math.min(59, Math.floor(Number.isFinite(mins) ? mins : 0)));
+    setDailyHoursGoal(safeHrs);
+    setDailyMinutesGoal(safeMins);
+    setFocusTargetGoal(safeHrs, safeMins);
     setSavedFeedback(true);
     setTimeout(() => setSavedFeedback(false), 1500);
   };
 
-  const handleToggleDistractionFree = () => {
-    const nextVal = !distractionFree;
-    setDistractionFree(nextVal);
-    localStorage.setItem('medden_distraction_free', String(nextVal));
+  const handleUpdateDailyMcq = (q: number) => {
+    const saved = setDailyMcqGoalValue(q);
+    setDailyMcqGoal(saved);
+    setDailyMcqDraft(String(saved));
+    setMcqLogs(getPracticeLogs('mcq'));
     setSavedFeedback(true);
     setTimeout(() => setSavedFeedback(false), 1500);
   };
 
-  const handleUpdateDailyHours = (hrs: number) => {
-    setDailyHoursGoal(hrs);
-    localStorage.setItem('medden_daily_hours', String(hrs));
+  const handleUpdateDailyImageQ = (q: number) => {
+    const saved = setDailyImageQGoalValue(q);
+    setDailyImageQGoal(saved);
+    setDailyImageQDraft(String(saved));
+    setImageQLogs(getPracticeLogs('image'));
     setSavedFeedback(true);
     setTimeout(() => setSavedFeedback(false), 1500);
   };
 
-  const handleUpdateDailyQBank = (q: number) => {
-    setDailyQBankGoal(q);
-    localStorage.setItem('medden_daily_qbank', String(q));
+  const handleLogTodayMcq = (completed: number) => {
+    const safe = Math.max(0, Math.min(5000, Math.round(completed) || 0));
+    setTodayMcqDone(safe);
+    logTodayPracticeCount('mcq', safe, dailyMcqGoal);
+    setMcqLogs(getPracticeLogs('mcq'));
+    setSavedFeedback(true);
+    setTimeout(() => setSavedFeedback(false), 1500);
+  };
+
+  const handleLogTodayImageQ = (completed: number) => {
+    const safe = Math.max(0, Math.min(5000, Math.round(completed) || 0));
+    setTodayImageQDone(safe);
+    logTodayPracticeCount('image', safe, dailyImageQGoal);
+    setImageQLogs(getPracticeLogs('image'));
     setSavedFeedback(true);
     setTimeout(() => setSavedFeedback(false), 1500);
   };
@@ -2487,7 +2561,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           {/* TAB: SIDEBAR BUTTONS CUSTOMIZER                                           */}
           {/* ========================================================================= */}
           {activeTab === 'sidebar-buttons' && (
-            <div className="space-y-6">
+            <div className="space-y-4">
               <div className="pb-2 border-b" style={{ borderColor: 'var(--th-border)' }}>
                 <h4 className="text-lg font-bold flex items-center gap-2" style={{ color: 'var(--th-ink)' }}>
                   <SlidersHorizontal className="w-4 h-4" style={themeAccentIconStyle} />
@@ -2495,7 +2569,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </h4>
               </div>
 
-              <div className="p-4 rounded-2xl bg-stone-50 dark:bg-[#18110c] border border-stone-200 dark:border-[#382518] divide-y divide-stone-200 dark:divide-[#382518]">
+              <div className="max-w-xs w-full p-2.5 rounded-2xl bg-stone-50 dark:bg-[#18110c] border border-stone-200 dark:border-[#382518] divide-y divide-stone-200 dark:divide-[#382518]">
                 {[...ALL_SIDEBAR_BUTTON_ITEMS]
                   .sort((a, b) => {
                     const idxA = sidebarOrder.indexOf(a.id);
@@ -2503,29 +2577,29 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     return (idxA === -1 ? 99 : idxA) - (idxB === -1 ? 99 : idxB);
                   })
                   .map((item, idx, arr) => (
-                    <div key={item.key} className="py-2.5 flex items-center justify-between gap-4 first:pt-0 last:pb-0">
-                      <div className="flex items-center gap-2">
-                        <div className="flex items-center gap-0.5">
+                    <div key={item.key} className="py-1.5 px-1 flex items-center justify-between gap-2 first:pt-0 last:pb-0">
+                      <div className="flex items-center gap-1.5 min-w-0">
+                        <div className="flex items-center gap-0.5 shrink-0">
                           <button
                             type="button"
                             onClick={() => handleShiftSidebarItem(item.id, -1)}
                             disabled={idx === 0}
                             title="Move segment Up in Sidebar"
-                            className="p-1 rounded hover:bg-stone-200 dark:hover:bg-[#251a12] disabled:opacity-30 disabled:pointer-events-none text-stone-600 dark:text-stone-300 transition-colors cursor-pointer"
+                            className="p-0.5 rounded hover:bg-stone-200 dark:hover:bg-[#251a12] disabled:opacity-30 disabled:pointer-events-none text-stone-600 dark:text-stone-300 transition-colors cursor-pointer"
                           >
-                            <ArrowUp className="w-3.5 h-3.5" />
+                            <ArrowUp className="w-3 h-3" />
                           </button>
                           <button
                             type="button"
                             onClick={() => handleShiftSidebarItem(item.id, 1)}
                             disabled={idx === arr.length - 1}
                             title="Move segment Down in Sidebar"
-                            className="p-1 rounded hover:bg-stone-200 dark:hover:bg-[#251a12] disabled:opacity-30 disabled:pointer-events-none text-stone-600 dark:text-stone-300 transition-colors cursor-pointer"
+                            className="p-0.5 rounded hover:bg-stone-200 dark:hover:bg-[#251a12] disabled:opacity-30 disabled:pointer-events-none text-stone-600 dark:text-stone-300 transition-colors cursor-pointer"
                           >
-                            <ArrowDown className="w-3.5 h-3.5" />
+                            <ArrowDown className="w-3 h-3" />
                           </button>
                         </div>
-                        <span className="font-bold text-xs text-stone-900 dark:text-stone-100">
+                        <span className="font-bold text-xs text-stone-900 dark:text-stone-100 truncate">
                           {item.label}
                         </span>
                       </div>
@@ -2538,7 +2612,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           className="sr-only peer"
                         />
                         <div
-                          className="w-9 h-5 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all"
+                          className="w-8 h-4 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all"
                           style={{
                             backgroundColor:
                               sidebarSettings[item.key] !== false
@@ -2707,6 +2781,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             </div>
           )}
           {/* ========================================================================= */}
+          {/* ========================================================================= */}
           {activeTab === 'customizer' && (
             <div className="space-y-6">
               <div className="pb-2 border-b" style={{ borderColor: 'var(--th-border)' }}>
@@ -2716,105 +2791,46 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </h4>
               </div>
 
-              {/* Deep Study & Distraction Controls */}
+              {/* Daily Focus Time Target (Hours + Minutes) */}
               <div className="p-4 rounded-2xl bg-stone-50/80 dark:bg-[#18110c] border border-stone-200/90 dark:border-[#382518] space-y-4">
-                <div className="flex items-center gap-2">
-                  <ShieldCheck className="w-4 h-4" style={themeAccentIconStyle} />
-                  <span className="text-xs font-bold text-stone-800 dark:text-stone-200">
-                    Deep Study & Focus Protections
-                  </span>
-                </div>
-
-                {/* Distraction Free Toggle */}
-                <div className="flex items-center justify-between p-3 rounded-xl bg-white dark:bg-[#140e0a] border border-stone-200/80 dark:border-[#352317]">
-                  <div className="pr-4">
-                    <div className="text-xs font-semibold text-stone-900 dark:text-stone-100 flex items-center gap-1.5">
-                      <Zap className="w-3.5 h-3.5" style={themeAccentIconStyle} />
-                      <span>Distraction-Free Deep Note Mode</span>
-                    </div>
-                    <p className="text-[11px] text-stone-500 dark:text-stone-400 mt-0.5">
-                      Automatically soft-dim non-essential side panels and widgets while actively taking medical notes.
-                    </p>
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Timer className="w-4 h-4" style={themeAccentIconStyle} />
+                    <span className="text-xs font-bold text-stone-800 dark:text-stone-200">
+                      Daily Focus Target
+                    </span>
                   </div>
-                  <button
-                    type="button"
-                    role="switch"
-                    aria-checked={distractionFree}
-                    onClick={handleToggleDistractionFree}
-                    className="w-11 h-6 rounded-full transition-colors relative cursor-pointer shrink-0"
-                    style={{
-                      backgroundColor: distractionFree
-                        ? 'var(--th-accent)'
-                        : isNightMode
-                        ? '#322318'
-                        : '#d6d3d1',
-                    }}
-                  >
-                    <div
-                      className={`w-4 h-4 rounded-full bg-white transition-transform transform shadow-2xs absolute top-1 ${
-                        distractionFree ? 'translate-x-6' : 'translate-x-1'
-                      }`}
-                    />
-                  </button>
-                </div>
-
-                {/* Auto-Save Frequency */}
-                <div>
-                  <label className="block text-[11px] font-semibold text-stone-700 dark:text-stone-300 mb-1.5">
-                    Note Auto-Save Cadence:
-                  </label>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {[
-                      { id: 'instant', label: 'Instant (Keystroke)' },
-                      { id: '30s', label: 'Every 30 Seconds' },
-                      { id: '60s', label: 'Every 60 Seconds' },
-                      { id: 'manual', label: 'Manual Only (⌘S)' },
-                    ].map((opt) => (
-                      <button
-                        key={opt.id}
-                        type="button"
-                        onClick={() => handleUpdateAutoSave(opt.id)}
-                        className={`p-2 rounded-xl text-xs font-medium border text-center transition-all cursor-pointer ${
-                          autoSaveFreq === opt.id
-                            ? 'themed-accent-btn bg-[#A47C43] text-white border-[#A47C43] shadow-2xs font-semibold'
-                            : 'bg-white dark:bg-[#140e0a] text-stone-700 dark:text-stone-300 border-stone-200 dark:border-[#352317] hover:border-stone-400 dark:hover:border-[#4b3322]'
-                        }`}
-                      >
-                        {opt.label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </div>
-
-              {/* 3. Daily Clinical Target Goals */}
-              <div className="p-4 rounded-2xl bg-stone-50/80 dark:bg-[#18110c] border border-stone-200/90 dark:border-[#382518] space-y-4">
-                <div className="flex items-center gap-2">
-                  <Target className="w-4 h-4" style={themeAccentIconStyle} />
-                  <span className="text-xs font-bold text-stone-800 dark:text-stone-200">
-                    Clinical Exam & Daily Target Goals
+                  <span className="text-xs font-bold font-mono" style={themeAccentIconStyle}>
+                    {dailyHoursGoal}h {dailyMinutesGoal}m / day
                   </span>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  {/* Daily Study Hours */}
-                  <div>
-                    <div className="flex items-center justify-between mb-1.5">
+                  {/* Hours selector */}
+                  <div className="p-3 rounded-xl bg-white dark:bg-[#140e0a] border border-stone-200/80 dark:border-[#352317] space-y-2">
+                    <div className="flex items-center justify-between">
                       <label className="text-[11px] font-semibold text-stone-700 dark:text-stone-300">
-                        Daily Focus Hours Target:
+                        Hours (0–24)
                       </label>
-                      <span className="text-xs font-bold font-mono" style={themeAccentIconStyle}>{dailyHoursGoal} hrs/day</span>
+                      <input
+                        type="number"
+                        min={0}
+                        max={24}
+                        value={dailyHoursGoal}
+                        onChange={(e) => handleUpdateFocusTarget(Number(e.target.value), dailyMinutesGoal)}
+                        className="w-16 px-2 py-1 text-xs font-mono font-bold text-right rounded-lg border border-stone-200 dark:border-[#382518] bg-stone-50 dark:bg-[#1b120d] text-stone-900 dark:text-stone-100 outline-none"
+                      />
                     </div>
                     <div className="grid grid-cols-5 gap-1.5">
-                      {[3, 4, 5, 6, 8].map((h) => (
+                      {[2, 4, 5, 6, 8].map((h) => (
                         <button
                           key={h}
                           type="button"
-                          onClick={() => handleUpdateDailyHours(h)}
+                          onClick={() => handleUpdateFocusTarget(h, dailyMinutesGoal)}
                           className={`py-1.5 rounded-lg text-xs font-medium border text-center transition-all cursor-pointer ${
                             dailyHoursGoal === h
                               ? 'themed-tab-active bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 font-bold shadow-2xs'
-                              : 'bg-white dark:bg-[#140e0a] text-stone-700 dark:text-stone-300 border-stone-200 dark:border-[#352317] hover:border-stone-400 dark:hover:border-[#4b3322]'
+                              : 'bg-stone-50 dark:bg-[#18110c] text-stone-700 dark:text-stone-300 border-stone-200 dark:border-[#352317] hover:border-stone-400 dark:hover:border-[#4b3322]'
                           }`}
                         >
                           {h}h
@@ -2823,35 +2839,234 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     </div>
                   </div>
 
-                  {/* Daily QBank Questions */}
-                  <div>
-                    <div className="flex items-center justify-between mb-1.5">
+                  {/* Minutes selector */}
+                  <div className="p-3 rounded-xl bg-white dark:bg-[#140e0a] border border-stone-200/80 dark:border-[#352317] space-y-2">
+                    <div className="flex items-center justify-between">
                       <label className="text-[11px] font-semibold text-stone-700 dark:text-stone-300">
-                        Daily USMLE / MCQ Questions:
+                        Minutes (0–59)
                       </label>
-                      <span className="text-xs font-bold font-mono" style={themeAccentIconStyle}>{dailyQBankGoal} Qs</span>
+                      <input
+                        type="number"
+                        min={0}
+                        max={59}
+                        value={dailyMinutesGoal}
+                        disabled={dailyHoursGoal === 24}
+                        onChange={(e) => handleUpdateFocusTarget(dailyHoursGoal, Number(e.target.value))}
+                        className="w-16 px-2 py-1 text-xs font-mono font-bold text-right rounded-lg border border-stone-200 dark:border-[#382518] bg-stone-50 dark:bg-[#1b120d] text-stone-900 dark:text-stone-100 outline-none disabled:opacity-40"
+                      />
                     </div>
-                    <div className="grid grid-cols-5 gap-1.5">
+                    <div className="grid grid-cols-4 gap-1.5">
+                      {[0, 15, 30, 45].map((m) => (
+                        <button
+                          key={m}
+                          type="button"
+                          disabled={dailyHoursGoal === 24 && m > 0}
+                          onClick={() => handleUpdateFocusTarget(dailyHoursGoal, m)}
+                          className={`py-1.5 rounded-lg text-xs font-medium border text-center transition-all cursor-pointer disabled:opacity-40 ${
+                            dailyMinutesGoal === m
+                              ? 'themed-accent-btn bg-amber-600 text-white font-bold shadow-2xs'
+                              : 'bg-stone-50 dark:bg-[#18110c] text-stone-700 dark:text-stone-300 border-stone-200 dark:border-[#352317] hover:border-stone-400 dark:hover:border-[#4b3322]'
+                          }`}
+                        >
+                          {m}m
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+                <p className="text-[11px] text-stone-500 dark:text-stone-400">
+                  Your Focus Timer button stays active on the main dashboard ribbon with Pause &amp; Resume controls.
+                </p>
+              </div>
+
+              {/* Daily MCQ & Image Questions Side-by-Side with Custom Numbers & Past Logs */}
+              <div className="p-4 rounded-2xl bg-stone-50/80 dark:bg-[#18110c] border border-stone-200/90 dark:border-[#382518] space-y-4">
+                <div className="flex items-center gap-2">
+                  <Target className="w-4 h-4" style={themeAccentIconStyle} />
+                  <span className="text-xs font-bold text-stone-800 dark:text-stone-200">
+                    Daily Question Targets
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Daily MCQ */}
+                  <div className="p-3 rounded-xl bg-white dark:bg-[#140e0a] border border-stone-200/80 dark:border-[#352317] space-y-3 flex flex-col">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-stone-800 dark:text-stone-100">
+                        Daily MCQ
+                      </label>
+                      <span className="text-xs font-bold font-mono" style={themeAccentIconStyle}>
+                        {dailyMcqGoal} Qs
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="number"
+                        min={1}
+                        max={2000}
+                        value={dailyMcqDraft}
+                        onChange={(e) => {
+                          setDailyMcqDraft(e.target.value);
+                          const num = Number(e.target.value);
+                          if (Number.isFinite(num) && num >= 1) {
+                            handleUpdateDailyMcq(num);
+                          }
+                        }}
+                        placeholder="Custom target"
+                        className="flex-1 min-w-0 px-2.5 py-1.5 rounded-lg text-xs font-mono font-bold border border-stone-200 dark:border-[#382518] bg-stone-50 dark:bg-[#1b120d] text-stone-900 dark:text-stone-100 outline-none"
+                      />
+                      <span className="text-[11px] text-stone-500 dark:text-stone-400 shrink-0">target</span>
+                    </div>
+
+                    <div className="grid grid-cols-5 gap-1">
                       {[20, 40, 60, 80, 100].map((q) => (
                         <button
                           key={q}
                           type="button"
-                          onClick={() => handleUpdateDailyQBank(q)}
-                          className={`py-1.5 rounded-lg text-xs font-medium border text-center transition-all cursor-pointer ${
-                            dailyQBankGoal === q
+                          onClick={() => handleUpdateDailyMcq(q)}
+                          className={`py-1 rounded-lg text-[11px] font-medium border text-center transition-all cursor-pointer ${
+                            dailyMcqGoal === q
                               ? 'themed-accent-btn bg-amber-600 text-white font-bold shadow-2xs'
-                              : 'bg-white dark:bg-[#140e0a] text-stone-700 dark:text-stone-300 border-stone-200 dark:border-[#352317] hover:border-stone-400 dark:hover:border-[#4b3322]'
+                              : 'bg-stone-50 dark:bg-[#18110c] text-stone-700 dark:text-stone-300 border-stone-200 dark:border-[#352317] hover:border-stone-400 dark:hover:border-[#4b3322]'
                           }`}
                         >
                           {q}
                         </button>
                       ))}
                     </div>
+
+                    <div className="flex items-center justify-between gap-2 pt-1 border-t border-stone-200/70 dark:border-[#2a1c12]">
+                      <span className="text-[11px] text-stone-600 dark:text-stone-300">Solved today</span>
+                      <input
+                        type="number"
+                        min={0}
+                        max={5000}
+                        value={todayMcqDone}
+                        onChange={(e) => handleLogTodayMcq(Number(e.target.value))}
+                        className="w-20 px-2 py-1 rounded-lg text-xs font-mono font-bold text-right border border-stone-200 dark:border-[#382518] bg-stone-50 dark:bg-[#1b120d] text-stone-900 dark:text-stone-100 outline-none"
+                      />
+                    </div>
+
+                    <div className="pt-1 border-t border-stone-200/70 dark:border-[#2a1c12] space-y-1">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400">
+                        Past Daily MCQ Logs
+                      </div>
+                      <div className="max-h-28 overflow-y-auto space-y-1 pr-1">
+                        {Object.keys(mcqLogs).length === 0 ? (
+                          <div className="text-[11px] text-stone-400 dark:text-stone-500 italic py-1">
+                            No Daily MCQ logs recorded yet.
+                          </div>
+                        ) : (
+                          Object.entries(mcqLogs)
+                            .sort(([a], [b]) => b.localeCompare(a))
+                            .map(([dateKey, entry]) => (
+                              <div
+                                key={dateKey}
+                                className="flex items-center justify-between text-[11px] px-2 py-1 rounded-md bg-stone-50 dark:bg-[#1a120c] border border-stone-200/60 dark:border-[#2e2015]"
+                              >
+                                <span className="text-stone-600 dark:text-stone-300">{formatLogDateLabel(dateKey)}</span>
+                                <span className="font-mono font-bold text-stone-900 dark:text-stone-100">
+                                  {entry.completed} / {entry.target} Qs
+                                </span>
+                              </div>
+                            ))
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Image Questions */}
+                  <div className="p-3 rounded-xl bg-white dark:bg-[#140e0a] border border-stone-200/80 dark:border-[#352317] space-y-3 flex flex-col">
+                    <div className="flex items-center justify-between">
+                      <label className="text-xs font-bold text-stone-800 dark:text-stone-100 flex items-center gap-1.5">
+                        <ImageIcon className="w-3.5 h-3.5" style={themeAccentIconStyle} />
+                        <span>Image Questions</span>
+                      </label>
+                      <span className="text-xs font-bold font-mono" style={themeAccentIconStyle}>
+                        {dailyImageQGoal} Qs
+                      </span>
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      <input
+                        type="number"
+                        min={1}
+                        max={2000}
+                        value={dailyImageQDraft}
+                        onChange={(e) => {
+                          setDailyImageQDraft(e.target.value);
+                          const num = Number(e.target.value);
+                          if (Number.isFinite(num) && num >= 1) {
+                            handleUpdateDailyImageQ(num);
+                          }
+                        }}
+                        placeholder="Custom target"
+                        className="flex-1 min-w-0 px-2.5 py-1.5 rounded-lg text-xs font-mono font-bold border border-stone-200 dark:border-[#382518] bg-stone-50 dark:bg-[#1b120d] text-stone-900 dark:text-stone-100 outline-none"
+                      />
+                      <span className="text-[11px] text-stone-500 dark:text-stone-400 shrink-0">target</span>
+                    </div>
+
+                    <div className="grid grid-cols-5 gap-1">
+                      {[10, 15, 25, 40, 60].map((q) => (
+                        <button
+                          key={q}
+                          type="button"
+                          onClick={() => handleUpdateDailyImageQ(q)}
+                          className={`py-1 rounded-lg text-[11px] font-medium border text-center transition-all cursor-pointer ${
+                            dailyImageQGoal === q
+                              ? 'themed-accent-btn bg-amber-600 text-white font-bold shadow-2xs'
+                              : 'bg-stone-50 dark:bg-[#18110c] text-stone-700 dark:text-stone-300 border-stone-200 dark:border-[#352317] hover:border-stone-400 dark:hover:border-[#4b3322]'
+                          }`}
+                        >
+                          {q}
+                        </button>
+                      ))}
+                    </div>
+
+                    <div className="flex items-center justify-between gap-2 pt-1 border-t border-stone-200/70 dark:border-[#2a1c12]">
+                      <span className="text-[11px] text-stone-600 dark:text-stone-300">Solved today</span>
+                      <input
+                        type="number"
+                        min={0}
+                        max={5000}
+                        value={todayImageQDone}
+                        onChange={(e) => handleLogTodayImageQ(Number(e.target.value))}
+                        className="w-20 px-2 py-1 rounded-lg text-xs font-mono font-bold text-right border border-stone-200 dark:border-[#382518] bg-stone-50 dark:bg-[#1b120d] text-stone-900 dark:text-stone-100 outline-none"
+                      />
+                    </div>
+
+                    <div className="pt-1 border-t border-stone-200/70 dark:border-[#2a1c12] space-y-1">
+                      <div className="text-[10px] font-bold uppercase tracking-wider text-stone-500 dark:text-stone-400">
+                        Past Image Question Logs
+                      </div>
+                      <div className="max-h-28 overflow-y-auto space-y-1 pr-1">
+                        {Object.keys(imageQLogs).length === 0 ? (
+                          <div className="text-[11px] text-stone-400 dark:text-stone-500 italic py-1">
+                            No Image Question logs recorded yet.
+                          </div>
+                        ) : (
+                          Object.entries(imageQLogs)
+                            .sort(([a], [b]) => b.localeCompare(a))
+                            .map(([dateKey, entry]) => (
+                              <div
+                                key={dateKey}
+                                className="flex items-center justify-between text-[11px] px-2 py-1 rounded-md bg-stone-50 dark:bg-[#1a120c] border border-stone-200/60 dark:border-[#2e2015]"
+                              >
+                                <span className="text-stone-600 dark:text-stone-300">{formatLogDateLabel(dateKey)}</span>
+                                <span className="font-mono font-bold text-stone-900 dark:text-stone-100">
+                                  {entry.completed} / {entry.target} Qs
+                                </span>
+                              </div>
+                            ))
+                        )}
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* 4. Keyboard Shortcuts Cheatsheet */}
+              {/* Keyboard Shortcuts Cheatsheet */}
               <div className="p-4 rounded-2xl bg-stone-50/80 dark:bg-[#18110c] border border-stone-200/90 dark:border-[#382518] space-y-3">
                 <div className="flex items-center gap-2">
                   <Keyboard className="w-4 h-4 text-stone-500" />
@@ -2878,6 +3093,46 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       </kbd>
                     </div>
                   ))}
+                </div>
+              </div>
+
+              {/* Daily Focus Timer Activity Log List (bottom of Goals segment) */}
+              <div className="p-4 rounded-2xl bg-stone-50/80 dark:bg-[#18110c] border border-stone-200/90 dark:border-[#382518] space-y-3">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Clock className="w-4 h-4" style={themeAccentIconStyle} />
+                    <span className="text-xs font-bold text-stone-800 dark:text-stone-200">
+                      Daily Focus Timer Log
+                    </span>
+                  </div>
+                  <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400">
+                    {Object.keys(focusTimerLogs).filter((k) => (focusTimerLogs[k] || 0) > 0).length} days logged
+                  </span>
+                </div>
+
+                <div className="divide-y divide-stone-200/70 dark:divide-[#2e2015] rounded-xl bg-white dark:bg-[#140e0a] border border-stone-200/80 dark:border-[#352317] max-h-60 overflow-y-auto">
+                  {Object.entries(focusTimerLogs).filter(([, secs]) => (secs || 0) > 0).length === 0 ? (
+                    <div className="px-3.5 py-4 text-xs text-stone-500 dark:text-stone-400 text-center">
+                      Start the Focus Timer from the top dashboard ribbon to record how long the timer runs each day.
+                    </div>
+                  ) : (
+                    Object.entries(focusTimerLogs)
+                      .filter(([, secs]) => (secs || 0) > 0)
+                      .sort(([a], [b]) => b.localeCompare(a))
+                      .map(([dateKey, secs]) => (
+                        <div
+                          key={dateKey}
+                          className="px-3.5 py-2.5 flex items-center justify-between gap-3 text-xs"
+                        >
+                          <span className="font-medium text-stone-800 dark:text-stone-200">
+                            {formatLogDateLabel(dateKey)}
+                          </span>
+                          <span className="font-mono font-bold" style={themeAccentIconStyle}>
+                            {formatDurationWords(secs)}
+                          </span>
+                        </div>
+                      ))
+                  )}
                 </div>
               </div>
             </div>

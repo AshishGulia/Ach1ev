@@ -4,6 +4,9 @@ import { useAuth } from '../../contexts/AuthContext';
 import { AchievBrand } from './AchievBrand';
 import { subscribePwaInstall, triggerPwaInstall } from '../../utils/pwaInstall';
 import {
+  Clock,
+  Pause,
+  Timer,
   Eye,
   Sun,
   Moon,
@@ -29,6 +32,16 @@ import {
   ZoomOut,
   RotateCcw,
 } from 'lucide-react';
+import {
+  FocusTimerState,
+  GOALS_UPDATED_EVENT,
+  formatDurationCompact,
+  formatDurationWords,
+  formatShortDayAndClock12h,
+  getFocusTimerState,
+  recordFocusSecondTick,
+  setFocusTimerStatus,
+} from '../../utils/studyGoalsStore';
 
 export interface SoothingSoundItem {
   id: string;
@@ -143,6 +156,41 @@ export const WindowsHeader: React.FC<WindowsHeaderProps> = ({
   useEffect(() => {
     return subscribePwaInstall(setCanInstallApp);
   }, []);
+  // 12-hour Clock & Short Day Name (Mon, Tues, Wed, Thurs, Fri, Sat, Sun)
+  const [clockDisplay, setClockDisplay] = useState<{ day: string; time: string }>(() =>
+    formatShortDayAndClock12h()
+  );
+
+  // Daily Focus Target Timer (Synced with Settings -> Goals)
+  const [focusTimer, setFocusTimer] = useState<FocusTimerState>(() => getFocusTimerState());
+  const [isFocusMenuOpen, setIsFocusMenuOpen] = useState(false);
+  const focusMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const syncClock = () => setClockDisplay(formatShortDayAndClock12h());
+    syncClock();
+    const id = window.setInterval(syncClock, 10000);
+    return () => window.clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    const syncGoals = () => setFocusTimer(getFocusTimerState());
+    window.addEventListener(GOALS_UPDATED_EVENT, syncGoals);
+    window.addEventListener('storage', syncGoals);
+    return () => {
+      window.removeEventListener(GOALS_UPDATED_EVENT, syncGoals);
+      window.removeEventListener('storage', syncGoals);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (focusTimer.status !== 'running') return;
+    const id = window.setInterval(() => {
+      setFocusTimer(recordFocusSecondTick());
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [focusTimer.status]);
+
   // 20 Continuous Procedural Soothing Sounds State
   const [activeSoundId, setActiveSoundId] = useState<string | null>(null);
   const [isSoundMenuOpen, setIsSoundMenuOpen] = useState<boolean>(false);
@@ -152,7 +200,7 @@ export const WindowsHeader: React.FC<WindowsHeaderProps> = ({
   const activeCleanupRef = useRef<(() => void) | null>(null);
   const soundSessionRef = useRef<number>(0);
 
-  // Close sound & zoom dropdowns when clicking outside
+  // Close sound, zoom & focus timer dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
       if (soundMenuRef.current && !soundMenuRef.current.contains(e.target as Node)) {
@@ -161,12 +209,15 @@ export const WindowsHeader: React.FC<WindowsHeaderProps> = ({
       if (zoomMenuRef.current && !zoomMenuRef.current.contains(e.target as Node)) {
         setIsZoomMenuOpen(false);
       }
+      if (focusMenuRef.current && !focusMenuRef.current.contains(e.target as Node)) {
+        setIsFocusMenuOpen(false);
+      }
     };
-    if (isSoundMenuOpen || isZoomMenuOpen) {
+    if (isSoundMenuOpen || isZoomMenuOpen || isFocusMenuOpen) {
       document.addEventListener('mousedown', handleClickOutside);
     }
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isSoundMenuOpen, isZoomMenuOpen]);
+  }, [isSoundMenuOpen, isZoomMenuOpen, isFocusMenuOpen]);
 
   // Stop active procedural audio safely (isolated session closure, never races new sound)
   const stopSound = () => {
@@ -572,8 +623,11 @@ export const WindowsHeader: React.FC<WindowsHeaderProps> = ({
     }
   };
 
+  const focusTargetTotalSec = Math.max(60, focusTimer.hoursGoal * 3600 + focusTimer.minutesGoal * 60);
+  const focusRemainingSec = Math.max(0, focusTargetTotalSec - focusTimer.elapsedTodaySec);
+
   return (
-    <header className="themed-glass-bar h-12 px-2.5 sm:px-5 flex items-center justify-between gap-2 border-b border-stone-200/80 dark:border-[#342318] bg-[#fdfcfa]/90 dark:bg-[#140e0a]/92 backdrop-blur-md select-none z-20 text-xs transition-colors">
+    <header className="themed-glass-bar relative h-12 px-2.5 sm:px-5 flex items-center justify-between gap-2 border-b border-stone-200/80 dark:border-[#342318] bg-[#fdfcfa]/90 dark:bg-[#140e0a]/92 backdrop-blur-md select-none z-20 text-xs transition-colors">
       
       {/* Left: View Breadcrumb & Mobile Menu Toggle */}
       <div className="flex items-center gap-1.5 sm:gap-3 min-w-0 flex-1 overflow-hidden">
@@ -604,8 +658,128 @@ export const WindowsHeader: React.FC<WindowsHeaderProps> = ({
         </div>
       </div>
 
-      {/* Right Column: Sign In Pill (left of Sounds), Soothing Sounds Icon, UI Zoom, Eye Logo, Dark Mode */}
-      <div className="flex items-center gap-1 sm:gap-2.5 shrink-0">
+      {/* Center: Live 12-Hour Time & Short Day Name (Mon, Tues, Wed, Thurs, Fri, Sat, Sun) */}
+      <div
+        className="lg:absolute lg:left-1/2 lg:-translate-x-1/2 flex items-center gap-1.5 px-2.5 py-1 rounded-xl border border-stone-200/80 dark:border-[#382518] bg-stone-100/75 dark:bg-[#1d140e]/85 text-stone-800 dark:text-[#efe4d4] shrink-0"
+        aria-label={`Current day ${clockDisplay.day}, ${clockDisplay.time}`}
+      >
+        <Clock className="w-3.5 h-3.5 text-[#A47C43] dark:text-amber-400 shrink-0 hidden sm:block" />
+        <span className="font-mono text-[11px] sm:text-[11.5px] font-bold tracking-tight whitespace-nowrap">
+          {clockDisplay.time}
+        </span>
+        <span className="text-stone-300 dark:text-[#4b3322] font-bold">·</span>
+        <span className="text-[11px] sm:text-[11.5px] font-semibold text-[#6e4520] dark:text-amber-300 whitespace-nowrap">
+          {clockDisplay.day}
+        </span>
+      </div>
+
+      {/* Right Column: Focus Timer, Sign In Pill, Soothing Sounds Icon, UI Zoom, Eye Logo, Dark Mode */}
+      <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+        {focusTimer.active && (
+          <div className="relative" ref={focusMenuRef}>
+            <button
+              type="button"
+              onClick={() => setIsFocusMenuOpen((v) => !v)}
+              title={`Daily Focus Timer (${focusTimer.hoursGoal}h ${String(focusTimer.minutesGoal).padStart(2, '0')}m target) · Click for Pause / Resume`}
+              className={`flex items-center gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-xl border text-[10.5px] sm:text-[11px] font-mono font-bold transition-all cursor-pointer ${
+                focusTimer.status === 'running'
+                  ? 'bg-emerald-600/15 border-emerald-600/45 text-emerald-800 dark:text-emerald-300 shadow-2xs'
+                  : focusTimer.status === 'paused'
+                  ? 'bg-amber-500/15 border-amber-500/45 text-[#7c4d18] dark:text-amber-300'
+                  : 'bg-stone-100 hover:bg-stone-200/80 dark:bg-[#211711] dark:hover:bg-[#2b1e15] border-stone-200/80 dark:border-[#382518] text-stone-700 dark:text-[#efe4d4]'
+              }`}
+            >
+              {focusTimer.status === 'running' ? (
+                <Pause className="w-3.5 h-3.5 shrink-0" />
+              ) : (
+                <Timer className="w-3.5 h-3.5 text-[#A47C43] dark:text-amber-400 shrink-0" />
+              )}
+              <span className="whitespace-nowrap">
+                {focusRemainingSec > 0
+                  ? formatDurationCompact(focusRemainingSec)
+                  : `+${formatDurationCompact(focusTimer.elapsedTodaySec)}`}
+              </span>
+            </button>
+
+            {isFocusMenuOpen && (
+              <div className="themed-glass-card fixed sm:absolute right-3 sm:right-0 top-13 sm:top-11 w-64 rounded-2xl bg-[#fdfcfa] dark:bg-[#1a120d] border border-stone-200 dark:border-[#3a271a] shadow-2xl p-3.5 z-50 text-stone-900 dark:text-[#efe4d4] space-y-3 animate-in fade-in zoom-in-95 duration-150">
+                <div className="flex items-center justify-between pb-2 border-b border-stone-200/80 dark:border-[#352317]">
+                  <div>
+                    <div className="text-xs font-bold flex items-center gap-1.5">
+                      <Timer className="w-3.5 h-3.5 text-[#A47C43]" />
+                      <span>Daily Focus Timer</span>
+                    </div>
+                    <p className="text-[10px] text-stone-500 dark:text-stone-400 mt-0.5">
+                      Target: {focusTimer.hoursGoal}h {String(focusTimer.minutesGoal).padStart(2, '0')}m
+                    </p>
+                  </div>
+                  <span
+                    className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${
+                      focusTimer.status === 'running'
+                        ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300'
+                        : focusTimer.status === 'paused'
+                        ? 'bg-amber-500/15 text-amber-700 dark:text-amber-300'
+                        : 'bg-stone-200/70 dark:bg-[#2a1d14] text-stone-600 dark:text-stone-300'
+                    }`}
+                  >
+                    {focusTimer.status === 'running'
+                      ? 'Active'
+                      : focusTimer.status === 'paused'
+                      ? 'Paused'
+                      : 'Ready'}
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-center">
+                  <div className="p-2 rounded-xl bg-stone-100/80 dark:bg-[#140e0a] border border-stone-200/70 dark:border-[#352317]">
+                    <div className="text-[9.5px] uppercase text-stone-500 dark:text-stone-400">Used Today</div>
+                    <div className="text-xs font-mono font-bold mt-0.5">
+                      {formatDurationWords(focusTimer.elapsedTodaySec)}
+                    </div>
+                  </div>
+                  <div className="p-2 rounded-xl bg-stone-100/80 dark:bg-[#140e0a] border border-stone-200/70 dark:border-[#352317]">
+                    <div className="text-[9.5px] uppercase text-stone-500 dark:text-stone-400">Remaining</div>
+                    <div className="text-xs font-mono font-bold mt-0.5">
+                      {formatDurationCompact(focusRemainingSec)}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  {focusTimer.status === 'running' ? (
+                    <button
+                      type="button"
+                      onClick={() => setFocusTimer(setFocusTimerStatus('paused'))}
+                      className="flex-1 py-2 px-3 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                    >
+                      <Pause className="w-3.5 h-3.5" />
+                      <span>Pause</span>
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => setFocusTimer(setFocusTimerStatus('running'))}
+                      className="flex-1 py-2 px-3 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold flex items-center justify-center gap-1.5 cursor-pointer transition-colors"
+                    >
+                      <Play className="w-3.5 h-3.5" />
+                      <span>{focusTimer.elapsedTodaySec > 0 ? 'Resume' : 'Start Focus'}</span>
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setFocusTimer(setFocusTimerStatus('idle', true))}
+                    title="Reset today's active timer"
+                    className="p-2 rounded-xl border border-stone-200 dark:border-[#382518] hover:bg-stone-100 dark:hover:bg-[#261a12] text-stone-600 dark:text-stone-300 cursor-pointer"
+                    aria-label="Reset focus timer"
+                  >
+                    <RotateCcw className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Supabase Realtime Sync + Personal Google Drive Status Pill (left of Sounds per user request) */}
         <button
           type="button"
