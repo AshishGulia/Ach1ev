@@ -3,13 +3,13 @@
 
 @theme {
   /* =========================================================================
-     UNIFIED FONT SYSTEM - ALATA ACROSS ENTIRE APPLICATION (USER DEFAULT)
-     Ensures typography is completely consistent, modern, clean, and elegant.
+     UNIFIED FONT SYSTEM - BASKERVILLE ACROSS ENTIRE APPLICATION (DEFAULT)
+     Ensures typography is completely consistent, scholarly, clean, and timeless.
      ========================================================================= */
-  --font-sans: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif);
-  --font-serif: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif);
-  --font-mono: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif);
-  --font-heading: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif);
+  --font-sans: var(--app-font-family, 'Libre Baskerville', Baskerville, Georgia, serif);
+  --font-serif: var(--app-font-family, 'Libre Baskerville', Baskerville, Georgia, serif);
+  --font-mono: var(--app-font-family, 'Libre Baskerville', Baskerville, Georgia, serif);
+  --font-heading: var(--app-font-family, 'Libre Baskerville', Baskerville, Georgia, serif);
 
   /* =========================================================================
      SOBER, RESTORATIVE, EYE-COMFORTABLE MEDICAL PALETTE

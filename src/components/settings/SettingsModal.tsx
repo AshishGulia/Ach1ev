@@ -221,9 +221,9 @@ export const APP_FONTS: FontOption[] = [
   { id: 'times-new-roman', name: 'Times New Roman', category: 'Serif', fontType: 'serif', cssFamily: "'Times New Roman', Times, serif", description: 'Timeless academic paper & medical journal standard.', sample: 'Harrison’s Principles of Internal Medicine — Review Notes' },
   { id: 'georgia', name: 'Georgia', category: 'Serif', fontType: 'serif', cssFamily: "Georgia, serif", description: 'Wide generous screen serif built for clarity.', sample: 'Differential Diagnosis of Acute Abdomen & Peritonitis' },
   { id: 'garamond', name: 'Garamond', category: 'Serif', fontType: 'serif', cssFamily: "Garamond, 'EB Garamond', serif", description: 'Graceful Old-Style scholarly print elegance.', sample: 'Classical Materia Medica & Pathophysiology Essays' },
-  { id: 'baskerville', name: 'Baskerville', category: 'Serif', fontType: 'serif', cssFamily: "Baskerville, 'Libre Baskerville', serif", description: 'Transitional high-contrast British academic serif.', sample: 'Oxford Handbook of Clinical Medicine Notes' },
+  { id: 'baskerville', name: 'Baskerville', category: 'Serif', fontType: 'serif', cssFamily: "'Libre Baskerville', Baskerville, Georgia, serif", description: 'Transitional high-contrast British academic serif (Default Ach1ev Style).', sample: 'Oxford Handbook of Clinical Medicine Notes' },
   { id: 'merriweather', name: 'Merriweather', category: 'Serif', fontType: 'serif', cssFamily: "'Merriweather', serif", description: 'Robust condensed serif designed for deep textbook study.', sample: 'Diagnostic Criteria for Acute Coronary Syndromes' },
-  { id: 'playfair-display', name: 'Playfair Display', category: 'Serif', fontType: 'serif', cssFamily: "'Playfair Display', serif", description: 'Signature royal editorial serif (Default Ach1ev Style).', sample: 'Ach1ev Editorial Study — Clinical Journal Synthesis' },
+  { id: 'playfair-display', name: 'Playfair Display', category: 'Serif', fontType: 'serif', cssFamily: "'Playfair Display', serif", description: 'Royal editorial display serif for classical headers.', sample: 'Ach1ev Editorial Study — Clinical Journal Synthesis' },
   { id: 'bodoni', name: 'Bodoni', category: 'Serif', fontType: 'serif', cssFamily: "'Bodoni Moda', 'Bodoni MT', Didot, serif", description: 'Dramatic hairline Didone contrast for headers.', sample: 'Grand Rounds Case Compendium & Therapeutics' },
   { id: 'palatino', name: 'Palatino', category: 'Serif', fontType: 'serif', cssFamily: "'Palatino Linotype', 'Book Antiqua', Palatino, serif", description: 'Broad sculptural Renaissance humanist serif.', sample: 'Physiological Basis of Medical Practice' },
   { id: 'lora', name: 'Lora', category: 'Serif', fontType: 'serif', cssFamily: "'Lora', serif", description: 'Calligraphic contemporary serif with subtle curves.', sample: 'Integrated Pathology & Pharmacology Compendium' },
@@ -785,7 +785,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [dailyQBankGoal, setDailyQBankGoal] = useState<number>(() => Number(localStorage.getItem('medden_daily_qbank')) || 40);
   const [distractionFree, setDistractionFree] = useState<boolean>(() => localStorage.getItem('medden_distraction_free') === 'true');
   const [currentFont, setCurrentFont] = useState<string>(() => {
-    return localStorage.getItem('medden_app_font') || 'Playfair Display';
+    return localStorage.getItem('medden_app_font') || 'Baskerville';
   });
   const [fontScale, setFontScale] = useState<number>(() => {
     const saved = localStorage.getItem('medden_font_scale');

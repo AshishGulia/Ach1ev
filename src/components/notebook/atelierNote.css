@@ -15,9 +15,9 @@
   --an-rule: rgba(138, 102, 58, 0.24);
   --an-margin: rgba(180,88,74,.35);
   --an-shadow: 0 1px 0 rgba(255,255,255,.8) inset, 0 18px 40px -30px rgba(54,40,20,.45);
-  --an-serif: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif);
-  --an-sans: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif);
-  --an-mono: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif);
+  --an-serif: var(--app-font-family, 'Libre Baskerville', Baskerville, Georgia, serif);
+  --an-sans: var(--app-font-family, 'Libre Baskerville', Baskerville, Georgia, serif);
+  --an-mono: var(--app-font-family, 'Libre Baskerville', Baskerville, Georgia, serif);
   --an-hand: "Caveat", cursive;
 }
 

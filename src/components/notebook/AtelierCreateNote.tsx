@@ -333,9 +333,9 @@ const NOTE_FONT_OPTIONS: Array<{
 
 const normalizeNoteFontKey = (raw: string): string => {
   if (raw === 'sans' || raw === 'alata') return 'helvetica';
-  if (raw === 'serif') return 'playfair';
+  if (raw === 'serif') return 'baskerville';
   if (raw === 'hand') return 'caveat';
-  return raw || 'playfair';
+  return raw || 'baskerville';
 };
 
 const formatTodayDate = () =>
@@ -527,9 +527,9 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
   }, [paperColor]);
   const [fontStyle, setFontStyle] = useState<string>(() => {
     try {
-      return localStorage.getItem('medden_note_font_style') || 'playfair';
+      return localStorage.getItem('medden_note_font_style') || 'baskerville';
     } catch {
-      return 'playfair';
+      return 'baskerville';
     }
   });
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);

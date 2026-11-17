@@ -423,7 +423,7 @@ const LegacyRichNoteEditor: React.FC<RichNoteEditorProps> = ({
 
   // Active Note Font State (supports all 15 master fonts & 6 handwriting fonts)
   const [activeNoteFont, setActiveNoteFont] = useState<string>(() => {
-    return localStorage.getItem('medden_app_font') || 'Alata';
+    return localStorage.getItem('medden_app_font') || 'Baskerville';
   });
 
   const handleSelectNoteFont = (fontName: string) => {

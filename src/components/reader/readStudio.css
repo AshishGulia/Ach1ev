@@ -6,7 +6,7 @@
   width: 100%;
   height: 100%;
   overflow: hidden;
-  font-family: var(--app-font-family, 'Alata', system-ui, -apple-system, sans-serif);
+  font-family: var(--app-font-family, 'Libre Baskerville', Baskerville, Georgia, serif);
   --rs-prose-ink: var(--rs-ink, #1c1b18);
   background-color: transparent;
   color: var(--rs-ink, #1c1b18);

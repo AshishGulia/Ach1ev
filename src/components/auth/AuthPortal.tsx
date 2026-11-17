@@ -296,24 +296,52 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
     <div
       className={`auth-portal-root ${
         isModal
-          ? 'fixed inset-0 z-50 bg-black/55 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto overflow-x-hidden'
+          ? 'fixed inset-0 z-50 bg-black/60 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto overflow-x-hidden'
           : 'min-h-[100dvh] w-full relative overflow-y-auto overflow-x-hidden flex flex-col'
       } transition-colors duration-300 text-[#fff8ee]`}
-      style={
-        isModal
-          ? undefined
-          : {
-              backgroundColor: '#120602',
-            }
-      }
+      style={{
+        fontFamily: "'Libre Baskerville', Baskerville, Georgia, serif",
+        ...(isModal ? {} : { backgroundColor: '#0b0402' }),
+      }}
     >
+      <style>{`
+        @keyframes achievGloomyPulseA {
+          0%, 100% {
+            transform: translate3d(0, 0, 0) scale(1);
+            opacity: 0.42;
+          }
+          50% {
+            transform: translate3d(18px, -14px, 0) scale(1.16);
+            opacity: 0.72;
+          }
+        }
+        @keyframes achievGloomyPulseB {
+          0%, 100% {
+            transform: translate3d(0, 0, 0) scale(1.06);
+            opacity: 0.34;
+          }
+          50% {
+            transform: translate3d(-16px, 14px, 0) scale(0.94);
+            opacity: 0.62;
+          }
+        }
+        @keyframes achievGlassBreathe {
+          0%, 100% {
+            box-shadow: inset 0 1.5px 1px rgba(255, 226, 184, 0.16), inset 0 -2px 8px rgba(4, 1, 0, 0.65), 0 28px 70px rgba(4, 1, 0, 0.78), 0 0 38px rgba(132, 68, 24, 0.14);
+          }
+          50% {
+            box-shadow: inset 0 1.5px 1px rgba(255, 226, 184, 0.24), inset 0 -2px 8px rgba(4, 1, 0, 0.65), 0 32px 82px rgba(4, 1, 0, 0.85), 0 0 70px rgba(168, 92, 34, 0.28);
+          }
+        }
+      `}</style>
+
       {/* Modal close button only */}
       {isModal && onClose && (
         <div className="fixed top-4 right-4 z-50 flex items-center">
           <button
             type="button"
             onClick={onClose}
-            className="p-2.5 rounded-xl backdrop-blur-xl transition-all cursor-pointer shadow-lg bg-[#1c0a04]/92 text-[#fff8ee] hover:bg-[#2c1208]"
+            className="p-2.5 rounded-xl backdrop-blur-xl transition-all cursor-pointer shadow-lg bg-[#160803]/90 text-[#fff8ee] hover:bg-[#2a1107] border border-[#f5d093]/20"
             title="Close Authentication Portal"
           >
             <X className="w-4 h-4" />
@@ -321,21 +349,59 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
         </div>
       )}
 
-      {/* Very Dark Chocolaty Brown Main Login Screen Viewport (No Background Patterns) */}
+      {/* Gloomy Dark Chocolaty Glassmorphism Login Screen with Slow Pulsation */}
       <div
         className={
           isModal
             ? 'relative z-10 w-full max-w-4xl grid grid-cols-1 lg:grid-cols-12 gap-6 items-center'
-            : 'relative w-full min-h-[82dvh] flex items-center justify-center px-4 sm:px-8 pt-6 pb-10 sm:py-10 overflow-hidden shrink-0'
+            : 'relative w-full min-h-[84dvh] flex items-center justify-center px-4 sm:px-8 pt-6 pb-12 sm:py-12 overflow-hidden shrink-0'
         }
         style={
           isModal
             ? undefined
             : {
-                backgroundColor: '#120602',
+                background:
+                  'radial-gradient(ellipse at 50% 35%, #1c0b05 0%, #100502 52%, #090301 100%)',
               }
         }
       >
+        {/* Pure Blurry Gloomy Ambient Mist with Slow Pulsation (Zero Patterns) */}
+        {!isModal && (
+          <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden select-none">
+            <div
+              className="absolute -top-28 -left-24 w-[520px] h-[520px] rounded-full"
+              style={{
+                background: 'radial-gradient(circle, rgba(118, 56, 22, 0.44) 0%, rgba(16, 6, 2, 0) 70%)',
+                filter: 'blur(96px)',
+                animation: 'achievGloomyPulseA 11s ease-in-out infinite',
+              }}
+            />
+            <div
+              className="absolute top-[18%] -right-24 w-[540px] h-[540px] rounded-full"
+              style={{
+                background: 'radial-gradient(circle, rgba(145, 76, 30, 0.36) 0%, rgba(12, 4, 1, 0) 72%)',
+                filter: 'blur(110px)',
+                animation: 'achievGloomyPulseB 14s ease-in-out infinite',
+              }}
+            />
+            <div
+              className="absolute -bottom-32 left-[26%] w-[620px] h-[360px] rounded-full"
+              style={{
+                background: 'radial-gradient(circle, rgba(84, 38, 14, 0.48) 0%, rgba(10, 4, 1, 0) 72%)',
+                filter: 'blur(90px)',
+                animation: 'achievGloomyPulseA 16s ease-in-out infinite reverse',
+              }}
+            />
+            {/* Soft frosted haze sheet + invisible bottom edge join into showcase */}
+            <div
+              className="absolute inset-0 backdrop-blur-[22px]"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(12, 5, 2, 0.18) 0%, rgba(11, 4, 2, 0.08) 72%, #0b0402 100%)',
+              }}
+            />
+          </div>
+        )}
 
       {/* Clean Split Layout: Vertically Centered Brand Panel Beside Slightly Lower Compact Login Box */}
       <div className={isModal ? 'contents' : 'relative z-10 w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10 items-center my-auto'}>
@@ -362,15 +428,16 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
           </div>
         </div>
 
-        {/* Right: Compact Borderless Frosted-Glass Login Card Positioned Breathably Lower + External Skip Link */}
+        {/* Right: Compact Gloomy Blurry Glassmorphism Login Card + External Skip Link */}
         <div className="lg:col-span-7 lg:mt-8 w-full max-w-md mx-auto flex flex-col items-center">
         <div
-          className="rounded-3xl p-4 sm:p-6 backdrop-blur-xl backdrop-saturate-150 flex flex-col justify-between transition-all w-full"
+          className="rounded-3xl p-4 sm:p-6 flex flex-col justify-between transition-all w-full border border-[#f5d093]/18"
           style={{
             background:
-              'linear-gradient(160deg, rgba(28, 12, 5, 0.92) 0%, rgba(16, 6, 2, 0.96) 100%)',
-            boxShadow:
-              'inset 0 1.5px 1px rgba(255, 228, 186, 0.14), inset 0 -2px 6px rgba(6, 2, 0, 0.65), 0 24px 60px rgba(4, 1, 0, 0.72)',
+              'linear-gradient(155deg, rgba(38, 17, 7, 0.46) 0%, rgba(20, 8, 3, 0.56) 55%, rgba(11, 4, 1, 0.66) 100%)',
+            backdropFilter: 'blur(34px) saturate(155%)',
+            WebkitBackdropFilter: 'blur(34px) saturate(155%)',
+            animation: 'achievGlassBreathe 9s ease-in-out infinite',
           }}
         >
           <div>
@@ -902,15 +969,12 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
       {!isModal && (
         <section
           aria-label="Achiev Medical Study Guide & Tour"
-          className="w-full relative z-10 pb-16 sm:pb-20 text-[#190802] overflow-hidden"
-          style={{
-            background:
-              'linear-gradient(180deg, #f5e4c6 0%, #f2dfc0 65%, #ecd3ab 100%)',
-          }}
+          className="w-full relative z-10 overflow-hidden"
+          style={{ backgroundColor: '#0b0402' }}
         >
           <div className="relative z-10">
             {showShowcase ? (
-              <Suspense fallback={<div className="w-full max-w-6xl mx-auto mt-4 h-48 rounded-3xl bg-[#E8D2AA]/60 animate-pulse" />}>
+              <Suspense fallback={<div className="w-full max-w-6xl mx-auto mt-4 h-48 rounded-3xl bg-[#2a1308]/50 animate-pulse" />}>
                 <ProductDemoShowcase />
               </Suspense>
             ) : (

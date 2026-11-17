@@ -31,7 +31,7 @@ const BOOT_FONT_MAP: Record<string, string> = {
   'Times New Roman': "'Times New Roman', Times, serif",
   Georgia: 'Georgia, serif',
   Garamond: "'EB Garamond', Garamond, serif",
-  Baskerville: "'Libre Baskerville', Baskerville, serif",
+  Baskerville: "'Libre Baskerville', Baskerville, Georgia, serif",
   Merriweather: "'Merriweather', serif",
   'Playfair Display': "'Playfair Display', 'Lora', Georgia, serif",
   Bodoni: "'Bodoni Moda', 'Bodoni MT', serif",
@@ -40,11 +40,11 @@ const BOOT_FONT_MAP: Record<string, string> = {
   Cinzel: "'Cinzel', serif",
 };
 
-// Apply saved user font family & size spectrum
+// Apply saved user font family & size spectrum (Default: Baskerville)
 try {
-  const savedFont = localStorage.getItem('medden_app_font') || 'Playfair Display';
+  const savedFont = localStorage.getItem('medden_app_font') || 'Baskerville';
   const savedScale = localStorage.getItem('medden_font_scale') || '100%';
-  const cssFamily = BOOT_FONT_MAP[savedFont] || `'${savedFont}', 'Playfair Display', Georgia, serif`;
+  const cssFamily = BOOT_FONT_MAP[savedFont] || `'${savedFont}', 'Libre Baskerville', Baskerville, Georgia, serif`;
   document.documentElement.style.setProperty('--app-font-family', cssFamily);
   document.documentElement.style.setProperty('--app-font-scale', savedScale);
 } catch {}

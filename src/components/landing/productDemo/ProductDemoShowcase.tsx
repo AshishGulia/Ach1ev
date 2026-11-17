@@ -139,46 +139,45 @@ export const ProductDemoShowcase: React.FC = () => {
     <section
       aria-labelledby="product-demo-heading"
       className="w-full pb-16 sm:pb-24"
+      style={{
+        fontFamily: "'Libre Baskerville', Baskerville, Georgia, serif",
+        background:
+          'linear-gradient(180deg, #0b0402 0%, #110602 5%, #180904 10%, #210c05 15%, #2b1207 20%, #37180a 25%, #46200e 30%, #572a14 35%, #6a361b 40%, #7f4424 45%, #955530 50%, #ab693f 55%, #c17e51 59%, #d49668 63%, #e3af81 67%, #eec699 71%, #f4d8b3 74%, #f6e6cb 77%, #f2dfc0 88%, #ecd3ab 100%)',
+      }}
     >
       <style>{SHOWCASE_CSS}</style>
 
-      {/* ═══════════════ 0. SEO INTRO WITH SEAMLESS DARK CHOCOLATE -> CREAM MERGE BEFORE LAPTOP ═══════════════ */}
-      <div
-        className="w-full px-4 sm:px-8 pt-4 pb-24 sm:pb-32"
-        style={{
-          background:
-            'linear-gradient(180deg, #120602 0%, #190903 34%, #38190b 58%, #7b4624 76%, #ca9562 90%, #f5e4c6 100%)',
-        }}
-      >
+      {/* ═══════════════ 0. SEO INTRO IN DEEP GLOOMY DARK CHOCOLATE ZONE ═══════════════ */}
+      <div className="w-full px-4 sm:px-8 pt-4 pb-16 sm:pb-20">
         <div className="max-w-4xl mx-auto text-center px-3 space-y-3">
-          <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#f5d093] drop-shadow-[0_1px_4px_rgba(12,4,1,0.7)]">
+          <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#f5d093] drop-shadow-[0_1px_6px_rgba(6,2,0,0.85)]">
             Cheapest Medical Note-Making &amp; Focus Study Platform · ₹0 Free, ₹100 Pro &amp; ₹300 Master
           </p>
-          <h2 className="text-2xl sm:text-4xl font-serif font-bold text-[#fffaf0] leading-tight text-balance drop-shadow-[0_2px_10px_rgba(10,3,0,0.65)]">
+          <h2 className="text-2xl sm:text-4xl font-bold text-[#fffaf0] leading-tight text-balance drop-shadow-[0_2px_12px_rgba(6,2,0,0.85)]">
             Side-by-Side Textbooks, Ruled Notes, 3D Almirahs &amp; Focus Timers in One Workspace
           </h2>
-          <p className="text-sm sm:text-base text-[#faebd3] max-w-2xl mx-auto leading-relaxed drop-shadow-[0_1px_5px_rgba(10,3,0,0.6)]">
+          <p className="text-sm sm:text-base text-[#f7e5ca] max-w-2xl mx-auto leading-relaxed drop-shadow-[0_1px_6px_rgba(6,2,0,0.8)]">
             Built for MBBS, NEET-PG, USMLE, Nursing, and deep learners: read PDFs/DOCX beside handwriting or serif notes, pin timestamped YouTube lectures, build multi-level flowcharts, and organize every file neatly.
           </p>
         </div>
       </div>
 
-      {/* Main High-Contrast Cream Content Container (Above & Below Laptop / Tablet) */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-8 -mt-4 space-y-16 sm:space-y-24">
+      {/* Main Content Container Stretching Smoothly Through the 6× Merge Band */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-8 space-y-16 sm:space-y-24">
 
-      {/* ═══════════════ 1. MACBOOK PRO SHOWCASE WITH ITS OWN SIDE ARROWS ═══════════════ */}
+      {/* ═══════════════ 1. MACBOOK PRO SHOWCASE (HIGH-CONTRAST IVORY TEXT ON ROASTED COCOA) ═══════════════ */}
       <div>
-        <div className="space-y-1.5 text-center mb-6 sm:mb-8">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6b3810]">
+        <div className="space-y-2 text-center mb-6 sm:mb-8">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f4cd90] drop-shadow-[0_1px_6px_rgba(10,3,0,0.7)]">
             Desktop Studio · MacBook View
           </p>
           <h2
             id="product-demo-heading"
-            className="text-xl sm:text-3xl font-bold text-[#190802] font-serif leading-[1.2] text-balance"
+            className="text-xl sm:text-3xl font-bold text-[#fffaf0] leading-[1.25] text-balance drop-shadow-[0_2px_12px_rgba(10,3,0,0.75)]"
           >
             {laptopScene.title}
           </h2>
-          <p className="text-sm font-medium text-[#2c1206] leading-relaxed max-w-2xl mx-auto">
+          <p className="text-sm font-normal text-[#f5e3c6] leading-relaxed max-w-2xl mx-auto drop-shadow-[0_1px_6px_rgba(10,3,0,0.7)]">
             {laptopScene.caption}
           </p>
         </div>
@@ -188,7 +187,7 @@ export const ProductDemoShowcase: React.FC = () => {
             type="button"
             onClick={prevLaptop}
             aria-label="Previous laptop section preview"
-            className="pds-arrow-col flex items-center justify-center cursor-pointer select-none text-[#2c1206]/80 hover:text-[#120602]"
+            className="pds-arrow-col flex items-center justify-center cursor-pointer select-none text-[#f7e1be]/85 hover:text-white drop-shadow-[0_2px_8px_rgba(10,3,0,0.8)]"
           >
             <ChevronLeft className="w-9 h-24 sm:w-12 sm:h-32 shrink-0" strokeWidth={1.35} aria-hidden="true" />
           </button>
@@ -201,59 +200,74 @@ export const ProductDemoShowcase: React.FC = () => {
             type="button"
             onClick={nextLaptop}
             aria-label="Next laptop section preview"
-            className="pds-arrow-col flex items-center justify-center cursor-pointer select-none text-[#2c1206]/80 hover:text-[#120602]"
+            className="pds-arrow-col flex items-center justify-center cursor-pointer select-none text-[#f7e1be]/85 hover:text-white drop-shadow-[0_2px_8px_rgba(10,3,0,0.8)]"
           >
             <ChevronRight className="w-9 h-24 sm:w-12 sm:h-32 shrink-0" strokeWidth={1.35} aria-hidden="true" />
           </button>
         </div>
       </div>
 
-      {/* ═══════════════ 2. EDITORIAL PRAISE STRIP BETWEEN LAPTOP & TABLET ═══════════════ */}
-      <div className="max-w-4xl mx-auto py-4 sm:py-6 border-y border-[#6b3810]/30">
+      {/* ═══════════════ 2. EDITORIAL PRAISE STRIP BELOW LAPTOP (BLURRY DARK COCOA GLASS FOR HIGH CONTRAST OVER MID-MERGE) ═══════════════ */}
+      <div
+        className="max-w-4xl mx-auto py-7 sm:py-9 px-5 sm:px-9 rounded-3xl border border-[#f5d093]/20 shadow-[0_24px_60px_rgba(12,4,1,0.36)]"
+        style={{
+          background:
+            'linear-gradient(155deg, rgba(28, 11, 4, 0.72) 0%, rgba(16, 6, 2, 0.80) 100%)',
+          backdropFilter: 'blur(26px) saturate(140%)',
+          WebkitBackdropFilter: 'blur(26px) saturate(140%)',
+        }}
+      >
         <div className="text-center space-y-3 max-w-2xl mx-auto px-2">
-          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#6b3810]">
+          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#f4cd90]">
             Why Scholars Switch to Ach1ev
           </p>
-          <h3 className="text-xl sm:text-3xl font-serif font-bold text-[#190802] leading-snug text-balance">
+          <h3 className="text-xl sm:text-3xl font-bold text-[#fffaf0] leading-snug text-balance">
             One quiet desk where your textbooks, clinical tables, and revision memory finally live together.
           </h3>
-          <p className="text-sm sm:text-[15px] font-medium text-[#2c1206] leading-relaxed">
+          <p className="text-sm sm:text-[15px] text-[#f3dfc1] leading-relaxed">
             Built specifically for long library hours and ward postings—Ach1ev pairs paper-calm reading comfort with
             instant diagram capture, tactile 3D bookshelves, and clinical flowcharts so nothing breaks your focus.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 pt-6 border-t border-[#6b3810]/22 text-left px-2">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 pt-6 border-t border-[#f5d093]/20 text-left px-2">
           <div className="space-y-1.5">
-            <h4 className="font-serif text-base font-bold text-[#190802]">Textbooks Beside Living Notes</h4>
-            <p className="text-xs sm:text-[13px] font-medium text-[#2c1206] leading-relaxed">
+            <h4 className="text-base font-bold text-[#fff5e2]">Textbooks Beside Living Notes</h4>
+            <p className="text-xs sm:text-[13px] text-[#eed8b8] leading-relaxed">
               Keep Harrison or Robbins open right beside ruled sepia pages, snip charts cleanly, and pin your lecture at
               the bottom without juggling five windows.
             </p>
           </div>
           <div className="space-y-1.5">
-            <h4 className="font-serif text-base font-bold text-[#190802]">Effortless Table &amp; Flowchart Recall</h4>
-            <p className="text-xs sm:text-[13px] font-medium text-[#2c1206] leading-relaxed">
+            <h4 className="text-base font-bold text-[#fff5e2]">Effortless Table &amp; Flowchart Recall</h4>
+            <p className="text-xs sm:text-[13px] text-[#eed8b8] leading-relaxed">
               Turn dense pharmacology photographs into structured editable tables and zoom effortlessly through branching
               clinical pathways before exams.
             </p>
           </div>
           <div className="space-y-1.5">
-            <h4 className="font-serif text-base font-bold text-[#190802]">Laptop Depth, iPad Fluidity</h4>
-            <p className="text-xs sm:text-[13px] font-medium text-[#2c1206] leading-relaxed">
+            <h4 className="text-base font-bold text-[#fff5e2]">Laptop Depth, iPad Fluidity</h4>
+            <p className="text-xs sm:text-[13px] text-[#eed8b8] leading-relaxed">
               Start an outline on your MacBook at the library and review flashcards or ward rosters seamlessly on your iPad—zero hardware lock-in.
             </p>
           </div>
         </div>
       </div>
 
-      {/* ═══════════════ 3. IPAD PRO SHOWCASE WITH ITS OWN SIDE ARROWS ═══════════════ */}
+      {/* ═══════════════ 3. IPAD PRO SHOWCASE (HIGH-CONTRAST FROSTED CREAM HEADER OVER GOLDEN MERGE) ═══════════════ */}
       <div>
-        <div className="space-y-1.5 text-center mb-6 sm:mb-8">
+        <div
+          className="space-y-1.5 text-center mb-6 sm:mb-8 max-w-2xl mx-auto px-5 py-4 rounded-2xl border border-[#8c5621]/25 shadow-[0_12px_32px_rgba(32,14,4,0.12)]"
+          style={{
+            background: 'rgba(255, 248, 235, 0.84)',
+            backdropFilter: 'blur(18px)',
+            WebkitBackdropFilter: 'blur(18px)',
+          }}
+        >
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6b3810]">
             Bedside &amp; Companion · iPad Pro View
           </p>
-          <h3 className="text-lg sm:text-2xl font-bold text-[#190802] font-serif leading-[1.2] text-balance">
+          <h3 className="text-lg sm:text-2xl font-bold text-[#190802] leading-[1.25] text-balance">
             {tabletScene.title}
           </h3>
           <p className="text-sm font-medium text-[#2c1206] leading-relaxed max-w-xl mx-auto">
@@ -266,9 +280,9 @@ export const ProductDemoShowcase: React.FC = () => {
             type="button"
             onClick={prevTablet}
             aria-label="Previous tablet section preview"
-            className="pds-arrow-col flex items-center justify-center cursor-pointer select-none text-[#2c1206]/80 hover:text-[#120602]"
+            className="pds-arrow-col flex items-center justify-center cursor-pointer select-none text-[#190802]/85 hover:text-[#0d0401] drop-shadow-[0_1px_8px_rgba(255,248,236,0.92)]"
           >
-            <ChevronLeft className="w-9 h-24 sm:w-12 sm:h-32 shrink-0" strokeWidth={1.35} aria-hidden="true" />
+            <ChevronLeft className="w-9 h-24 sm:w-12 sm:h-32 shrink-0" strokeWidth={1.5} aria-hidden="true" />
           </button>
 
           <div className="min-w-0 py-2">
@@ -279,9 +293,9 @@ export const ProductDemoShowcase: React.FC = () => {
             type="button"
             onClick={nextTablet}
             aria-label="Next tablet section preview"
-            className="pds-arrow-col flex items-center justify-center cursor-pointer select-none text-[#2c1206]/80 hover:text-[#120602]"
+            className="pds-arrow-col flex items-center justify-center cursor-pointer select-none text-[#190802]/85 hover:text-[#0d0401] drop-shadow-[0_1px_8px_rgba(255,248,236,0.92)]"
           >
-            <ChevronRight className="w-9 h-24 sm:w-12 sm:h-32 shrink-0" strokeWidth={1.35} aria-hidden="true" />
+            <ChevronRight className="w-9 h-24 sm:w-12 sm:h-32 shrink-0" strokeWidth={1.5} aria-hidden="true" />
           </button>
         </div>
       </div>

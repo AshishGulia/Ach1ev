@@ -25,7 +25,7 @@ export interface MakeNoteThemeConfig {
   isTerminal?: boolean;
 }
 
-const UNIFIED_FONT = "var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif)";
+const UNIFIED_FONT = "var(--app-font-family, 'Libre Baskerville', Baskerville, Georgia, serif)";
 
 export const MAKE_NOTE_THEMES: Record<DesignId, MakeNoteThemeConfig> = {
   '1': {
