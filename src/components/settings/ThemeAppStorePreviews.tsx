@@ -572,9 +572,9 @@ export const ThemeAppStorePreviews: React.FC<ThemeAppStorePreviewsProps> = ({
                 e.stopPropagation();
                 setActiveModalSection(section);
               }}
-              className="themed-glass-card w-44 sm:w-64 shrink-0 snap-start rounded-xl sm:rounded-2xl border border-stone-200/90 dark:border-[#382518] bg-stone-50/80 dark:bg-[#1a120d] p-1.5 sm:p-2 hover:border-amber-500/80 dark:hover:border-amber-400/80 hover:shadow-xl transition-all duration-200 cursor-pointer group hover:-translate-y-0.5"
+              className="w-44 sm:w-64 shrink-0 snap-start rounded-xl sm:rounded-2xl border-0 p-1 sm:p-1.5 hover:shadow-xl transition-all duration-200 cursor-pointer group hover:-translate-y-0.5"
             >
-              <div className="w-full h-28 sm:h-36 rounded-lg sm:rounded-xl overflow-hidden border border-stone-200 dark:border-stone-800 shadow-xs relative group-hover:ring-2 group-hover:ring-sky-500/30 transition-all">
+              <div className="w-full h-28 sm:h-36 rounded-lg sm:rounded-xl overflow-hidden border-0 shadow-xs relative transition-all">
                 {renderMiniPreview(section, false)}
 
                 <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-150 backdrop-blur-2xs">
@@ -657,7 +657,7 @@ export const ThemeAppStorePreviews: React.FC<ThemeAppStorePreviewsProps> = ({
             </div>
 
             <div className="p-4 sm:p-5">
-              <div className="w-full h-56 sm:h-64 rounded-2xl overflow-hidden border border-stone-300 dark:border-stone-700 shadow-inner relative">
+              <div className="w-full h-56 sm:h-64 rounded-2xl overflow-hidden border-0 shadow-inner relative">
                 {renderMiniPreview(activeModalSection, true)}
               </div>
 

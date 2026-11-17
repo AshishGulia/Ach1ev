@@ -14,6 +14,7 @@ import {
   toDriveAccountStatus,
   writeStoredGoogleUser,
 } from '../services/googleDriveService';
+import { syncActiveUserEmail } from '../utils/subscriptionLimits';
 
 export type SocialProviderId = 'google' | 'apple' | 'azure';
 
@@ -178,6 +179,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     void prefetchGoogleOAuth();
   }, []);
+
+  // Keep owner/active user email synced for subscription & permission checks across app
+  useEffect(() => {
+    syncActiveUserEmail(user?.email || googleUser?.email || null);
+  }, [user?.email, googleUser?.email]);
 
   const fetchEnabledProviders = useCallback(async (): Promise<SocialProviderStatus | null> => {
     const cfg = getSupabaseConfig();
@@ -667,6 +673,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     writeStoredGoogleUser(null);
     setPhoneUser(null);
     writeStoredPhoneUser(null);
+    syncActiveUserEmail(null);
     phoneOtpChallengeRef.current = null;
     setIsGuestMode(false);
     localStorage.removeItem(LS_GUEST_MODE);

@@ -206,6 +206,22 @@ export interface BreakTimerConfig {
   autoStartNext: boolean;
 }
 
+export interface UserSubscriptionRecord {
+  planId: 'free' | 'scholar-pro' | 'master-ultimate' | string;
+  planName: string;
+  badge?: string;
+  billingCycle: 'monthly' | 'annual' | 'free' | 'owner';
+  durationDays: number | null;
+  status: 'active' | 'expired' | 'owner';
+  amountInr: number;
+  activatedAt: string;
+  expiresAt: string | null;
+  paymentMethod: string;
+  transactionId: string;
+  attachedEmail?: string;
+  attachedName?: string;
+}
+
 export interface UserProfile {
   name: string;
   username?: string;
@@ -217,6 +233,7 @@ export interface UserProfile {
   email?: string;
   avatarUrl?: string;
   authProvider?: string;
+  subscription?: UserSubscriptionRecord;
 }
 
 export type DesignId = '1' | '2' | '3' | '4' | '5';

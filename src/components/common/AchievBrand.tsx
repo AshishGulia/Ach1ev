@@ -73,7 +73,7 @@ export const AchievBrand: React.FC<AchievBrandProps> = ({
           draggable={false}
           className={
             imgClassName ||
-            'h-[84px] sm:h-[104px] w-auto max-w-full object-contain bg-transparent select-none'
+            'h-[101px] sm:h-[125px] w-auto max-w-full object-contain bg-transparent select-none'
           }
           style={{
             filter: 'drop-shadow(0 6px 16px rgba(0, 0, 0, 0.45))',
@@ -103,7 +103,7 @@ export const AchievBrand: React.FC<AchievBrandProps> = ({
         src={ACHIEV_DEFAULT_LOGO_URL}
         alt={title}
         draggable={false}
-        className={imgClassName || 'h-[36px] max-w-[165px] w-auto object-contain bg-transparent select-none'}
+        className={imgClassName || 'h-[43px] max-w-[190px] w-auto object-contain bg-transparent select-none'}
         style={{
           filter: darkFlag
             ? 'drop-shadow(0 3px 8px rgba(0, 0, 0, 0.5))'

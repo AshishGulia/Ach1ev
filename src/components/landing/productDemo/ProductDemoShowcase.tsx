@@ -76,17 +76,17 @@ const SHOWCASE_CSS = `
     filter: none !important;
     -webkit-tap-highlight-color: transparent !important;
   }
-  .pds-faq-btn {
-    background: linear-gradient(180deg, #ecd4ac 0%, #e1bf8b 100%) !important;
-    background-color: #e6c99a !important;
-    color: #3b1e0d !important;
+  .pds-faq-btn,
+  .pds-faq-btn:hover,
+  .pds-faq-btn:focus,
+  .pds-faq-btn:active {
+    background: transparent !important;
+    background-color: transparent !important;
+    background-image: none !important;
+    color: #2c1206 !important;
     border: none !important;
     box-shadow: none !important;
-  }
-  .pds-faq-btn:hover {
-    background: linear-gradient(180deg, #e5c899 0%, #d8b279 100%) !important;
-    background-color: #deb984 !important;
-    color: #2c1408 !important;
+    outline: none !important;
   }
 `;
 
@@ -207,70 +207,61 @@ export const ProductDemoShowcase: React.FC = () => {
         </div>
       </div>
 
-      {/* ═══════════════ 2. EDITORIAL PRAISE STRIP BELOW LAPTOP (BLURRY DARK COCOA GLASS FOR HIGH CONTRAST OVER MID-MERGE) ═══════════════ */}
-      <div
-        className="max-w-4xl mx-auto py-7 sm:py-9 px-5 sm:px-9 rounded-3xl border border-[#f5d093]/20 shadow-[0_24px_60px_rgba(12,4,1,0.36)]"
-        style={{
-          background:
-            'linear-gradient(155deg, rgba(28, 11, 4, 0.72) 0%, rgba(16, 6, 2, 0.80) 100%)',
-          backdropFilter: 'blur(26px) saturate(140%)',
-          WebkitBackdropFilter: 'blur(26px) saturate(140%)',
-        }}
-      >
+      {/* ═══════════════ 2. EDITORIAL PRAISE STRIP BELOW LAPTOP (PURE TEXT WITHOUT BOX WRAPPER) ═══════════════ */}
+      <div className="max-w-4xl mx-auto py-4 px-2 sm:px-4">
         <div className="text-center space-y-3 max-w-2xl mx-auto px-2">
-          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#f4cd90]">
+          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#f5d093] drop-shadow-[0_1px_6px_rgba(8,2,0,0.85)]">
             Why Scholars Switch to Ach1ev
           </p>
-          <h3 className="text-xl sm:text-3xl font-bold text-[#fffaf0] leading-snug text-balance">
+          <h3 className="text-xl sm:text-3xl font-bold text-[#fffaf0] leading-snug text-balance drop-shadow-[0_2px_12px_rgba(8,2,0,0.85)]">
             One quiet desk where your textbooks, clinical tables, and revision memory finally live together.
           </h3>
-          <p className="text-sm sm:text-[15px] text-[#f3dfc1] leading-relaxed">
+          <p className="text-sm sm:text-[15px] text-[#f5e3c6] leading-relaxed drop-shadow-[0_1px_6px_rgba(8,2,0,0.8)]">
             Built specifically for long library hours and ward postings—Ach1ev pairs paper-calm reading comfort with
             instant diagram capture, tactile 3D bookshelves, and clinical flowcharts so nothing breaks your focus.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 pt-6 border-t border-[#f5d093]/20 text-left px-2">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 pt-6 border-t border-[#f5d093]/25 text-left px-2">
           <div className="space-y-1.5">
-            <h4 className="text-base font-bold text-[#fff5e2]">Textbooks Beside Living Notes</h4>
-            <p className="text-xs sm:text-[13px] text-[#eed8b8] leading-relaxed">
+            <h4 className="text-base font-bold text-[#fff8ea] drop-shadow-[0_1px_6px_rgba(8,2,0,0.8)]">
+              Textbooks Beside Living Notes
+            </h4>
+            <p className="text-xs sm:text-[13px] text-[#f3dfc1] leading-relaxed drop-shadow-[0_1px_4px_rgba(8,2,0,0.75)]">
               Keep Harrison or Robbins open right beside ruled sepia pages, snip charts cleanly, and pin your lecture at
               the bottom without juggling five windows.
             </p>
           </div>
           <div className="space-y-1.5">
-            <h4 className="text-base font-bold text-[#fff5e2]">Effortless Table &amp; Flowchart Recall</h4>
-            <p className="text-xs sm:text-[13px] text-[#eed8b8] leading-relaxed">
+            <h4 className="text-base font-bold text-[#fff8ea] drop-shadow-[0_1px_6px_rgba(8,2,0,0.8)]">
+              Effortless Table &amp; Flowchart Recall
+            </h4>
+            <p className="text-xs sm:text-[13px] text-[#f3dfc1] leading-relaxed drop-shadow-[0_1px_4px_rgba(8,2,0,0.75)]">
               Turn dense pharmacology photographs into structured editable tables and zoom effortlessly through branching
               clinical pathways before exams.
             </p>
           </div>
           <div className="space-y-1.5">
-            <h4 className="text-base font-bold text-[#fff5e2]">Laptop Depth, iPad Fluidity</h4>
-            <p className="text-xs sm:text-[13px] text-[#eed8b8] leading-relaxed">
+            <h4 className="text-base font-bold text-[#fff8ea] drop-shadow-[0_1px_6px_rgba(8,2,0,0.8)]">
+              Laptop Depth, iPad Fluidity
+            </h4>
+            <p className="text-xs sm:text-[13px] text-[#f3dfc1] leading-relaxed drop-shadow-[0_1px_4px_rgba(8,2,0,0.75)]">
               Start an outline on your MacBook at the library and review flashcards or ward rosters seamlessly on your iPad—zero hardware lock-in.
             </p>
           </div>
         </div>
       </div>
 
-      {/* ═══════════════ 3. IPAD PRO SHOWCASE (HIGH-CONTRAST FROSTED CREAM HEADER OVER GOLDEN MERGE) ═══════════════ */}
+      {/* ═══════════════ 3. IPAD PRO SHOWCASE (DYNAMIC TEXT WITHOUT BOX WRAPPER) ═══════════════ */}
       <div>
-        <div
-          className="space-y-1.5 text-center mb-6 sm:mb-8 max-w-2xl mx-auto px-5 py-4 rounded-2xl border border-[#8c5621]/25 shadow-[0_12px_32px_rgba(32,14,4,0.12)]"
-          style={{
-            background: 'rgba(255, 248, 235, 0.84)',
-            backdropFilter: 'blur(18px)',
-            WebkitBackdropFilter: 'blur(18px)',
-          }}
-        >
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6b3810]">
+        <div className="space-y-1.5 text-center mb-6 sm:mb-8 max-w-2xl mx-auto px-3">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f8dca8] drop-shadow-[0_1px_8px_rgba(10,3,0,0.85)]">
             Bedside &amp; Companion · iPad Pro View
           </p>
-          <h3 className="text-lg sm:text-2xl font-bold text-[#190802] leading-[1.25] text-balance">
+          <h3 className="text-lg sm:text-2xl font-bold text-[#fffaf0] leading-[1.25] text-balance drop-shadow-[0_2px_10px_rgba(10,3,0,0.85)]">
             {tabletScene.title}
           </h3>
-          <p className="text-sm font-medium text-[#2c1206] leading-relaxed max-w-xl mx-auto">
+          <p className="text-sm font-medium text-[#f5e3c6] leading-relaxed max-w-xl mx-auto drop-shadow-[0_1px_8px_rgba(10,3,0,0.8)]">
             {tabletScene.tablet.heading} — {tabletScene.tablet.subheading}
           </p>
         </div>
@@ -443,38 +434,39 @@ export const ProductDemoShowcase: React.FC = () => {
         </div>
       </div>
 
-      {/* ═══════════════ 6. FREQUENTLY ASKED QUESTIONS — HIGH-CONTRAST CHOCOLATE BROWN ═══════════════ */}
-      <div className="max-w-4xl mx-auto space-y-3">
-        <h3 className="text-xl sm:text-2xl font-bold text-center text-[#190802] font-serif mb-4">
+      {/* ═══════════════ 6. FREQUENTLY ASKED QUESTIONS — PLAIN CHOCOLATE BROWN TEXT WITHOUT BUTTON CHROME ═══════════════ */}
+      <div className="max-w-4xl mx-auto">
+        <h3 className="text-xl sm:text-2xl font-bold text-center text-[#190802] font-serif mb-6">
           Frequently Asked Questions
         </h3>
-        {PRODUCT_FAQS.map((item, i) => {
-          const isOpen = openFaqIdx === i;
-          return (
-            <div
-              key={item.q}
-              className="rounded-2xl border border-[#9e6e3c] bg-[#F4E2C2] overflow-hidden shadow-[0_6px_18px_rgba(68,36,12,0.10)]"
-            >
-              <button
-                type="button"
-                onClick={() => setOpenFaqIdx(isOpen ? null : i)}
-                className="pds-faq-btn raw-icon-btn w-full px-4 py-3.5 text-left flex items-center justify-between gap-3 cursor-pointer transition-colors"
-              >
-                <span className="text-xs sm:text-sm font-bold text-[#220d04]">{item.q}</span>
-                {isOpen ? (
-                  <ChevronUp className="w-4 h-4 text-[#220d04] shrink-0" />
-                ) : (
-                  <ChevronDown className="w-4 h-4 text-[#220d04] shrink-0" />
+        <div className="divide-y divide-[#6b3810]/25 border-t border-b border-[#6b3810]/25">
+          {PRODUCT_FAQS.map((item, i) => {
+            const isOpen = openFaqIdx === i;
+            return (
+              <div key={item.q} className="py-1">
+                <button
+                  type="button"
+                  onClick={() => setOpenFaqIdx(isOpen ? null : i)}
+                  className="pds-faq-btn raw-icon-btn w-full px-1 py-3.5 text-left flex items-center justify-between gap-3 cursor-pointer"
+                >
+                  <span className="text-xs sm:text-sm font-bold text-[#3b1e0d] hover:text-[#1f0b03]">
+                    {item.q}
+                  </span>
+                  {isOpen ? (
+                    <ChevronUp className="w-4 h-4 text-[#3b1e0d] shrink-0" />
+                  ) : (
+                    <ChevronDown className="w-4 h-4 text-[#3b1e0d] shrink-0" />
+                  )}
+                </button>
+                {isOpen && (
+                  <div className="px-1 pb-4 text-xs sm:text-[13px] font-medium text-[#3b1e0d] leading-relaxed">
+                    {item.a}
+                  </div>
                 )}
-              </button>
-              {isOpen && (
-                <div className="px-4 pb-3.5 text-xs sm:text-[13px] font-medium text-[#2c1206] bg-[#faf0dc] leading-relaxed border-t border-[#9e6e3c]/35 pt-2.5">
-                  {item.a}
-                </div>
-              )}
-            </div>
-          );
-        })}
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* ═══════════════ 7. QUIET LEGAL & PRIVACY FOOTER ═══════════════ */}

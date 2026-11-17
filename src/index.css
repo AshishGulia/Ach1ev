@@ -358,7 +358,7 @@ html[data-design="5"].dark {
     overflow-x: clip;
   }
   html, body, button, button *, input, select, textarea, div, span, p, h1, h2, h3, h4, h5, h6, a, label, b, i, small {
-    font-family: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif);
+    font-family: var(--app-font-family, 'Libre Baskerville', Baskerville, Georgia, serif);
   }
   .an-sheet,
   .an-sheet *:not(.an-sheet-quick-tools):not(.an-sheet-quick-tools *):not(.an-table-word-bar):not(.an-table-word-bar *):not(.an-table-drag-grip):not(.an-table-drag-grip *) {
@@ -552,16 +552,16 @@ html[data-design]:not([data-design="1"]) :is(.text-\[\#A47C43\], .text-\[\#a47c4
 
 /* Unified Typography Classes across all Design Editions */
 .font-cinzel {
-  font-family: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif) !important;
+  font-family: var(--app-font-family, 'Libre Baskerville', Baskerville, Georgia, serif) !important;
 }
 .font-space {
-  font-family: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif) !important;
+  font-family: var(--app-font-family, 'Libre Baskerville', Baskerville, Georgia, serif) !important;
 }
 .font-cormorant {
-  font-family: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif) !important;
+  font-family: var(--app-font-family, 'Libre Baskerville', Baskerville, Georgia, serif) !important;
 }
 .font-mono-tech {
-  font-family: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif) !important;
+  font-family: var(--app-font-family, 'Libre Baskerville', Baskerville, Georgia, serif) !important;
 }
 
 .cyber-grid {
@@ -587,13 +587,13 @@ html[data-design]:not([data-design="1"]) :is(.text-\[\#A47C43\], .text-\[\#a47c4
 }
 
 :root {
-  --app-font-family: 'Playfair Display', 'Lora', Georgia, serif;
+  --app-font-family: 'Libre Baskerville', Baskerville, Georgia, serif;
   --app-font-scale: 100%;
 }
 
 html, body, #root,
 html *:not([data-font-sample]):not([data-font-sample] *):not(.an-sheet):not(.an-sheet *) {
-  font-family: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif) !important;
+  font-family: var(--app-font-family, 'Libre Baskerville', Baskerville, Georgia, serif) !important;
 }
 
 button, button *, input, select, textarea, option, optgroup,
@@ -604,7 +604,7 @@ button, button *, input, select, textarea, option, optgroup,
 h1, h2, h3, h4, h5, h6, a, label, p, span, div, li, td, th,
 small, strong, b, em, i, code, pre, svg text, svg tspan,
 .font-sans, .font-serif, .font-mono, .font-cinzel, .font-space, .font-cormorant {
-  font-family: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif) !important;
+  font-family: var(--app-font-family, 'Libre Baskerville', Baskerville, Georgia, serif) !important;
 }
 
 body, html, #root {
@@ -626,7 +626,7 @@ body, html, #root {
 .an-sheet .an-table-word-bar *,
 .an-sheet .an-table-drag-grip,
 .an-sheet .an-table-drag-grip * {
-  font-family: var(--app-font-family, 'Playfair Display', 'Lora', Georgia, serif) !important;
+  font-family: var(--app-font-family, 'Libre Baskerville', Baskerville, Georgia, serif) !important;
 }
 
 /* =========================================================================

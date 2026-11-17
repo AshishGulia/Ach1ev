@@ -33,8 +33,13 @@ import type { DeletedItem } from './components/recycle/RecycleBinView';
 import { AchievBrand } from './components/common/AchievBrand';
 import { PrivacyPolicyModal } from './components/common/PrivacyPolicyModal';
 import {
+  getOwnerSubscriptionRecord,
   getPlanLimits,
+  getStoredSubscription,
+  isCurrentUserOwner,
   openSubscriptionUpgradeModal,
+  saveUserSubscription,
+  syncActiveUserEmail,
   type UpgradeBannerDetail,
 } from './utils/subscriptionLimits';
 
@@ -60,6 +65,7 @@ import { useAuth } from './contexts/AuthContext';
 import {
   deleteNotebookPermanentlyInCloud,
   emptyTrashedNotebooksInCloud,
+  fetchUserSubscriptionFromCloud,
   fetchWorkspaceSnapshot,
   markNotebookTrashedInCloud,
   pushBooksToCloud,
@@ -142,10 +148,69 @@ export default function App() {
     };
   }, []);
   const [currentSubject, setCurrentSubject] = useState<SubjectCourse>('Pharmacology');
-  const [userProfile, setUserProfile] = useState<UserProfile>(INITIAL_USER_PROFILE);
+  const [userProfile, setUserProfile] = useState<UserProfile>(() => {
+    try {
+      const raw = localStorage.getItem('medden_user_profile');
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        return {
+          ...INITIAL_USER_PROFILE,
+          ...parsed,
+          subscription: parsed?.subscription || getStoredSubscription() || undefined,
+        };
+      }
+    } catch {}
+    const storedSub = getStoredSubscription();
+    return storedSub ? { ...INITIAL_USER_PROFILE, subscription: storedSub } : INITIAL_USER_PROFILE;
+  });
   const [isSubscriptionModalOpen, setIsSubscriptionModalOpen] = useState<boolean>(false);
   const [subscriptionBanner, setSubscriptionBanner] = useState<UpgradeBannerDetail | null>(null);
   const [isPrivacyPolicyOpen, setIsPrivacyPolicyOpen] = useState<boolean>(false);
+
+  // Sync active user email & attach owner / subscription state cleanly onto userProfile
+  useEffect(() => {
+    const authEmail = user?.email || googleUser?.email || userProfile.email || null;
+    syncActiveUserEmail(authEmail);
+    const owner = isCurrentUserOwner(authEmail);
+    if (authEmail || owner) {
+      setUserProfile((prev) => {
+        const nextEmail = authEmail || prev.email;
+        const nextSub = owner
+          ? getOwnerSubscriptionRecord(nextEmail || undefined)
+          : prev.subscription || getStoredSubscription() || undefined;
+        if (prev.email === nextEmail && prev.subscription?.transactionId === nextSub?.transactionId && prev.subscription?.status === nextSub?.status) {
+          return prev;
+        }
+        const updated: UserProfile = {
+          ...prev,
+          ...(nextEmail ? { email: nextEmail } : {}),
+          ...(nextSub ? { subscription: nextSub } : {}),
+        };
+        try {
+          localStorage.setItem('medden_user_profile', JSON.stringify(updated));
+        } catch {}
+        return updated;
+      });
+    }
+  }, [user?.email, googleUser?.email, userProfile.email]);
+
+  // Attach updated subscription & duration to userProfile immediately after payment or plan switch
+  useEffect(() => {
+    const handleTierUpdated = (ev: Event) => {
+      const detail = (ev as CustomEvent<{ tierId?: string; subscription?: any }>)?.detail;
+      const nextSub = detail?.subscription || getStoredSubscription();
+      if (!nextSub) return;
+      setUserProfile((prev) => {
+        const updated: UserProfile = { ...prev, subscription: nextSub };
+        try {
+          localStorage.setItem('medden_user_profile', JSON.stringify(updated));
+        } catch {}
+        return updated;
+      });
+    };
+    window.addEventListener('achiev_tier_updated', handleTierUpdated);
+    return () => window.removeEventListener('achiev_tier_updated', handleTierUpdated);
+  }, []);
 
   const currentSubjectRef = React.useRef<SubjectCourse>(currentSubject);
   currentSubjectRef.current = currentSubject;
@@ -543,12 +608,35 @@ export default function App() {
 
         isApplyingRemoteRef.current = true;
 
+        const cloudSub = await fetchUserSubscriptionFromCloud(
+          userId,
+          user?.email || googleUser?.email || snap.profile?.email
+        );
+        const owner = isCurrentUserOwner(user?.email || googleUser?.email || snap.profile?.email);
+        const resolvedSub = owner
+          ? getOwnerSubscriptionRecord(user?.email || googleUser?.email || undefined)
+          : cloudSub || getStoredSubscription() || undefined;
+        if (cloudSub && !owner) {
+          saveUserSubscription(cloudSub, { dispatchEvent: false });
+        }
+
         if (snap.profile) {
-          setUserProfile(snap.profile);
+          const mergedProfile: UserProfile = {
+            ...snap.profile,
+            ...(user?.email || googleUser?.email ? { email: snap.profile.email || user?.email || googleUser?.email } : {}),
+            ...(resolvedSub ? { subscription: resolvedSub } : {}),
+          };
+          setUserProfile(mergedProfile);
+          try {
+            localStorage.setItem('medden_user_profile', JSON.stringify(mergedProfile));
+          } catch {}
           if (snap.profile.activeSubject) {
             setCurrentSubject(snap.profile.activeSubject);
           }
         } else if (seedIfEmpty) {
+          if (resolvedSub) {
+            setUserProfile((prev) => ({ ...prev, subscription: resolvedSub }));
+          }
           await pushProfileToCloud(
             userId,
             { ...userProfile, email: user?.email || userProfile.email },
@@ -1691,6 +1779,7 @@ export default function App() {
           <SubscriptionModal
             isOpen={isSubscriptionModalOpen}
             upgradeBanner={subscriptionBanner}
+            userProfile={userProfile}
             onClose={() => {
               setIsSubscriptionModalOpen(false);
               setSubscriptionBanner(null);

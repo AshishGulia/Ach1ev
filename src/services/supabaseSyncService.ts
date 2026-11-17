@@ -9,6 +9,7 @@ import {
   StudyTask,
   SubjectCourse,
   UserProfile,
+  UserSubscriptionRecord,
 } from '../types';
 
 export interface WorkspaceSnapshot {
@@ -253,6 +254,96 @@ export async function pushProfileToCloud(
 
   const { error } = await supabase.from('profiles').upsert(payload, { onConflict: 'id' });
   if (error) throw new Error(error.message);
+}
+
+export async function fetchUserSubscriptionFromCloud(
+  userId?: string | null,
+  userEmail?: string | null
+): Promise<UserSubscriptionRecord | null> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return null;
+
+  try {
+    let row: any = null;
+    if (userId) {
+      const { data } = await supabase
+        .from('user_subscriptions')
+        .select('*')
+        .eq('user_id', userId)
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (data) row = data;
+    }
+    if (!row && userEmail) {
+      const { data } = await supabase
+        .from('user_subscriptions')
+        .select('*')
+        .ilike('user_email', userEmail.trim())
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (data) row = data;
+    }
+
+    if (row && row.plan_id) {
+      const cycle =
+        row.billing_cycle === 'annual'
+          ? 'annual'
+          : row.billing_cycle === 'monthly'
+          ? 'monthly'
+          : 'free';
+      const durationDays = cycle === 'annual' ? 365 : cycle === 'monthly' ? 30 : null;
+      const planNameMap: Record<string, string> = {
+        free: 'Free Scholar Plan',
+        'scholar-pro': 'Clinical Scholar Pro',
+        'master-ultimate': 'Chief Fellow Master',
+      };
+      const expMs = row.expires_at ? new Date(row.expires_at).getTime() : null;
+      const isExpired = Boolean(expMs && Number.isFinite(expMs) && expMs < Date.now() && row.plan_id !== 'free');
+      return {
+        planId: row.plan_id,
+        planName: planNameMap[row.plan_id] || row.plan_id,
+        billingCycle: cycle,
+        durationDays,
+        status: isExpired ? 'expired' : 'active',
+        amountInr: Number(row.amount_inr || 0),
+        activatedAt: row.activated_at || row.updated_at || new Date().toISOString(),
+        expiresAt: row.expires_at || null,
+        paymentMethod: row.signature_verified ? 'Razorpay Verified Checkout' : 'Checkout Payment',
+        transactionId: row.razorpay_payment_id || `SUB-${Date.now().toString().slice(-8)}`,
+        attachedEmail: row.user_email || userEmail || undefined,
+      };
+    }
+
+    const { data: userRes } = await supabase.auth.getUser();
+    const metaSub = userRes?.user?.user_metadata?.subscription as UserSubscriptionRecord | undefined;
+    if (metaSub?.planId) {
+      const expMs = metaSub.expiresAt ? new Date(metaSub.expiresAt).getTime() : null;
+      const isExpired = Boolean(expMs && Number.isFinite(expMs) && expMs < Date.now() && metaSub.planId !== 'free');
+      return isExpired ? { ...metaSub, status: 'expired' } : metaSub;
+    }
+  } catch {
+    // Non-fatal: local storage fallback still applies
+  }
+  return null;
+}
+
+export async function persistSubscriptionToAuthProfile(record: UserSubscriptionRecord): Promise<void> {
+  const supabase = getSupabaseClient();
+  if (!supabase) return;
+  try {
+    const { data: userRes } = await supabase.auth.getUser();
+    if (userRes?.user) {
+      await supabase.auth.updateUser({
+        data: {
+          subscription: record,
+        },
+      });
+    }
+  } catch {
+    // Ignore when unauthenticated or guest
+  }
 }
 
 export async function pushNotebooksToCloud(userId: string, notebooks: Notebook[]): Promise<void> {

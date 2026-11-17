@@ -17,6 +17,15 @@ import { useAuth } from '../../contexts/AuthContext';
 import {
   DRIVE_APP_FOLDER_NAME,
 } from '../../services/googleDriveService';
+import { persistSubscriptionToAuthProfile } from '../../services/supabaseSyncService';
+import {
+  buildSubscriptionRecord,
+  getActivePlanId,
+  getOwnerSubscriptionRecord,
+  getStoredSubscription,
+  isCurrentUserOwner,
+  saveUserSubscription,
+} from '../../utils/subscriptionLimits';
 import {
   User,
   Settings,
@@ -107,8 +116,8 @@ export interface MasterEdition {
 export const MASTER_EDITIONS: MasterEdition[] = [
   {
     id: '1',
-    title: 'Heritage Atelier Study',
-    badge: 'Theme 1 · Default',
+    title: '1. Heritage Atelier Study',
+    badge: '1 · Default',
     category: 'Linen & Walnut Atelier · Espresso Night',
     tagline: 'Calacatta marble Leisure (Light), warm walnut & espresso (Dark), Soft Pill buttons',
     description: 'Signature Heritage Study with warm linen Light Mode, smooth dark walnut & espresso Dark Mode, Soft Pill buttons, daytime butterflies & nighttime fireflies.',
@@ -122,8 +131,8 @@ export const MASTER_EDITIONS: MasterEdition[] = [
   },
   {
     id: '2',
-    title: 'Twilight Sunset',
-    badge: 'Theme 2 · Plum, Blush & Coral',
+    title: '2. Twilight Sunset',
+    badge: '2 · Plum, Blush & Coral',
     category: 'Twilight Plum #473E66 · Orchid #BD83B8 · Coral #F1916D',
     tagline: 'Twilight plum depth, orchid mauve mist, rose blush surfaces & coral peach glow accents',
     description: 'Signature atelier layout dressed in a serene twilight horizon palette: deep #473E66 plum, soft #BD83B8 orchid, airy #F5D7DB rose blush, and warm #F1916D sunset coral.',
@@ -137,8 +146,8 @@ export const MASTER_EDITIONS: MasterEdition[] = [
   },
   {
     id: '3',
-    title: 'Royal Blush & Plum',
-    badge: 'Theme 3 · Pastel Beige-Pink',
+    title: '3. Royal Blush & Plum',
+    badge: '3 · Pastel Beige-Pink',
     category: 'Royal Blush #FBF3F2 · Warm Beige #F5E6E7 · Plum Cocoa #6E4253',
     tagline: 'Cushioned royal baby-pink & warm beige by day, velvety deep plum by night',
     description: 'Royal pastel baby-pink & warm antique beige surfaces paired with refined plum-cocoa buttons and generous cushioned borders.',
@@ -152,8 +161,8 @@ export const MASTER_EDITIONS: MasterEdition[] = [
   },
   {
     id: '4',
-    title: 'Muted Slate & Cobalt',
-    badge: 'Theme 4 · Matte Architectural Grey-Blue',
+    title: '4. Muted Slate & Cobalt',
+    badge: '4 · Matte Architectural Grey-Blue',
     category: 'Soft Mist #F1F5F8 · Matte Cobalt #56728F · Dark Slate #131921',
     tagline: 'Restrained matte slate & muted cobalt blue by day, deep charcoal slate by night',
     description: 'Calm architectural contrast pairing desaturated slate mist surfaces with muted matte cobalt accents and razor-crisp 90° geometric corners.',
@@ -167,8 +176,8 @@ export const MASTER_EDITIONS: MasterEdition[] = [
   },
   {
     id: '5',
-    title: 'Forest Emerald & Gold',
-    badge: 'Theme 5 · Evergreen, Champagne & Gold',
+    title: '5. Forest Emerald & Gold',
+    badge: '5 · Evergreen, Champagne & Gold',
     category: 'Forest #002a23 · Champagne #d8c2aa · Gold · Obsidian #090e0e',
     tagline: 'Deep forest evergreen #002a23, warm champagne #d8c2aa, brushed gold & obsidian #090e0e',
     description: 'Rich greenish forest study sanctuary pairing deep #002a23 evergreen and #090e0e obsidian night with warm #d8c2aa champagne sand and brushed metallic gold accents.',
@@ -794,37 +803,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   const [fontCategoryFilter, setFontCategoryFilter] = useState<'all' | 'handwriting' | 'sans' | 'serif'>('all');
   const [copiedAppletId, setCopiedAppletId] = useState<boolean>(false);
 
-  // Receiving / Payout Account Settings stored in localStorage for instant UPI QR & Payment routing
-  const [payoutConfig, setPayoutConfig] = useState<{
-    accountName: string;
-    upiId: string;
-    bankName: string;
-    accountNumber: string;
-    ifscCode: string;
-  }>(() => {
-    try {
-      const saved = localStorage.getItem('achiev_merchant_payout_v1');
-      if (saved) return JSON.parse(saved);
-    } catch {}
-    return {
-      accountName: 'Ach1ev Official Study Platform',
-      upiId: 'achiev@okicici',
-      bankName: 'ICICI Bank Ltd.',
-      accountNumber: '004201528491',
-      ifscCode: 'ICIC0000042',
-    };
-  });
-  const [payoutSavedMsg, setPayoutSavedMsg] = useState<string | null>(null);
-
-  const handleSavePayoutConfig = (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      localStorage.setItem('achiev_merchant_payout_v1', JSON.stringify(payoutConfig));
-      window.dispatchEvent(new Event('achiev_payout_updated'));
-      setPayoutSavedMsg('Receiving account updated! UPI QR, Card & Net Banking checkout now route here.');
-      setTimeout(() => setPayoutSavedMsg(null), 3200);
-    } catch {}
-  };
+  const activeAccountEmail = user?.email || googleUser?.email || profileForm.email || '';
+  const isOwnerAccount = isCurrentUserOwner(activeAccountEmail);
+  const currentSubscription = isOwnerAccount
+    ? getOwnerSubscriptionRecord(activeAccountEmail || undefined)
+    : userProfile.subscription || getStoredSubscription();
+  const activePlanId = getActivePlanId(activeAccountEmail);
 
   const handleCopyAppletId = () => {
     navigator.clipboard.writeText('0087218c-d7d0-4ad0-b0df-2e515051e7a0');
@@ -1230,11 +1214,17 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       >
                         <div className="flex flex-wrap items-center justify-between gap-2 mb-1.5 sm:mb-2">
                           <div className="flex items-center gap-1.5 sm:gap-2 flex-wrap min-w-0">
+                            <span
+                              className="inline-flex items-center justify-center w-5 h-5 rounded-full text-[11px] font-bold shrink-0"
+                              style={themeAccentSoftBadgeStyle}
+                            >
+                              {edition.id}
+                            </span>
                             <span className="text-xs sm:text-sm font-bold text-stone-900 dark:text-stone-100">
                               {edition.title}
                             </span>
                             <span className="text-[9px] sm:text-[10px] font-mono px-1.5 sm:px-2 py-0.5 rounded-full bg-stone-200/80 dark:bg-[#251a12] text-stone-700 dark:text-stone-300 font-semibold">
-                              {edition.badge}
+                              Theme {edition.badge}
                             </span>
                           </div>
 
@@ -2566,66 +2556,137 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
           )}
 
           {/* ========================================================================= */}
-          {/* TAB: SUBSCRIPTION & PAYMENT PLANS (4 TIERS)                               */}
+          {/* TAB: SUBSCRIPTION & PAYMENT PLANS                                         */}
           {/* ========================================================================= */}
           {activeTab === 'subscription' && (
             <div className="space-y-6">
-              <div className="pb-2 border-b" style={{ borderColor: 'var(--th-border)' }}>
+              <div className="pb-2 border-b flex flex-wrap items-center justify-between gap-2" style={{ borderColor: 'var(--th-border)' }}>
                 <h4 className="text-lg font-bold flex items-center gap-2" style={{ color: 'var(--th-ink)' }}>
                   <Crown className="w-4 h-4" style={themeAccentIconStyle} />
                   <span>Plans</span>
                 </h4>
+                <button
+                  type="button"
+                  onClick={() => window.dispatchEvent(new CustomEvent('achiev_open_subscription'))}
+                  className="themed-accent-btn px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold cursor-pointer shrink-0"
+                >
+                  Open Payment Window
+                </button>
+              </div>
+
+              {/* Current Attached Account Membership & Duration Card */}
+              <div className="p-4 rounded-2xl border border-stone-200 dark:border-[#382518] bg-stone-50/80 dark:bg-[#1a120d] flex flex-wrap items-center justify-between gap-3">
+                <div className="space-y-1 text-xs">
+                  <div className="flex items-center gap-2 font-bold text-stone-900 dark:text-stone-100">
+                    <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                    <span>
+                      {isOwnerAccount
+                        ? 'Owner Account · Unrestricted Master Access'
+                        : `Active Membership: ${currentSubscription?.planName || 'Free Scholar Plan'}`}
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-stone-600 dark:text-stone-400">
+                    {isOwnerAccount ? (
+                      <span>
+                        Attached to <strong>{activeAccountEmail}</strong> · Zero limits across notes, documents, 5 almirahs, peace sounds, leisure &amp; Gemini.
+                      </span>
+                    ) : (
+                      <span>
+                        Type:{' '}
+                        <strong className="capitalize">
+                          {currentSubscription?.billingCycle || 'free'}
+                        </strong>
+                        {currentSubscription?.durationDays
+                          ? ` (${currentSubscription.durationDays} Days)`
+                          : ' (No Expiry)'}
+                        {currentSubscription?.expiresAt
+                          ? ` · Valid until ${new Date(currentSubscription.expiresAt).toLocaleDateString('en-IN', {
+                              day: '2-digit',
+                              month: 'short',
+                              year: 'numeric',
+                            })}`
+                          : ''}
+                        {activeAccountEmail ? ` · Attached to ${activeAccountEmail}` : ''}
+                      </span>
+                    )}
+                  </div>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {SUBSCRIPTION_TIERS.map((tier) => (
-                  <div
-                    key={tier.id}
-                    className="p-4 rounded-xl border flex flex-col justify-between themed-glass-card"
-                    style={
-                      tier.highlight
-                        ? {
-                            borderColor: 'var(--th-accent)',
-                            backgroundColor: 'var(--th-accent-soft)',
-                            boxShadow: '0 0 0 2px color-mix(in srgb, var(--th-accent) 22%, transparent)',
-                          }
-                        : undefined
-                    }
-                  >
-                    <div>
-                      <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-stone-100 dark:bg-[#251a12] text-stone-700 dark:text-stone-300 uppercase">
-                        {tier.badge}
-                      </span>
-                      <h5 className="font-bold text-sm text-stone-900 dark:text-stone-100 mt-2">
-                        {tier.name}
-                      </h5>
-                      <div className="my-2">
-                        <div className="text-lg font-black font-mono text-stone-900 dark:text-stone-100">
-                          {tier.priceAnnual === 0 ? '₹0 / Free' : `₹${tier.priceAnnual.toLocaleString('en-IN')} / yr`}
+                {SUBSCRIPTION_TIERS.map((tier) => {
+                  const isCurrentTier = activePlanId === tier.id;
+                  return (
+                    <div
+                      key={tier.id}
+                      className="p-4 rounded-xl border flex flex-col justify-between themed-glass-card"
+                      style={
+                        tier.highlight || isCurrentTier
+                          ? {
+                              borderColor: 'var(--th-accent)',
+                              backgroundColor: 'var(--th-accent-soft)',
+                              boxShadow: '0 0 0 2px color-mix(in srgb, var(--th-accent) 22%, transparent)',
+                            }
+                          : undefined
+                      }
+                    >
+                      <div>
+                        <div className="flex items-center justify-between gap-1">
+                          <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-stone-100 dark:bg-[#251a12] text-stone-700 dark:text-stone-300 uppercase">
+                            {tier.badge}
+                          </span>
+                          {isCurrentTier && (
+                            <span className="text-[10px] font-bold text-emerald-700 dark:text-emerald-400 flex items-center gap-1">
+                              <Check className="w-3 h-3" /> Active
+                            </span>
+                          )}
                         </div>
-                        <div className="text-[11px] font-mono font-bold" style={themeAccentIconStyle}>
-                          {tier.priceMonthly === 0 ? 'Forever Free Core Suite' : `Only ₹${tier.priceMonthly} / month`}
+                        <h5 className="font-bold text-sm text-stone-900 dark:text-stone-100 mt-2">
+                          {tier.name}
+                        </h5>
+                        <div className="my-2">
+                          <div className="text-lg font-black font-mono text-stone-900 dark:text-stone-100">
+                            {tier.priceAnnual === 0 ? '₹0 / Free' : `₹${tier.priceAnnual.toLocaleString('en-IN')} / yr`}
+                          </div>
+                          <div className="text-[11px] font-mono font-bold" style={themeAccentIconStyle}>
+                            {tier.priceMonthly === 0 ? 'Forever Free Core Suite' : `Only ₹${tier.priceMonthly} / month`}
+                          </div>
                         </div>
+                        <p className="text-[11px] text-stone-500 dark:text-stone-400 line-clamp-2 mb-3">
+                          {tier.description}
+                        </p>
+                        <ul className="space-y-1.5 text-[10.5px]">
+                          {tier.features.slice(0, 6).map((f, i) => (
+                            <li key={i} className="flex items-start gap-1.5">
+                              <Check className="w-3 h-3 shrink-0 mt-0.5" style={themeAccentIconStyle} />
+                              <span className="text-stone-700 dark:text-stone-300">{f}</span>
+                            </li>
+                          ))}
+                        </ul>
                       </div>
-                      <p className="text-[11px] text-stone-500 dark:text-stone-400 line-clamp-2 mb-3">
-                        {tier.description}
-                      </p>
-                      <ul className="space-y-1.5 text-[10.5px]">
-                        {tier.features.slice(0, 6).map((f, i) => (
-                          <li key={i} className="flex items-start gap-1.5">
-                            <Check className="w-3 h-3 shrink-0 mt-0.5" style={themeAccentIconStyle} />
-                            <span className="text-stone-700 dark:text-stone-300">{f}</span>
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
 
                       <button
                         type="button"
                         onClick={() => {
-                          localStorage.setItem('medden_user_tier', tier.id);
-                          setSavedFeedback(true);
-                          setTimeout(() => setSavedFeedback(false), 1500);
+                          if (tier.priceMonthly === 0) {
+                            const freeRec = buildSubscriptionRecord({
+                              planId: 'free',
+                              planName: tier.name,
+                              badge: tier.badge,
+                              billingCycle: 'free',
+                              amountInr: 0,
+                              paymentMethod: 'Free Plan',
+                              transactionId: `FREE-${Date.now().toString().slice(-6)}`,
+                              attachedEmail: activeAccountEmail,
+                              attachedName: profileForm.name !== 'User' ? profileForm.name : undefined,
+                            });
+                            saveUserSubscription(freeRec);
+                            void persistSubscriptionToAuthProfile(freeRec);
+                            setSavedFeedback(true);
+                            setTimeout(() => setSavedFeedback(false), 1500);
+                            return;
+                          }
+                          window.dispatchEvent(new CustomEvent('achiev_open_subscription'));
                         }}
                         className={`mt-4 w-full py-2 rounded-lg text-xs font-bold transition-all cursor-pointer ${
                           tier.highlight
@@ -2633,114 +2694,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             : 'bg-stone-200 dark:bg-[#251a12] hover:bg-stone-300 dark:hover:bg-[#322318] text-stone-800 dark:text-stone-200'
                         }`}
                       >
-                        {tier.priceMonthly === 0 ? 'Current Free' : `Select ${tier.name}`}
+                        {isCurrentTier
+                          ? 'Active Plan'
+                          : tier.priceMonthly === 0
+                          ? 'Switch to Free'
+                          : `Upgrade to ${tier.name}`}
                       </button>
                     </div>
-                  ))}
+                  );
+                })}
               </div>
-
-              {/* Receiving Payout Account Configuration (Direct UPI, Net Banking & Card Settlement) */}
-              <form
-                onSubmit={handleSavePayoutConfig}
-                className="rounded-2xl border border-stone-200 dark:border-[#382518] bg-white dark:bg-[#1a120d] p-4 sm:p-5 space-y-4"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-2 border-b border-stone-200/80 dark:border-[#352317] pb-3">
-                  <div>
-                    <h5 className="text-xs sm:text-sm font-bold text-stone-900 dark:text-stone-100">
-                      Creator Receiving Account &amp; Direct Settlement Setup
-                    </h5>
-                    <p className="text-[11px] text-stone-500 dark:text-stone-400">
-                      Payments via UPI QR (with Ach1ev logo), Debit/Credit Card, and Net Banking route directly to these details.
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => window.dispatchEvent(new CustomEvent('achiev_open_subscription'))}
-                    className="themed-accent-btn px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold cursor-pointer shrink-0"
-                  >
-                    Open Payment Checkout
-                  </button>
-                </div>
-
-                {payoutSavedMsg && (
-                  <div className="p-2.5 rounded-xl bg-emerald-500/15 border border-emerald-500/35 text-emerald-700 dark:text-emerald-300 text-xs font-semibold flex items-center gap-2">
-                    <CheckCircle2 className="w-4 h-4 shrink-0" />
-                    <span>{payoutSavedMsg}</span>
-                  </div>
-                )}
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-[11px] font-semibold text-stone-600 dark:text-stone-300 block mb-1">
-                      Account Holder / Beneficiary Name
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={payoutConfig.accountName}
-                      onChange={(e) => setPayoutConfig((p) => ({ ...p, accountName: e.target.value }))}
-                      className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-[#382518] bg-stone-50 dark:bg-[#120c08] text-xs outline-none focus:border-amber-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[11px] font-semibold text-stone-600 dark:text-stone-300 block mb-1">
-                      Receiving UPI ID (Used for live QR &amp; UPI Apps)
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="yourname@okicici"
-                      value={payoutConfig.upiId}
-                      onChange={(e) => setPayoutConfig((p) => ({ ...p, upiId: e.target.value }))}
-                      className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-[#382518] bg-stone-50 dark:bg-[#120c08] text-xs font-mono outline-none focus:border-amber-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-[11px] font-semibold text-stone-600 dark:text-stone-300 block mb-1">
-                      Bank Name
-                    </label>
-                    <input
-                      type="text"
-                      value={payoutConfig.bankName}
-                      onChange={(e) => setPayoutConfig((p) => ({ ...p, bankName: e.target.value }))}
-                      className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-[#382518] bg-stone-50 dark:bg-[#120c08] text-xs outline-none focus:border-amber-500"
-                    />
-                  </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <label className="text-[11px] font-semibold text-stone-600 dark:text-stone-300 block mb-1">
-                        Account Number
-                      </label>
-                      <input
-                        type="text"
-                        value={payoutConfig.accountNumber}
-                        onChange={(e) => setPayoutConfig((p) => ({ ...p, accountNumber: e.target.value }))}
-                        className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-[#382518] bg-stone-50 dark:bg-[#120c08] text-xs font-mono outline-none focus:border-amber-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-[11px] font-semibold text-stone-600 dark:text-stone-300 block mb-1">
-                        IFSC Code
-                      </label>
-                      <input
-                        type="text"
-                        value={payoutConfig.ifscCode}
-                        onChange={(e) => setPayoutConfig((p) => ({ ...p, ifscCode: e.target.value.toUpperCase() }))}
-                        className="w-full px-3 py-2 rounded-xl border border-stone-200 dark:border-[#382518] bg-stone-50 dark:bg-[#120c08] text-xs font-mono outline-none focus:border-amber-500"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex justify-end">
-                  <button
-                    type="submit"
-                    className="themed-accent-btn px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold cursor-pointer shadow-xs"
-                  >
-                    Save Receiving Account
-                  </button>
-                </div>
-              </form>
             </div>
           )}
           {/* ========================================================================= */}
@@ -3075,6 +3038,61 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     onChange={(e) => setProfileForm({ ...profileForm, specialityGoal: e.target.value })}
                     className="w-full bg-stone-50 dark:bg-[#18110c] px-3 py-2 rounded-xl border border-stone-200 dark:border-[#382518] text-xs text-stone-800 dark:text-stone-200 outline-none focus:border-amber-500"
                   />
+                </div>
+              </div>
+
+              {/* Attached Subscription Type & Duration Card on User Profile */}
+              <div className="p-4 rounded-2xl bg-stone-50 dark:bg-[#18110c] border border-stone-200 dark:border-[#382518] space-y-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 text-xs font-bold text-stone-900 dark:text-stone-100">
+                    <Crown className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                    <span>Attached Subscription &amp; Duration</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => window.dispatchEvent(new CustomEvent('achiev_open_subscription'))}
+                    className="px-2.5 py-1 rounded-lg bg-amber-600/15 hover:bg-amber-600/25 text-amber-900 dark:text-amber-300 text-[11px] font-bold cursor-pointer"
+                  >
+                    {isOwnerAccount ? 'View Owner Status' : 'Manage Plan'}
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px] pt-1">
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-[#140e0a] border border-stone-200/80 dark:border-[#352317]">
+                    <div className="text-stone-500 dark:text-stone-400">Plan &amp; Type</div>
+                    <div className="font-bold text-stone-900 dark:text-stone-100 mt-0.5">
+                      {isOwnerAccount
+                        ? 'Owner Unrestricted Master'
+                        : `${currentSubscription?.planName || 'Free Scholar Plan'} (${
+                            currentSubscription?.billingCycle === 'annual'
+                              ? 'Annual'
+                              : currentSubscription?.billingCycle === 'monthly'
+                              ? 'Monthly'
+                              : 'Free'
+                          })`}
+                    </div>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-[#140e0a] border border-stone-200/80 dark:border-[#352317]">
+                    <div className="text-stone-500 dark:text-stone-400">Duration &amp; Validity</div>
+                    <div className="font-bold text-stone-900 dark:text-stone-100 mt-0.5">
+                      {isOwnerAccount
+                        ? 'Lifetime Unrestricted'
+                        : currentSubscription?.expiresAt
+                        ? `${currentSubscription.durationDays || 30} Days · Until ${new Date(
+                            currentSubscription.expiresAt
+                          ).toLocaleDateString('en-IN', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric',
+                          })}`
+                        : 'Forever Free Core'}
+                    </div>
+                  </div>
+                  <div className="p-2.5 rounded-xl bg-white dark:bg-[#140e0a] border border-stone-200/80 dark:border-[#352317]">
+                    <div className="text-stone-500 dark:text-stone-400">Attached Account</div>
+                    <div className="font-bold text-stone-900 dark:text-stone-100 mt-0.5 truncate">
+                      {currentSubscription?.attachedEmail || activeAccountEmail || profileForm.name || 'Active Profile'}
+                    </div>
+                  </div>
                 </div>
               </div>
 

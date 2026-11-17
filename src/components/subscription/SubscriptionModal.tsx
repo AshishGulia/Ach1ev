@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import QRCode from 'qrcode';
 import { SUBSCRIPTION_TIERS } from '../../data/subscriptionData';
-import { SubscriptionTier } from '../../types';
+import { SubscriptionTier, UserProfile, UserSubscriptionRecord } from '../../types';
 import {
   Check,
   X,
@@ -12,43 +11,23 @@ import {
   CreditCard,
   Landmark,
   ShieldCheck,
-  Copy,
   ArrowLeft,
   Lock,
+  UserCheck,
+  CalendarClock,
 } from 'lucide-react';
-
-interface MerchantPayoutConfig {
-  accountName: string;
-  upiId: string;
-  bankName: string;
-  accountNumber: string;
-  ifscCode: string;
-}
-
-const DEFAULT_PAYOUT_CONFIG: MerchantPayoutConfig = {
-  accountName: 'Ach1ev Official Study Platform',
-  upiId: 'achiev@okicici',
-  bankName: 'ICICI Bank Ltd.',
-  accountNumber: '004201528491',
-  ifscCode: 'ICIC0000042',
-};
-
-function readMerchantPayout(): MerchantPayoutConfig {
-  try {
-    const raw = localStorage.getItem('achiev_merchant_payout_v1');
-    if (raw) {
-      const parsed = JSON.parse(raw);
-      return {
-        accountName: parsed.accountName || DEFAULT_PAYOUT_CONFIG.accountName,
-        upiId: parsed.upiId || DEFAULT_PAYOUT_CONFIG.upiId,
-        bankName: parsed.bankName || DEFAULT_PAYOUT_CONFIG.bankName,
-        accountNumber: parsed.accountNumber || DEFAULT_PAYOUT_CONFIG.accountNumber,
-        ifscCode: parsed.ifscCode || DEFAULT_PAYOUT_CONFIG.ifscCode,
-      };
-    }
-  } catch {}
-  return DEFAULT_PAYOUT_CONFIG;
-}
+import { useAuth } from '../../contexts/AuthContext';
+import { getSupabaseConfig } from '../../lib/supabaseClient';
+import { persistSubscriptionToAuthProfile } from '../../services/supabaseSyncService';
+import {
+  buildSubscriptionRecord,
+  getActivePlanId,
+  getOwnerSubscriptionRecord,
+  getStoredSubscription,
+  isCurrentUserOwner,
+  saveUserSubscription,
+  UpgradeBannerDetail,
+} from '../../utils/subscriptionLimits';
 
 const INDIAN_BANKS = [
   'State Bank of India (SBI)',
@@ -61,10 +40,6 @@ const INDIAN_BANKS = [
   'Yes Bank',
 ];
 
-import { useAuth } from '../../contexts/AuthContext';
-import { getSupabaseConfig } from '../../lib/supabaseClient';
-import { UpgradeBannerDetail } from '../../utils/subscriptionLimits';
-
 const RAZORPAY_KEY_ID =
   ((import.meta as any).env?.VITE_RAZORPAY_KEY_ID as string | undefined)?.trim() ||
   'rzp_live_U0sX2QgzwryN0q';
@@ -75,6 +50,7 @@ interface SubscriptionModalProps {
   currentTierId?: string;
   onUpgradeTier?: (tierId: string) => void;
   upgradeBanner?: UpgradeBannerDetail | null;
+  userProfile?: UserProfile;
 }
 
 export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
@@ -83,23 +59,42 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   currentTierId = 'free',
   onUpgradeTier,
   upgradeBanner = null,
+  userProfile,
 }) => {
-  const { user, googleUser } = useAuth();
+  const { user, googleUser, phoneUser } = useAuth();
+
+  const resolvedAuthEmail =
+    user?.email || googleUser?.email || userProfile?.email || '';
+  const resolvedAuthName =
+    (user?.user_metadata?.full_name as string | undefined) ||
+    googleUser?.name ||
+    phoneUser?.displayName ||
+    (userProfile?.name && userProfile.name !== 'User' ? userProfile.name : '') ||
+    '';
+  const resolvedAuthPhone =
+    user?.phone || phoneUser?.phone || userProfile?.phone || '';
+
+  const isOwner = isCurrentUserOwner(resolvedAuthEmail);
+
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'annual'>('annual');
-  const [activeTier, setActiveTier] = useState<string>(() => {
-    return localStorage.getItem('medden_user_tier') || currentTierId;
-  });
+  const [activeTier, setActiveTier] = useState<string>(() => getActivePlanId(resolvedAuthEmail) || currentTierId);
+  const [activeSubRecord, setActiveSubRecord] = useState<UserSubscriptionRecord | null>(() =>
+    userProfile?.subscription || getStoredSubscription()
+  );
   const [upgradedFeedback, setUpgradedFeedback] = useState<string | null>(null);
-  const [payoutConfig, setPayoutConfig] = useState<MerchantPayoutConfig>(() => readMerchantPayout());
   const [bannerDetail, setBannerDetail] = useState<UpgradeBannerDetail | null>(upgradeBanner);
+
+  // Sender details (payer / account holder only — zero sample/creator fields)
+  const [senderName, setSenderName] = useState<string>(resolvedAuthName);
+  const [senderEmail, setSenderEmail] = useState<string>(resolvedAuthEmail);
+  const [senderPhone, setSenderPhone] = useState<string>(resolvedAuthPhone);
+  const [senderUpiId, setSenderUpiId] = useState<string>('');
 
   // Checkout state
   const [checkoutTier, setCheckoutTier] = useState<SubscriptionTier | null>(null);
   const [paymentMethod, setPaymentMethod] = useState<'upi' | 'card' | 'netbanking'>('upi');
-  const [qrDataUrl, setQrDataUrl] = useState<string>('');
-  const [copiedUpi, setCopiedUpi] = useState(false);
   const [utrRef, setUtrRef] = useState('');
-  const [cardHolder, setCardHolder] = useState('');
+  const [cardHolder, setCardHolder] = useState(resolvedAuthName);
   const [cardNumber, setCardNumber] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
   const [cardCvv, setCardCvv] = useState('');
@@ -108,10 +103,31 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   const [isProcessingRazorpay, setIsProcessingRazorpay] = useState(false);
   const [receiptInfo, setReceiptInfo] = useState<{
     tierName: string;
+    planType: string;
+    durationLabel: string;
+    expiresAt: string | null;
     amountInr: number;
     methodLabel: string;
     txnId: string;
+    attachedEmail: string;
   } | null>(null);
+
+  useEffect(() => {
+    setSenderName((prev) => prev || resolvedAuthName);
+    setSenderEmail((prev) => prev || resolvedAuthEmail);
+    setSenderPhone((prev) => prev || resolvedAuthPhone);
+    setCardHolder((prev) => prev || resolvedAuthName);
+  }, [resolvedAuthName, resolvedAuthEmail, resolvedAuthPhone]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setActiveTier(getActivePlanId(resolvedAuthEmail));
+    setActiveSubRecord(
+      isOwner
+        ? getOwnerSubscriptionRecord(resolvedAuthEmail || undefined)
+        : userProfile?.subscription || getStoredSubscription()
+    );
+  }, [isOpen, isOwner, resolvedAuthEmail, userProfile?.subscription]);
 
   useEffect(() => {
     if (upgradeBanner) {
@@ -129,55 +145,26 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
     }
   }, [isOpen, upgradeBanner]);
 
-  useEffect(() => {
-    const syncPayout = () => setPayoutConfig(readMerchantPayout());
-    window.addEventListener('achiev_payout_updated', syncPayout);
-    window.addEventListener('storage', syncPayout);
-    return () => {
-      window.removeEventListener('achiev_payout_updated', syncPayout);
-      window.removeEventListener('storage', syncPayout);
-    };
-  }, []);
-
   const checkoutAmount = checkoutTier
     ? billingCycle === 'annual'
       ? checkoutTier.priceAnnual
       : checkoutTier.priceMonthly
     : 0;
 
-  const upiUri = checkoutTier
-    ? `upi://pay?pa=${encodeURIComponent(payoutConfig.upiId)}&pn=${encodeURIComponent(
-        payoutConfig.accountName
-      )}&am=${checkoutAmount}&cu=INR&tn=${encodeURIComponent(`Ach1ev ${checkoutTier.name} (${billingCycle})`)}`
-    : '';
-
-  useEffect(() => {
-    if (!isOpen || !checkoutTier || checkoutAmount <= 0 || !upiUri) {
-      setQrDataUrl('');
-      return;
-    }
-    let cancelled = false;
-    QRCode.toDataURL(upiUri, {
-      width: 240,
-      margin: 2,
-      errorCorrectionLevel: 'H',
-      color: {
-        dark: '#1a0e07',
-        light: '#ffffff',
-      },
-    })
-      .then((url) => {
-        if (!cancelled) setQrDataUrl(url);
-      })
-      .catch(() => {
-        if (!cancelled) setQrDataUrl('');
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [isOpen, checkoutTier, checkoutAmount, upiUri]);
-
   if (!isOpen) return null;
+
+  const formatDateDisplay = (iso?: string | null) => {
+    if (!iso) return 'Lifetime / No Expiry';
+    try {
+      return new Date(iso).toLocaleDateString('en-IN', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      });
+    } catch {
+      return iso;
+    }
+  };
 
   const loadRazorpayScript = (): Promise<boolean> => {
     return new Promise((resolve) => {
@@ -194,9 +181,71 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
     });
   };
 
+  const finalizeUpgrade = (tier: SubscriptionTier, methodLabel: string, txnRef?: string) => {
+    const txnId = txnRef || `ACH-${Date.now().toString().slice(-8)}`;
+    const amountInr = billingCycle === 'annual' ? tier.priceAnnual : tier.priceMonthly;
+    const cycle: 'monthly' | 'annual' | 'free' =
+      amountInr <= 0 || tier.id === 'free' ? 'free' : billingCycle;
+    const attachedEmail = senderEmail.trim() || resolvedAuthEmail;
+    const attachedName = senderName.trim() || resolvedAuthName;
+
+    const record = buildSubscriptionRecord({
+      planId: tier.id,
+      planName: tier.name,
+      badge: tier.badge,
+      billingCycle: cycle,
+      amountInr,
+      paymentMethod: methodLabel,
+      transactionId: txnId,
+      attachedEmail,
+      attachedName,
+    });
+
+    saveUserSubscription(record);
+    void persistSubscriptionToAuthProfile(record);
+
+    setActiveTier(tier.id);
+    setActiveSubRecord(record);
+    onUpgradeTier?.(tier.id);
+
+    const planType =
+      cycle === 'annual' ? 'Annual Plan' : cycle === 'monthly' ? 'Monthly Plan' : 'Free Plan';
+    const durationLabel =
+      record.durationDays === 365
+        ? '365 Days (12 Months)'
+        : record.durationDays === 30
+        ? '30 Days (1 Month)'
+        : 'Unlimited Free Tier';
+
+    setReceiptInfo({
+      tierName: tier.name,
+      planType,
+      durationLabel,
+      expiresAt: record.expiresAt,
+      amountInr,
+      methodLabel,
+      txnId,
+      attachedEmail: attachedEmail || attachedName || 'Current Profile',
+    });
+    setCheckoutTier(null);
+    setCheckoutError(null);
+    setBannerDetail(null);
+    setUpgradedFeedback(`${tier.name} (${planType})`);
+    setTimeout(() => setUpgradedFeedback(null), 5000);
+  };
+
   const launchRazorpayCheckout = async (tier: SubscriptionTier) => {
     const amountInr = billingCycle === 'annual' ? tier.priceAnnual : tier.priceMonthly;
     if (amountInr <= 0) return;
+
+    const cleanSenderEmail = senderEmail.trim() || resolvedAuthEmail;
+    const cleanSenderName = senderName.trim() || resolvedAuthName;
+    const cleanSenderPhone = senderPhone.trim() || resolvedAuthPhone;
+
+    if (!cleanSenderName && !cleanSenderEmail && !cleanSenderPhone) {
+      setCheckoutError('Please enter your Sender Name, Email, or Contact Number before continuing.');
+      return;
+    }
 
     setCheckoutError(null);
     setIsProcessingRazorpay(true);
@@ -209,12 +258,6 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         return;
       }
 
-      const customerEmail = user?.email || googleUser?.email || 'scholar@achiev.com';
-      const customerName =
-        (user?.user_metadata?.full_name as string | undefined) ||
-        googleUser?.name ||
-        'Ach1ev Scholar';
-
       // Create Razorpay order on Express/Vercel backend
       let orderId: string | undefined;
       try {
@@ -225,7 +268,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
             amountInr,
             planId: tier.id,
             billingCycle,
-            userEmail: customerEmail,
+            userEmail: cleanSenderEmail,
           }),
         });
         if (orderRes.ok) {
@@ -238,22 +281,25 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         // Fallback: open checkout without pre-created orderId if offline
       }
 
+      const prefill: Record<string, string> = {};
+      if (cleanSenderName) prefill.name = cleanSenderName;
+      if (cleanSenderEmail) prefill.email = cleanSenderEmail;
+      if (cleanSenderPhone) prefill.contact = cleanSenderPhone;
+
       const options: Record<string, any> = {
         key: RAZORPAY_KEY_ID,
         amount: amountInr * 100,
         currency: 'INR',
-        name: 'Ach1ev — Settle Ideas',
-        description: `${tier.name} (${billingCycle === 'annual' ? '12 Months' : 'Monthly'})`,
+        name: 'Ach1ev',
+        description: `${tier.name} (${billingCycle === 'annual' ? 'Annual · 365 Days' : 'Monthly · 30 Days'})`,
         image: `${window.location.origin}/assets/aistudio/Final_Logo_webp_1000_x_350_e6e85d30.PNG`,
         ...(orderId ? { order_id: orderId } : {}),
-        prefill: {
-          name: customerName,
-          email: customerEmail,
-        },
+        prefill,
         notes: {
           plan_id: tier.id,
           billing_cycle: billingCycle,
-          user_email: customerEmail,
+          sender_email: cleanSenderEmail,
+          sender_name: cleanSenderName,
         },
         theme: {
           color: '#6f3d1d',
@@ -276,7 +322,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
               planId: tier.id,
               billingCycle,
               amountInr,
-              userEmail: customerEmail,
+              userEmail: cleanSenderEmail,
               userId: user?.id || null,
             };
 
@@ -361,33 +407,26 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
     }
   };
 
-  const finalizeUpgrade = (tier: SubscriptionTier, methodLabel: string, txnRef?: string) => {
-    const txnId = txnRef || `ACH-${Date.now().toString().slice(-8)}`;
-    setActiveTier(tier.id);
-    localStorage.setItem('medden_user_tier', tier.id);
-    window.dispatchEvent(new CustomEvent('achiev_tier_updated', { detail: { tierId: tier.id } }));
-    onUpgradeTier?.(tier.id);
-    setReceiptInfo({
-      tierName: tier.name,
-      amountInr: billingCycle === 'annual' ? tier.priceAnnual : tier.priceMonthly,
-      methodLabel,
-      txnId,
-    });
-    setCheckoutTier(null);
-    setCheckoutError(null);
-    setBannerDetail(null);
-    setUpgradedFeedback(tier.name);
-    setTimeout(() => setUpgradedFeedback(null), 4000);
-  };
-
   const handleSelectTier = (tier: SubscriptionTier) => {
     const price = billingCycle === 'annual' ? tier.priceAnnual : tier.priceMonthly;
     setReceiptInfo(null);
     setCheckoutError(null);
     if (price === 0) {
+      const freeRecord = buildSubscriptionRecord({
+        planId: tier.id,
+        planName: tier.name,
+        badge: tier.badge,
+        billingCycle: 'free',
+        amountInr: 0,
+        paymentMethod: 'Free Plan',
+        transactionId: `FREE-${Date.now().toString().slice(-6)}`,
+        attachedEmail: senderEmail.trim() || resolvedAuthEmail,
+        attachedName: senderName.trim() || resolvedAuthName,
+      });
+      saveUserSubscription(freeRecord);
+      void persistSubscriptionToAuthProfile(freeRecord);
       setActiveTier(tier.id);
-      localStorage.setItem('medden_user_tier', tier.id);
-      window.dispatchEvent(new CustomEvent('achiev_tier_updated', { detail: { tierId: tier.id } }));
+      setActiveSubRecord(freeRecord);
       onUpgradeTier?.(tier.id);
       setUpgradedFeedback(tier.name);
       setTimeout(() => setUpgradedFeedback(null), 3000);
@@ -396,23 +435,25 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
     setCheckoutTier(tier);
   };
 
-  const handleCopyUpi = () => {
-    navigator.clipboard.writeText(payoutConfig.upiId);
-    setCopiedUpi(true);
-    setTimeout(() => setCopiedUpi(false), 2000);
-  };
-
   const handleConfirmUpi = (e: React.FormEvent) => {
     e.preventDefault();
     if (!checkoutTier) return;
-    if (utrRef.trim() && utrRef.trim().length < 6) {
-      setCheckoutError('Please enter a valid 6+ character UTR / UPI Transaction ID or leave blank after completing UPI confirmation.');
+    if (!senderName.trim() && !senderEmail.trim()) {
+      setCheckoutError('Please confirm your Sender Name or Email in Sender Details.');
+      return;
+    }
+    if (!senderUpiId.trim() || !senderUpiId.includes('@')) {
+      setCheckoutError('Please enter your valid Sender UPI ID (for example yourname@bank).');
+      return;
+    }
+    if (!utrRef.trim() || utrRef.trim().length < 6) {
+      setCheckoutError('Please enter a valid 6+ character UTR / UPI Transaction Reference Number.');
       return;
     }
     finalizeUpgrade(
       checkoutTier,
-      `UPI (${payoutConfig.upiId})`,
-      utrRef.trim() || `UPI-${Date.now().toString().slice(-8)}`
+      `Sender UPI (${senderUpiId.trim()})`,
+      utrRef.trim()
     );
   };
 
@@ -426,7 +467,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
     }
     finalizeUpgrade(
       checkoutTier,
-      `Card •••• ${digits.slice(-4)} → ${payoutConfig.accountName}`,
+      `Card •••• ${digits.slice(-4)}`,
       `CARD-${Date.now().toString().slice(-8)}`
     );
   };
@@ -434,9 +475,13 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   const handleConfirmNetBanking = (e: React.FormEvent) => {
     e.preventDefault();
     if (!checkoutTier) return;
+    if (!senderName.trim() && !senderEmail.trim()) {
+      setCheckoutError('Please confirm your Sender Name or Email in Sender Details.');
+      return;
+    }
     finalizeUpgrade(
       checkoutTier,
-      `Net Banking (${selectedBank}) → ${payoutConfig.bankName}`,
+      `Net Banking (${selectedBank})`,
       `NB-${Date.now().toString().slice(-8)}`
     );
   };
@@ -469,7 +514,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
               </h3>
               <p className="text-xs text-stone-500 dark:text-stone-400">
                 {checkoutTier
-                  ? `Secured by Razorpay (${RAZORPAY_KEY_ID}) & Supabase Verification`
+                  ? 'Enter your sender details and complete payment to attach this plan to your profile'
                   : 'Transparent student pricing · Free (₹0), Scholar Pro (₹100/mo), and Master Ultimate (₹300/mo)'}
               </p>
             </div>
@@ -485,7 +530,22 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           </button>
         </div>
 
-        {bannerDetail && (
+        {/* Owner Account Unrestricted Notice */}
+        {isOwner && (
+          <div className="mx-6 mt-4 p-3.5 rounded-xl bg-emerald-500/12 border border-emerald-500/35 text-emerald-900 dark:text-emerald-200 text-xs flex items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <Crown className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
+              <div>
+                <div className="font-bold text-sm">Owner Account · Unrestricted Access Active</div>
+                <p className="opacity-90">
+                  Signed in as <strong>{resolvedAuthEmail}</strong>. All notes, documents, 5 almirahs, peace sounds, leisure favourites, Achiever&apos;s Hub &amp; Gemini features are permanently unlocked with zero restrictions.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {!isOwner && bannerDetail && (
           <div className="mx-6 mt-4 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/35 text-rose-900 dark:text-rose-200 text-xs flex items-start justify-between gap-3">
             <div>
               <div className="font-bold text-sm">{bannerDetail.title}</div>
@@ -502,17 +562,25 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           </div>
         )}
 
-        {/* Billing Toggle & Feedback */}
+        {/* Billing Toggle & Current Attached Plan Summary */}
         {!checkoutTier && (
           <div className="px-6 py-3.5 flex flex-wrap items-center justify-between gap-3 border-b border-stone-200/60 dark:border-[#352317] bg-[#f9f8f4] dark:bg-[#160f0b]">
-            {upgradedFeedback && (
+            {upgradedFeedback ? (
               <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200 text-xs flex items-center gap-2 font-medium">
                 <CheckCircle2 className="w-4 h-4 text-[#8f5f2c] dark:text-amber-400 shrink-0" />
                 <span>
-                  Subscription updated to <strong>{upgradedFeedback}</strong>! All features unlocked.
+                  Subscription updated to <strong>{upgradedFeedback}</strong> and attached to your profile!
                 </span>
               </div>
-            )}
+            ) : activeSubRecord ? (
+              <div className="flex items-center gap-2 text-xs text-stone-700 dark:text-stone-300">
+                <CalendarClock className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                <span>
+                  Profile Plan: <strong>{activeSubRecord.planName}</strong>
+                  {activeSubRecord.durationDays ? ` (${activeSubRecord.durationDays} Days · Valid until ${formatDateDisplay(activeSubRecord.expiresAt)})` : ''}
+                </span>
+              </div>
+            ) : null}
 
             <div className="flex items-center gap-2 ml-auto">
               <span className="text-xs font-semibold text-stone-600 dark:text-stone-400">Billing Interval:</span>
@@ -526,7 +594,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                       : 'text-stone-600 dark:text-stone-400'
                   }`}
                 >
-                  Monthly
+                  Monthly (30 Days)
                 </button>
                 <button
                   type="button"
@@ -539,7 +607,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                 >
                   <span>Annual</span>
                   <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-200 text-amber-950 font-mono">
-                    12-Mo Pass
+                    365 Days
                   </span>
                 </button>
               </div>
@@ -554,10 +622,14 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
               <div className="flex items-start gap-2.5">
                 <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5" />
                 <div className="text-xs space-y-0.5">
-                  <div className="font-bold text-sm">Payment Authorized &amp; Plan Activated</div>
+                  <div className="font-bold text-sm">Payment Confirmed &amp; Attached to Profile</div>
                   <div>
-                    Plan: <strong>{receiptInfo.tierName}</strong> · Paid{' '}
-                    <strong>₹{receiptInfo.amountInr.toLocaleString('en-IN')}</strong> via {receiptInfo.methodLabel}
+                    Plan: <strong>{receiptInfo.tierName}</strong> ({receiptInfo.planType}) ·{' '}
+                    Duration: <strong>{receiptInfo.durationLabel}</strong>
+                    {receiptInfo.expiresAt ? ` · Valid Until ${formatDateDisplay(receiptInfo.expiresAt)}` : ''}
+                  </div>
+                  <div>
+                    Paid <strong>₹{receiptInfo.amountInr.toLocaleString('en-IN')}</strong> via {receiptInfo.methodLabel} · Attached to <strong>{receiptInfo.attachedEmail}</strong>
                   </div>
                   <div className="font-mono text-[11px] opacity-80">Transaction Ref: {receiptInfo.txnId}</div>
                 </div>
@@ -566,34 +638,91 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           )}
 
           {checkoutTier ? (
-            /* ═══════════════ PAYMENT CHECKOUT VIEW (UPI + LOGO QR, CARD, NET BANKING) ═══════════════ */
+            /* ═══════════════ PAYMENT CHECKOUT VIEW (SENDER DETAILS ONLY + RAZORPAY) ═══════════════ */
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-              {/* Left 5 Cols: Order & Beneficiary Account Summary */}
+              {/* Left 5 Cols: Order Summary & Sender Details Only */}
               <div className="lg:col-span-5 rounded-2xl border border-stone-200 dark:border-[#382518] bg-stone-50/70 dark:bg-[#1a120d] p-5 space-y-4">
                 <div>
                   <span className="text-[10px] font-bold uppercase tracking-wider text-amber-700 dark:text-amber-400">
-                    Order Summary
+                    Order &amp; Duration Summary
                   </span>
                   <h4 className="text-lg font-bold text-stone-900 dark:text-stone-50 mt-0.5">{checkoutTier.name}</h4>
                   <p className="text-xs text-stone-500 dark:text-stone-400 mt-1">{checkoutTier.description}</p>
                 </div>
 
-                <div className="p-3.5 rounded-xl bg-white dark:bg-[#120c08] border border-stone-200 dark:border-[#352317] flex items-center justify-between">
-                  <span className="text-xs font-semibold text-stone-600 dark:text-stone-300">
-                    Total Payable ({billingCycle === 'annual' ? 'Annual' : 'Monthly'})
-                  </span>
-                  <span className="text-2xl font-black text-stone-900 dark:text-stone-50 font-mono">
-                    ₹{checkoutAmount.toLocaleString('en-IN')}
-                  </span>
+                <div className="p-3.5 rounded-xl bg-white dark:bg-[#120c08] border border-stone-200 dark:border-[#352317] space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-semibold text-stone-600 dark:text-stone-300">
+                      Total Payable ({billingCycle === 'annual' ? 'Annual' : 'Monthly'})
+                    </span>
+                    <span className="text-2xl font-black text-stone-900 dark:text-stone-50 font-mono">
+                      ₹{checkoutAmount.toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                  <div className="text-[11px] text-stone-500 dark:text-stone-400 flex items-center justify-between pt-1 border-t border-stone-200/70 dark:border-[#352317]">
+                    <span>Validity Duration</span>
+                    <strong className="text-stone-800 dark:text-stone-200">
+                      {billingCycle === 'annual' ? '365 Days (1 Year)' : '30 Days (1 Month)'}
+                    </strong>
+                  </div>
+                </div>
+
+                {/* Sender Details Card (No Creator / Sample Info) */}
+                <div className="p-3.5 rounded-xl bg-white dark:bg-[#120c08] border border-stone-200 dark:border-[#352317] space-y-2.5 text-xs">
+                  <div className="font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">
+                    <UserCheck className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+                    <span>Sender Details (Attached to Your Profile)</span>
+                  </div>
+                  <div className="space-y-2">
+                    <div>
+                      <label className="text-[11px] font-semibold text-stone-600 dark:text-stone-300 block mb-1">
+                        Sender Name
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Enter your full name"
+                        value={senderName}
+                        onChange={(e) => setSenderName(e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg border border-stone-200 dark:border-[#382518] bg-stone-50 dark:bg-[#1a120d] text-xs outline-none focus:border-amber-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-semibold text-stone-600 dark:text-stone-300 block mb-1">
+                        Sender Email
+                      </label>
+                      <input
+                        type="email"
+                        placeholder="Enter your account email"
+                        value={senderEmail}
+                        onChange={(e) => setSenderEmail(e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg border border-stone-200 dark:border-[#382518] bg-stone-50 dark:bg-[#1a120d] text-xs outline-none focus:border-amber-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-[11px] font-semibold text-stone-600 dark:text-stone-300 block mb-1">
+                        Sender Mobile Number
+                      </label>
+                      <input
+                        type="tel"
+                        placeholder="Enter your mobile number"
+                        value={senderPhone}
+                        onChange={(e) => setSenderPhone(e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg border border-stone-200 dark:border-[#382518] bg-stone-50 dark:bg-[#1a120d] text-xs outline-none focus:border-amber-500"
+                      />
+                    </div>
+                  </div>
+                  <p className="text-[10.5px] text-stone-500 dark:text-stone-400 leading-relaxed">
+                    Once payment completes, your membership type and validity dates are stored directly on your profile.
+                  </p>
                 </div>
 
                 <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-2.5 text-xs">
                   <div className="font-bold text-amber-900 dark:text-amber-200 flex items-center gap-1.5">
                     <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                    <span>Razorpay Live Gateway ({RAZORPAY_KEY_ID})</span>
+                    <span>Razorpay Live Checkout</span>
                   </div>
                   <p className="text-[11px] text-stone-700 dark:text-stone-300 leading-relaxed">
-                    Instant UPI, Cards, NetBanking &amp; Wallets verified via HMAC-SHA256 Supabase signature verification before unlocking your subscription.
+                    Pay instantly via UPI QR, Debit/Credit Card, or Net Banking with cryptographic verification.
                   </p>
                   <button
                     type="button"
@@ -609,32 +738,14 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                     </span>
                   </button>
                 </div>
-
-                <div className="p-3.5 rounded-xl bg-stone-100/80 dark:bg-[#120c08] border border-stone-200 dark:border-[#352317] space-y-1.5 text-xs">
-                  <div className="font-bold text-stone-800 dark:text-stone-200 flex items-center gap-1.5">
-                    <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400" />
-                    <span>Direct Settlement Account</span>
-                  </div>
-                  <div className="text-[11px] text-stone-700 dark:text-stone-300 space-y-0.5">
-                    <div>
-                      Payee: <strong>{payoutConfig.accountName}</strong>
-                    </div>
-                    <div>
-                      UPI ID: <strong className="font-mono">{payoutConfig.upiId}</strong>
-                    </div>
-                    <div>
-                      Bank: <strong>{payoutConfig.bankName}</strong> ({payoutConfig.ifscCode})
-                    </div>
-                  </div>
-                </div>
               </div>
 
-              {/* Right 7 Cols: Method Tabs + Payment Form */}
+              {/* Right 7 Cols: Payment Method Tabs (Sender Input Only, Zero Sample Data) */}
               <div className="lg:col-span-7 rounded-2xl border border-stone-200 dark:border-[#382518] bg-white dark:bg-[#1a120d] p-5 space-y-5">
                 <div className="grid grid-cols-3 gap-2 p-1 rounded-xl bg-stone-100 dark:bg-[#120c08]">
                   {(
                     [
-                      { id: 'upi', label: 'UPI & QR', icon: Smartphone },
+                      { id: 'upi', label: 'UPI', icon: Smartphone },
                       { id: 'card', label: 'Card Payment', icon: CreditCard },
                       { id: 'netbanking', label: 'Net Banking', icon: Landmark },
                     ] as const
@@ -670,70 +781,48 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
                 {paymentMethod === 'upi' && (
                   <form onSubmit={handleConfirmUpi} className="space-y-4">
-                    <div className="flex flex-col sm:flex-row items-center gap-5 p-4 rounded-2xl bg-stone-50 dark:bg-[#120c08] border border-stone-200 dark:border-[#352317]">
-                      {/* QR CODE WITH CENTERED ACH1EV LOGO */}
-                      <div className="relative inline-flex items-center justify-center p-2.5 rounded-2xl bg-white border border-stone-200 shadow-sm shrink-0">
-                        {qrDataUrl ? (
-                          <img
-                            src={qrDataUrl}
-                            alt={`UPI Payment QR for ${payoutConfig.upiId}`}
-                            className="w-44 h-44 object-contain"
-                          />
-                        ) : (
-                          <div className="w-44 h-44 bg-stone-100 rounded-xl animate-pulse" />
-                        )}
-                        {/* Centered Ach1ev Logo Badge inside High-ECC QR Code */}
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                          <div className="w-11 h-11 rounded-full bg-white p-1.5 shadow-md border border-amber-500/40 flex items-center justify-center">
-                            <img
-                              src="./android-chrome-192x192.png?v=2"
-                              alt="Ach1ev Logo"
-                              className="w-full h-full object-contain rounded-full"
-                            />
-                          </div>
-                        </div>
+                    <div className="p-4 rounded-2xl bg-stone-50 dark:bg-[#120c08] border border-stone-200 dark:border-[#352317] space-y-3">
+                      <div className="text-xs font-bold text-stone-900 dark:text-stone-100">
+                        Sender UPI Payment Details
                       </div>
-
-                      <div className="flex-1 space-y-2.5 text-center sm:text-left">
-                        <div className="text-xs font-bold text-stone-900 dark:text-stone-100">
-                          Scan with GPay, PhonePe, Paytm or BHIM
-                        </div>
-                        <p className="text-[11px] text-stone-500 dark:text-stone-400 leading-relaxed">
-                          This QR encodes <strong>₹{checkoutAmount}</strong> directly to{' '}
-                          <span className="font-mono font-bold text-stone-800 dark:text-stone-200">
-                            {payoutConfig.upiId}
-                          </span>
-                          .
-                        </p>
-                        <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
-                          <button
-                            type="button"
-                            onClick={handleCopyUpi}
-                            className="px-3 py-1.5 rounded-xl bg-stone-200 dark:bg-[#251a12] hover:bg-stone-300 dark:hover:bg-[#322318] text-xs font-bold flex items-center gap-1.5 cursor-pointer"
-                          >
-                            <Copy className="w-3.5 h-3.5" />
-                            <span>{copiedUpi ? 'Copied UPI ID!' : 'Copy UPI ID'}</span>
-                          </button>
-                          <a
-                            href={upiUri}
-                            className="px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/35 text-amber-800 dark:text-amber-300 text-xs font-bold"
-                          >
-                            Open UPI App
-                          </a>
-                        </div>
-                      </div>
+                      <p className="text-[11px] text-stone-500 dark:text-stone-400 leading-relaxed">
+                        Pay securely via Razorpay UPI or enter your own UPI ID and UTR reference after completing your payment for <strong>₹{checkoutAmount.toLocaleString('en-IN')}</strong>.
+                      </p>
+                      <button
+                        type="button"
+                        disabled={isProcessingRazorpay}
+                        onClick={() => launchRazorpayCheckout(checkoutTier)}
+                        className="px-4 py-2 rounded-xl bg-amber-500/15 hover:bg-amber-500/25 border border-amber-500/35 text-amber-800 dark:text-amber-300 text-xs font-bold cursor-pointer"
+                      >
+                        Launch Razorpay UPI QR / Apps
+                      </button>
                     </div>
 
                     <div>
                       <label className="text-xs font-semibold block mb-1 text-stone-700 dark:text-stone-300">
-                        UTR / UPI Reference Number (Optional after scan)
+                        Your Sender UPI ID
                       </label>
                       <input
                         type="text"
-                        placeholder="e.g. 418923749102"
+                        placeholder="Enter your UPI ID (name@bank)"
+                        value={senderUpiId}
+                        onChange={(e) => setSenderUpiId(e.target.value)}
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 dark:border-[#382518] bg-stone-50 dark:bg-[#120c08] text-xs font-mono outline-none focus:border-amber-500"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-xs font-semibold block mb-1 text-stone-700 dark:text-stone-300">
+                        UTR / UPI Transaction Reference Number
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="Enter your 12-digit UTR / reference number"
                         value={utrRef}
                         onChange={(e) => setUtrRef(e.target.value)}
                         className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 dark:border-[#382518] bg-stone-50 dark:bg-[#120c08] text-xs font-mono outline-none focus:border-amber-500"
+                        required
                       />
                     </div>
 
@@ -742,7 +831,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                       className="themed-accent-btn w-full py-2.5 px-4 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold flex items-center justify-center gap-2 cursor-pointer shadow"
                     >
                       <CheckCircle2 className="w-4 h-4" />
-                      <span>Verify UPI Payment &amp; Activate {checkoutTier.name}</span>
+                      <span>Confirm Payment &amp; Attach {checkoutTier.name}</span>
                     </button>
                   </form>
                 )}
@@ -751,11 +840,11 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                   <form onSubmit={handleConfirmCard} className="space-y-3.5">
                     <div>
                       <label className="text-xs font-semibold block mb-1 text-stone-700 dark:text-stone-300">
-                        Cardholder Name
+                        Cardholder Name (Sender)
                       </label>
                       <input
                         type="text"
-                        placeholder="Dr. Aarav Sharma"
+                        placeholder="Enter name printed on your card"
                         value={cardHolder}
                         onChange={(e) => setCardHolder(e.target.value)}
                         className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 dark:border-[#382518] bg-stone-50 dark:bg-[#120c08] text-xs outline-none focus:border-amber-500"
@@ -771,7 +860,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                         type="text"
                         inputMode="numeric"
                         maxLength={19}
-                        placeholder="4532 8910 2234 5678"
+                        placeholder="XXXX XXXX XXXX XXXX"
                         value={cardNumber}
                         onChange={(e) => {
                           const raw = e.target.value.replace(/\D/g, '').slice(0, 16);
@@ -792,7 +881,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                           type="text"
                           inputMode="numeric"
                           maxLength={5}
-                          placeholder="08/28"
+                          placeholder="MM/YY"
                           value={cardExpiry}
                           onChange={(e) => {
                             const raw = e.target.value.replace(/\D/g, '').slice(0, 4);
@@ -810,7 +899,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                           type="password"
                           inputMode="numeric"
                           maxLength={4}
-                          placeholder="•••"
+                          placeholder="CVV"
                           value={cardCvv}
                           onChange={(e) => setCardCvv(e.target.value.replace(/\D/g, '').slice(0, 4))}
                           className="w-full px-3.5 py-2.5 rounded-xl border border-stone-200 dark:border-[#382518] bg-stone-50 dark:bg-[#120c08] text-xs font-mono outline-none focus:border-amber-500"
@@ -833,7 +922,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                   <form onSubmit={handleConfirmNetBanking} className="space-y-4">
                     <div>
                       <label className="text-xs font-semibold block mb-1.5 text-stone-700 dark:text-stone-300">
-                        Choose Your Bank
+                        Choose Your Bank (Sender Bank)
                       </label>
                       <select
                         value={selectedBank}
@@ -850,17 +939,13 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
                     <div className="p-3.5 rounded-xl bg-stone-50 dark:bg-[#120c08] border border-stone-200 dark:border-[#352317] text-xs space-y-1">
                       <div className="font-bold text-stone-800 dark:text-stone-200">
-                        Beneficiary Settlement Account
+                        Sender Billing Summary
                       </div>
                       <div className="text-[11px] text-stone-600 dark:text-stone-400">
-                        Account Name: <strong className="text-stone-900 dark:text-stone-100">{payoutConfig.accountName}</strong>
+                        Account Holder: <strong className="text-stone-900 dark:text-stone-100">{senderName || senderEmail || 'Enter Sender Details'}</strong>
                       </div>
                       <div className="text-[11px] text-stone-600 dark:text-stone-400">
-                        Bank &amp; Branch: <strong>{payoutConfig.bankName}</strong> · IFSC:{' '}
-                        <span className="font-mono font-bold">{payoutConfig.ifscCode}</span>
-                      </div>
-                      <div className="text-[11px] text-stone-600 dark:text-stone-400">
-                        Account No.: <span className="font-mono font-bold">{payoutConfig.accountNumber}</span>
+                        Selected Bank: <strong>{selectedBank}</strong> · Duration: <strong>{billingCycle === 'annual' ? '365 Days' : '30 Days'}</strong>
                       </div>
                     </div>
 
@@ -926,7 +1011,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                         </div>
                         {billingCycle === 'annual' && price > 0 && (
                           <span className="text-[10px] text-amber-700 dark:text-amber-400 font-semibold block mt-0.5">
-                            Only ₹{Math.round(price / 12)} / month billed annually
+                            Only ₹{Math.round(price / 12)} / month · 365 days pass
                           </span>
                         )}
                       </div>
@@ -979,3 +1064,4 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 };
 
 export default SubscriptionModal;
+
