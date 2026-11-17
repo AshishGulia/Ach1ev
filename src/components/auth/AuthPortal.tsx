@@ -303,7 +303,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
         isModal
           ? undefined
           : {
-              backgroundColor: '#221007',
+              backgroundColor: '#120602',
             }
       }
     >
@@ -313,7 +313,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="p-2.5 rounded-xl backdrop-blur-xl transition-all cursor-pointer shadow-lg bg-[#241108]/90 text-[#fff8ee] hover:bg-[#3a1c0e]"
+            className="p-2.5 rounded-xl backdrop-blur-xl transition-all cursor-pointer shadow-lg bg-[#1c0a04]/92 text-[#fff8ee] hover:bg-[#2c1208]"
             title="Close Authentication Portal"
           >
             <X className="w-4 h-4" />
@@ -321,7 +321,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
         </div>
       )}
 
-      {/* Dark Chocolaty Brown Main Login Screen Viewport with Subtle Blurry Pattern */}
+      {/* Very Dark Chocolaty Brown Main Login Screen Viewport (No Background Patterns) */}
       <div
         className={
           isModal
@@ -332,72 +332,10 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
           isModal
             ? undefined
             : {
-                background:
-                  'radial-gradient(ellipse at 22% 28%, #34190c 0%, #241108 46%, #180b04 100%)',
+                backgroundColor: '#120602',
               }
         }
       >
-        {/* Subtle Blurry Pattern Backdrop Layer */}
-        {!isModal && (
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0 overflow-hidden select-none"
-          >
-            {/* Soft blurry cocoa & amber glow clouds */}
-            <div
-              className="absolute -top-24 -left-24 w-[420px] h-[420px] rounded-full opacity-45"
-              style={{
-                background: 'radial-gradient(circle, rgba(112, 59, 28, 0.55) 0%, rgba(36, 17, 8, 0) 70%)',
-                filter: 'blur(56px)',
-              }}
-            />
-            <div
-              className="absolute top-[28%] right-[-8%] w-[460px] h-[460px] rounded-full opacity-40"
-              style={{
-                background: 'radial-gradient(circle, rgba(138, 76, 36, 0.42) 0%, rgba(28, 12, 5, 0) 72%)',
-                filter: 'blur(68px)',
-              }}
-            />
-            <div
-              className="absolute -bottom-24 left-[32%] w-[520px] h-[320px] rounded-full opacity-35"
-              style={{
-                background: 'radial-gradient(circle, rgba(89, 44, 19, 0.5) 0%, rgba(24, 11, 4, 0) 72%)',
-                filter: 'blur(64px)',
-              }}
-            />
-
-            {/* Subtle blurry architectural/botanical lattice pattern */}
-            <div
-              className="absolute inset-0 opacity-75"
-              style={{
-                backgroundImage: `url("data:image/svg+xml,${encodeURIComponent(
-                  `<svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 96 96">
-                    <circle cx="48" cy="48" r="26" fill="none" stroke="#d9a566" stroke-opacity="0.14" stroke-width="1.2"/>
-                    <path d="M48 4 L92 48 L48 92 L4 48 Z" fill="none" stroke="#c88d4d" stroke-opacity="0.11" stroke-width="1"/>
-                    <circle cx="0" cy="0" r="14" fill="none" stroke="#e4b982" stroke-opacity="0.1" stroke-width="1"/>
-                    <circle cx="96" cy="0" r="14" fill="none" stroke="#e4b982" stroke-opacity="0.1" stroke-width="1"/>
-                    <circle cx="0" cy="96" r="14" fill="none" stroke="#e4b982" stroke-opacity="0.1" stroke-width="1"/>
-                    <circle cx="96" cy="96" r="14" fill="none" stroke="#e4b982" stroke-opacity="0.1" stroke-width="1"/>
-                    <circle cx="48" cy="48" r="4" fill="#e6be8a" fill-opacity="0.12"/>
-                  </svg>`
-                )}")`,
-                backgroundSize: '96px 96px',
-                filter: 'blur(2.5px)',
-                transform: 'scale(1.04)',
-                maskImage: 'radial-gradient(ellipse 85% 80% at 50% 45%, black 35%, transparent 92%)',
-                WebkitMaskImage: 'radial-gradient(ellipse 85% 80% at 50% 45%, black 35%, transparent 92%)',
-              }}
-            />
-
-            {/* Seamless bottom edge blend into showcase transition */}
-            <div
-              className="absolute inset-x-0 bottom-0 h-24"
-              style={{
-                background: 'linear-gradient(180deg, rgba(34, 16, 7, 0) 0%, #221007 100%)',
-              }}
-            />
-          </div>
-        )}
 
       {/* Clean Split Layout: Vertically Centered Brand Panel Beside Slightly Lower Compact Login Box */}
       <div className={isModal ? 'contents' : 'relative z-10 w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10 items-center my-auto'}>
@@ -430,9 +368,9 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
           className="rounded-3xl p-4 sm:p-6 backdrop-blur-xl backdrop-saturate-150 flex flex-col justify-between transition-all w-full"
           style={{
             background:
-              'linear-gradient(160deg, rgba(43, 21, 10, 0.86) 0%, rgba(25, 11, 5, 0.88) 100%)',
+              'linear-gradient(160deg, rgba(28, 12, 5, 0.92) 0%, rgba(16, 6, 2, 0.96) 100%)',
             boxShadow:
-              'inset 0 1.5px 1px rgba(255, 228, 186, 0.14), inset 0 -2px 6px rgba(12, 4, 1, 0.45), 0 24px 60px rgba(10, 4, 1, 0.58)',
+              'inset 0 1.5px 1px rgba(255, 228, 186, 0.14), inset 0 -2px 6px rgba(6, 2, 0, 0.65), 0 24px 60px rgba(4, 1, 0, 0.72)',
           }}
         >
           <div>
@@ -964,10 +902,10 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
       {!isModal && (
         <section
           aria-label="Achiev Medical Study Guide & Tour"
-          className="w-full relative z-10 px-4 sm:px-8 pt-6 pb-16 sm:pb-20 text-[#3b1e0d] overflow-hidden"
+          className="w-full relative z-10 pb-16 sm:pb-20 text-[#190802] overflow-hidden"
           style={{
             background:
-              'linear-gradient(180deg, #221007 0%, #34190c 5%, #4a2511 11%, #68381d 18%, #8b522f 26%, #b1744a 35%, #d49f6f 45%, #e8c398 55%, #f4e2c2 66%, #f2dfc0 84%, #ecd3ab 100%)',
+              'linear-gradient(180deg, #f5e4c6 0%, #f2dfc0 65%, #ecd3ab 100%)',
           }}
         >
           <div className="relative z-10">

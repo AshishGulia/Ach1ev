@@ -138,36 +138,47 @@ export const ProductDemoShowcase: React.FC = () => {
   return (
     <section
       aria-labelledby="product-demo-heading"
-      className="w-full max-w-6xl mx-auto pb-16 sm:pb-24 space-y-16 sm:space-y-24"
+      className="w-full pb-16 sm:pb-24"
     >
       <style>{SHOWCASE_CSS}</style>
 
-      {/* ═══════════════ 0. SEO & VALUE PROPOSITION INTRO ON SEAMLESS MERGE BAND ═══════════════ */}
-      <div className="max-w-4xl mx-auto text-center px-3 pt-2 pb-4 space-y-3">
-        <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#fdf2df] drop-shadow-[0_1px_4px_rgba(35,14,4,0.45)]">
-          Cheapest Medical Note-Making &amp; Focus Study Platform · ₹0 Free, ₹100 Pro &amp; ₹300 Master
-        </p>
-        <h2 className="text-2xl sm:text-4xl font-serif font-bold text-[#fffaf0] leading-tight text-balance drop-shadow-[0_2px_10px_rgba(35,14,4,0.38)]">
-          Side-by-Side Textbooks, Ruled Notes, 3D Almirahs &amp; Focus Timers in One Workspace
-        </h2>
-        <p className="text-sm sm:text-base text-[#faebd3] max-w-2xl mx-auto leading-relaxed drop-shadow-[0_1px_4px_rgba(35,14,4,0.35)]">
-          Built for MBBS, NEET-PG, USMLE, Nursing, and deep learners: read PDFs/DOCX beside handwriting or serif notes, pin timestamped YouTube lectures, build multi-level flowcharts, and organize every file neatly.
-        </p>
+      {/* ═══════════════ 0. SEO INTRO WITH SEAMLESS DARK CHOCOLATE -> CREAM MERGE BEFORE LAPTOP ═══════════════ */}
+      <div
+        className="w-full px-4 sm:px-8 pt-4 pb-24 sm:pb-32"
+        style={{
+          background:
+            'linear-gradient(180deg, #120602 0%, #190903 34%, #38190b 58%, #7b4624 76%, #ca9562 90%, #f5e4c6 100%)',
+        }}
+      >
+        <div className="max-w-4xl mx-auto text-center px-3 space-y-3">
+          <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#f5d093] drop-shadow-[0_1px_4px_rgba(12,4,1,0.7)]">
+            Cheapest Medical Note-Making &amp; Focus Study Platform · ₹0 Free, ₹100 Pro &amp; ₹300 Master
+          </p>
+          <h2 className="text-2xl sm:text-4xl font-serif font-bold text-[#fffaf0] leading-tight text-balance drop-shadow-[0_2px_10px_rgba(10,3,0,0.65)]">
+            Side-by-Side Textbooks, Ruled Notes, 3D Almirahs &amp; Focus Timers in One Workspace
+          </h2>
+          <p className="text-sm sm:text-base text-[#faebd3] max-w-2xl mx-auto leading-relaxed drop-shadow-[0_1px_5px_rgba(10,3,0,0.6)]">
+            Built for MBBS, NEET-PG, USMLE, Nursing, and deep learners: read PDFs/DOCX beside handwriting or serif notes, pin timestamped YouTube lectures, build multi-level flowcharts, and organize every file neatly.
+          </p>
+        </div>
       </div>
+
+      {/* Main High-Contrast Cream Content Container (Above & Below Laptop / Tablet) */}
+      <div className="max-w-6xl mx-auto px-4 sm:px-8 -mt-4 space-y-16 sm:space-y-24">
 
       {/* ═══════════════ 1. MACBOOK PRO SHOWCASE WITH ITS OWN SIDE ARROWS ═══════════════ */}
       <div>
         <div className="space-y-1.5 text-center mb-6 sm:mb-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#4a2511]">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6b3810]">
             Desktop Studio · MacBook View
           </p>
           <h2
             id="product-demo-heading"
-            className="text-xl sm:text-3xl font-bold text-[#3b1e0d] font-serif leading-[1.2] text-balance"
+            className="text-xl sm:text-3xl font-bold text-[#190802] font-serif leading-[1.2] text-balance"
           >
             {laptopScene.title}
           </h2>
-          <p className="text-sm text-[#4a2511] leading-relaxed max-w-2xl mx-auto">
+          <p className="text-sm font-medium text-[#2c1206] leading-relaxed max-w-2xl mx-auto">
             {laptopScene.caption}
           </p>
         </div>
@@ -177,9 +188,9 @@ export const ProductDemoShowcase: React.FC = () => {
             type="button"
             onClick={prevLaptop}
             aria-label="Previous laptop section preview"
-            className="pds-arrow-col flex items-center justify-center cursor-pointer select-none text-[#4E3211]/65 hover:text-[#1E1007]"
+            className="pds-arrow-col flex items-center justify-center cursor-pointer select-none text-[#2c1206]/80 hover:text-[#120602]"
           >
-            <ChevronLeft className="w-9 h-24 sm:w-12 sm:h-32 shrink-0" strokeWidth={1.1} aria-hidden="true" />
+            <ChevronLeft className="w-9 h-24 sm:w-12 sm:h-32 shrink-0" strokeWidth={1.35} aria-hidden="true" />
           </button>
 
           <div className="min-w-0 py-2">
@@ -190,46 +201,46 @@ export const ProductDemoShowcase: React.FC = () => {
             type="button"
             onClick={nextLaptop}
             aria-label="Next laptop section preview"
-            className="pds-arrow-col flex items-center justify-center cursor-pointer select-none text-[#4E3211]/65 hover:text-[#1E1007]"
+            className="pds-arrow-col flex items-center justify-center cursor-pointer select-none text-[#2c1206]/80 hover:text-[#120602]"
           >
-            <ChevronRight className="w-9 h-24 sm:w-12 sm:h-32 shrink-0" strokeWidth={1.1} aria-hidden="true" />
+            <ChevronRight className="w-9 h-24 sm:w-12 sm:h-32 shrink-0" strokeWidth={1.35} aria-hidden="true" />
           </button>
         </div>
       </div>
 
       {/* ═══════════════ 2. EDITORIAL PRAISE STRIP BETWEEN LAPTOP & TABLET ═══════════════ */}
-      <div className="max-w-4xl mx-auto py-4 sm:py-6 border-y border-[#8C5621]/25">
+      <div className="max-w-4xl mx-auto py-4 sm:py-6 border-y border-[#6b3810]/30">
         <div className="text-center space-y-3 max-w-2xl mx-auto px-2">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#7D4B1B]">
+          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#6b3810]">
             Why Scholars Switch to Ach1ev
           </p>
-          <h3 className="text-xl sm:text-3xl font-serif font-bold text-[#1E1007] leading-snug text-balance">
+          <h3 className="text-xl sm:text-3xl font-serif font-bold text-[#190802] leading-snug text-balance">
             One quiet desk where your textbooks, clinical tables, and revision memory finally live together.
           </h3>
-          <p className="text-sm sm:text-[15px] text-[#422B16] leading-relaxed">
+          <p className="text-sm sm:text-[15px] font-medium text-[#2c1206] leading-relaxed">
             Built specifically for long library hours and ward postings—Ach1ev pairs paper-calm reading comfort with
             instant diagram capture, tactile 3D bookshelves, and clinical flowcharts so nothing breaks your focus.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 pt-6 border-t border-[#8C5621]/18 text-left px-2">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 pt-6 border-t border-[#6b3810]/22 text-left px-2">
           <div className="space-y-1.5">
-            <h4 className="font-serif text-base font-bold text-[#221006]">Textbooks Beside Living Notes</h4>
-            <p className="text-xs sm:text-[13px] text-[#4A321C] leading-relaxed">
+            <h4 className="font-serif text-base font-bold text-[#190802]">Textbooks Beside Living Notes</h4>
+            <p className="text-xs sm:text-[13px] font-medium text-[#2c1206] leading-relaxed">
               Keep Harrison or Robbins open right beside ruled sepia pages, snip charts cleanly, and pin your lecture at
               the bottom without juggling five windows.
             </p>
           </div>
           <div className="space-y-1.5">
-            <h4 className="font-serif text-base font-bold text-[#221006]">Effortless Table &amp; Flowchart Recall</h4>
-            <p className="text-xs sm:text-[13px] text-[#4A321C] leading-relaxed">
+            <h4 className="font-serif text-base font-bold text-[#190802]">Effortless Table &amp; Flowchart Recall</h4>
+            <p className="text-xs sm:text-[13px] font-medium text-[#2c1206] leading-relaxed">
               Turn dense pharmacology photographs into structured editable tables and zoom effortlessly through branching
               clinical pathways before exams.
             </p>
           </div>
           <div className="space-y-1.5">
-            <h4 className="font-serif text-base font-bold text-[#221006]">Laptop Depth, iPad Fluidity</h4>
-            <p className="text-xs sm:text-[13px] text-[#4A321C] leading-relaxed">
+            <h4 className="font-serif text-base font-bold text-[#190802]">Laptop Depth, iPad Fluidity</h4>
+            <p className="text-xs sm:text-[13px] font-medium text-[#2c1206] leading-relaxed">
               Start an outline on your MacBook at the library and review flashcards or ward rosters seamlessly on your iPad—zero hardware lock-in.
             </p>
           </div>
@@ -239,13 +250,13 @@ export const ProductDemoShowcase: React.FC = () => {
       {/* ═══════════════ 3. IPAD PRO SHOWCASE WITH ITS OWN SIDE ARROWS ═══════════════ */}
       <div>
         <div className="space-y-1.5 text-center mb-6 sm:mb-8">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8f5f2c]">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6b3810]">
             Bedside &amp; Companion · iPad Pro View
           </p>
-          <h3 className="text-lg sm:text-2xl font-bold text-[#1E1007] font-serif leading-[1.2] text-balance">
+          <h3 className="text-lg sm:text-2xl font-bold text-[#190802] font-serif leading-[1.2] text-balance">
             {tabletScene.title}
           </h3>
-          <p className="text-sm text-[#4E3721] leading-relaxed max-w-xl mx-auto">
+          <p className="text-sm font-medium text-[#2c1206] leading-relaxed max-w-xl mx-auto">
             {tabletScene.tablet.heading} — {tabletScene.tablet.subheading}
           </p>
         </div>
@@ -255,9 +266,9 @@ export const ProductDemoShowcase: React.FC = () => {
             type="button"
             onClick={prevTablet}
             aria-label="Previous tablet section preview"
-            className="pds-arrow-col flex items-center justify-center cursor-pointer select-none text-[#4E3211]/65 hover:text-[#1E1007]"
+            className="pds-arrow-col flex items-center justify-center cursor-pointer select-none text-[#2c1206]/80 hover:text-[#120602]"
           >
-            <ChevronLeft className="w-9 h-24 sm:w-12 sm:h-32 shrink-0" strokeWidth={1.1} aria-hidden="true" />
+            <ChevronLeft className="w-9 h-24 sm:w-12 sm:h-32 shrink-0" strokeWidth={1.35} aria-hidden="true" />
           </button>
 
           <div className="min-w-0 py-2">
@@ -268,9 +279,9 @@ export const ProductDemoShowcase: React.FC = () => {
             type="button"
             onClick={nextTablet}
             aria-label="Next tablet section preview"
-            className="pds-arrow-col flex items-center justify-center cursor-pointer select-none text-[#4E3211]/65 hover:text-[#1E1007]"
+            className="pds-arrow-col flex items-center justify-center cursor-pointer select-none text-[#2c1206]/80 hover:text-[#120602]"
           >
-            <ChevronRight className="w-9 h-24 sm:w-12 sm:h-32 shrink-0" strokeWidth={1.1} aria-hidden="true" />
+            <ChevronRight className="w-9 h-24 sm:w-12 sm:h-32 shrink-0" strokeWidth={1.35} aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -317,13 +328,13 @@ export const ProductDemoShowcase: React.FC = () => {
       {/* ═══════════════ 5. ACH1EV ACADEMIC PRICING PLANS & COMPARISON TABLE ═══════════════ */}
       <div aria-labelledby="achiev-pricing-heading" className="space-y-8 max-w-5xl mx-auto">
         <div className="text-center space-y-2">
-          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#8f5f2c]">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6b3810]">
             Simple Student Pricing
           </p>
-          <h3 id="achiev-pricing-heading" className="text-xl sm:text-3xl font-bold text-[#1E1007] font-serif">
+          <h3 id="achiev-pricing-heading" className="text-xl sm:text-3xl font-bold text-[#190802] font-serif">
             Ach1ev Academic Plans
           </h3>
-          <p className="text-xs sm:text-sm text-[#4E3721] max-w-xl mx-auto leading-relaxed">
+          <p className="text-xs sm:text-sm font-medium text-[#2c1206] max-w-xl mx-auto leading-relaxed">
             Start free forever or unlock complete clinical extraction, all 5 3D almirahs, and Drive vault sync via UPI QR, Debit/Credit Card, or Net Banking.
           </p>
         </div>
@@ -335,33 +346,33 @@ export const ProductDemoShowcase: React.FC = () => {
               key={tier.id}
               className={`rounded-2xl p-5 sm:p-6 border flex flex-col justify-between transition-all ${
                 tier.highlight
-                  ? 'bg-[#FFF8E8]/92 border-[#A66C24] ring-1 ring-[#C98A32]/45 shadow-[0_18px_38px_rgba(92,50,12,0.16)]'
-                  : 'bg-[#FFFBF4]/82 border-[#C7A474]/60 shadow-[0_8px_22px_rgba(78,50,15,0.08)]'
+                  ? 'bg-[#FFF8E8]/96 border-[#A66C24] ring-1 ring-[#C98A32]/45 shadow-[0_18px_38px_rgba(92,50,12,0.16)]'
+                  : 'bg-[#FFFBF4]/92 border-[#C7A474]/70 shadow-[0_8px_22px_rgba(78,50,15,0.08)]'
               }`}
             >
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#8A5618]">
+                <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-[#6b3810]">
                   {tier.badge}
                 </p>
-                <h4 className="text-xl font-bold text-[#1E1007] mt-1 font-serif">{tier.name}</h4>
+                <h4 className="text-xl font-bold text-[#190802] mt-1 font-serif">{tier.name}</h4>
                 <div className="flex items-baseline gap-2 mt-2 tabular-nums">
-                  <span className="text-3xl font-extrabold text-[#1E1007]">
+                  <span className="text-3xl font-extrabold text-[#190802]">
                     {tier.priceAnnual === 0 ? '₹0' : `₹${tier.priceMonthly}`}
                   </span>
-                  <span className="text-xs font-semibold text-[#5E4126]">
+                  <span className="text-xs font-semibold text-[#3b1b0a]">
                     {tier.priceAnnual === 0
                       ? 'Free Forever'
                       : `/ mo · ₹${tier.priceAnnual.toLocaleString('en-IN')}/yr`}
                   </span>
                 </div>
-                <p className="text-xs text-[#4E3721] mt-2.5 leading-relaxed">{tier.description}</p>
+                <p className="text-xs font-medium text-[#2c1206] mt-2.5 leading-relaxed">{tier.description}</p>
               </div>
 
               <div className="mt-5 pt-4 border-t border-[#DEC79E]/75 space-y-4">
                 <ul className="space-y-2">
                   {tier.features.slice(0, 5).map((f) => (
-                    <li key={f} className="flex items-start gap-2 text-xs text-[#2E1B0C] leading-snug">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-[#8A5618] shrink-0 mt-0.5" />
+                    <li key={f} className="flex items-start gap-2 text-xs font-medium text-[#1e0b03] leading-snug">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-[#6b3810] shrink-0 mt-0.5" />
                       <span>{f}</span>
                     </li>
                   ))}
@@ -372,8 +383,8 @@ export const ProductDemoShowcase: React.FC = () => {
                   onClick={() => window.dispatchEvent(new CustomEvent('achiev_skip_create_note'))}
                   className={`w-full py-2.5 px-4 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
                     tier.highlight
-                      ? 'bg-[#8C5621] hover:bg-[#734316] text-white shadow-sm'
-                      : 'bg-[#B67A3B] hover:bg-[#9E652B] text-[#1C0D04]'
+                      ? 'bg-[#6b3810] hover:bg-[#52290a] text-white shadow-sm'
+                      : 'bg-[#2c1206] hover:bg-[#190802] text-[#fff6e5]'
                   }`}
                 >
                   <span>{tier.priceAnnual === 0 ? 'Start Free Note' : 'Explore Studio Free'}</span>
@@ -385,26 +396,26 @@ export const ProductDemoShowcase: React.FC = () => {
         </div>
 
         {/* Clean Tabular Feature & Pricing Comparison Table */}
-        <div className="rounded-2xl border border-[#B8905E]/55 bg-[#FFF9EE]/82 overflow-hidden shadow-[0_10px_28px_rgba(78,50,15,0.08)]">
+        <div className="rounded-2xl border border-[#B8905E]/65 bg-[#FFF9EE]/92 overflow-hidden shadow-[0_10px_28px_rgba(78,50,15,0.08)]">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-[600px]">
               <thead>
-                <tr className="bg-[#DFBE92]/55 border-b border-[#B8905E]/50 text-[#221006]">
+                <tr className="bg-[#DFBE92]/70 border-b border-[#B8905E]/60 text-[#190802]">
                   <th className="py-3 px-4 font-serif text-xs sm:text-sm font-bold">Workspace Capability</th>
                   <th className="py-3 px-4 font-serif text-xs sm:text-sm font-bold text-center">Free Scholar</th>
-                  <th className="py-3 px-4 font-serif text-xs sm:text-sm font-bold text-center text-[#6E3E0F]">
+                  <th className="py-3 px-4 font-serif text-xs sm:text-sm font-bold text-center text-[#5c2c09]">
                     Clinical Scholar Pro
                   </th>
                   <th className="py-3 px-4 font-serif text-xs sm:text-sm font-bold text-center">Chief Fellow Master</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#D7B789]/45">
+              <tbody className="divide-y divide-[#D7B789]/55">
                 {PLAN_COMPARISON_ROWS.map((row, idx) => (
                   <tr
                     key={row.feature}
-                    className={idx % 2 === 1 ? 'bg-[#F5E7CC]/45' : 'bg-transparent'}
+                    className={idx % 2 === 1 ? 'bg-[#F5E7CC]/55' : 'bg-transparent'}
                   >
-                    <td className="py-2.5 px-4 text-xs sm:text-[13px] font-medium text-[#2A1508]">
+                    <td className="py-2.5 px-4 text-xs sm:text-[13px] font-semibold text-[#1e0b03]">
                       {row.feature}
                     </td>
                     <td className="py-2.5 px-4 text-center">{renderPlanCell(row.free)}</td>
@@ -418,9 +429,9 @@ export const ProductDemoShowcase: React.FC = () => {
         </div>
       </div>
 
-      {/* ═══════════════ 6. FREQUENTLY ASKED QUESTIONS — CHOCOLATE BROWN QUESTION & ANSWER TEXT ═══════════════ */}
+      {/* ═══════════════ 6. FREQUENTLY ASKED QUESTIONS — HIGH-CONTRAST CHOCOLATE BROWN ═══════════════ */}
       <div className="max-w-4xl mx-auto space-y-3">
-        <h3 className="text-xl sm:text-2xl font-bold text-center text-[#3b1e0d] font-serif mb-4">
+        <h3 className="text-xl sm:text-2xl font-bold text-center text-[#190802] font-serif mb-4">
           Frequently Asked Questions
         </h3>
         {PRODUCT_FAQS.map((item, i) => {
@@ -428,22 +439,22 @@ export const ProductDemoShowcase: React.FC = () => {
           return (
             <div
               key={item.q}
-              className="rounded-2xl border border-[#b98a55] bg-[#F4E2C2] overflow-hidden shadow-[0_6px_18px_rgba(68,36,12,0.10)]"
+              className="rounded-2xl border border-[#9e6e3c] bg-[#F4E2C2] overflow-hidden shadow-[0_6px_18px_rgba(68,36,12,0.10)]"
             >
               <button
                 type="button"
                 onClick={() => setOpenFaqIdx(isOpen ? null : i)}
                 className="pds-faq-btn raw-icon-btn w-full px-4 py-3.5 text-left flex items-center justify-between gap-3 cursor-pointer transition-colors"
               >
-                <span className="text-xs sm:text-sm font-bold text-[#3b1e0d]">{item.q}</span>
+                <span className="text-xs sm:text-sm font-bold text-[#220d04]">{item.q}</span>
                 {isOpen ? (
-                  <ChevronUp className="w-4 h-4 text-[#3b1e0d] shrink-0" />
+                  <ChevronUp className="w-4 h-4 text-[#220d04] shrink-0" />
                 ) : (
-                  <ChevronDown className="w-4 h-4 text-[#3b1e0d] shrink-0" />
+                  <ChevronDown className="w-4 h-4 text-[#220d04] shrink-0" />
                 )}
               </button>
               {isOpen && (
-                <div className="px-4 pb-3.5 text-xs sm:text-[13px] font-medium text-[#4a2511] bg-[#f8ebd4] leading-relaxed border-t border-[#b98a55]/35 pt-2.5">
+                <div className="px-4 pb-3.5 text-xs sm:text-[13px] font-medium text-[#2c1206] bg-[#faf0dc] leading-relaxed border-t border-[#9e6e3c]/35 pt-2.5">
                   {item.a}
                 </div>
               )}
@@ -453,25 +464,26 @@ export const ProductDemoShowcase: React.FC = () => {
       </div>
 
       {/* ═══════════════ 7. QUIET LEGAL & PRIVACY FOOTER ═══════════════ */}
-      <footer className="max-w-4xl mx-auto pt-4 border-t border-[#8C5621]/25 flex flex-wrap items-center justify-between gap-3 text-xs text-[#4a2511]">
-        <span className="font-semibold">© {new Date().getFullYear()} Ach1ev — Settle Ideas</span>
+      <footer className="max-w-4xl mx-auto pt-4 border-t border-[#6b3810]/30 flex flex-wrap items-center justify-between gap-3 text-xs text-[#2c1206]">
+        <span className="font-bold">© {new Date().getFullYear()} Ach1ev — Settle Ideas</span>
         <div className="flex items-center gap-4">
           <button
             type="button"
             onClick={() => window.dispatchEvent(new CustomEvent('achiev_open_privacy_policy'))}
-            className="font-semibold text-[#3b1e0d] hover:underline underline-offset-4 cursor-pointer"
+            className="font-bold text-[#190802] hover:underline underline-offset-4 cursor-pointer"
           >
             Privacy Policy
           </button>
           <button
             type="button"
             onClick={() => window.dispatchEvent(new CustomEvent('achiev_skip_create_note'))}
-            className="font-semibold text-[#3b1e0d] hover:underline underline-offset-4 cursor-pointer"
+            className="font-bold text-[#190802] hover:underline underline-offset-4 cursor-pointer"
           >
             Open Studio
           </button>
         </div>
       </footer>
+      </div>
     </section>
   );
 };
