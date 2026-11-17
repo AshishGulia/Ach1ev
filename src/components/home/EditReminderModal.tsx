@@ -150,8 +150,8 @@ export const EditReminderModal: React.FC<EditReminderModalProps> = ({
       osc2.start();
       osc1.stop(ctx.currentTime + 1.6);
       osc2.stop(ctx.currentTime + 1.6);
-    } catch (err) {
-      console.warn('Audio chime error:', err);
+    } catch {
+      // Ignore audio context restrictions
     }
   };
 

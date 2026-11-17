@@ -522,8 +522,8 @@ export const WindowsHeader: React.FC<WindowsHeaderProps> = ({
 
       setActiveSoundId(soundId);
       setIsSoundMenuOpen(false);
-    } catch (e) {
-      console.warn('Audio playback fallback', e);
+    } catch {
+      // Ignore browser autoplay restrictions
     }
   };
 

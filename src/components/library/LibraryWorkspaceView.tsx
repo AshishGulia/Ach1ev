@@ -236,8 +236,8 @@ export const LibraryWorkspaceView: React.FC<LibraryWorkspaceViewProps> = ({
         if (Array.isArray(scanned.tables)) extractedTables = scanned.tables;
         if (Array.isArray(scanned.events)) parsedEventsCount = scanned.events.length;
       }
-    } catch (err) {
-      console.warn('Library file scan skipped:', err);
+    } catch {
+      // Fallback to local document metadata when scan is skipped
     }
 
     const record = addUploadedDocument({

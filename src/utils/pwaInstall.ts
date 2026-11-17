@@ -25,7 +25,7 @@ export function initPwaSupport(): void {
     notify();
   });
 
-  if ('serviceWorker' in navigator) {
+  if ('serviceWorker' in navigator && window.self === window.top) {
     window.addEventListener('load', () => {
       const hadController = Boolean(navigator.serviceWorker.controller);
       let reloading = false;
@@ -40,8 +40,8 @@ export function initPwaSupport(): void {
         .then((reg) => {
           reg.update().catch(() => {});
         })
-        .catch((err) => {
-          console.warn('Service Worker registration skipped:', err?.message || err);
+        .catch(() => {
+          // Ignore environments where service workers are unsupported
         });
     });
   }

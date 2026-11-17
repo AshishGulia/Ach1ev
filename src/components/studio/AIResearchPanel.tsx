@@ -72,8 +72,7 @@ export const AIResearchPanel: React.FC<AIResearchPanelProps> = ({
 
       const data = await res.json();
       setResearchContent(data.content);
-    } catch (err: any) {
-      console.error(err);
+    } catch {
       setError('Unable to load latest clinical research. Check connection or API key.');
       // High-yield fallback content so student is never blocked
       setResearchContent(`

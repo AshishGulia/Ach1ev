@@ -1242,7 +1242,10 @@ html[data-design]:not([data-design="1"]) button:not([data-swatch]):not([role="sw
 html[data-design="1"]:not(.dark) .leisure-surface,
 html:not([data-design]):not(.dark) .leisure-surface {
   background-color: #faf6ee !important;
-  background-image: url("/assets/themes/marble-gold-light.jpg?v=1"), linear-gradient(155deg, #fdfcf8 0%, #f8f3ea 48%, #f1e8d9 100%) !important;
+  background-image:
+    radial-gradient(ellipse 84% 56% at 18% 20%, rgba(212, 174, 114, 0.14) 0%, transparent 62%),
+    radial-gradient(ellipse 72% 60% at 84% 76%, rgba(164, 124, 67, 0.10) 0%, transparent 64%),
+    linear-gradient(155deg, #fdfcf8 0%, #f8f3ea 48%, #f1e8d9 100%) !important;
   background-size: cover !important;
   background-position: center !important;
   background-repeat: no-repeat !important;

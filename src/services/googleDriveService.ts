@@ -83,10 +83,7 @@ export async function resolveGoogleClientId(): Promise<string> {
 
 export async function prefetchGoogleOAuth(): Promise<void> {
   try {
-    const id = await resolveGoogleClientId();
-    if (id && typeof window !== 'undefined') {
-      await loadGoogleIdentityServices();
-    }
+    await resolveGoogleClientId();
   } catch {
     // Ignore background prefetch errors
   }

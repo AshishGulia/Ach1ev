@@ -520,8 +520,8 @@ export function useStored(): [AlmirahT[], (next: AlmirahT[]) => void] {
       setValue(next);
       try {
         localStorage.setItem(KEY, JSON.stringify(next));
-      } catch (err) {
-        console.error('Failed to save almirahs to localStorage', err);
+      } catch {
+        // Ignore storage quota errors
       }
     },
   ];

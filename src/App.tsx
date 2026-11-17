@@ -697,8 +697,7 @@ export default function App() {
         hasHydratedCloudRef.current = userId;
         setSyncStatus('synced');
         setLastSyncedAt(new Date().toISOString());
-      } catch (err) {
-        console.error('Supabase workspace sync failed:', err);
+      } catch {
         setSyncStatus('error');
       } finally {
         setTimeout(() => {

@@ -1,11 +1,10 @@
-const CACHE_NAME = 'achiev-app-shell-v9';
+const CACHE_NAME = 'achiev-app-shell-v10';
 const STATIC_ASSETS = [
   '/manifest.webmanifest',
-  '/assets/aistudio/IMG_2993_-_mini_beda30e2.webp',
-  '/assets/brand/achiev-wordmark.png?v=hd8',
-  '/assets/brand/achiev-emblem.png?v=hd8',
-  '/assets/brand/achiev-icon-192.png?v=hd7',
-  '/assets/brand/achiev-icon-512.png',
+  '/assets/aistudio/Final_Logo_webp_1000_x_350_e6e85d30.PNG',
+  '/android-chrome-192x192.png?v=2',
+  '/android-chrome-512x512.png?v=2',
+  '/favicon.svg?v=2',
 ];
 
 self.addEventListener('install', (event) => {
@@ -51,7 +50,7 @@ self.addEventListener('fetch', (event) => {
   }
 
   // Cache-first with background refresh for brand assets & static icons
-  if (url.pathname.startsWith('/assets/brand/') || url.pathname.endsWith('/manifest.webmanifest')) {
+  if (url.pathname.startsWith('/assets/aistudio/') || url.pathname.endsWith('/manifest.webmanifest')) {
     event.respondWith(
       caches.match(request).then((cached) => {
         const fetched = fetch(request)

@@ -404,8 +404,7 @@ export const RosterCalendarModal: React.FC<RosterCalendarModalProps> = ({
       } else {
         setScanStatus(`✓ Saved "${file.name}" to Library & Recent Files. Single-click below to open it.`);
       }
-    } catch (err: any) {
-      console.error(err);
+    } catch {
       const fallbackDoc = addUploadedDocument({
         title: file.name.replace(/\.[^.]+$/, '') || file.name,
         fileName: file.name,
