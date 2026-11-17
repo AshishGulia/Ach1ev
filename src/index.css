@@ -1083,19 +1083,19 @@ button[class*="border"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-bt
   100% { opacity: 1; filter: blur(0px); }
 }
 
-/* Shared button exclusions for custom shapes */
+/* Shared button exclusions for custom shapes (Login Page .auth-portal-root stays 100% isolated) */
 /* Theme 2 — Twilight Sunset: Sunset Contour */
-html[data-design="2"] button[class*="bg-"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.rounded-full),
-html[data-design="2"] button[class*="border"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.rounded-full),
-html[data-design="2"] :is(.atelier-btn, .atelier-log, .an-btn, .an-btn-primary, .read-attach-btn, .read-icon-btn, .read-tab, .shelfwise-btn, .shelfwise-seg-btn, .rs-btn, .rs-tab) {
+html[data-design="2"] button[class*="bg-"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.rounded-full):not(.auth-portal-root):not(.auth-portal-root *),
+html[data-design="2"] button[class*="border"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.rounded-full):not(.auth-portal-root):not(.auth-portal-root *),
+html[data-design="2"] :is(.atelier-btn, .atelier-log, .an-btn, .an-btn-primary, .read-attach-btn, .read-icon-btn, .read-tab, .shelfwise-btn, .shelfwise-seg-btn, .rs-btn, .rs-tab):not(.auth-portal-root):not(.auth-portal-root *) {
   border-radius: 15px 4px 15px 4px !important;
 }
 
 /* Theme 3 — Royal Blush & Plum: Cushioned Rounded Buttons */
-html[data-design="3"] button[class*="bg-"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.rounded-full),
-html[data-design="3"] button[class*="border"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.rounded-full),
-html[data-design="3"] button:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.rounded-full),
-html[data-design="3"] :is(.atelier-btn, .atelier-log, .an-btn, .an-btn-primary, .read-attach-btn, .read-tab, .shelfwise-btn, .shelfwise-seg-btn, .rs-btn, .rs-tab) {
+html[data-design="3"] button[class*="bg-"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.rounded-full):not(.auth-portal-root):not(.auth-portal-root *),
+html[data-design="3"] button[class*="border"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.rounded-full):not(.auth-portal-root):not(.auth-portal-root *),
+html[data-design="3"] button:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.rounded-full):not(.auth-portal-root):not(.auth-portal-root *),
+html[data-design="3"] :is(.atelier-btn, .atelier-log, .an-btn, .an-btn-primary, .read-attach-btn, .read-tab, .shelfwise-btn, .shelfwise-seg-btn, .rs-btn, .rs-tab):not(.auth-portal-root):not(.auth-portal-root *) {
   border-radius: 15px !important;
   box-shadow:
     inset 0 2px 3px rgba(255, 255, 255, 0.45),
@@ -1103,9 +1103,9 @@ html[data-design="3"] :is(.atelier-btn, .atelier-log, .an-btn, .an-btn-primary, 
     0 5px 12px -4px rgba(61, 33, 43, 0.16) !important;
 }
 
-/* Theme 4 — Muted Slate & Cobalt: Crisp Sharp 90° Right-Angle Corners on ALL Buttons & Controls */
-html[data-design="4"] button:not([data-swatch]):not([role="switch"]):not(.joystick-btn):not(.atelier-tr-del),
-html[data-design="4"] [role="button"]:not([data-swatch]):not([role="switch"]),
+/* Theme 4 — Muted Slate & Cobalt: Crisp Sharp 90° Right-Angle Corners on Workspace Buttons & Controls */
+html[data-design="4"] button:not([data-swatch]):not([role="switch"]):not(.joystick-btn):not(.atelier-tr-del):not(.auth-portal-root):not(.auth-portal-root *),
+html[data-design="4"] [role="button"]:not([data-swatch]):not([role="switch"]):not(.auth-portal-root):not(.auth-portal-root *),
 html[data-design="4"] :is(
   .atelier-btn,
   .atelier-log,
@@ -1140,18 +1140,18 @@ html[data-design="4"] :is(
   .themed-accent-btn,
   .themed-tab-active,
   .raw-icon-btn
-) {
+):not(.auth-portal-root):not(.auth-portal-root *) {
   border-radius: 0px !important;
 }
 
 /* Theme 5 — Forest Emerald & Gold: Crisp Emerald Tab (8px 14px 8px 14px) */
-html[data-design="5"] button[class*="bg-"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.rounded-full),
-html[data-design="5"] button[class*="border"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.rounded-full),
-html[data-design="5"] :is(.atelier-btn, .atelier-log, .an-btn, .an-btn-primary, .read-attach-btn, .read-icon-btn, .read-tab, .shelfwise-btn, .shelfwise-seg-btn, .rs-btn, .rs-tab) {
+html[data-design="5"] button[class*="bg-"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.rounded-full):not(.auth-portal-root):not(.auth-portal-root *),
+html[data-design="5"] button[class*="border"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-btn):not(.joystick-btn):not(.atelier-tr-del):not(.rounded-full):not(.auth-portal-root):not(.auth-portal-root *),
+html[data-design="5"] :is(.atelier-btn, .atelier-log, .an-btn, .an-btn-primary, .read-attach-btn, .read-icon-btn, .read-tab, .shelfwise-btn, .shelfwise-seg-btn, .rs-btn, .rs-tab):not(.auth-portal-root):not(.auth-portal-root *) {
   border-radius: 8px 14px 8px 14px !important;
 }
 
-html[data-design]:not([data-design="1"]) button:not([data-swatch]):not([role="switch"]):active {
+html[data-design]:not([data-design="1"]) button:not([data-swatch]):not([role="switch"]):not(.auth-portal-root):not(.auth-portal-root *):active {
   animation: themeSoftFadePress 0.32s ease;
 }
 

@@ -4,6 +4,8 @@ import fs from 'fs';
 import crypto from 'crypto';
 import { fileURLToPath } from 'url';
 import { GoogleGenAI } from '@google/genai';
+import * as XLSX from 'xlsx';
+import mammoth from 'mammoth';
 
 const currentDir = path.dirname(fileURLToPath(import.meta.url));
 
@@ -102,7 +104,7 @@ function getRequestOrigin(req: express.Request): string {
 
 export function attachApiRoutes(app: express.Express): express.Express {
   app.set('trust proxy', 1);
-  app.use(express.json({ limit: '20mb' }));
+  app.use(express.json({ limit: '35mb' }));
 
   // Allow requests from primary domain (achiev.com), secondary Vercel domains, and local dev
   app.use((req, res, next) => {
@@ -549,6 +551,308 @@ Return ONLY a valid JSON array of objects with the exact following schema:
       console.error('Error in /api/gemini/parse-roster:', error);
       return res.status(500).json({
         error: error.message || 'Failed to parse timetable roster.',
+      });
+    }
+  });
+
+  // 2b. Universal Document, Table & Roster AI Scanner (PDF, Word, Excel, CSV, TXT, Images)
+  app.post('/api/gemini/scan-document', async (req, res) => {
+    try {
+      const { filename = 'Document', mimeType = '', base64Data = '', extractedText: rawTextInput = '' } = req.body || {};
+      const lowerName = String(filename).toLowerCase();
+      const ext = lowerName.split('.').pop() || '';
+
+      interface ParsedTable {
+        id: string;
+        title: string;
+        headers: string[];
+        rows: string[][];
+      }
+
+      const detectedTables: ParsedTable[] = [];
+      let combinedText = String(rawTextInput || '').trim();
+      const buffer = base64Data ? Buffer.from(String(base64Data), 'base64') : null;
+
+      // 1) Excel / Spreadsheet (.xlsx, .xls, .csv, .ods)
+      if (buffer && (ext === 'xlsx' || ext === 'xls' || ext === 'csv' || ext === 'ods' || mimeType.includes('spreadsheet') || mimeType.includes('excel'))) {
+        try {
+          const wb = XLSX.read(buffer, { type: 'buffer' });
+          const textChunks: string[] = [];
+          wb.SheetNames.forEach((sheetName, sIdx) => {
+            const sheet = wb.Sheets[sheetName];
+            if (!sheet) return;
+            const rows2D = XLSX.utils.sheet_to_json<any[]>(sheet, { header: 1, defval: '' });
+            const cleanedRows = rows2D
+              .map((r) => (Array.isArray(r) ? r.map((c) => String(c ?? '').trim()) : []))
+              .filter((r) => r.some((cell) => cell.length > 0));
+            if (cleanedRows.length > 0) {
+              const headers = cleanedRows[0];
+              const bodyRows = cleanedRows.slice(1).map((r) => {
+                const padded = [...r];
+                while (padded.length < headers.length) padded.push('');
+                return padded.slice(0, Math.max(headers.length, padded.length));
+              });
+              detectedTables.push({
+                id: `tbl-sheet-${sIdx}-${Date.now()}`,
+                title: sheetName || `${filename} Sheet ${sIdx + 1}`,
+                headers,
+                rows: bodyRows.length > 0 ? bodyRows : [headers],
+              });
+              textChunks.push(
+                `[Sheet: ${sheetName}]\n` +
+                  cleanedRows.map((r) => r.join(' | ')).join('\n')
+              );
+            }
+          });
+          if (textChunks.length > 0) {
+            combinedText = textChunks.join('\n\n');
+          }
+        } catch (xlsxErr) {
+          console.warn('XLSX parse warning:', xlsxErr);
+        }
+      }
+
+      // 2) Word Document (.docx)
+      if (buffer && (ext === 'docx' || mimeType.includes('wordprocessingml'))) {
+        try {
+          const [rawRes, htmlRes] = await Promise.all([
+            mammoth.extractRawText({ buffer }),
+            mammoth.convertToHtml({ buffer }),
+          ]);
+          if (rawRes.value && rawRes.value.trim()) {
+            combinedText = rawRes.value.trim();
+          }
+          const html = htmlRes.value || '';
+          const tableMatches = html.match(/<table[\s\S]*?<\/table>/gi) || [];
+          tableMatches.forEach((tblHtml, tIdx) => {
+            const trMatches = tblHtml.match(/<tr[\s\S]*?<\/tr>/gi) || [];
+            const matrix: string[][] = [];
+            trMatches.forEach((tr) => {
+              const cellMatches = tr.match(/<(td|th)[^>]*>[\s\S]*?<\/(td|th)>/gi) || [];
+              const rowCells = cellMatches.map((cell) =>
+                cell
+                  .replace(/<[^>]+>/g, ' ')
+                  .replace(/&nbsp;/gi, ' ')
+                  .replace(/&amp;/gi, '&')
+                  .replace(/&lt;/gi, '<')
+                  .replace(/&gt;/gi, '>')
+                  .replace(/\s+/g, ' ')
+                  .trim()
+              );
+              if (rowCells.some((c) => c.length > 0)) {
+                matrix.push(rowCells);
+              }
+            });
+            if (matrix.length > 0) {
+              detectedTables.push({
+                id: `tbl-docx-${tIdx}-${Date.now()}`,
+                title: `${filename} — Table ${tIdx + 1}`,
+                headers: matrix[0],
+                rows: matrix.slice(1).length > 0 ? matrix.slice(1) : [matrix[0]],
+              });
+            }
+          });
+        } catch (docxErr) {
+          console.warn('DOCX parse warning:', docxErr);
+        }
+      }
+
+      // 3) Legacy .doc or plain text / CSV text
+      if (buffer && !combinedText && (ext === 'txt' || ext === 'md' || ext === 'csv' || mimeType.startsWith('text/'))) {
+        combinedText = buffer.toString('utf8');
+      }
+
+      if (ext === 'csv' && detectedTables.length === 0 && combinedText) {
+        const lines = combinedText.split(/\r?\n/).filter((l) => l.trim().length > 0);
+        if (lines.length > 0) {
+          const matrix = lines.map((line) => line.split(',').map((c) => c.replace(/^"|"$/g, '').trim()));
+          detectedTables.push({
+            id: `tbl-csv-${Date.now()}`,
+            title: `${filename} CSV Table`,
+            headers: matrix[0],
+            rows: matrix.slice(1),
+          });
+        }
+      }
+
+      const isVisualBinary =
+        Boolean(base64Data) &&
+        (ext === 'pdf' ||
+          ext === 'png' ||
+          ext === 'jpg' ||
+          ext === 'jpeg' ||
+          ext === 'webp' ||
+          mimeType === 'application/pdf' ||
+          mimeType.startsWith('image/'));
+
+      const aiEvents: any[] = [];
+      let aiTables: ParsedTable[] = [];
+      let aiExtractedText = combinedText;
+      let aiSummary = '';
+
+      if (process.env.GEMINI_API_KEY && (isVisualBinary || combinedText.length > 0)) {
+        try {
+          const ai = getGenAI();
+          const todayStr = new Date().toISOString().split('T')[0];
+          const promptText = `You are a precision Academic Roster, Table & Study Document Scanner for medical students.
+File name: "${filename}"
+MIME type: "${mimeType || 'unknown'}"
+Today's date reference: ${todayStr}
+
+Analyze the provided document (PDF pages, image, spreadsheet rows, or document text) and extract:
+1. ALL schedule / timetable / roster / exam / posting / deadline sessions into "events".
+2. ALL tabular structures (timetables, drug charts, lab tables, marksheets, duty rosters, clinical comparisons) into "tables" with clear column headers and row arrays.
+3. A clean readable transcript or key structured notes into "extractedText" (preserve original lines if plain text).
+4. A concise 1-2 sentence "summary".
+
+${combinedText ? `Document Extracted Text:\n"""\n${combinedText.slice(0, 28000)}\n"""\n` : ''}
+
+Return STRICT valid JSON object matching this exact schema (no markdown code fences):
+{
+  "summary": "Brief description of what was detected",
+  "extractedText": "Readable text extracted from the document",
+  "tables": [
+    {
+      "title": "Descriptive Table Title",
+      "headers": ["Column 1", "Column 2", "Column 3"],
+      "rows": [["val 1", "val 2", "val 3"]]
+    }
+  ],
+  "events": [
+    {
+      "id": "ev-1",
+      "title": "Class / Posting / Exam / Topic Title",
+      "subject": "Anatomy | Physiology | Biochemistry | Pharmacology | Pathology | Microbiology | Forensic Medicine | Community Medicine | Internal Medicine | General Surgery | Pediatrics | OBGYN",
+      "type": "lecture | practical | posting | seminar | exam",
+      "date": "YYYY-MM-DD (if only weekday given, resolve to nearest upcoming date from ${todayStr})",
+      "dayOfWeek": "Monday",
+      "startTime": "09:00",
+      "endTime": "10:00",
+      "venue": "Venue or Hall or Ward",
+      "instructor": "Faculty/Doctor name if present",
+      "notes": "Extra details"
+    }
+  ]
+}`;
+
+          const parts: any[] = [];
+          if (isVisualBinary && base64Data) {
+            const resolvedMime =
+              mimeType ||
+              (ext === 'pdf'
+                ? 'application/pdf'
+                : ext === 'png'
+                ? 'image/png'
+                : ext === 'webp'
+                ? 'image/webp'
+                : 'image/jpeg');
+            parts.push({
+              inlineData: {
+                mimeType: resolvedMime,
+                data: String(base64Data),
+              },
+            });
+          }
+          parts.push({ text: promptText });
+
+          const response = await generateContentWithFallback(ai, {
+            contents: { parts },
+            config: {
+              responseMimeType: 'application/json',
+            },
+          });
+
+          let rawJson = (response.text || '{}').trim();
+          rawJson = rawJson.replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/i, '').trim();
+          const parsed = JSON.parse(rawJson);
+          if (Array.isArray(parsed.events)) {
+            parsed.events.forEach((ev: any, idx: number) => {
+              if (ev && ev.title) {
+                aiEvents.push({
+                  id: ev.id || `scan-ev-${Date.now()}-${idx}`,
+                  title: String(ev.title),
+                  subject: String(ev.subject || 'Internal Medicine'),
+                  type: ['lecture', 'practical', 'posting', 'seminar', 'exam'].includes(ev.type) ? ev.type : 'lecture',
+                  date: /^\d{4}-\d{2}-\d{2}$/.test(String(ev.date || '')) ? String(ev.date) : todayStr,
+                  dayOfWeek: String(ev.dayOfWeek || ''),
+                  startTime: String(ev.startTime || '09:00'),
+                  endTime: String(ev.endTime || '10:00'),
+                  venue: String(ev.venue || 'Main Hall'),
+                  instructor: ev.instructor ? String(ev.instructor) : undefined,
+                  notes: ev.notes ? String(ev.notes) : undefined,
+                });
+              }
+            });
+          }
+          if (Array.isArray(parsed.tables)) {
+            aiTables = parsed.tables
+              .filter((t: any) => t && Array.isArray(t.headers) && Array.isArray(t.rows))
+              .map((t: any, idx: number) => ({
+                id: `ai-tbl-${idx}-${Date.now()}`,
+                title: String(t.title || `${filename} Table ${idx + 1}`),
+                headers: t.headers.map((h: any) => String(h ?? '')),
+                rows: t.rows.map((r: any) => (Array.isArray(r) ? r.map((c: any) => String(c ?? '')) : [String(r ?? '')])),
+              }));
+          }
+          if (parsed.extractedText && String(parsed.extractedText).trim().length > aiExtractedText.length) {
+            aiExtractedText = String(parsed.extractedText).trim();
+          }
+          if (parsed.summary) {
+            aiSummary = String(parsed.summary);
+          }
+        } catch (geminiErr: any) {
+          console.warn('Gemini document scan fallback used:', geminiErr?.message || geminiErr);
+        }
+      }
+
+      // Combine locally parsed Excel/Word tables + Gemini tables (dedupe empty/duplicate tables)
+      const finalTables: ParsedTable[] = detectedTables.length > 0 ? detectedTables : aiTables;
+      if (detectedTables.length > 0 && aiTables.length > 0) {
+        // Keep parsed spreadsheet/Word tables first, plus any extra tables detected
+        aiTables.forEach((t) => {
+          if (!finalTables.some((ft) => ft.headers.join('|') === t.headers.join('|') && ft.rows.length === t.rows.length)) {
+            finalTables.push(t);
+          }
+        });
+      }
+
+      // If no events from Gemini yet, try basic table/text fallback heuristics so tables still produce usable rows
+      if (aiEvents.length === 0 && finalTables.length > 0) {
+        const todayStr = new Date().toISOString().split('T')[0];
+        finalTables.slice(0, 2).forEach((tbl) => {
+          tbl.rows.slice(0, 25).forEach((row, rIdx) => {
+            const joined = row.filter(Boolean).join(' · ');
+            if (!joined) return;
+            const timeMatch = joined.match(/\b([01]?\d|2[0-3]):[0-5]\d\b/);
+            const dateMatch = joined.match(/\b(\d{4}-\d{2}-\d{2})\b/);
+            aiEvents.push({
+              id: `row-ev-${Date.now()}-${rIdx}`,
+              title: row[1] || row[0] || `Row ${rIdx + 1}`,
+              subject: row[2] || 'Internal Medicine',
+              type: 'lecture',
+              date: dateMatch ? dateMatch[1] : todayStr,
+              dayOfWeek: '',
+              startTime: timeMatch ? timeMatch[0].padStart(5, '0') : '09:00',
+              endTime: '10:00',
+              venue: row[3] || tbl.title || 'Main Schedule',
+              notes: joined,
+            });
+          });
+        });
+      }
+
+      return res.json({
+        events: aiEvents,
+        tables: finalTables,
+        extractedText: aiExtractedText,
+        summary:
+          aiSummary ||
+          `Processed ${filename}: ${finalTables.length} table(s) & ${aiEvents.length} schedule session(s) detected.`,
+      });
+    } catch (error: any) {
+      console.error('Error in /api/gemini/scan-document:', error);
+      return res.status(500).json({
+        error: error.message || 'Failed to scan uploaded document.',
       });
     }
   });

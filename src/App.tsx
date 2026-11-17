@@ -40,6 +40,7 @@ const SettingsModal = lazy(() => import('./components/settings/SettingsModal').t
 const RichNoteEditor = lazy(() => import('./components/notebook/RichNoteEditor').then((m) => ({ default: m.RichNoteEditor })));
 const RecycleBinView = lazy(() => import('./components/recycle/RecycleBinView').then((m) => ({ default: m.RecycleBinView })));
 const LibraryView = lazy(() => import('./components/library/LibraryView').then((m) => ({ default: m.LibraryView })));
+const LibraryWorkspaceView = lazy(() => import('./components/library/LibraryWorkspaceView').then((m) => ({ default: m.LibraryWorkspaceView })));
 const CommunityView = lazy(() => import('./components/community/CommunityView').then((m) => ({ default: m.CommunityView })));
 const MnemonicDashboard = lazy(() => import('./components/mnemonics/MnemonicDashboard').then((m) => ({ default: m.MnemonicDashboard })));
 const LeisureDashboard = lazy(() => import('./components/leisure/LeisureDashboard').then((m) => ({ default: m.LeisureDashboard })));
@@ -80,6 +81,7 @@ export default function App() {
     isLoading: authLoading,
     isGuestMode,
     enterGuestMode,
+    exitGuestToLogin,
     isAuthModalOpen,
     openAuthModal,
     closeAuthModal,
@@ -93,7 +95,7 @@ export default function App() {
 
   // Navigation & Subject State
   const [activeView, setActiveView] = useState<
-    'home' | 'read' | 'notebooks' | 'library' | 'roster' | 'recycle-bin' | 'mnemonics' | 'leisure' | 'community' | 'make-note' | 'talk-to-dev' | 'settings'
+    'home' | 'read' | 'notebooks' | 'library' | 'my-library' | 'roster' | 'recycle-bin' | 'mnemonics' | 'leisure' | 'community' | 'make-note' | 'talk-to-dev' | 'settings'
   >('home');
   const [settingsInitialTab, setSettingsInitialTab] = useState<SettingsTabId>('profile');
 
@@ -1139,7 +1141,7 @@ export default function App() {
         isSettingsActive={activeView === 'settings' || isSettingsOpen}
         onNavigate={(view) => {
           if (isGuestOnly && (view === 'settings' || view === 'recycle-bin')) {
-            openAuthModal();
+            exitGuestToLogin();
             return;
           }
           setIsSettingsOpen(false);
@@ -1153,16 +1155,16 @@ export default function App() {
         currentSubject={currentSubject}
         onSelectSubject={setCurrentSubject}
         userProfile={userProfile}
-        onOpenSettings={
-          isGuestOnly
-            ? undefined
-            : () => {
-                setIsEditingNote(false);
-                setIsSettingsOpen(false);
-                setSettingsInitialTab('profile');
-                setActiveView('settings');
-              }
-        }
+        onOpenSettings={() => {
+          if (isGuestOnly) {
+            exitGuestToLogin();
+            return;
+          }
+          setIsEditingNote(false);
+          setIsSettingsOpen(false);
+          setSettingsInitialTab('profile');
+          setActiveView('settings');
+        }}
         onOpenAIStudioModal={() => setIsAIStudioModalOpen(true)}
       />
 
@@ -1180,7 +1182,7 @@ export default function App() {
           onTriggerEyeBreak={() => setIsEyeBreakModalOpen(true)}
           onOpenSettings={() => {
             if (isGuestOnly) {
-              openAuthModal();
+              exitGuestToLogin();
               return;
             }
             setIsEditingNote(false);
@@ -1190,7 +1192,7 @@ export default function App() {
           }}
           onOpenCloudSettings={() => {
             if (isGuestOnly) {
-              openAuthModal();
+              exitGuestToLogin();
               return;
             }
             setIsEditingNote(false);
@@ -1230,7 +1232,7 @@ export default function App() {
                       </button>
                       <button
                         type="button"
-                        onClick={openAuthModal}
+                        onClick={exitGuestToLogin}
                         className="px-2.5 py-1 rounded-lg bg-[#d99b3d] hover:bg-[#c5882b] text-[#1a0d05] font-bold transition-colors cursor-pointer"
                       >
                         Sign In
@@ -1246,7 +1248,7 @@ export default function App() {
                     if (!isGuestPreviewingLayout) return;
                     e.preventDefault();
                     e.stopPropagation();
-                    openAuthModal();
+                    exitGuestToLogin();
                   }}
                   onMouseDownCapture={(e) => {
                     if (!isGuestPreviewingLayout) return;
@@ -1254,14 +1256,14 @@ export default function App() {
                     if (target?.closest('input, textarea, select, [contenteditable="true"]')) {
                       e.preventDefault();
                       e.stopPropagation();
-                      openAuthModal();
+                      exitGuestToLogin();
                     }
                   }}
                   onSubmitCapture={(e) => {
                     if (!isGuestPreviewingLayout) return;
                     e.preventDefault();
                     e.stopPropagation();
-                    openAuthModal();
+                    exitGuestToLogin();
                   }}
                   onKeyDownCapture={(e) => {
                     if (!isGuestPreviewingLayout) return;
@@ -1269,7 +1271,7 @@ export default function App() {
                     if (!scrollKeys.has(e.key)) {
                       e.preventDefault();
                       e.stopPropagation();
-                      if (e.key === 'Enter' || e.key === ' ') openAuthModal();
+                      if (e.key === 'Enter' || e.key === ' ') exitGuestToLogin();
                     }
                   }}
                 >
@@ -1301,7 +1303,7 @@ export default function App() {
                       }}
                       onOpenSettings={() => {
                         if (isGuestOnly) {
-                          openAuthModal();
+                          exitGuestToLogin();
                           return;
                         }
                         setIsEditingNote(false);
@@ -1398,6 +1400,25 @@ export default function App() {
                 }
               }}
               onSnipToNote={handleSnipToActiveNote}
+            />
+          )}
+
+          {activeView === 'my-library' && (
+            <LibraryWorkspaceView
+              notebooks={notebooks}
+              books={books}
+              currentSubject={currentSubject}
+              onOpenNotebook={(nb) => handleOpenNotebook(nb.id)}
+              onCreateBlankNote={handleCreateBlankNote}
+              onAddBook={handleAddBook}
+              onOpenInRead={(doc) => {
+                try {
+                  localStorage.setItem('achiev_pending_uploaded_doc_id_v1', doc.id);
+                  window.dispatchEvent(new CustomEvent('achiev_open_uploaded_doc_in_read'));
+                } catch {}
+                setIsEditingNote(false);
+                setActiveView('read');
+              }}
             />
           )}
 
@@ -1566,24 +1587,26 @@ export default function App() {
             <span className="text-[9px] font-medium leading-none">Shelf</span>
           </button>
 
-          {!isGuestOnly && (
-            <button
-              type="button"
-              onClick={() => {
-                setIsEditingNote(false);
-                setIsSettingsOpen(false);
-                setActiveView('settings');
-              }}
-              className={`flex flex-col items-center gap-0.5 py-1 px-2.5 rounded-xl transition-all cursor-pointer ${
-                activeView === 'settings'
-                  ? 'text-[var(--th-accent)] font-bold'
-                  : 'text-[var(--th-muted)] hover:text-[var(--th-ink)]'
-              }`}
-            >
-              <Settings className="w-4 h-4" />
-              <span className="text-[9px] font-medium leading-none">Settings</span>
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => {
+              if (isGuestOnly) {
+                exitGuestToLogin();
+                return;
+              }
+              setIsEditingNote(false);
+              setIsSettingsOpen(false);
+              setActiveView('settings');
+            }}
+            className={`flex flex-col items-center gap-0.5 py-1 px-2.5 rounded-xl transition-all cursor-pointer ${
+              activeView === 'settings'
+                ? 'text-[var(--th-accent)] font-bold'
+                : 'text-[var(--th-muted)] hover:text-[var(--th-ink)]'
+            }`}
+          >
+            <Settings className="w-4 h-4" />
+            <span className="text-[9px] font-medium leading-none">Settings</span>
+          </button>
         </nav>
       </div>
 

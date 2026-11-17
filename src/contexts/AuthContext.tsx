@@ -69,6 +69,7 @@ interface AuthContextValue {
   resetPassword: (email: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   enterGuestMode: () => void;
+  exitGuestToLogin: () => void;
   openAuthModal: () => void;
   closeAuthModal: () => void;
   connectGoogleDrive: () => Promise<GoogleDriveAccount>;
@@ -669,6 +670,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsAuthModalOpen(false);
   };
 
+  const exitGuestToLogin = () => {
+    setIsGuestMode(false);
+    localStorage.removeItem(LS_GUEST_MODE);
+    setIsAuthModalOpen(false);
+  };
+
   const connectGoogleDrive = async () => {
     setDriveError(null);
     try {
@@ -731,6 +738,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         resetPassword,
         signOut,
         enterGuestMode,
+        exitGuestToLogin,
         openAuthModal: () => setIsAuthModalOpen(true),
         closeAuthModal: () => setIsAuthModalOpen(false),
         connectGoogleDrive,

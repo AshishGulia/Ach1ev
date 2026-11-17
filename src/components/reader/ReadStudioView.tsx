@@ -8,6 +8,15 @@ import {
   uploadPdfToPersonalDrive,
 } from '../../services/googleDriveService';
 import {
+  addUploadedDocument,
+  getSessionFileUrl,
+  getUploadedDocuments,
+  readFileAsDataUrl,
+  registerSessionFileUrl,
+  touchUploadedDocument,
+  UploadedDocumentRecord,
+} from '../../services/uploadedFilesStore';
+import {
   BookOpen,
   BookOpenText,
   Paperclip,
@@ -172,6 +181,21 @@ export const ReadStudioView: React.FC<ReadStudioViewProps> = ({
 
   // Attached documents list (initially empty)
   const [attachedDocs, setAttachedDocs] = useState<AttachedDoc[]>([]);
+  const [recentUploadedDocs, setRecentUploadedDocs] = useState<UploadedDocumentRecord[]>(() =>
+    getUploadedDocuments().slice(0, 20)
+  );
+
+  useEffect(() => {
+    const syncUploaded = () => setRecentUploadedDocs(getUploadedDocuments().slice(0, 20));
+    window.addEventListener('achiev_uploaded_files_changed', syncUploaded);
+    window.addEventListener('achiev_recent_files_changed', syncUploaded);
+    window.addEventListener('storage', syncUploaded);
+    return () => {
+      window.removeEventListener('achiev_uploaded_files_changed', syncUploaded);
+      window.removeEventListener('achiev_recent_files_changed', syncUploaded);
+      window.removeEventListener('storage', syncUploaded);
+    };
+  }, []);
 
   // Active tab: 'main' or attachedDoc id
   const [activeTab, setActiveTab] = useState<string>('main');
@@ -319,8 +343,83 @@ export const ReadStudioView: React.FC<ReadStudioViewProps> = ({
     setMainPageNum(1);
   }, [currentSubject, books]);
 
-  // Listen for direct open requests from Favourites or Read Desk folders
+  // Open an uploaded document record directly in Read Studio
+  const handleOpenUploadedDocInRead = useCallback((doc: UploadedDocumentRecord) => {
+    touchUploadedDocument(doc.id);
+    setRecentUploadedDocs(getUploadedDocuments().slice(0, 20));
+    const existing = attachedDocs.find((d) => d.id === doc.id);
+    if (existing) {
+      setActiveTab(existing.id);
+      setIsAttachModalOpen(false);
+      return;
+    }
+
+    const mediaUrl = getSessionFileUrl(doc.id) || doc.dataUrl || doc.pdfFileUrl;
+    const isPdf = doc.ext.toLowerCase() === 'pdf' || doc.mimeType === 'application/pdf';
+    const isImg = doc.mimeType.startsWith('image/') || ['png', 'jpg', 'jpeg', 'webp'].includes(doc.ext.toLowerCase());
+
+    let htmlParts = '';
+    if (doc.extractedTables && doc.extractedTables.length > 0) {
+      htmlParts += doc.extractedTables
+        .map((tbl) => {
+          const ths = tbl.headers.map((h) => `<th style="border:1px solid rgba(164,124,67,0.35);padding:6px 10px;text-align:left;background:rgba(164,124,67,0.12);">${h}</th>`).join('');
+          const trs = tbl.rows
+            .map((row) => `<tr>${tbl.headers.map((_, ci) => `<td style="border:1px solid rgba(164,124,67,0.25);padding:6px 10px;">${row[ci] || '—'}</td>`).join('')}</tr>`)
+            .join('');
+          return `<h4 style="margin:14px 0 6px;font-weight:700;">${tbl.title}</h4><div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table></div>`;
+        })
+        .join('');
+    }
+    if (doc.extractedText) {
+      const escaped = doc.extractedText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      htmlParts += `<pre style="white-space:pre-wrap;font-family:inherit;line-height:1.7;margin-top:12px;">${escaped}</pre>`;
+    }
+    if (!htmlParts && !isPdf && !isImg) {
+      htmlParts = `<p><strong>${doc.fileName}</strong> (${doc.ext.toUpperCase()} · ${doc.sizeLabel}) loaded in Read Studio.</p>`;
+    }
+
+    const openedDoc: AttachedDoc = {
+      id: doc.id,
+      title: doc.title || doc.fileName,
+      type: isPdf ? 'pdf' : isImg ? 'diagram' : 'book',
+      authorOrSource: `${doc.ext.toUpperCase()} · ${doc.sizeLabel}`,
+      subject: currentSubject,
+      fileSize: doc.sizeLabel,
+      pdfUrl: isPdf ? mediaUrl : undefined,
+      imageUrl: isImg ? mediaUrl : undefined,
+      driveFileId: doc.driveFileId,
+      storageProvider: doc.driveFileId ? 'google_drive' : 'local',
+      currentPage: 1,
+      pages: [
+        {
+          pageNumber: 1,
+          title: doc.fileName,
+          keyTopic: `${doc.ext.toUpperCase()} Document`,
+          summaryPearl: `${doc.extractedTables?.length || 0} table(s) · ${doc.sizeLabel}`,
+          contentHtml: htmlParts || `<p>${doc.fileName}</p>`,
+        },
+      ],
+    };
+
+    setAttachedDocs((prev) => [...prev, openedDoc]);
+    setActiveTab(openedDoc.id);
+    setIsAttachModalOpen(false);
+  }, [attachedDocs, currentSubject]);
+
+  // Listen for direct open requests from Favourites, Library, or Read Desk folders
   useEffect(() => {
+    const checkPendingUploaded = () => {
+      try {
+        const pendingDocId = localStorage.getItem('achiev_pending_uploaded_doc_id_v1');
+        if (pendingDocId) {
+          localStorage.removeItem('achiev_pending_uploaded_doc_id_v1');
+          const match = getUploadedDocuments().find((d) => d.id === pendingDocId);
+          if (match) handleOpenUploadedDocInRead(match);
+        }
+      } catch {}
+    };
+    checkPendingUploaded();
+
     const onOpenBook = () => {
       const queued = consumePendingReadBook();
       if (queued) {
@@ -332,8 +431,12 @@ export const ReadStudioView: React.FC<ReadStudioViewProps> = ({
       }
     };
     window.addEventListener('medden_open_book_in_reader', onOpenBook);
-    return () => window.removeEventListener('medden_open_book_in_reader', onOpenBook);
-  }, []);
+    window.addEventListener('achiev_open_uploaded_doc_in_read', checkPendingUploaded);
+    return () => {
+      window.removeEventListener('medden_open_book_in_reader', onOpenBook);
+      window.removeEventListener('achiev_open_uploaded_doc_in_read', checkPendingUploaded);
+    };
+  }, [handleOpenUploadedDocInRead]);
 
   // Active primary book page
   const currentMainPage =
@@ -391,23 +494,68 @@ export const ReadStudioView: React.FC<ReadStudioViewProps> = ({
     setDriveUploadErr(null);
     const sizeLabel = `${(file.size / (1024 * 1024)).toFixed(2)} MB`;
 
-    const ext = file.name.split('.').pop()?.toLowerCase() || '';
+    const ext = file.name.split('.').pop()?.toLowerCase() || 'file';
     const isPdf = ext === 'pdf' || file.type === 'application/pdf';
+    const isImg = file.type.startsWith('image/') || ext === 'png' || ext === 'jpg' || ext === 'jpeg' || ext === 'webp';
     const isTextReadable = ext === 'txt' || ext === 'md' || ext === 'csv' || ext === 'rtf';
 
     if (uploadTargetMode === 'local') {
       const localUrl = URL.createObjectURL(file);
-      let renderedHtml = '';
+      let dataUrl = '';
+      try {
+        dataUrl = await readFileAsDataUrl(file);
+      } catch {}
+      const base64Data = dataUrl.includes(',') ? dataUrl.split(',')[1] : '';
+
+      let rawText = '';
       if (isTextReadable) {
         try {
-          const rawText = await file.text();
-          const escaped = rawText
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;');
-          renderedHtml = `<pre style="white-space:pre-wrap;font-family:inherit;line-height:1.7;">${escaped}</pre>`;
+          rawText = await file.text();
         } catch {}
-      } else if (!isPdf) {
+      }
+
+      let extractedTables: any[] = [];
+      let extractedText = rawText;
+
+      if (!isPdf && !isImg) {
+        try {
+          const scanRes = await fetch('/api/gemini/scan-document', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              filename: file.name,
+              mimeType: file.type,
+              base64Data,
+              extractedText: rawText,
+            }),
+          });
+          if (scanRes.ok) {
+            const scanned = await scanRes.json();
+            if (Array.isArray(scanned.tables)) extractedTables = scanned.tables;
+            if (scanned.extractedText) extractedText = scanned.extractedText;
+          }
+        } catch {}
+      }
+
+      let renderedHtml = '';
+      if (extractedTables.length > 0) {
+        renderedHtml += extractedTables
+          .map((tbl: any) => {
+            const ths = tbl.headers.map((h: string) => `<th style="border:1px solid rgba(164,124,67,0.35);padding:6px 10px;text-align:left;background:rgba(164,124,67,0.12);">${h}</th>`).join('');
+            const trs = tbl.rows
+              .map((row: string[]) => `<tr>${tbl.headers.map((_: any, ci: number) => `<td style="border:1px solid rgba(164,124,67,0.25);padding:6px 10px;">${row[ci] || '—'}</td>`).join('')}</tr>`)
+              .join('');
+            return `<h4 style="margin:12px 0 6px;font-weight:700;">${tbl.title}</h4><div style="overflow-x:auto;"><table style="width:100%;border-collapse:collapse;font-size:13px;"><thead><tr>${ths}</tr></thead><tbody>${trs}</tbody></table></div>`;
+          })
+          .join('');
+      }
+      if (extractedText) {
+        const escaped = extractedText
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;');
+        renderedHtml += `<pre style="white-space:pre-wrap;font-family:inherit;line-height:1.7;margin-top:10px;">${escaped}</pre>`;
+      } else if (!isPdf && !isImg) {
         const formatLabel = ext ? ext.toUpperCase() : 'DOCUMENT';
         renderedHtml = `
           <div style="padding:20px;border-radius:16px;border:1px solid rgba(164,124,67,0.35);background:rgba(164,124,67,0.08);">
@@ -417,14 +565,31 @@ export const ReadStudioView: React.FC<ReadStudioViewProps> = ({
           </div>`;
       }
 
+      const savedRecord = addUploadedDocument({
+        title: file.name.replace(/\.[^.]+$/, '') || file.name,
+        fileName: file.name,
+        ext,
+        mimeType: file.type || 'application/octet-stream',
+        sizeBytes: file.size,
+        source: 'read',
+        subject: currentSubject,
+        folderId: 'folder-pdfs-files',
+        extractedText,
+        extractedTables,
+        dataUrl,
+      });
+      registerSessionFileUrl(savedRecord.id, localUrl);
+      setRecentUploadedDocs(getUploadedDocuments().slice(0, 20));
+
       const newDoc: AttachedDoc = {
-        id: `doc-local-${Date.now()}`,
+        id: savedRecord.id,
         title: file.name,
-        type: isPdf ? 'pdf' : 'book',
+        type: isPdf ? 'pdf' : isImg ? 'diagram' : 'book',
         authorOrSource: `Local Document · ${sizeLabel}`,
         fileSize: sizeLabel,
         pdfUrl: isPdf ? localUrl : undefined,
-        webUrl: !isPdf ? localUrl : undefined,
+        imageUrl: isImg ? localUrl : undefined,
+        webUrl: !isPdf && !isImg ? localUrl : undefined,
         storageProvider: 'local',
         summary: isPdf
           ? 'Loaded locally in browser memory for this session.'
@@ -679,57 +844,88 @@ export const ReadStudioView: React.FC<ReadStudioViewProps> = ({
         </svg>
       </div>
 
-      {/* Center Action Box */}
-      <div className="themed-glass-card relative z-10 text-center max-w-md mx-auto space-y-4 p-8 rounded-3xl bg-white/80 dark:bg-[#1a120d]/95 backdrop-blur-md border border-stone-200/90 dark:border-[#382518] shadow-xl">
-        <div className="w-16 h-16 rounded-2xl bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-400 mx-auto flex items-center justify-center shadow-inner">
-          <BookOpen className="w-8 h-8" />
+      {/* Center Action Box & Last 20 Uploaded Documents */}
+      <div className="themed-glass-card relative z-10 text-center max-w-xl w-full mx-auto space-y-4 p-6 sm:p-7 rounded-3xl bg-white/80 dark:bg-[#1a120d]/95 backdrop-blur-md border border-stone-200/90 dark:border-[#382518] shadow-xl">
+        <div className="w-12 h-12 rounded-2xl bg-amber-100 dark:bg-amber-950/50 text-amber-800 dark:text-amber-400 mx-auto flex items-center justify-center shadow-inner">
+          <BookOpen className="w-6 h-6" />
         </div>
 
-        <div>
-          <p className="text-sm font-sans text-stone-700 dark:text-[#efe4d4] leading-relaxed">
-            Select a book from your Shelf or upload a document (PDF, Word, EPUB) to start reading.
-          </p>
-        </div>
+        <p className="text-sm font-sans text-stone-700 dark:text-[#efe4d4] leading-relaxed">
+          Use the compact Shelf or Upload Document buttons on the top-left ribbon, or open any of your recent uploaded documents below.
+        </p>
 
-        <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3 font-sans">
-          <button
-            type="button"
-            onClick={() => {
-              if (onNavigateToShelf) {
-                onNavigateToShelf();
-              } else {
-                setUploadTargetMode('local');
-                setIsAttachModalOpen(true);
-              }
-            }}
-            className="themed-accent-btn w-full sm:w-auto px-6 py-3 rounded-full bg-[#775734] hover:bg-[#5f442a] text-white font-semibold text-sm shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <BookOpen className="w-4 h-4" />
-            <span>Choose a Book from Shelf</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() => {
-              setUploadTargetMode('local');
-              setIsAttachModalOpen(true);
-            }}
-            className="themed-soft-pill w-full sm:w-auto px-5 py-3 rounded-full bg-[#efe7d8] dark:bg-[#2a1d14] text-[#2a1d14] dark:text-white font-semibold text-sm hover:bg-[#e5dac6] dark:hover:bg-[#38271b] transition-colors flex items-center justify-center gap-2 cursor-pointer"
-          >
-            <UploadCloud className="w-4 h-4" />
-            <span>Upload Document</span>
-          </button>
-        </div>
+        {recentUploadedDocs.length > 0 && (
+          <div className="pt-2 border-t border-stone-200/80 dark:border-[#382518] text-left space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#7c5321] dark:text-amber-300">
+                Recent Uploaded Documents (Last {Math.min(20, recentUploadedDocs.length)})
+              </span>
+            </div>
+            <div className="max-h-56 overflow-y-auto custom-scrollbar space-y-1.5 pr-1">
+              {recentUploadedDocs.slice(0, 20).map((doc) => (
+                <button
+                  key={doc.id}
+                  type="button"
+                  onClick={() => handleOpenUploadedDocInRead(doc)}
+                  className="w-full px-3 py-2 rounded-xl border border-stone-200/80 dark:border-[#382518] bg-stone-50/90 hover:bg-amber-50 dark:bg-[#231811] dark:hover:bg-[#322218] flex items-center justify-between gap-2 text-left transition-colors cursor-pointer"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <FileText className="w-3.5 h-3.5 text-[#A47C43] shrink-0" />
+                    <span className="text-xs font-semibold text-stone-900 dark:text-stone-100 truncate">
+                      {doc.fileName}
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-mono text-stone-500 shrink-0">
+                    {doc.ext.toUpperCase()} · {doc.sizeLabel}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
 
   return (
     <div className={`read-studio-root theme-${themeMode} font-mode-${fontColorMode}`}>
-      {/* Top Bar with Document Tabs & Attach Button */}
+      {/* Top Bar with Compact Left Action Buttons + Document Tabs */}
       <header className="read-top-bar">
-        {/* Left: Document Tabs */}
-        <div className="read-tabs-list custom-scrollbar">
+        {/* Left: Compact Choose Book + Upload Document Banner + Document Tabs */}
+        <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
+          <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              type="button"
+              onClick={() => {
+                if (onNavigateToShelf) {
+                  onNavigateToShelf();
+                } else {
+                  setUploadTargetMode('local');
+                  setIsAttachModalOpen(true);
+                }
+              }}
+              className="themed-accent-btn px-2.5 py-1 rounded-lg bg-[#775734] hover:bg-[#5f442a] text-white font-semibold text-[11px] shadow-2xs transition-colors flex items-center gap-1 cursor-pointer whitespace-nowrap"
+              title="Choose a Book from Shelf"
+            >
+              <BookOpen className="w-3 h-3 shrink-0" />
+              <span>Shelf Book</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setUploadTargetMode('local');
+                setIsAttachModalOpen(true);
+              }}
+              className="themed-soft-pill px-2.5 py-1 rounded-lg bg-[#efe7d8] dark:bg-[#2a1d14] text-[#2a1d14] dark:text-[#f5eadc] border border-[#b8975a]/40 dark:border-[#4b3322] font-semibold text-[11px] hover:bg-[#e5dac6] dark:hover:bg-[#38271b] transition-colors flex items-center gap-1 cursor-pointer whitespace-nowrap"
+              title="Upload Document (PDF, Word, Excel, CSV, Text)"
+            >
+              <UploadCloud className="w-3 h-3 shrink-0 text-[#8f5f2c] dark:text-amber-400" />
+              <span>Upload</span>
+            </button>
+          </div>
+
+          <div className="read-tabs-list custom-scrollbar" style={{ maxWidth: '100%' }}>
           {/* Main Book Tab (Shown only when main textbook is open; no Study Desk label) */}
           {!isBookClosed && (
             <button
@@ -739,7 +935,7 @@ export const ReadStudioView: React.FC<ReadStudioViewProps> = ({
               title={`Primary Course Textbook: ${mainBook.title}`}
             >
               <BookOpen className="w-3.5 h-3.5 text-[#A47C43] dark:text-amber-400" />
-              <span className="truncate max-w-[200px]">{mainBook.title}</span>
+              <span className="truncate max-w-[180px]">{mainBook.title}</span>
               <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 bg-[#A47C43]/15 text-[#784d22] dark:text-amber-300 rounded">
                 Main
               </span>
@@ -767,7 +963,7 @@ export const ReadStudioView: React.FC<ReadStudioViewProps> = ({
                 ) : (
                   <Layers className="w-3.5 h-3.5 text-[#7f1d1d] dark:text-[#c94a4f]" />
                 )}
-                <span className="truncate max-w-[170px]">{doc.title}</span>
+                <span className="truncate max-w-[160px]">{doc.title}</span>
                 <span
                   role="button"
                   tabIndex={0}
@@ -780,6 +976,7 @@ export const ReadStudioView: React.FC<ReadStudioViewProps> = ({
               </div>
             );
           })}
+          </div>
         </div>
 
         {/* Right: Reading Comfort Controls & Dual Split View Toggle */}
@@ -1610,7 +1807,7 @@ export const ReadStudioView: React.FC<ReadStudioViewProps> = ({
 
               <input
                 type="file"
-                accept=".pdf,.doc,.docx,.epub,.txt,.rtf,.odt,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/epub+zip,text/plain"
+                accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.epub,.txt,.rtf,.odt,.png,.jpg,.jpeg,.webp,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/epub+zip,text/plain"
                 className="hidden"
                 id="read-file-input"
                 disabled={driveUploadPct !== null}
@@ -1749,20 +1946,55 @@ export const ReadStudioView: React.FC<ReadStudioViewProps> = ({
                 </div>
               )}
 
-              {/* Panel 2: Device Upload */}
+              {/* Panel 2: Device Upload + Last 20 Uploaded Documents */}
               {uploadTargetMode === 'local' && (
-                <label htmlFor="read-file-input" className="read-dropzone block">
-                  <UploadCloud className="w-8 h-8 text-[#A47C43] mx-auto mb-2" />
-                  <p className="text-sm font-semibold text-stone-800 dark:text-stone-200">
-                    Upload Document from Device
-                  </p>
-                  <p className="text-xs text-stone-400 mt-1">
-                    Select any PDF, Word (.doc/.docx), EPUB, or text file to open right away
-                  </p>
-                  <span className="themed-accent-btn inline-block mt-3 px-4 py-1.5 rounded-lg bg-[#A47C43] text-white text-xs font-semibold hover:bg-[#8e6834]">
-                    Upload Document
-                  </span>
-                </label>
+                <div className="space-y-4">
+                  <label htmlFor="read-file-input" className="read-dropzone block">
+                    <UploadCloud className="w-8 h-8 text-[#A47C43] mx-auto mb-2" />
+                    <p className="text-sm font-semibold text-stone-800 dark:text-stone-200">
+                      Upload Document from Device
+                    </p>
+                    <p className="text-xs text-stone-400 mt-1">
+                      Select any PDF, Word (.doc/.docx), Excel (.xls/.xlsx), CSV, EPUB, image, or text file to open right away
+                    </p>
+                    <span className="themed-accent-btn inline-block mt-3 px-4 py-1.5 rounded-lg bg-[#A47C43] text-white text-xs font-semibold hover:bg-[#8e6834]">
+                      Upload Document
+                    </span>
+                  </label>
+
+                  {recentUploadedDocs.length > 0 && (
+                    <div className="space-y-2 pt-1">
+                      <div className="text-[11px] font-mono font-bold uppercase tracking-wider text-stone-500 dark:text-[#a69079]">
+                        Last {Math.min(20, recentUploadedDocs.length)} Uploaded Documents
+                      </div>
+                      <div className="space-y-1.5 max-h-56 overflow-y-auto custom-scrollbar pr-1">
+                        {recentUploadedDocs.slice(0, 20).map((doc) => (
+                          <button
+                            key={doc.id}
+                            type="button"
+                            onClick={() => handleOpenUploadedDocInRead(doc)}
+                            className="w-full p-2.5 rounded-xl border border-stone-200 dark:border-[#382518] bg-stone-50 dark:bg-[#221811]/85 hover:border-amber-500/60 flex items-center justify-between gap-2 text-left transition-colors cursor-pointer"
+                          >
+                            <div className="flex items-center gap-2.5 min-w-0">
+                              <FileText className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                              <div className="min-w-0">
+                                <p className="text-xs font-semibold text-stone-900 dark:text-stone-100 truncate">
+                                  {doc.fileName}
+                                </p>
+                                <p className="text-[10px] font-mono text-stone-500 truncate">
+                                  {doc.ext.toUpperCase()} · {doc.sizeLabel} · {doc.source}
+                                </p>
+                              </div>
+                            </div>
+                            <span className="text-[10.5px] font-semibold text-[#8f5f2c] dark:text-amber-300 shrink-0">
+                              Open →
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               )}
             </div>
           </div>

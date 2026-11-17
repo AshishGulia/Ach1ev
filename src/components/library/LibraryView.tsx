@@ -17,6 +17,15 @@ import {
   uploadPdfToPersonalDrive,
 } from '../../services/googleDriveService';
 import {
+  getRecentOpenedFiles,
+  getSessionFileUrl,
+  getUploadedDocuments,
+  recordRecentOpenedFile,
+  touchUploadedDocument,
+  RecentOpenedFileRecord,
+  UploadedDocumentRecord,
+} from '../../services/uploadedFilesStore';
+import {
   INITIAL_FLOWCHART_DOCS,
   MedicalFlowchartDoc,
   CLASSIFICATION_TEMPLATES,
@@ -608,6 +617,24 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
     saveSections(updated);
   };
 
+  // Recent files opened strip synced across Shelf, Read Studio & Calendar Roster
+  const [recentFiles, setRecentFiles] = useState<RecentOpenedFileRecord[]>(() =>
+    getRecentOpenedFiles()
+  );
+  const [recentDocModal, setRecentDocModal] = useState<UploadedDocumentRecord | null>(null);
+
+  useEffect(() => {
+    const syncRecent = () => setRecentFiles(getRecentOpenedFiles());
+    window.addEventListener('achiev_recent_files_changed', syncRecent);
+    window.addEventListener('achiev_uploaded_files_changed', syncRecent);
+    window.addEventListener('storage', syncRecent);
+    return () => {
+      window.removeEventListener('achiev_recent_files_changed', syncRecent);
+      window.removeEventListener('achiev_uploaded_files_changed', syncRecent);
+      window.removeEventListener('storage', syncRecent);
+    };
+  }, []);
+
   // Classification Flowchart with Levels State
   const [activeClassificationId, setActiveClassificationId] = useState<string>('tree-shock');
   const [isBuilderOpen, setIsBuilderOpen] = useState<boolean>(false);
@@ -803,6 +830,14 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
   const effectiveNightMode = isDarkMode !== undefined ? isDarkMode : themeModeDark;
 
   const handleSelectShelfBook = (shelfBook: ShelfBook) => {
+    recordRecentOpenedFile({
+      refId: shelfBook.id,
+      kind: 'book',
+      title: shelfBook.title,
+      subtitle: 'Shelf Book',
+      source: 'shelf',
+    });
+
     const found =
       CURATED_MEDICAL_BOOKS.find(
         (b) =>
@@ -845,6 +880,29 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
       };
       setActiveBookModal(dynamicBook);
     }
+  };
+
+  const handleOpenRecentFile = (item: RecentOpenedFileRecord) => {
+    if (item.kind === 'uploaded-doc') {
+      touchUploadedDocument(item.refId);
+      const doc = getUploadedDocuments().find((d) => d.id === item.refId);
+      if (doc) {
+        setRecentDocModal(doc);
+        return;
+      }
+    }
+    const foundBook =
+      CURATED_MEDICAL_BOOKS.find((b) => b.id === item.refId || b.title === item.title) ||
+      books.find((b) => b.id === item.refId || b.title === item.title);
+    if (foundBook) {
+      setActiveBookModal(foundBook);
+      return;
+    }
+    handleSelectShelfBook({
+      id: item.refId,
+      title: item.title,
+      cover: 'navy',
+    });
   };
 
   return (
@@ -1024,17 +1082,6 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
           {/* Top Window Bar */}
           <header className="shelfwise-header justify-start">
             <div className="flex flex-wrap items-center gap-2">
-              {/* Library Button */}
-              <button
-                type="button"
-                onClick={() => setIsEagleViewOpen(true)}
-                className="shelfwise-btn shelfwise-btn-ghost flex items-center gap-1.5"
-                title="Library: Subject-wise curated catalog of all textbooks & resources"
-              >
-                <LayoutGrid className="w-4 h-4 text-amber-400" />
-                <span>Library</span>
-              </button>
-
               {/* Flowcharts Button */}
               <button
                 type="button"
@@ -1052,6 +1099,119 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
           {/* TAB 1: PRIMARY BOOKSHELF (Exact Room + Almirah from user code) */}
           {activeTab === 'books' && (
             <div className="flex-1 overflow-y-auto custom-scrollbar p-1.5 sm:p-4 space-y-3 sm:space-y-4">
+              {recentFiles.length > 0 && (
+                <div className="themed-glass-card rounded-2xl border border-amber-700/25 dark:border-amber-800/40 bg-white/75 dark:bg-[#1a110b]/85 px-3.5 py-2.5 shadow-sm">
+                  <div className="flex items-center justify-between gap-2 mb-2">
+                    <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#7c5321] dark:text-amber-300 flex items-center gap-1.5">
+                      <BookOpen className="w-3.5 h-3.5" />
+                      <span>Recent Files Opened ({recentFiles.length})</span>
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 overflow-x-auto custom-scrollbar pb-1">
+                    {recentFiles.slice(0, 12).map((rf) => (
+                      <button
+                        key={rf.id}
+                        type="button"
+                        onClick={() => handleOpenRecentFile(rf)}
+                        className="shrink-0 px-3 py-1.5 rounded-xl bg-amber-50/90 hover:bg-amber-100 dark:bg-[#261a12] dark:hover:bg-[#352418] border border-amber-700/25 dark:border-amber-800/40 text-left transition-all cursor-pointer flex items-center gap-2 max-w-[220px]"
+                      >
+                        <FileText className="w-3.5 h-3.5 text-[#A47C43] shrink-0" />
+                        <div className="min-w-0">
+                          <div className="text-[11.5px] font-semibold text-stone-900 dark:text-[#efe4d4] truncate">
+                            {rf.title}
+                          </div>
+                          <div className="text-[9.5px] font-mono text-stone-500 dark:text-[#a69079] truncate">
+                            {rf.subtitle || rf.source || 'Opened recently'}
+                          </div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {recentDocModal && (
+                <div
+                  className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs"
+                  onClick={() => setRecentDocModal(null)}
+                >
+                  <div
+                    onClick={(e) => e.stopPropagation()}
+                    className="w-full max-w-3xl max-h-[88vh] rounded-3xl bg-[#fcfaf7] dark:bg-[#160f0a] border border-stone-200 dark:border-[#382518] shadow-2xl flex flex-col overflow-hidden"
+                  >
+                    <div className="px-5 py-3 border-b border-stone-200 dark:border-[#382518] flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <h3 className="font-serif font-bold text-sm sm:text-base text-stone-900 dark:text-[#efe4d4] truncate">
+                          {recentDocModal.fileName}
+                        </h3>
+                        <p className="text-[11px] font-mono text-stone-500">
+                          {recentDocModal.ext.toUpperCase()} · {recentDocModal.sizeLabel}
+                        </p>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setRecentDocModal(null)}
+                        className="p-1.5 rounded-lg text-stone-400 hover:text-stone-800 dark:hover:text-white cursor-pointer"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <div className="flex-1 overflow-y-auto p-5 space-y-4 custom-scrollbar">
+                      {(() => {
+                        const url = getSessionFileUrl(recentDocModal.id) || recentDocModal.dataUrl || recentDocModal.pdfFileUrl;
+                        if (url && (recentDocModal.ext === 'pdf' || recentDocModal.mimeType === 'application/pdf')) {
+                          return (
+                            <div className="h-[420px] rounded-2xl overflow-hidden border border-stone-200 dark:border-[#382518]">
+                              <iframe src={url} title={recentDocModal.fileName} className="w-full h-full border-0" />
+                            </div>
+                          );
+                        }
+                        if (url && recentDocModal.mimeType.startsWith('image/')) {
+                          return <img src={url} alt={recentDocModal.fileName} className="max-h-[380px] mx-auto rounded-xl" />;
+                        }
+                        return null;
+                      })()}
+                      {recentDocModal.extractedTables && recentDocModal.extractedTables.length > 0 && (
+                        <div className="space-y-3">
+                          {recentDocModal.extractedTables.map((tbl) => (
+                            <div key={tbl.id} className="rounded-xl border border-stone-200 dark:border-[#382518] overflow-hidden">
+                              <div className="px-3 py-1.5 bg-stone-100 dark:bg-[#241912] text-xs font-bold text-stone-800 dark:text-stone-100">
+                                {tbl.title}
+                              </div>
+                              <div className="overflow-x-auto">
+                                <table className="w-full text-left text-xs border-collapse">
+                                  <thead className="bg-stone-50 dark:bg-[#1a120d]">
+                                    <tr>
+                                      {tbl.headers.map((h, i) => (
+                                        <th key={i} className="px-3 py-2 font-semibold">{h}</th>
+                                      ))}
+                                    </tr>
+                                  </thead>
+                                  <tbody className="divide-y divide-stone-100 dark:divide-[#2e1e14]">
+                                    {tbl.rows.map((row, ri) => (
+                                      <tr key={ri}>
+                                        {tbl.headers.map((_, ci) => (
+                                          <td key={ci} className="px-3 py-1.5">{row[ci] || '—'}</td>
+                                        ))}
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {recentDocModal.extractedText && (
+                        <pre className="p-3.5 rounded-xl bg-stone-50 dark:bg-[#120c08] border border-stone-200 dark:border-[#382518] text-xs whitespace-pre-wrap font-sans text-stone-800 dark:text-stone-200">
+                          {recentDocModal.extractedText}
+                        </pre>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {cloudUploadedBooks.length > 0 && (
                 <div className="themed-glass-card rounded-2xl border border-amber-700/35 bg-amber-50/90 dark:bg-[#1b120c]/90 text-stone-900 dark:text-amber-100 p-3.5 shadow-lg">
                   <div className="flex items-center justify-between gap-2 mb-2.5 flex-wrap">

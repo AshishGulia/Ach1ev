@@ -298,6 +298,7 @@ export interface SidebarSettings {
   showCreateNote: boolean;
   showCalendar: boolean;
   showLibrary: boolean;
+  showMyLibrary?: boolean;
   showMnemonics?: boolean;
   showCommunity: boolean;
   showLeisure?: boolean;

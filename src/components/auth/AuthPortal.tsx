@@ -294,7 +294,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
 
   return (
     <div
-      className={`${
+      className={`auth-portal-root ${
         isModal
           ? 'fixed inset-0 z-50 bg-black/55 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto overflow-x-hidden'
           : 'min-h-[100dvh] w-full relative overflow-y-auto overflow-x-hidden flex flex-col'

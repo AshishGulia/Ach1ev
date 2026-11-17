@@ -438,7 +438,21 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
   books = [],
   activeDesign = '1',
 }) => {
-  const { user, googleUser, phoneUser, openAuthModal } = useAuth();
+  const { user, googleUser, phoneUser, exitGuestToLogin } = useAuth();
+  const [noteSurroundDark, setNoteSurroundDark] = useState<boolean | null>(() => {
+    try {
+      const v = localStorage.getItem('achiev_note_surround_dark_v1');
+      return v === 'dark' ? true : v === 'light' ? false : null;
+    } catch {
+      return null;
+    }
+  });
+  useEffect(() => {
+    try {
+      if (noteSurroundDark === null) localStorage.removeItem('achiev_note_surround_dark_v1');
+      else localStorage.setItem('achiev_note_surround_dark_v1', noteSurroundDark ? 'dark' : 'light');
+    } catch {}
+  }, [noteSurroundDark]);
   // Title & Content (Starts with clean blank ruled paper by default)
   const initialTitle = notebook?.title || 'Untitled Note';
   const initialContent =
@@ -2953,7 +2967,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
           onClick={() => {
             if (!user && !googleUser && !phoneUser) {
               showToast('Please sign up / sign in first to save your notes');
-              openAuthModal();
+              exitGuestToLogin();
               return;
             }
             if (saveTimeoutRef.current) clearTimeout(saveTimeoutRef.current);
@@ -3029,12 +3043,30 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
         </button>
 
         <button
+          type="button"
           className="an-icon-btn"
-          aria-label="Toggle dark mode"
-          onClick={() => window.dispatchEvent(new CustomEvent('medden_toggle_dark'))}
+          aria-label="Toggle note desk backdrop"
+          title="Toggle light / dark desk surrounding paper sheet"
+          onClick={() => setNoteSurroundDark((prev) => !(prev ?? isDarkThemeDoc))}
         >
-          <Moon className="w-4 h-4 dark:hidden" />
-          <Sun className="w-4 h-4 hidden dark:block" />
+          <svg
+            viewBox="0 0 24 24"
+            className="w-4 h-4"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.9"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <rect x="2.5" y="3.5" width="19" height="17" rx="2.5" strokeOpacity="0.65" />
+            <path
+              d="M7 6.5h10v11H7z"
+              fill={(noteSurroundDark ?? isDarkThemeDoc) ? 'currentColor' : 'none'}
+              fillOpacity={(noteSurroundDark ?? isDarkThemeDoc) ? 0.22 : 0}
+            />
+            <line x1="9.5" y1="10" x2="14.5" y2="10" />
+            <line x1="9.5" y1="13" x2="14.5" y2="13" />
+          </svg>
         </button>
       </header>
 
@@ -3964,7 +3996,10 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
 
             {/* Note Sheet + Vertical Category Attachments Ribbon */}
             <div className="an-note-split-body">
-            <div className="an-note-body">
+            <div
+              className="an-note-body"
+              data-surround={noteSurroundDark === null ? undefined : noteSurroundDark ? 'dark' : 'light'}
+            >
               {(() => {
                 const normFontKey = normalizeNoteFontKey(fontStyle);
                 const activeFontObj = NOTE_FONT_OPTIONS.find((f) => f.key === normFontKey) || NOTE_FONT_OPTIONS[0];

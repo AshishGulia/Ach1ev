@@ -16,10 +16,11 @@ const resolveAssetUrl = (relativePath: string): string => {
   return `${normalizedBase}${relativePath.replace(/^\/+/, '')}`;
 };
 
+export const ACHIEV_DEFAULT_LOGO_URL = resolveAssetUrl('default-logo-and-name.png?v=1');
 export const ACHIEV_LOGO_URL = resolveAssetUrl('achiev-emblem-3d.png?v=1');
 export const ACHIEV_EMBLEM_URL = resolveAssetUrl('achiev-emblem-3d.png?v=1');
-export const ACHIEV_WORDMARK_URL = resolveAssetUrl('android-chrome-512x512.png?v=2');
-export const ACHIEV_LOCKUP_URL = resolveAssetUrl('android-chrome-512x512.png?v=2');
+export const ACHIEV_WORDMARK_URL = resolveAssetUrl('default-logo-and-name.png?v=1');
+export const ACHIEV_LOCKUP_URL = resolveAssetUrl('default-logo-and-name.png?v=1');
 export const ACHIEV_LEATHER_HERO_URL = '';
 export const ACHIEV_LEATHER_LOGIN_URL = '';
 
@@ -47,7 +48,6 @@ export const AchievBrand: React.FC<AchievBrandProps> = ({
   showTagline = true,
   className = '',
   imgClassName = '',
-  emblemClassName = '',
   title = 'ACH1EV — Settle Ideas',
 }) => {
   const darkFlag = isDarkMode ?? true;
@@ -65,32 +65,21 @@ export const AchievBrand: React.FC<AchievBrandProps> = ({
   if (variant === 'lockup') {
     return (
       <div
-        className={`inline-flex items-center justify-center gap-3.5 sm:gap-4 bg-transparent select-none max-w-full ${className}`}
+        className={`inline-flex items-center justify-center bg-transparent select-none max-w-full ${className}`}
         title={title}
       >
-        <GoldEmblem3D
-          sizeClass={emblemClassName || 'w-14 h-14 sm:w-[70px] sm:h-[70px]'}
-          isDarkMode={true}
-          ariaLabel="ACH1EV crown nib emblem"
+        <img
+          src={ACHIEV_DEFAULT_LOGO_URL}
+          alt={title}
+          draggable={false}
+          className={
+            imgClassName ||
+            'h-[76px] sm:h-[94px] w-auto max-w-full object-contain bg-transparent select-none'
+          }
+          style={{
+            filter: 'drop-shadow(0 6px 14px rgba(0, 0, 0, 0.55))',
+          }}
         />
-        <div className="flex flex-col items-start text-left leading-none">
-          <span
-            className="font-serif font-extrabold tracking-[0.14em] uppercase bg-clip-text text-transparent"
-            style={{
-              fontSize: 'clamp(1.7rem, 3.3vw, 2.45rem)',
-              backgroundImage:
-                'linear-gradient(165deg, #fff5cf 0%, #f1c86e 38%, #c98c2b 68%, #ffe59e 100%)',
-              filter: 'drop-shadow(0 3px 8px rgba(0, 0, 0, 0.55))',
-            }}
-          >
-            ACH1EV
-          </span>
-          {showTagline && (
-            <span className="mt-1.5 text-[10px] sm:text-[11px] font-mono uppercase tracking-[0.34em] text-[#dec295]">
-              SETTLE IDEAS
-            </span>
-          )}
-        </div>
       </div>
     );
   }

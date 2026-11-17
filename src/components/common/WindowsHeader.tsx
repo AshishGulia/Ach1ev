@@ -76,6 +76,7 @@ interface WindowsHeaderProps {
     | 'read'
     | 'notebooks'
     | 'library'
+    | 'my-library'
     | 'roster'
     | 'recycle-bin'
     | 'mnemonics'
@@ -550,6 +551,8 @@ export const WindowsHeader: React.FC<WindowsHeaderProps> = ({
         return 'Create note';
       case 'library':
         return 'Shelf';
+      case 'my-library':
+        return 'Library';
       case 'talk-to-dev':
         return 'Talk to Developer';
       case 'community':

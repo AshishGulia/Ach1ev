@@ -1314,6 +1314,17 @@ mark.hit {
   overflow: auto;
   background: var(--an-bg2);
   padding: 22px 20px;
+  transition: background-color 0.24s ease;
+}
+
+.an-note-body[data-surround="dark"] {
+  background-color: #130b06 !important;
+  background-image: radial-gradient(circle at 50% 25%, rgba(164, 124, 67, 0.1), transparent 65%) !important;
+}
+
+.an-note-body[data-surround="light"] {
+  background-color: #ece1ce !important;
+  background-image: radial-gradient(circle at 50% 25%, rgba(255, 252, 244, 0.55), transparent 65%) !important;
 }
 
 /* Unboxed Split Underline / Color & Highlight Glyphs inside Note Ribbon */

@@ -2165,7 +2165,7 @@ export function DukaanRollingShutter({
           onToggle();
         }}
         onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onToggle())}
-        title={open ? 'Click pelmet or shutter rail to close' : 'Click to unlock rolling shutter'}
+        title={open ? 'Click pelmet or shutter rail to close door' : 'Click pelmet or shutter rail to open door'}
         style={{
           position: 'absolute',
           top: 0,
@@ -2224,7 +2224,7 @@ export function DukaanRollingShutter({
           onToggle();
         }}
         onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onToggle())}
-        title={open ? 'Click shutter rail to close & lock' : 'Click to lift shutter & unlock'}
+        title={open ? 'Click shutter rail to close door' : 'Click shutter to open door'}
         style={{
           position: 'absolute',
           left: 12,
@@ -2296,10 +2296,10 @@ export function DukaanRollingShutter({
           boxShadow: '0 3px 10px rgba(0,0,0,0.55)',
         }}
         className="flex items-center gap-1 cursor-pointer hover:bg-amber-700 transition"
-        title={open ? 'Lock shutter closed' : 'Unlock shutter'}
+        title={open ? 'Close shutter door' : 'Open shutter door'}
       >
-        {open ? <Lock className="w-3 h-3 text-amber-300" /> : <Unlock className="w-3 h-3 text-amber-300" />}
-        <span>{open ? 'Lock' : 'Unlock'}</span>
+        {open ? <DoorClosed className="w-3 h-3 text-amber-300" /> : <DoorOpen className="w-3 h-3 text-amber-300" />}
+        <span>{open ? 'Close' : 'Open'}</span>
       </button>
     </div>
   );
@@ -2350,7 +2350,7 @@ export function BankVaultDoor({
         tabIndex={0}
         onClick={handleDialClick}
         onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), handleDialClick(e as any))}
-        title={open ? 'Click vault door panel to close & lock' : 'Click vault door to unlock'}
+        title={open ? 'Click vault door to close' : 'Click vault door to open'}
         style={{
           position: 'absolute',
           inset: 0,
@@ -2560,10 +2560,10 @@ export function BankVaultDoor({
           boxShadow: '0 3px 10px rgba(0,0,0,0.55)',
         }}
         className="flex items-center gap-1 cursor-pointer hover:bg-amber-700 transition"
-        title={open ? 'Lock Vault Door' : 'Unlock Vault Door'}
+        title={open ? 'Close Vault Door' : 'Open Vault Door'}
       >
-        {open ? <Lock className="w-3 h-3 text-amber-300" /> : <Unlock className="w-3 h-3 text-amber-300" />}
-        <span>{open ? 'Lock' : 'Unlock'}</span>
+        {open ? <DoorClosed className="w-3 h-3 text-amber-300" /> : <DoorOpen className="w-3 h-3 text-amber-300" />}
+        <span>{open ? 'Close' : 'Open'}</span>
       </button>
     </div>
   );
@@ -2665,10 +2665,10 @@ export function CabinetDoors({
         boxShadow: '0 3px 10px rgba(0,0,0,0.55)',
       }}
       className="flex items-center gap-1 cursor-pointer hover:bg-amber-700 transition"
-      title={open ? 'Lock door closed' : 'Unlock door'}
+      title={open ? 'Close door' : 'Open door'}
     >
-      {open ? <Lock className="w-3 h-3 text-amber-300" /> : <Unlock className="w-3 h-3 text-amber-300" />}
-      <span>{open ? 'Lock' : 'Unlock'}</span>
+      {open ? <DoorClosed className="w-3 h-3 text-amber-300" /> : <DoorOpen className="w-3 h-3 text-amber-300" />}
+      <span>{open ? 'Close' : 'Open'}</span>
     </button>
   );
 
@@ -2698,7 +2698,7 @@ export function CabinetDoors({
                 onToggle();
               }}
               onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onToggle())}
-              title={open ? 'Click arched glass door to close & lock' : 'Click arched glass door to unlock'}
+              title={open ? 'Click arched glass door to close' : 'Click arched glass door to open'}
               style={{
                 position: 'absolute',
                 top: 0,
@@ -2966,7 +2966,7 @@ export function CabinetDoors({
                 onToggle();
               }}
               onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onToggle())}
-              title={open ? 'Click solid wood door to close & lock' : 'Click solid wood door to unlock'}
+              title={open ? 'Click solid wood door to close' : 'Click solid wood door to open'}
               style={{
                 position: 'absolute',
                 top: 0,
@@ -3059,7 +3059,7 @@ export function CabinetDoors({
                 onToggle();
               }}
               onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onToggle())}
-              title={open ? 'Click glass door to close & lock' : 'Click glass door to unlock'}
+              title={open ? 'Click glass door to close' : 'Click glass door to open'}
               style={{
                 position: 'absolute',
                 top: 0,
@@ -3167,7 +3167,7 @@ export function CabinetDoors({
                 onToggle();
               }}
               onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onToggle())}
-              title={open ? 'Click sliding door leaf to close & lock' : 'Click to slide glass doors open'}
+              title={open ? 'Click sliding door leaf to close' : 'Click to slide glass doors open'}
               style={{
                 position: 'absolute',
                 top: 4,
@@ -3258,7 +3258,7 @@ export function CabinetDoors({
                 onToggle();
               }}
               onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onToggle())}
-              title={open ? 'Click folded glass panel to close & lock' : 'Click to fold crystal glass doors open'}
+              title={open ? 'Click folded glass panel to close' : 'Click to fold crystal glass doors open'}
               style={{
                 position: 'absolute',
                 top: 0,
@@ -3331,7 +3331,7 @@ export function CabinetDoors({
             onToggle();
           }}
           onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onToggle())}
-          title={open ? 'Click glass panel to close & lock' : 'Click glass panel to unlock'}
+          title={open ? 'Click glass panel to close' : 'Click glass panel to open'}
           style={{
             position: 'absolute',
             inset: 0,
@@ -3394,7 +3394,7 @@ export function CabinetDoors({
               onToggle();
             }}
             onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), onToggle())}
-            title={open ? 'Click panel edge to close & lock' : 'Click to slide armored steel vault panels open'}
+            title={open ? 'Click panel edge to close' : 'Click to slide armored steel vault panels open'}
             style={{
               position: 'absolute',
               top: 0,
@@ -4130,7 +4130,7 @@ export function Compartment({
   const hasInteractiveDoor =
     renderDoors && doorKind !== 'none' && doorKind !== 'frameless-glass';
   const shouldRenderOverlay = renderDoors && doorKind !== 'none';
-  const scrollableUpper = !isBottomShutter && shelves.length > 3;
+  const scrollableUpper = !isBottomShutter && shelves.length > 2;
 
   const clipDoorsToBay =
     doorKind === 'classified-shutter' ||
@@ -4186,12 +4186,12 @@ export function Compartment({
         }}
       />
 
-      {/* Vertically Scrollable Compartment List when user adds >3 upper sections */}
+      {/* Vertically Scrollable Compartment List when user adds >2 upper sections */}
       <div
         className={scrollableUpper ? 'sh-scroll-v' : undefined}
         style={{
           position: 'relative',
-          maxHeight: scrollableUpper ? 510 : undefined,
+          maxHeight: scrollableUpper ? 330 : undefined,
           overflowY: scrollableUpper ? 'auto' : 'visible',
           overflowX: 'hidden',
           minWidth: 0,
