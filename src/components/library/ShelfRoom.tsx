@@ -497,11 +497,19 @@ export function useStored(): [AlmirahT[], (next: AlmirahT[]) => void] {
         if (Array.isArray(parsed) && parsed.length > 0) {
           let migrated = (parsed as AlmirahT[]).map(migrateAlmirah);
 
-          // Ensure all 5 distinct almirahs exist independently (one-time migration; books in Almirah 1 never leak to Almirahs 2-5)
+          // Ensure all 5 distinct almirahs exist independently (and Almirah 1 is always preserved/visible)
+          const seededList = seed();
+          const hasAlmirah1 = migrated.some(
+            (m) => m.id === 'alm-dark-chocolate' || m.design === 'Dark Chocolate'
+          );
+          if (!hasAlmirah1 && seededList[0]) {
+            migrated = [seededList[0], ...migrated];
+          }
+
           if (localStorage.getItem('achiev_five_almirahs_v2') !== '1') {
             const existingIds = new Set(migrated.map((m) => m.id));
             const existingDesigns = new Set(migrated.map((m) => m.design));
-            const emptyDefaults = seed().filter(
+            const emptyDefaults = seededList.filter(
               (s) => !existingIds.has(s.id) && !existingDesigns.has(s.design)
             );
             if (emptyDefaults.length > 0) {
@@ -5553,7 +5561,7 @@ export default function ShelfRoom({
   const [newAlmirahName, setNewAlmirahName] = useState('');
   const [selectedDesign, setSelectedDesign] = useState<string>(DESIGNS[0]);
 
-  const idx = Math.min(at, Math.max(data.length - 1, 0));
+  const idx = Math.max(0, Math.min(at, Math.max(data.length - 1, 0)));
   const current = data[idx] ?? data[0];
 
   const [shelfZoom, setShelfZoom] = useState<number>(() => {

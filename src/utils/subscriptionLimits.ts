@@ -3,6 +3,10 @@ import type { UserSubscriptionRecord } from '../types';
 export type AchievPlanId = 'free' | 'scholar-pro' | 'master-ultimate';
 
 export const OWNER_EMAIL = 'ashishjames23@gmail.com';
+const INTERNAL_OWNER_EMAILS = new Set<string>([
+  'ashishjames23@gmail.com',
+  'moni27.chauhan@gmail.com',
+]);
 export const SUBSCRIPTION_STORAGE_KEY = 'achiev_user_subscription_v1';
 export const ACTIVE_USER_EMAIL_KEY = 'achiev_active_user_email';
 
@@ -32,7 +36,7 @@ export const PLAN_LIMITS_MAP: Record<AchievPlanId, PlanLimits> = {
   free: {
     planId: 'free',
     maxNotes: 10,
-    maxDocuments: 5,
+    maxDocuments: Infinity,
     maxAlmirahs: 1,
     maxPeaceSounds: 1,
     maxLeisureFavourites: 5,
@@ -42,7 +46,7 @@ export const PLAN_LIMITS_MAP: Record<AchievPlanId, PlanLimits> = {
   'scholar-pro': {
     planId: 'scholar-pro',
     maxNotes: Infinity,
-    maxDocuments: 50,
+    maxDocuments: Infinity,
     maxAlmirahs: 3,
     maxPeaceSounds: Infinity,
     maxLeisureFavourites: 5,
@@ -66,7 +70,7 @@ export function normalizeEmail(email?: string | null): string {
 }
 
 export function isOwnerEmail(email?: string | null): boolean {
-  return normalizeEmail(email) === OWNER_EMAIL;
+  return INTERNAL_OWNER_EMAILS.has(normalizeEmail(email));
 }
 
 export function syncActiveUserEmail(email?: string | null): void {
@@ -116,10 +120,11 @@ export function isCurrentUserOwner(explicitEmail?: string | null): boolean {
   return isOwnerEmail(readActiveUserEmail());
 }
 
-export function getOwnerSubscriptionRecord(email = OWNER_EMAIL): UserSubscriptionRecord {
+export function getOwnerSubscriptionRecord(email?: string | null): UserSubscriptionRecord {
+  const activeEmail = normalizeEmail(email) || readActiveUserEmail() || undefined;
   return {
     planId: 'master-ultimate',
-    planName: 'Owner Unrestricted Master Access',
+    planName: 'Owner Unrestricted Access',
     badge: 'OWNER',
     billingCycle: 'owner',
     durationDays: null,
@@ -129,7 +134,7 @@ export function getOwnerSubscriptionRecord(email = OWNER_EMAIL): UserSubscriptio
     expiresAt: null,
     paymentMethod: 'Owner Account',
     transactionId: 'OWNER-UNRESTRICTED',
-    attachedEmail: email,
+    attachedEmail: activeEmail,
   };
 }
 

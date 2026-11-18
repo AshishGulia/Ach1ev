@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Shield, Lock, Database, CreditCard, Mail } from 'lucide-react';
+import { X, Shield, Lock, Database, CreditCard, Mail, FileDown } from 'lucide-react';
 
 interface PrivacyPolicyModalProps {
   isOpen: boolean;
@@ -24,7 +24,7 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, 
             </span>
             <div>
               <h2 id="achiev-privacy-title" className="text-base sm:text-lg font-bold tracking-tight">
-                Ach1ev Privacy Policy &amp; Data Protection
+                Achiev Privacy Policy &amp; Data Protection
               </h2>
               <p className="text-[11px] opacity-75">Last updated: April 2026 · Applicable to achiev.com &amp; Vercel/Supabase deployments</p>
             </div>
@@ -46,7 +46,7 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, 
               <span>1. What Data We Collect</span>
             </h3>
             <p className="opacity-90">
-              When you sign in to Ach1ev, we collect only your account identifier (email address or Google/OAuth profile ID, and optional display name) along with the notes, syllabus schedules, trackers, bookshelves, and study documents you explicitly choose to create or sync.
+              When you sign in to Achiev, we collect only your account identifier (email address or Google/OAuth profile ID, and optional display name) along with the notes, syllabus schedules, trackers, bookshelves, and study documents you explicitly choose to create or sync.
             </p>
           </section>
 
@@ -66,7 +66,7 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, 
               <span>3. Razorpay Payments &amp; Subscription Verification</span>
             </h3>
             <p className="opacity-90">
-              Paid upgrades (Clinical Scholar Pro ₹100/mo and Chief Fellow Master ₹300/mo) are processed through Razorpay’s PCI-DSS compliant checkout. Ach1ev never stores your full card number, CVV, UPI PIN, or net-banking credentials. Only verified Razorpay payment/order identifiers and HMAC-SHA256 verification status are saved in Supabase to unlock your chosen plan.
+              Paid upgrades (Clinical Scholar Pro ₹100/mo and Chief Fellow Master ₹300/mo) are processed through Razorpay’s PCI-DSS compliant checkout. Achiev never stores your full card number, CVV, UPI PIN, or net-banking credentials. Only verified Razorpay payment/order identifiers and HMAC-SHA256 verification status are saved in Supabase to unlock your chosen plan.
             </p>
           </section>
 
@@ -88,15 +88,25 @@ export const PrivacyPolicyModal: React.FC<PrivacyPolicyModalProps> = ({ isOpen, 
           </section>
         </div>
 
-        <div className="px-6 py-3.5 border-t border-[#d9c1a0] dark:border-[#382518] bg-[#f4e7d2] dark:bg-[#140c08] flex items-center justify-between">
-          <span className="text-[11px] opacity-75">Ach1ev — Settle Ideas</span>
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-1.5 rounded-xl bg-[#4a2511] hover:bg-[#381b0b] text-[#f6ebd8] text-xs font-semibold transition-colors cursor-pointer"
-          >
-            Close Policy
-          </button>
+        <div className="px-6 py-3.5 border-t border-[#d9c1a0] dark:border-[#382518] bg-[#f4e7d2] dark:bg-[#140c08] flex flex-wrap items-center justify-between gap-2">
+          <span className="text-[11px] opacity-75">Achiev — Settle Ideas</span>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="px-3 py-1.5 rounded-xl border border-[#c7a982] dark:border-[#4b3120] hover:bg-[#ead8bd] dark:hover:bg-[#2a1a11] text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+            >
+              <FileDown className="w-3.5 h-3.5" />
+              <span>Save / View PDF</span>
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-1.5 rounded-xl bg-[#4a2511] hover:bg-[#381b0b] text-[#f6ebd8] text-xs font-semibold transition-colors cursor-pointer"
+            >
+              Close Policy
+            </button>
+          </div>
         </div>
       </div>
     </div>

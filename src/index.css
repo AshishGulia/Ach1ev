@@ -3,13 +3,13 @@
 
 @theme {
   /* =========================================================================
-     UNIFIED FONT SYSTEM - BASKERVILLE ACROSS ENTIRE APPLICATION (DEFAULT)
-     Ensures typography is completely consistent, scholarly, clean, and timeless.
+     UNIFIED FONT SYSTEM - URBANIST ACROSS ENTIRE APPLICATION (DEFAULT)
+     Ensures typography is completely consistent, crisp, clean, and modern.
      ========================================================================= */
-  --font-sans: var(--app-font-family, 'Libre Baskerville', Baskerville, Georgia, serif);
-  --font-serif: var(--app-font-family, 'Libre Baskerville', Baskerville, Georgia, serif);
-  --font-mono: var(--app-font-family, 'Libre Baskerville', Baskerville, Georgia, serif);
-  --font-heading: var(--app-font-family, 'Libre Baskerville', Baskerville, Georgia, serif);
+  --font-sans: var(--app-font-family, 'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif);
+  --font-serif: var(--app-font-family, 'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif);
+  --font-mono: var(--app-font-family, 'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif);
+  --font-heading: var(--app-font-family, 'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif);
 
   /* =========================================================================
      SOBER, RESTORATIVE, EYE-COMFORTABLE MEDICAL PALETTE

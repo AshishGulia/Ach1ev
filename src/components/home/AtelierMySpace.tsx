@@ -1298,7 +1298,7 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
                     {filteredTasks.length === 0 ? (
                       <li
                         className="atelier-task"
-                        style={{ color: 'color-mix(in srgb, var(--note-ink) 65%, transparent)', fontFamily: 'Caveat, cursive', fontSize: '15px', fontStyle: 'normal' }}
+                        style={{ color: 'color-mix(in srgb, var(--note-ink) 65%, transparent)', fontFamily: 'Caveat, cursive', fontSize: '15.5px', lineHeight: '28px', fontStyle: 'normal' }}
                       >
                         Nothing here.
                       </li>
@@ -1311,7 +1311,6 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
                               id={`chk-${t.id}`}
                               checked={t.done}
                               onChange={() => handleToggleTaskDone(t.id)}
-                              className="mt-1"
                             />
                             <label htmlFor={`chk-${t.id}`}>{t.t}</label>
                           </div>

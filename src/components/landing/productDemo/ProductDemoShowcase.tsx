@@ -92,7 +92,7 @@ const PRODUCT_FAQS = [
   },
   {
     q: 'How does Picture-to-Table speed up pharmacology and pathology revision?',
-    a: 'Upload or snap a photo of a classification table from a textbook or slide, and Ach1ev structures the rows into an editable grid directly on your note page.',
+    a: 'Upload or snap a photo of a classification table from a textbook or slide, and Achiev structures the rows into an editable grid directly on your note page.',
   },
   {
     q: 'Can I save directly from Google Drive or sync across my laptop and iPad?',
@@ -219,24 +219,24 @@ export const ProductDemoShowcase: React.FC = () => {
       aria-labelledby="product-demo-heading"
       className="w-full pb-16 sm:pb-24"
       style={{
-        fontFamily: "'Libre Baskerville', Baskerville, Georgia, serif",
+        fontFamily: "'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif",
         background:
           'linear-gradient(180deg, #0b0402 0%, #110602 5%, #180904 10%, #210c05 15%, #2b1207 20%, #37180a 25%, #46200e 30%, #572a14 35%, #6a361b 40%, #7f4424 45%, #955530 50%, #ab693f 55%, #c17e51 59%, #d49668 63%, #e3af81 67%, #eec699 71%, #f4d8b3 74%, #f6e6cb 77%, #f2dfc0 88%, #ecd3ab 100%)',
       }}
     >
       <style>{SHOWCASE_CSS}</style>
 
-      {/* ═══════════════ 0. SEO INTRO SHIFTED LOWER IN DEEP GLOOMY DARK CHOCOLATE ZONE ═══════════════ */}
-      <div className="w-full px-4 sm:px-8 pt-20 sm:pt-32 pb-16 sm:pb-24">
-        <div className="max-w-4xl mx-auto text-center px-3 space-y-3">
-          <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#f5d093] drop-shadow-[0_1px_6px_rgba(6,2,0,0.85)]">
-            1st Ever Luxury &amp; Cozy Fully Customisable Study Sanctuary · ₹0 Free, ₹100 Pro &amp; ₹300 Master
+      {/* ═══════════════ 0. CONCISE INTRO IN DEEP COCOA ZONE ═══════════════ */}
+      <div className="w-full px-4 sm:px-8 pt-16 sm:pt-24 pb-12 sm:pb-16">
+        <div className="max-w-3xl mx-auto text-center px-3 space-y-3">
+          <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-[#f5d093] drop-shadow-[0_1px_6px_rgba(6,2,0,0.85)]">
+            Luxury &amp; Customisable Study Sanctuary · ₹0 Free, ₹100 Pro &amp; ₹300 Master
           </p>
           <h2 className="text-2xl sm:text-4xl font-bold text-[#fffaf0] leading-tight text-balance drop-shadow-[0_2px_12px_rgba(6,2,0,0.85)]">
-            High-End Note Maker &amp; Focus Workspace Crafted for Millions of Students Worldwide
+            High-End Note Maker &amp; Focus Workspace for Global Students
           </h2>
           <p className="text-sm sm:text-base text-[#f7e5ca] max-w-2xl mx-auto leading-relaxed drop-shadow-[0_1px_6px_rgba(6,2,0,0.8)]">
-            Experience a high-end study app built from understanding what global learners truly need—a focus app and a studying app at one quiet place. Compile notes, heavy books, and lecture video sources together without carrying weighty bags.
+            One calm desk compiling your notes, textbooks, and lecture videos without heavy bags or distraction.
           </p>
         </div>
       </div>
@@ -286,79 +286,76 @@ export const ProductDemoShowcase: React.FC = () => {
         </div>
       </div>
 
-      {/* ═══════════════ 2. EDITORIAL PRAISE HIGHLIGHTS BELOW LAPTOP (PURE TEXT WITHOUT BOX WRAPPER) ═══════════════ */}
+      {/* ═══════════════ 2. CLEAN SCANNABLE HIGHLIGHTS BELOW LAPTOP ═══════════════ */}
       <div className="max-w-5xl mx-auto py-4 px-2 sm:px-4">
-        <div className="text-center space-y-3 max-w-3xl mx-auto px-2">
-          <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#f5d093] drop-shadow-[0_1px_6px_rgba(8,2,0,0.85)]">
-            Why Scholars Around the World Choose Ach1ev
+        <div className="text-center space-y-2.5 max-w-2xl mx-auto px-2">
+          <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#f5d093] drop-shadow-[0_1px_6px_rgba(8,2,0,0.85)]">
+            Why Scholars Choose Achiev
           </p>
           <h3 className="text-xl sm:text-3xl font-bold text-[#fffaf0] leading-snug text-balance drop-shadow-[0_2px_12px_rgba(8,2,0,0.85)]">
-            1st ever luxury, cozy &amp; fully customisable studying sanctuary built so you stay focused and healthy.
+            A luxury, cozy &amp; customisable study room designed for deep focus.
           </h3>
-          <p className="text-sm sm:text-[15px] text-[#f5e3c6] leading-relaxed drop-shadow-[0_1px_6px_rgba(8,2,0,0.8)]">
-            Crafted by experience and deep understanding of millions of students across the globe—every shelf, font, timer, flowchart, and study circle works seamlessly together without ever reaching for social media.
-          </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6 mt-10 pt-8 border-t border-[#f5d093]/25 text-left px-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-5 mt-8 pt-7 border-t border-[#f5d093]/25 text-left px-2">
           {[
             {
               num: '01',
               title: '1st Ever Luxury, Cozy & Customisable Study Vibe',
-              body: 'Crafted from real student experience across the globe—customize every theme, paper tint, font, and layout so your desk feels calm, personal, and genuinely inviting.',
+              body: 'Tailor every theme, sepia paper shade, font, and layout so your desk feels calm and personal.',
             },
             {
               num: '02',
-              title: 'Compile Notes, Books & Lecture Videos in One Place',
-              body: 'Read textbooks side-by-side while pinning lecture video sources beside your sheet—make better, cleaner notes without carrying heavy books.',
+              title: 'Notes, Books & Lecture Videos in One Place',
+              body: 'Read textbooks beside lined notes while pinning lecture videos—no heavy books required.',
             },
             {
               num: '03',
-              title: 'Homely Vibes With a Real 3D Almirah Setup',
-              body: 'Organize books in realistic wooden & glass bookshelf almirahs and choose any cabinet design of your choice, just like your study room at home.',
+              title: 'Homely 3D Almirah Bookshelf Setup',
+              body: 'Organize books inside wooden & glass almirahs with custom designs of your choice.',
             },
             {
               num: '04',
-              title: 'Make Flowcharts With Gemini to Master Theory',
-              body: 'Turn sprawling theory chapters into structured multi-level Gemini flowcharts so complex mechanisms, drugs, and pathways stay organized for rapid recall.',
+              title: 'Gemini Flowcharts to Organise Theory',
+              body: 'Convert sprawling chapters into structured multi-level flowcharts for rapid recall.',
             },
             {
               num: '05',
-              title: 'Dedicated Eye Rest Timer to Keep You Healthy',
-              body: 'Featured exclusively to protect your eyes during long study hours so you stay healthy, excel anywhere, and Achiev your goals in life.',
+              title: 'Eye Rest Timer for Healthy Study Hours',
+              body: 'Built-in 20-20-20 ocular rest alerts protect your eyes so you stay fresh and excel.',
             },
             {
               num: '06',
-              title: 'Connect With Friends — Zero Social Media Distraction',
-              body: 'Create your study group without moving from your seat and stay connected with classmates without losing focus—zero need to ever reach out to social media.',
+              title: 'Study Groups Without Social Media',
+              body: 'Connect with classmates in focused study circles with zero social media distraction.',
             },
             {
               num: '07',
-              title: 'Feeling Bored? Explore the World in Leisure Mode',
-              body: 'When not in the mood to study, unwind inside the Leisure segment as if exploring the world—complete with a smart break-time reminder tracking how long you rest.',
+              title: 'Leisure Mode & Smart Break Reminders',
+              body: 'Explore scenic relaxation breaks when bored while keeping track of your break timer.',
             },
             {
               num: '08',
-              title: 'Talk to the Developer & Earn Idea Credits',
-              body: 'Suggest changes anytime. Ideas worth implementing are discussed with the developer team and showcased to users with credit while strictly maintaining your privacy.',
+              title: 'Talk to Developer & Earn Idea Credits',
+              body: 'Suggest improvements directly; implemented ideas receive public credit with full privacy.',
             },
             {
               num: '09',
-              title: 'A Bag Full of Handwriting, Casual & Official Fonts',
-              body: 'Switch effortlessly across curated Handwriting, Casual, and Official font styles to craft notes that feel crisp, expressive, and uniquely yours.',
+              title: 'Handwriting, Casual & Official Font Bag',
+              body: 'Switch freely across curated Handwriting, Casual, and Official typography styles.',
             },
             {
               num: '10',
-              title: 'Observe Goals & Habits With Customised Trackers',
-              body: 'Monitor daily focus timer logs, MCQs, image questions, and study habits using tailored trackers built to help you Achiev efficiently every day.',
+              title: 'Customised Goal & Habit Trackers',
+              body: 'Monitor daily focus hours, MCQs, and habits on one clear dashboard.',
             },
           ].map((item) => (
-            <div key={item.num} className="pt-4 border-t border-[#f5d093]/15 flex items-start gap-3.5">
+            <div key={item.num} className="pt-3.5 border-t border-[#f5d093]/15 flex items-start gap-3">
               <span className="text-xs font-mono font-bold text-[#f5d093] pt-0.5 shrink-0 tabular-nums drop-shadow-[0_1px_4px_rgba(8,2,0,0.8)]">
                 {item.num}
               </span>
-              <div className="space-y-1">
-                <h4 className="text-sm sm:text-base font-bold text-[#fff8ea] leading-snug drop-shadow-[0_1px_6px_rgba(8,2,0,0.8)]">
+              <div className="space-y-0.5">
+                <h4 className="text-sm sm:text-[15px] font-bold text-[#fff8ea] leading-snug drop-shadow-[0_1px_6px_rgba(8,2,0,0.8)]">
                   {item.title}
                 </h4>
                 <p className="text-xs sm:text-[13px] text-[#f3dfc1] leading-relaxed drop-shadow-[0_1px_4px_rgba(8,2,0,0.75)]">
@@ -415,8 +412,8 @@ export const ProductDemoShowcase: React.FC = () => {
           <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-[#5c2c09]">
             Inside Everyday Study Environments · 5 Real Desk Stories
           </p>
-          <h3 className="text-xl sm:text-3xl font-bold text-[#190802] font-serif leading-snug">
-            Every study corner—solitary or together—paired with a dedicated Ach1ev workspace tool.
+          <h3 className="text-xl sm:text-3xl font-bold text-[#190802] leading-snug">
+            Every study corner—paired with a dedicated Achiev tool.
           </h3>
         </div>
 
@@ -551,17 +548,17 @@ export const ProductDemoShowcase: React.FC = () => {
         </div>
       </div>
 
-      {/* ═══════════════ 5. ACH1EV ACADEMIC PRICING PLANS & COMPARISON TABLE ═══════════════ */}
+      {/* ═══════════════ 5. ACHIEV ACADEMIC PRICING PLANS & COMPARISON TABLE ═══════════════ */}
       <div aria-labelledby="achiev-pricing-heading" className="space-y-8 max-w-5xl mx-auto">
         <div className="text-center space-y-2">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#6b3810]">
             Simple Student Pricing
           </p>
-          <h3 id="achiev-pricing-heading" className="text-xl sm:text-3xl font-bold text-[#190802] font-serif">
-            Ach1ev Academic Plans
+          <h3 id="achiev-pricing-heading" className="text-xl sm:text-3xl font-bold text-[#190802]">
+            Achiev Academic Plans
           </h3>
           <p className="text-xs sm:text-sm font-medium text-[#2c1206] max-w-xl mx-auto leading-relaxed">
-            Start free forever or unlock complete clinical extraction, all 5 3D almirahs, and Drive vault sync via UPI QR, Debit/Credit Card, or Net Banking.
+            Start free forever or unlock clinical extraction, all 5 3D almirahs, and Drive sync via UPI QR, Card, or Net Banking.
           </p>
         </div>
 
@@ -692,7 +689,7 @@ export const ProductDemoShowcase: React.FC = () => {
 
       {/* ═══════════════ 7. QUIET LEGAL & PRIVACY FOOTER ═══════════════ */}
       <footer className="max-w-4xl mx-auto pt-4 border-t border-[#6b3810]/30 flex flex-wrap items-center justify-between gap-3 text-xs text-[#2c1206]">
-        <span className="font-bold">© {new Date().getFullYear()} Ach1ev — Settle Ideas</span>
+        <span className="font-bold">© {new Date().getFullYear()} Achiev — Settle Ideas</span>
         <div className="flex items-center gap-4">
           <button
             type="button"

@@ -3,8 +3,10 @@ import { SubjectCourse, DesignId } from '../../types';
 import { useAuth } from '../../contexts/AuthContext';
 import { AchievBrand } from './AchievBrand';
 import { subscribePwaInstall, triggerPwaInstall } from '../../utils/pwaInstall';
+import { isCurrentUserOwner, readActiveUserEmail } from '../../utils/subscriptionLimits';
 import {
   Clock,
+  Flag,
   Pause,
   Timer,
   Eye,
@@ -129,6 +131,8 @@ export const WindowsHeader: React.FC<WindowsHeaderProps> = ({
 }) => {
   const { user, googleUser, phoneUser, syncStatus, lastSyncedAt, driveAccount, openAuthModal } = useAuth();
   const isSignedInAccount = Boolean(user || googleUser || phoneUser);
+  const activeHeaderEmail = user?.email || googleUser?.email || readActiveUserEmail();
+  const showOwnerFlag = isCurrentUserOwner(activeHeaderEmail);
   const [canInstallApp, setCanInstallApp] = useState(false);
 
   // Global UI / Font Zoom (85% - 135%) for comfortable reading & mobile readability
@@ -673,8 +677,17 @@ export const WindowsHeader: React.FC<WindowsHeaderProps> = ({
         </span>
       </div>
 
-      {/* Right Column: Focus Timer, Sign In Pill, Soothing Sounds Icon, UI Zoom, Eye Logo, Dark Mode */}
+      {/* Right Column: Owner Flag, Focus Timer, Sign In Pill, Soothing Sounds Icon, UI Zoom, Eye Logo, Dark Mode */}
       <div className="flex items-center gap-1 sm:gap-2 shrink-0">
+        {showOwnerFlag && (
+          <span
+            title="Owner Access"
+            className="inline-flex items-center gap-1 px-2 py-1 rounded-xl border border-amber-500/45 bg-amber-500/15 text-[#784819] dark:text-amber-300 text-[10.5px] font-bold tracking-wide shadow-2xs shrink-0"
+          >
+            <Flag className="w-3 h-3 fill-current shrink-0" />
+            <span className="hidden xs:inline sm:inline">Owner</span>
+          </span>
+        )}
         {focusTimer.active && (
           <div className="relative" ref={focusMenuRef}>
             <button

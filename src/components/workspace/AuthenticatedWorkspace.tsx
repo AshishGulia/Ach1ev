@@ -74,7 +74,6 @@ const AskGeminiModal = lazy(() => import('../common/AskGeminiModal').then((m) =>
 const ReadStudioView = lazy(() => import('../reader/ReadStudioView').then((m) => ({ default: m.ReadStudioView })));
 const TalkToDeveloperModal = lazy(() => import('../developer/TalkToDeveloperModal').then((m) => ({ default: m.TalkToDeveloperModal })));
 const SubscriptionModal = lazy(() => import('../subscription/SubscriptionModal').then((m) => ({ default: m.SubscriptionModal })));
-const ShareToAIStudioModal = lazy(() => import('../common/ShareToAIStudioModal').then((m) => ({ default: m.ShareToAIStudioModal })));
 
 export const AuthenticatedWorkspace: React.FC = () => {
   const {
@@ -372,7 +371,6 @@ export const AuthenticatedWorkspace: React.FC = () => {
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [isEyeBreakModalOpen, setIsEyeBreakModalOpen] = useState<boolean>(false);
   const [isGlobalGeminiOpen, setIsGlobalGeminiOpen] = useState<boolean>(false);
-  const [isAIStudioModalOpen, setIsAIStudioModalOpen] = useState<boolean>(false);
 
   const [isDarkMode, setIsDarkMode] = useState<boolean>(() => {
     try {
@@ -1247,7 +1245,6 @@ export const AuthenticatedWorkspace: React.FC = () => {
           setSettingsInitialTab('profile');
           setActiveView('settings');
         }}
-        onOpenAIStudioModal={() => setIsAIStudioModalOpen(true)}
       />
 
       <div className="flex-1 min-w-0 flex flex-col h-[100dvh] overflow-hidden relative z-10">
@@ -1285,7 +1282,6 @@ export const AuthenticatedWorkspace: React.FC = () => {
           onSelectDesign={handleSelectDesign}
           onRevertChanges={handleRevertChanges}
           onOpenAskGemini={() => setIsGlobalGeminiOpen(true)}
-          onOpenAIStudioModal={() => setIsAIStudioModalOpen(true)}
         />
 
         <main className="flex-1 overflow-hidden flex flex-col pb-14 md:pb-0">
@@ -1599,7 +1595,6 @@ export const AuthenticatedWorkspace: React.FC = () => {
                           onResetSession={handleResetSession}
                           activeDesign={activeDesign}
                           onSelectDesign={handleSelectDesign}
-                          onOpenAIStudioModal={() => setIsAIStudioModalOpen(true)}
                         />
                       </div>
                     )}
@@ -1748,7 +1743,6 @@ export const AuthenticatedWorkspace: React.FC = () => {
             onResetSession={handleResetSession}
             activeDesign={activeDesign}
             onSelectDesign={handleSelectDesign}
-            onOpenAIStudioModal={() => setIsAIStudioModalOpen(true)}
           />
         )}
 
@@ -1824,13 +1818,6 @@ export const AuthenticatedWorkspace: React.FC = () => {
                 setActiveView('notebooks');
               }
             }}
-          />
-        )}
-
-        {isAIStudioModalOpen && (
-          <ShareToAIStudioModal
-            isOpen={isAIStudioModalOpen}
-            onClose={() => setIsAIStudioModalOpen(false)}
           />
         )}
       </Suspense>

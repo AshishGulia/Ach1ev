@@ -106,9 +106,9 @@ export const AchievBrand: React.FC<AchievBrandProps> = ({
     );
   }
 
-  // Default: 'compact' — Sidebar header brand displaying the crisp full ACH1EV Settle Ideas logo
+  // Default: 'compact' — Sidebar header brand displaying the crisp full ACH1EV Settle Ideas logo centered
   return (
-    <div className={`flex items-center justify-start bg-transparent select-none min-w-0 w-full py-0.5 ${className}`} title={title}>
+    <div className={`flex items-center justify-center bg-transparent select-none min-w-0 w-full py-0.5 ${className}`} title={title}>
       <img
         src={ACHIEV_DEFAULT_LOGO_URL}
         alt={title}

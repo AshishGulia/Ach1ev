@@ -28,6 +28,13 @@ import {
   saveUserSubscription,
   UpgradeBannerDetail,
 } from '../../utils/subscriptionLimits';
+import {
+  calculateDiscountedPrice,
+  getSavedDiscountCode,
+  saveDiscountCode,
+  validateDiscountCode,
+  type DiscountCodeResult,
+} from '../../utils/discountCodes';
 
 const INDIAN_BANKS = [
   'State Bank of India (SBI)',
@@ -83,6 +90,9 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   );
   const [upgradedFeedback, setUpgradedFeedback] = useState<string | null>(null);
   const [bannerDetail, setBannerDetail] = useState<UpgradeBannerDetail | null>(upgradeBanner);
+  const [discountInput, setDiscountInput] = useState<string>(() => getSavedDiscountCode()?.code || '');
+  const [appliedDiscount, setAppliedDiscount] = useState<DiscountCodeResult | null>(() => getSavedDiscountCode());
+  const [discountError, setDiscountError] = useState<string | null>(null);
 
   // Sender details (payer / account holder only — zero sample/creator fields)
   const [senderName, setSenderName] = useState<string>(resolvedAuthName);
@@ -145,10 +155,21 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
     }
   }, [isOpen, upgradeBanner]);
 
+  useEffect(() => {
+    if (!isOpen) return;
+    const saved = getSavedDiscountCode();
+    if (saved) {
+      setAppliedDiscount(saved);
+      setDiscountInput(saved.code);
+      setDiscountError(null);
+    }
+  }, [isOpen]);
+
+  const getDiscountedAmount = (basePrice: number) =>
+    appliedDiscount ? calculateDiscountedPrice(basePrice, appliedDiscount.percentOff) : basePrice;
+
   const checkoutAmount = checkoutTier
-    ? billingCycle === 'annual'
-      ? checkoutTier.priceAnnual
-      : checkoutTier.priceMonthly
+    ? getDiscountedAmount(billingCycle === 'annual' ? checkoutTier.priceAnnual : checkoutTier.priceMonthly)
     : 0;
 
   if (!isOpen) return null;
@@ -183,7 +204,8 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
 
   const finalizeUpgrade = (tier: SubscriptionTier, methodLabel: string, txnRef?: string) => {
     const txnId = txnRef || `ACH-${Date.now().toString().slice(-8)}`;
-    const amountInr = billingCycle === 'annual' ? tier.priceAnnual : tier.priceMonthly;
+    const baseInr = billingCycle === 'annual' ? tier.priceAnnual : tier.priceMonthly;
+    const amountInr = getDiscountedAmount(baseInr);
     const cycle: 'monthly' | 'annual' | 'free' =
       amountInr <= 0 || tier.id === 'free' ? 'free' : billingCycle;
     const attachedEmail = senderEmail.trim() || resolvedAuthEmail;
@@ -235,7 +257,8 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
   };
 
   const launchRazorpayCheckout = async (tier: SubscriptionTier) => {
-    const amountInr = billingCycle === 'annual' ? tier.priceAnnual : tier.priceMonthly;
+    const baseInr = billingCycle === 'annual' ? tier.priceAnnual : tier.priceMonthly;
+    const amountInr = getDiscountedAmount(baseInr);
     if (amountInr <= 0) return;
 
     const cleanSenderEmail = senderEmail.trim() || resolvedAuthEmail;
@@ -290,7 +313,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
         key: RAZORPAY_KEY_ID,
         amount: amountInr * 100,
         currency: 'INR',
-        name: 'Ach1ev',
+        name: 'Achiev',
         description: `${tier.name} (${billingCycle === 'annual' ? 'Annual · 365 Days' : 'Monthly · 30 Days'})`,
         image: `${window.location.origin}/assets/aistudio/Final_Logo_webp_1000_x_350_e6e85d30.PNG`,
         ...(orderId ? { order_id: orderId } : {}),
@@ -510,7 +533,7 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
             </span>
             <div>
               <h3 className="text-base font-bold text-stone-900 dark:text-stone-50">
-                {checkoutTier ? `Checkout · ${checkoutTier.name}` : 'Ach1ev Academic Membership'}
+                {checkoutTier ? `Checkout · ${checkoutTier.name}` : 'Achiev Academic Membership'}
               </h3>
               <p className="text-xs text-stone-500 dark:text-stone-400">
                 {checkoutTier
@@ -530,21 +553,6 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           </button>
         </div>
 
-        {/* Owner Account Unrestricted Notice */}
-        {isOwner && (
-          <div className="mx-6 mt-4 p-3.5 rounded-xl bg-emerald-500/12 border border-emerald-500/35 text-emerald-900 dark:text-emerald-200 text-xs flex items-center justify-between gap-3">
-            <div className="flex items-center gap-2.5">
-              <Crown className="w-4 h-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-              <div>
-                <div className="font-bold text-sm">Owner Account · Unrestricted Access Active</div>
-                <p className="opacity-90">
-                  Signed in as <strong>{resolvedAuthEmail}</strong>. All notes, documents, 5 almirahs, peace sounds, leisure favourites, Achiever&apos;s Hub &amp; Gemini features are permanently unlocked with zero restrictions.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-
         {!isOwner && bannerDetail && (
           <div className="mx-6 mt-4 p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/35 text-rose-900 dark:text-rose-200 text-xs flex items-start justify-between gap-3">
             <div>
@@ -562,55 +570,117 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
           </div>
         )}
 
-        {/* Billing Toggle & Current Attached Plan Summary */}
+        {/* Billing Toggle, Discount Code & Current Attached Plan Summary */}
         {!checkoutTier && (
-          <div className="px-6 py-3.5 flex flex-wrap items-center justify-between gap-3 border-b border-stone-200/60 dark:border-[#352317] bg-[#f9f8f4] dark:bg-[#160f0b]">
-            {upgradedFeedback ? (
-              <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200 text-xs flex items-center gap-2 font-medium">
-                <CheckCircle2 className="w-4 h-4 text-[#8f5f2c] dark:text-amber-400 shrink-0" />
-                <span>
-                  Subscription updated to <strong>{upgradedFeedback}</strong> and attached to your profile!
-                </span>
-              </div>
-            ) : activeSubRecord ? (
-              <div className="flex items-center gap-2 text-xs text-stone-700 dark:text-stone-300">
-                <CalendarClock className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
-                <span>
-                  Profile Plan: <strong>{activeSubRecord.planName}</strong>
-                  {activeSubRecord.durationDays ? ` (${activeSubRecord.durationDays} Days · Valid until ${formatDateDisplay(activeSubRecord.expiresAt)})` : ''}
-                </span>
-              </div>
-            ) : null}
-
-            <div className="flex items-center gap-2 ml-auto">
-              <span className="text-xs font-semibold text-stone-600 dark:text-stone-400">Billing Interval:</span>
-              <div className="flex items-center p-1 rounded-xl bg-stone-200/80 dark:bg-[#231912]">
-                <button
-                  type="button"
-                  onClick={() => setBillingCycle('monthly')}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                    billingCycle === 'monthly'
-                      ? 'bg-white dark:bg-[#140e0a] text-stone-900 dark:text-stone-100 shadow-xs'
-                      : 'text-stone-600 dark:text-stone-400'
-                  }`}
-                >
-                  Monthly (30 Days)
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setBillingCycle('annual')}
-                  className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
-                    billingCycle === 'annual'
-                      ? 'bg-amber-600 text-white shadow-xs'
-                      : 'text-stone-600 dark:text-stone-400'
-                  }`}
-                >
-                  <span>Annual</span>
-                  <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-200 text-amber-950 font-mono">
-                    365 Days
+          <div className="px-6 py-3.5 space-y-3 border-b border-stone-200/60 dark:border-[#352317] bg-[#f9f8f4] dark:bg-[#160f0b]">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              {upgradedFeedback ? (
+                <div className="p-2 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-700 text-amber-900 dark:text-amber-200 text-xs flex items-center gap-2 font-medium">
+                  <CheckCircle2 className="w-4 h-4 text-[#8f5f2c] dark:text-amber-400 shrink-0" />
+                  <span>
+                    Subscription updated to <strong>{upgradedFeedback}</strong> and attached to your profile!
                   </span>
-                </button>
+                </div>
+              ) : activeSubRecord ? (
+                <div className="flex items-center gap-2 text-xs text-stone-700 dark:text-stone-300">
+                  <CalendarClock className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                  <span>
+                    Profile Plan: <strong>{activeSubRecord.planName}</strong>
+                    {activeSubRecord.durationDays ? ` (${activeSubRecord.durationDays} Days · Valid until ${formatDateDisplay(activeSubRecord.expiresAt)})` : ''}
+                  </span>
+                </div>
+              ) : null}
+
+              <div className="flex items-center gap-2 ml-auto">
+                <span className="text-xs font-semibold text-stone-600 dark:text-stone-400">Billing Interval:</span>
+                <div className="flex items-center p-1 rounded-xl bg-stone-200/80 dark:bg-[#231912]">
+                  <button
+                    type="button"
+                    onClick={() => setBillingCycle('monthly')}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      billingCycle === 'monthly'
+                        ? 'bg-white dark:bg-[#140e0a] text-stone-900 dark:text-stone-100 shadow-xs'
+                        : 'text-stone-600 dark:text-stone-400'
+                    }`}
+                  >
+                    Monthly (30 Days)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setBillingCycle('annual')}
+                    className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1.5 ${
+                      billingCycle === 'annual'
+                        ? 'bg-amber-600 text-white shadow-xs'
+                        : 'text-stone-600 dark:text-stone-400'
+                    }`}
+                  >
+                    <span>Annual</span>
+                    <span className="text-[10px] px-1.5 py-0.2 rounded-full bg-amber-200 text-amber-950 font-mono">
+                      365 Days
+                    </span>
+                  </button>
+                </div>
               </div>
+            </div>
+
+            {/* Discount Code Column */}
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-stone-200/70 dark:border-[#2c1e14]">
+              <div className="flex items-center gap-2 flex-1 min-w-[230px]">
+                <label htmlFor="sub-modal-discount" className="text-xs font-bold text-stone-700 dark:text-stone-300 shrink-0">
+                  Discount Code:
+                </label>
+                <input
+                  id="sub-modal-discount"
+                  type="text"
+                  value={discountInput}
+                  onChange={(e) => {
+                    setDiscountInput(e.target.value.toUpperCase());
+                    if (discountError) setDiscountError(null);
+                  }}
+                  placeholder="Enter code (e.g. ACHIEV20)"
+                  className="flex-1 max-w-[220px] px-3 py-1.5 rounded-lg border border-stone-200 dark:border-[#382518] bg-white dark:bg-[#120c08] text-xs font-mono uppercase outline-none focus:border-amber-500"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const match = validateDiscountCode(discountInput);
+                    if (!match) {
+                      setDiscountError('Invalid code. Try ACHIEV20, STUDENT25, or SCHOLAR50.');
+                      return;
+                    }
+                    setAppliedDiscount(match);
+                    saveDiscountCode(match.code);
+                    setDiscountError(null);
+                  }}
+                  className="px-3 py-1.5 rounded-lg bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold cursor-pointer"
+                >
+                  Apply
+                </button>
+                {appliedDiscount && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAppliedDiscount(null);
+                      setDiscountInput('');
+                      saveDiscountCode(null);
+                    }}
+                    className="px-2.5 py-1.5 rounded-lg bg-stone-200 dark:bg-[#251a12] text-stone-700 dark:text-stone-300 text-xs font-semibold cursor-pointer"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+              {appliedDiscount ? (
+                <span className="text-xs font-bold text-emerald-700 dark:text-emerald-400">
+                  Applied {appliedDiscount.code} ({appliedDiscount.percentOff}% off) — discounted prices shown below
+                </span>
+              ) : discountError ? (
+                <span className="text-xs font-semibold text-rose-600 dark:text-rose-400">{discountError}</span>
+              ) : (
+                <span className="text-[11px] text-stone-500 dark:text-stone-400">
+                  Apply a student or promo code to preview discounted plan rates
+                </span>
+              )}
             </div>
           </div>
         )}
@@ -965,7 +1035,9 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {SUBSCRIPTION_TIERS.map((tier) => {
                 const isCurrent = activeTier === tier.id;
-                const price = billingCycle === 'annual' ? tier.priceAnnual : tier.priceMonthly;
+                const basePrice = billingCycle === 'annual' ? tier.priceAnnual : tier.priceMonthly;
+                const price = getDiscountedAmount(basePrice);
+                const hasDiscount = appliedDiscount && basePrice > 0 && price < basePrice;
                 const unit = billingCycle === 'annual' ? '/ year' : '/ month';
 
                 return (
@@ -1001,12 +1073,22 @@ export const SubscriptionModal: React.FC<SubscriptionModalProps> = ({
                       </p>
 
                       <div className="my-4 pb-3 border-b border-stone-200 dark:border-[#352317]">
-                        <div className="flex items-baseline gap-1">
+                        <div className="flex items-baseline gap-2 flex-wrap">
+                          {hasDiscount && (
+                            <span className="text-sm line-through text-stone-400 font-mono">
+                              ₹{basePrice.toLocaleString('en-IN')}
+                            </span>
+                          )}
                           <span className="text-2xl font-black text-stone-900 dark:text-stone-50 font-mono">
                             {price === 0 ? 'Free' : `₹${price.toLocaleString('en-IN')}`}
                           </span>
                           {price > 0 && (
                             <span className="text-xs text-stone-500 dark:text-stone-400">{unit}</span>
+                          )}
+                          {hasDiscount && (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-700 dark:text-emerald-300">
+                              {appliedDiscount.percentOff}% OFF
+                            </span>
                           )}
                         </div>
                         {billingCycle === 'annual' && price > 0 && (

@@ -44,11 +44,11 @@ const BOOT_FONT_MAP: Record<string, string> = {
   Baskerville: "'Libre Baskerville', Baskerville, Georgia, serif",
 };
 
-// Apply saved user font family & size spectrum (Default: Baskerville)
+// Apply saved user font family & size spectrum (Default: Urbanist)
 try {
-  const savedFont = localStorage.getItem('medden_app_font') || 'Baskerville';
+  const savedFont = localStorage.getItem('medden_app_font') || 'Urbanist';
   const savedScale = localStorage.getItem('medden_font_scale') || '100%';
-  const cssFamily = BOOT_FONT_MAP[savedFont] || `'${savedFont}', 'Libre Baskerville', Baskerville, Georgia, serif`;
+  const cssFamily = BOOT_FONT_MAP[savedFont] || `'${savedFont}', 'Urbanist', -apple-system, BlinkMacSystemFont, sans-serif`;
   document.documentElement.style.setProperty('--app-font-family', cssFamily);
   document.documentElement.style.setProperty('--app-font-scale', savedScale);
 } catch {}

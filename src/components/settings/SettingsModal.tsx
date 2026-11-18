@@ -27,6 +27,13 @@ import {
   saveUserSubscription,
 } from '../../utils/subscriptionLimits';
 import {
+  calculateDiscountedPrice,
+  getSavedDiscountCode,
+  saveDiscountCode,
+  validateDiscountCode,
+  type DiscountCodeResult,
+} from '../../utils/discountCodes';
+import {
   GOALS_UPDATED_EVENT,
   formatDurationWords,
   formatLogDateLabel,
@@ -54,8 +61,6 @@ import {
   Sparkles,
   Palette,
   ShieldCheck,
-  ExternalLink,
-  Copy,
   Globe,
   UploadCloud,
   Crown,
@@ -67,7 +72,6 @@ import {
   RefreshCw,
   Database,
   LogIn,
-  LogOut,
   AlertCircle,
   Plus,
   Trash2,
@@ -247,7 +251,7 @@ export const APP_FONTS: FontOption[] = [
   { id: 'antic', name: 'Antic', category: 'Official', fontType: 'official', cssFamily: "'Antic', sans-serif", description: 'Formal clean newspaper & monograph display clarity.', sample: 'Diagnostic Criteria for Acute Coronary Syndromes' },
   { id: 'didone', name: 'Didone', category: 'Official', fontType: 'official', cssFamily: "'Didone', 'Antic Didone', 'Bodoni Moda', 'Didot', serif", description: 'Sculptural hairline-serif formality for distinguished titles.', sample: 'Grand Rounds Case Compendium & Therapeutics' },
   { id: 'bellefair', name: 'Bellefair', category: 'Official', fontType: 'official', cssFamily: "'Bellefair', serif", description: 'Poetic humanist classic serif with graceful open counters.', sample: 'Differential Diagnosis of Acute Abdomen & Peritonitis' },
-  { id: 'bodoni-moda', name: 'Bodoni Moda', category: 'Official', fontType: 'official', cssFamily: "'Bodoni Moda', 'Bodoni MT', serif", description: 'Dramatic luxury editorial serif with sharp contrast.', sample: 'Ach1ev Editorial Study — Clinical Journal Archive' },
+  { id: 'bodoni-moda', name: 'Bodoni Moda', category: 'Official', fontType: 'official', cssFamily: "'Bodoni Moda', 'Bodoni MT', serif", description: 'Dramatic luxury editorial serif with sharp contrast.', sample: 'Achiev Editorial Study — Clinical Journal Archive' },
   { id: 'bona-nova', name: 'Bona Nova', category: 'Official', fontType: 'official', cssFamily: "'Bona Nova', serif", description: 'Structured contemporary academic book serif for deep focus.', sample: 'Physiological Basis of Medical Practice Notes' },
   { id: 'caudex', name: 'Caudex', category: 'Official', fontType: 'official', cssFamily: "'Caudex', serif", description: 'Inspired by medieval manuscripts with disciplined modern rhythm.', sample: 'Integrated Pathology & Pharmacology Compendium' },
   { id: 'domine', name: 'Domine', category: 'Official', fontType: 'official', cssFamily: "'Domine', serif", description: 'Sturdy authoritative serif tuned for razor-sharp on-screen body study.', sample: 'Evidence-Based Internal Medicine Pocket Guide' },
@@ -828,7 +832,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   );
   const [focusTimerLogs, setFocusTimerLogs] = useState<Record<string, number>>(() => getFocusTimerLogs());
   const [currentFont, setCurrentFont] = useState<string>(() => {
-    return localStorage.getItem('medden_app_font') || 'Baskerville';
+    return localStorage.getItem('medden_app_font') || 'Urbanist';
   });
 
   useEffect(() => {
@@ -859,7 +863,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     return saved ? parseInt(saved, 10) : 100;
   });
   const [fontCategoryFilter, setFontCategoryFilter] = useState<'all' | 'handwriting' | 'casual' | 'official'>('all');
-  const [copiedAppletId, setCopiedAppletId] = useState<boolean>(false);
+  const [discountInput, setDiscountInput] = useState<string>(() => getSavedDiscountCode()?.code || '');
+  const [appliedDiscount, setAppliedDiscount] = useState<DiscountCodeResult | null>(() => getSavedDiscountCode());
+  const [discountError, setDiscountError] = useState<string | null>(null);
 
   const activeAccountEmail = user?.email || googleUser?.email || profileForm.email || '';
   const isOwnerAccount = isCurrentUserOwner(activeAccountEmail);
@@ -867,12 +873,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     ? getOwnerSubscriptionRecord(activeAccountEmail || undefined)
     : userProfile.subscription || getStoredSubscription();
   const activePlanId = getActivePlanId(activeAccountEmail);
-
-  const handleCopyAppletId = () => {
-    navigator.clipboard.writeText('0087218c-d7d0-4ad0-b0df-2e515051e7a0');
-    setCopiedAppletId(true);
-    setTimeout(() => setCopiedAppletId(false), 2000);
-  };
 
   const handleSelectFont = (font: FontOption) => {
     setCurrentFont(font.name);
@@ -1092,16 +1092,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   );
                 })}
               </div>
-
-              <button
-                type="button"
-                onClick={handleSettingsLogout}
-                title={user?.email ? `Log out (${user.email})` : 'Log out / Switch Account'}
-                aria-label="Log Out"
-                className="w-8 h-8 rounded-xl flex items-center justify-center bg-[#7f1d1d]/12 hover:bg-[#7f1d1d]/22 dark:bg-[#6e171b]/30 dark:hover:bg-[#6e171b]/50 text-[#7f1d1d] dark:text-[#e49b9e] border border-[#7f1d1d]/25 dark:border-[#962d32]/45 cursor-pointer shrink-0"
-              >
-                <LogOut className="w-3.5 h-3.5" />
-              </button>
             </div>
           )}
 
@@ -1201,25 +1191,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 })}
               </div>
             </div>
-
-            {/* Bottom-pinned Log Out button */}
-            <div className="pt-1.5 shrink-0" style={{ borderTop: `1px solid ${sb.sectionBorder}` }}>
-              <button
-                type="button"
-                onClick={handleSettingsLogout}
-                title={user?.email ? `Log out (${user.email})` : 'Log out / Switch Account'}
-                className="w-full min-h-[36px] sm:min-h-[32px] flex items-center gap-2 px-2.5 py-1.5 rounded-xl text-xs font-semibold transition-all cursor-pointer bg-[#7f1d1d]/12 hover:bg-[#7f1d1d]/22 dark:bg-[#6e171b]/30 dark:hover:bg-[#6e171b]/50 text-[#7f1d1d] dark:text-[#e49b9e] border border-[#7f1d1d]/25 dark:border-[#962d32]/45"
-              >
-                <LogOut className="w-4 h-4 shrink-0" />
-                <span className="truncate">Log Out</span>
-              </button>
-            </div>
           </div>
 
           {/* Right Detail Content Viewport */}
           <div className="p-3 sm:p-6 overflow-y-auto space-y-5 flex-1 min-w-0 custom-scrollbar">
             {/* Mobile Settings Bar to reopen full vertical Settings Sidebar anytime */}
-            <div className="sm:hidden flex items-center justify-between gap-2 pb-2 border-b border-stone-200/80 dark:border-[#382518]">
+            <div className="sm:hidden flex items-center justify-start gap-2 pb-2 border-b border-stone-200/80 dark:border-[#382518]">
               <button
                 type="button"
                 onClick={() => setIsMobileSidebarOpen((v) => !v)}
@@ -1228,25 +1205,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 <Menu className="w-3.5 h-3.5" />
                 <span>Settings Menu</span>
               </button>
-              <span className="text-[11px] font-semibold text-stone-600 dark:text-stone-400 truncate">
-                {
-                  (
-                    {
-                      profile: 'Profile',
-                      designs: 'Themes',
-                      wallpaper: 'Wallpaper',
-                      typography: 'Fonts',
-                      'cloud-sync': 'Cloud',
-                      'import-notes': 'Import Notes',
-                      'sidebar-buttons': 'Sidebar',
-                      customizer: 'Goals',
-                      languages: 'Languages',
-                      subscription: 'Plans',
-                      defaults: 'Backup',
-                    } as Record<SettingsTabId, string>
-                  )[activeTab]
-                }
-              </span>
             </div>
           {/* ========================================================================= */}
           {/* TAB 1: THEMES (COMPACT MOBILE + LIGHT/DARK SCREENSHOT TOGGLE BESIDE APPLY)*/}
@@ -1687,17 +1645,15 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           ? `Mobile Scholar (${phoneUser.phone})`
                           : 'Not Signed In (Offline Browser Cache)'}
                       </h5>
-                      <p className="text-[11px] text-stone-500 dark:text-stone-400">
-                        {user
-                          ? `Provider: ${String(user.app_metadata?.provider || 'account').toUpperCase()}${
-                              lastSyncedAt ? ` · Last synced ${new Date(lastSyncedAt).toLocaleTimeString()}` : ''
-                            }`
-                          : googleUser
-                          ? 'Provider: GOOGLE OAUTH2 · Signed in & Drive-ready'
-                          : phoneUser
-                          ? 'Provider: MOBILE OTP VERIFIED · Instant Study Session'
-                          : 'Sign in with Email, Phone OTP, or Google to sync across devices.'}
-                      </p>
+                      {user && lastSyncedAt ? (
+                        <p className="text-[11px] text-stone-500 dark:text-stone-400">
+                          {`Last synced ${new Date(lastSyncedAt).toLocaleTimeString()}`}
+                        </p>
+                      ) : !(user || googleUser || phoneUser) ? (
+                        <p className="text-[11px] text-stone-500 dark:text-stone-400">
+                          Sign in with Email, Phone OTP, or Google to sync across devices.
+                        </p>
+                      ) : null}
                     </div>
                   </div>
 
@@ -1715,14 +1671,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                             <span>{syncingManual ? 'Syncing...' : 'Sync Now'}</span>
                           </button>
                         )}
-                        <button
-                          type="button"
-                          onClick={signOut}
-                          className="px-3 py-1.5 rounded-xl bg-[#7f1d1d]/12 hover:bg-[#7f1d1d]/20 dark:bg-[#6e171b]/30 dark:hover:bg-[#6e171b]/45 text-[#6e1418] dark:text-[#d97074] border border-[#7f1d1d]/25 dark:border-[#962d32]/45 text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
-                        >
-                          <LogOut className="w-3.5 h-3.5" />
-                          <span>Sign Out</span>
-                        </button>
                       </>
                     ) : (
                       <button
@@ -2649,23 +2597,72 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </button>
               </div>
 
-              {/* Current Attached Account Membership & Duration Card */}
-              <div className="p-4 rounded-2xl border border-stone-200 dark:border-[#382518] bg-stone-50/80 dark:bg-[#1a120d] flex flex-wrap items-center justify-between gap-3">
-                <div className="space-y-1 text-xs">
-                  <div className="flex items-center gap-2 font-bold text-stone-900 dark:text-stone-100">
-                    <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
-                    <span>
-                      {isOwnerAccount
-                        ? 'Owner Account · Unrestricted Master Access'
-                        : `Active Membership: ${currentSubscription?.planName || 'Free Scholar Plan'}`}
-                    </span>
+              {/* Discount Code Column */}
+              <div className="p-4 rounded-2xl border border-stone-200 dark:border-[#382518] bg-stone-50/80 dark:bg-[#1a120d] space-y-2.5">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="text-xs font-bold text-stone-900 dark:text-stone-100">
+                    Discount Code
                   </div>
-                  <div className="text-[11px] text-stone-600 dark:text-stone-400">
-                    {isOwnerAccount ? (
-                      <span>
-                        Attached to <strong>{activeAccountEmail}</strong> · Zero limits across notes, documents, 5 almirahs, peace sounds, leisure &amp; Gemini.
-                      </span>
-                    ) : (
+                  {appliedDiscount && (
+                    <span className="text-[11px] font-bold text-emerald-700 dark:text-emerald-400">
+                      {appliedDiscount.code} applied · {appliedDiscount.percentOff}% OFF active on plans below
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <input
+                    type="text"
+                    value={discountInput}
+                    onChange={(e) => {
+                      setDiscountInput(e.target.value.toUpperCase());
+                      if (discountError) setDiscountError(null);
+                    }}
+                    placeholder="Enter discount code (e.g. ACHIEV20)"
+                    className="flex-1 min-w-[180px] px-3 py-1.5 rounded-xl border border-stone-200 dark:border-[#382518] bg-white dark:bg-[#120c08] text-xs font-mono uppercase outline-none focus:border-amber-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const match = validateDiscountCode(discountInput);
+                      if (!match) {
+                        setDiscountError('Invalid code. Try ACHIEV20, STUDENT25, or SCHOLAR50.');
+                        return;
+                      }
+                      setAppliedDiscount(match);
+                      saveDiscountCode(match.code);
+                      setDiscountError(null);
+                    }}
+                    className="px-3.5 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold cursor-pointer"
+                  >
+                    Apply Code
+                  </button>
+                  {appliedDiscount && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAppliedDiscount(null);
+                        setDiscountInput('');
+                        saveDiscountCode(null);
+                      }}
+                      className="px-3 py-1.5 rounded-xl bg-stone-200 dark:bg-[#251a12] text-stone-700 dark:text-stone-300 text-xs font-semibold cursor-pointer"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+                {discountError && (
+                  <p className="text-[11px] font-semibold text-rose-600 dark:text-rose-400">{discountError}</p>
+                )}
+              </div>
+
+              {!isOwnerAccount && (
+                <div className="p-4 rounded-2xl border border-stone-200 dark:border-[#382518] bg-stone-50/80 dark:bg-[#1a120d] flex flex-wrap items-center justify-between gap-3">
+                  <div className="space-y-1 text-xs">
+                    <div className="flex items-center gap-2 font-bold text-stone-900 dark:text-stone-100">
+                      <ShieldCheck className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0" />
+                      <span>Active Membership: {currentSubscription?.planName || 'Free Scholar Plan'}</span>
+                    </div>
+                    <div className="text-[11px] text-stone-600 dark:text-stone-400">
                       <span>
                         Type:{' '}
                         <strong className="capitalize">
@@ -2683,14 +2680,21 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           : ''}
                         {activeAccountEmail ? ` · Attached to ${activeAccountEmail}` : ''}
                       </span>
-                    )}
+                    </div>
                   </div>
                 </div>
-              </div>
+              )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {SUBSCRIPTION_TIERS.map((tier) => {
                   const isCurrentTier = activePlanId === tier.id;
+                  const finalAnnual = appliedDiscount
+                    ? calculateDiscountedPrice(tier.priceAnnual, appliedDiscount.percentOff)
+                    : tier.priceAnnual;
+                  const finalMonthly = appliedDiscount
+                    ? calculateDiscountedPrice(tier.priceMonthly, appliedDiscount.percentOff)
+                    : tier.priceMonthly;
+                  const hasDiscount = Boolean(appliedDiscount && tier.priceAnnual > 0);
                   return (
                     <div
                       key={tier.id}
@@ -2720,11 +2724,23 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           {tier.name}
                         </h5>
                         <div className="my-2">
-                          <div className="text-lg font-black font-mono text-stone-900 dark:text-stone-100">
-                            {tier.priceAnnual === 0 ? '₹0 / Free' : `₹${tier.priceAnnual.toLocaleString('en-IN')} / yr`}
+                          <div className="flex items-baseline gap-2 flex-wrap">
+                            {hasDiscount && (
+                              <span className="text-xs line-through text-stone-400 font-mono">
+                                ₹{tier.priceAnnual.toLocaleString('en-IN')}
+                              </span>
+                            )}
+                            <span className="text-lg font-black font-mono text-stone-900 dark:text-stone-100">
+                              {finalAnnual === 0 ? '₹0 / Free' : `₹${finalAnnual.toLocaleString('en-IN')} / yr`}
+                            </span>
                           </div>
-                          <div className="text-[11px] font-mono font-bold" style={themeAccentIconStyle}>
-                            {tier.priceMonthly === 0 ? 'Forever Free Core Suite' : `Only ₹${tier.priceMonthly} / month`}
+                          <div className="text-[11px] font-mono font-bold flex items-center gap-1.5 flex-wrap" style={themeAccentIconStyle}>
+                            {hasDiscount && (
+                              <span className="line-through opacity-60">₹{tier.priceMonthly}</span>
+                            )}
+                            <span>
+                              {finalMonthly === 0 ? 'Forever Free Core Suite' : `Only ₹${finalMonthly} / month`}
+                            </span>
                           </div>
                         </div>
                         <p className="text-[11px] text-stone-500 dark:text-stone-400 line-clamp-2 mb-3">
@@ -2771,9 +2787,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                       >
                         {isCurrentTier
                           ? 'Active Plan'
-                          : tier.priceMonthly === 0
+                          : finalMonthly === 0
                           ? 'Switch to Free'
-                          : `Upgrade to ${tier.name}`}
+                          : `Upgrade to ${tier.name} (₹${finalMonthly}/mo)`}
                       </button>
                     </div>
                   );
@@ -3309,7 +3325,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     onClick={() => window.dispatchEvent(new CustomEvent('achiev_open_subscription'))}
                     className="px-2.5 py-1 rounded-lg bg-amber-600/15 hover:bg-amber-600/25 text-amber-900 dark:text-amber-300 text-[11px] font-bold cursor-pointer"
                   >
-                    {isOwnerAccount ? 'View Owner Status' : 'Manage Plan'}
+                    Manage Plan
                   </button>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px] pt-1">
@@ -3317,7 +3333,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     <div className="text-stone-500 dark:text-stone-400">Plan &amp; Type</div>
                     <div className="font-bold text-stone-900 dark:text-stone-100 mt-0.5">
                       {isOwnerAccount
-                        ? 'Owner Unrestricted Master'
+                        ? 'Master Ultimate (Full Access)'
                         : `${currentSubscription?.planName || 'Free Scholar Plan'} (${
                             currentSubscription?.billingCycle === 'annual'
                               ? 'Annual'
@@ -3375,106 +3391,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   <span>Backup</span>
                 </h4>
               </div>
-              {/* Google AI Studio Export Card */}
-              <div
-                className="p-4 rounded-xl border space-y-3"
-                style={{
-                  backgroundColor: 'var(--th-accent-soft)',
-                  borderColor: 'color-mix(in srgb, var(--th-accent) 28%, transparent)',
-                }}
-              >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <span className="p-1.5 rounded-lg border" style={themeAccentSoftBadgeStyle}>
-                      <Sparkles className="w-4 h-4" />
-                    </span>
-                    <div>
-                      <h4 className="text-xs font-bold" style={{ color: 'var(--th-ink)' }}>
-                        Export to Google AI Studio
-                      </h4>
-                      <p className="text-[11px]" style={{ color: 'var(--th-muted)' }}>
-                        Full-stack workspace bundle with server, Flowcharts, Leisure Atelier & Gemini API
-                      </p>
-                    </div>
-                  </div>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full border font-semibold" style={themeAccentSoftBadgeStyle}>
-                    Applet Ready
-                  </span>
-                </div>
-
-                <div
-                  className="p-2.5 rounded-lg bg-white/75 dark:bg-[#1a1714] border text-[11px] font-mono flex items-center justify-between"
-                  style={{ borderColor: 'var(--th-border)' }}
-                >
-                  <div className="truncate">
-                    <span className="text-stone-500 dark:text-stone-400">Applet ID: </span>
-                    <span className="font-semibold" style={{ color: 'var(--th-ink)' }}>0087218c-d7d0-4ad0-b0df-2e515051e7a0</span>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleCopyAppletId}
-                    title="Copy Applet ID"
-                    className="ml-2 px-2 py-1 rounded bg-stone-100 hover:bg-stone-200 dark:bg-[#251a12] dark:hover:bg-[#322318] text-stone-700 dark:text-stone-300 flex items-center gap-1 text-[10px] transition-colors cursor-pointer"
-                  >
-                    {copiedAppletId ? <Check className="w-3 h-3" style={themeAccentIconStyle} /> : <Copy className="w-3 h-3" />}
-                    <span>{copiedAppletId ? 'Copied' : 'Copy'}</span>
-                  </button>
-                </div>
-
-                <div className="flex flex-wrap items-center gap-2 pt-1">
-                  <a
-                    href="/api/export/aistudio"
-                    download="MedDen-AI-Studio-Export.zip"
-                    className="themed-accent-btn px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
-                    style={{ background: sb.activeBtnBg, color: sb.activeBtnText }}
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                    <span>Download AI Studio Bundle (.zip)</span>
-                  </a>
-
-                  <a
-                    href="https://aistudio.google.com/app/applet/0087218c-d7d0-4ad0-b0df-2e515051e7a0"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="px-3.5 py-1.5 bg-stone-200 dark:bg-[#251a12] hover:bg-stone-300 dark:hover:bg-[#322318] text-stone-800 dark:text-stone-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
-                  >
-                    <ExternalLink className="w-3.5 h-3.5" />
-                    <span>Open in AI Studio ↗</span>
-                  </a>
-
-                  {onOpenAIStudioModal && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        onClose();
-                        onOpenAIStudioModal();
-                      }}
-                      className="px-3.5 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 border transition-colors cursor-pointer"
-                      style={themeAccentSoftBadgeStyle}
-                    >
-                      <Sparkles className="w-3.5 h-3.5" style={themeAccentIconStyle} />
-                      <span>Share Center & Links</span>
-                    </button>
-                  )}
-                </div>
-
-                <div
-                  className="text-[10px] p-2 rounded-lg border space-y-1"
-                  style={{
-                    color: 'var(--th-muted)',
-                    borderColor: 'var(--th-border)',
-                    backgroundColor: 'color-mix(in srgb, var(--th-surface) 60%, transparent)',
-                  }}
-                >
-                  <p className="font-semibold" style={{ color: 'var(--th-ink)' }}>How to use in Google AI Studio:</p>
-                  <ol className="list-decimal list-inside space-y-0.5">
-                    <li>Download the <strong>MedDen-AI-Studio-Export.zip</strong> bundle above.</li>
-                    <li>Go to <a href="https://aistudio.google.com" target="_blank" rel="noreferrer" className="underline font-medium" style={themeAccentIconStyle}>Google AI Studio</a>.</li>
-                    <li>Click <strong>New Applet</strong> or import project archive, then upload the ZIP.</li>
-                    <li>All modules (Atelier, Flowcharts, 10 Peace Sounds, Notes) are immediately active.</li>
-                  </ol>
-                </div>
-              </div>
 
               <div className="p-4 rounded-xl bg-stone-50 dark:bg-[#18110c] border border-stone-200 dark:border-[#382518]">
                 <h4 className="text-xs font-bold text-stone-800 dark:text-stone-200 mb-1">
@@ -3496,10 +3412,10 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
               <div className="p-4 rounded-xl bg-stone-50 dark:bg-[#18110c] border border-stone-200 dark:border-[#382518] flex items-center justify-between gap-3 flex-wrap">
                 <div>
                   <h4 className="text-xs font-bold text-stone-800 dark:text-stone-200 mb-0.5">
-                    Privacy Policy &amp; Account Session
+                    Privacy Policy
                   </h4>
                   <p className="text-[11px] text-stone-500 dark:text-stone-400">
-                    {user?.email ? `Signed in as ${user.email}` : 'Local browser session · Sign out to return to Login screen'}
+                    View Achiev privacy terms or save as PDF inside the app.
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
@@ -3509,14 +3425,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     className="px-3.5 py-1.5 rounded-xl bg-stone-200 dark:bg-[#251a12] hover:bg-stone-300 dark:hover:bg-[#322318] text-stone-800 dark:text-stone-200 text-xs font-semibold transition-colors cursor-pointer"
                   >
                     Privacy Policy
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSettingsLogout}
-                    className="px-4 py-1.5 rounded-xl bg-[#7f1d1d] hover:bg-[#962d32] text-[#fdf2f2] text-xs font-semibold flex items-center gap-1.5 shadow-xs transition-colors cursor-pointer"
-                  >
-                    <LogOut className="w-3.5 h-3.5" />
-                    <span>Log Out</span>
                   </button>
                 </div>
               </div>
