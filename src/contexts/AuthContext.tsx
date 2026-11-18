@@ -175,10 +175,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const activeUserKey = user?.id || 'local';
 
-  // Prefetch GIS & Google Client ID on mount so "Continue with Google" opens popup synchronously without blocker issues
+  // Prefetch GIS & Google Client ID on idle so cold login LCP/TBT stay fast while clicks remain responsive
   useEffect(() => {
-    void prefetchGoogleOAuth();
-  }, []);
+    if (hasCachedSupabaseSession) {
+      void prefetchGoogleOAuth();
+      return;
+    }
+    const ric = (globalThis as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number; cancelIdleCallback?: (id: number) => void }).requestIdleCallback;
+    const cic = (globalThis as { cancelIdleCallback?: (id: number) => void }).cancelIdleCallback;
+    if (typeof ric === 'function') {
+      const id = ric(() => void prefetchGoogleOAuth(), { timeout: 2200 });
+      return () => cic?.(id);
+    }
+    const timer = globalThis.setTimeout(() => void prefetchGoogleOAuth(), 1400);
+    return () => globalThis.clearTimeout(timer);
+  }, [hasCachedSupabaseSession]);
 
   // Keep owner/active user email synced for subscription & permission checks across app
   useEffect(() => {
@@ -214,8 +225,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   useEffect(() => {
-    void fetchEnabledProviders();
-  }, [clientRevision, fetchEnabledProviders]);
+    if (hasCachedSupabaseSession || clientRevision > 0) {
+      void fetchEnabledProviders();
+      return;
+    }
+    const ric = (globalThis as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number; cancelIdleCallback?: (id: number) => void }).requestIdleCallback;
+    const cic = (globalThis as { cancelIdleCallback?: (id: number) => void }).cancelIdleCallback;
+    if (typeof ric === 'function') {
+      const id = ric(() => void fetchEnabledProviders(), { timeout: 2200 });
+      return () => cic?.(id);
+    }
+    const timer = globalThis.setTimeout(() => void fetchEnabledProviders(), 1400);
+    return () => globalThis.clearTimeout(timer);
+  }, [clientRevision, fetchEnabledProviders, hasCachedSupabaseSession]);
 
   // Restore any valid personal Google Drive OAuth token stored for this user
   const syncDriveStateFromStorage = useCallback((uid: string) => {

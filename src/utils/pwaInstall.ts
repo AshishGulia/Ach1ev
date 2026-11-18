@@ -27,22 +27,31 @@ export function initPwaSupport(): void {
 
   if ('serviceWorker' in navigator && window.self === window.top) {
     window.addEventListener('load', () => {
-      const hadController = Boolean(navigator.serviceWorker.controller);
-      let reloading = false;
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        if (hadController && !reloading) {
-          reloading = true;
-          window.location.reload();
-        }
-      });
-      navigator.serviceWorker
-        .register('./sw.js', { updateViaCache: 'none' })
-        .then((reg) => {
-          reg.update().catch(() => {});
-        })
-        .catch(() => {
-          // Ignore environments where service workers are unsupported
+      const registerWorker = () => {
+        const hadController = Boolean(navigator.serviceWorker.controller);
+        let reloading = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (hadController && !reloading) {
+            reloading = true;
+            window.location.reload();
+          }
         });
+        navigator.serviceWorker
+          .register('./sw.js', { updateViaCache: 'none' })
+          .then((reg) => {
+            reg.update().catch(() => {});
+          })
+          .catch(() => {
+            // Ignore environments where service workers are unsupported
+          });
+      };
+
+      const ric = (globalThis as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number }).requestIdleCallback;
+      if (typeof ric === 'function') {
+        ric(registerWorker, { timeout: 2500 });
+      } else {
+        globalThis.setTimeout(registerWorker, 1500);
+      }
     });
   }
 }

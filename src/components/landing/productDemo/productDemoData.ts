@@ -68,8 +68,8 @@ export const DEMO_SCENES: DemoScene[] = [
     hint: 'Click + to log tracker progress',
     tablet: {
       heading: 'Cockpit · Today',
-      subheading: '3 trackers · Eye Timer 19:42',
-      cards: ['Anatomy MCQs · 32 / 40 logged', 'Tasks sticky note · 2 / 4 done', 'Ward Posting Reminder · 08:30 AM'],
+      subheading: 'Daily MCQ · Image Qs · 05:00:00',
+      cards: ['Daily MCQ · 32 / 40 logged', 'Image Questions · 14 / 20 logged', 'Tasks sticky note · 2 / 4 done'],
       anchor: 1,
     },
     laptop: {
@@ -191,7 +191,7 @@ export const DEMO_SCENES: DemoScene[] = [
           title: 'Daily Trackers',
           badge: '3 active',
           kind: 'tracker',
-          rows: ['Anatomy: 32 / 40 MCQs (80%)', 'Pathology: 3 / 4 hrs (75%)', 'Anki Deck: 5 day streak'],
+          rows: ['Daily MCQ: 32 / 40 done (80%)', 'Image Questions: 14 / 20 done', 'Focus Timer: 05:00:00 target'],
         },
         {
           title: 'Clinical Postings',

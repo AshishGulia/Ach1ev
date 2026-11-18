@@ -444,37 +444,51 @@ const DemoPointer: React.FC<{ point: Point; accent: string; hint: string }> = ({
   );
 };
 
-/* Default Theme 1 Top Utility Bar (Heritage Ivory #f8f4eb + Walnut #1c140e + Brass #A47C43) */
+/* Default Theme 1 Top Utility Bar (Heritage Ivory #f8f4eb + Centered 12h Clock & Day + Focus Timer + Eye Rest) */
 const ThemeOneTopBar: React.FC<{ compact?: boolean }> = ({ compact = false }) => (
   <div
-    className={`flex items-center justify-between border-b border-[#e2d7c5] bg-[#f8f4eb] text-[#1c140e] shrink-0 ${
-      compact ? 'h-8 px-2.5' : 'h-9 px-3.5'
+    className={`grid grid-cols-[minmax(0,1fr)_auto_minmax(0,1fr)] items-center border-b border-[#e2d7c5] bg-[#f8f4eb]/95 text-[#1c140e] shrink-0 gap-1 ${
+      compact ? 'h-8 px-2' : 'h-9 px-3'
     }`}
   >
-    <div className="flex items-center gap-2 min-w-0">
-      <span className="text-[10px] font-medium text-[#6b5340] truncate">
-        {compact ? 'Pharmacology · Theme 1' : 'All Subjects · Default Theme 1'}
+    <div className="flex items-center gap-1.5 min-w-0">
+      <span className="text-[9.5px] font-medium text-[#6b5340] truncate">
+        {compact ? 'Pharmacology' : 'All Subjects · Default Theme 1'}
       </span>
     </div>
-    <div className="flex items-center gap-1.5 shrink-0">
-      <span className="hidden sm:inline-flex items-center gap-1 rounded-md border border-[#d6c7b0] bg-[#fdfbf7] px-1.5 py-0.5 text-[9px] font-medium text-[#4a3728]">
-        <Sun className="h-2.5 w-2.5 text-[#A47C43]" aria-hidden="true" />
-        Day
+    <div className="flex items-center justify-center shrink-0">
+      <span className="rounded-md border border-[#d6c7b0] bg-[#fdfbf7] px-2 py-0.5 text-[9px] font-semibold text-[#2a1f18] tabular-nums whitespace-nowrap">
+        10:42 AM · Mon
       </span>
-      <span className="inline-flex items-center gap-1 rounded-md border border-[#d6c7b0] bg-[#fdfbf7] px-1.5 py-0.5 text-[9px] font-semibold text-[#3f2918]">
+    </div>
+    <div className="flex items-center justify-end gap-1 shrink-0">
+      {!compact && (
+        <span className="inline-flex items-center gap-1 rounded-md border border-[#d6c7b0] bg-[#fdfbf7] px-1.5 py-0.5 text-[8.5px] font-semibold text-[#6f4225] tabular-nums">
+          <Timer className="h-2.5 w-2.5 text-[#a47c43]" aria-hidden="true" />
+          05:00:00
+        </span>
+      )}
+      <span className="inline-flex items-center gap-1 rounded-md border border-[#d6c7b0] bg-[#fdfbf7] px-1.5 py-0.5 text-[8.5px] font-semibold text-[#3f2918] tabular-nums">
         <Eye className="h-2.5 w-2.5 text-[#A47C43]" aria-hidden="true" />
         19:42
       </span>
-      <span className="inline-flex items-center rounded-md bg-[#18110c] px-1.5 py-0.5 text-[8.5px] font-semibold text-[#efe4d4]">
-        <Moon className="h-2.5 w-2.5 text-[#d4a373]" aria-hidden="true" />
+      <span className="inline-flex items-center rounded-md border border-[#d6c7b0] bg-[#efe4d4] px-1.5 py-0.5 text-[8.5px] font-semibold text-[#4c3b31]">
+        <Moon className="h-2.5 w-2.5 text-[#6f4225]" aria-hidden="true" />
       </span>
     </div>
   </div>
 );
 
 /* Default Theme 1 Panel Card Renderer inside MacBook */
-const renderLaptopPanel = (panel: DemoPanel, idx: number, accent: string) => {
+const renderLaptopPanel = (
+  panel: DemoPanel,
+  idx: number,
+  accent: string,
+  checkedRows: Record<number, boolean>,
+  onToggleRow: (rowIdx: number) => void
+) => {
   if (panel.kind === 'sticky') {
+    const doneCount = panel.rows.reduce((acc, _, i) => acc + (checkedRows[i] ? 1 : 0), 0);
     return (
       <div
         key={`${panel.title}-${idx}`}
@@ -486,26 +500,31 @@ const renderLaptopPanel = (panel: DemoPanel, idx: number, accent: string) => {
         />
         <div className="flex items-center justify-between gap-1 pt-0.5">
           <span className="text-[11px] font-serif font-semibold">{panel.title}</span>
-          {panel.badge && (
-            <span className="text-[8.5px] font-semibold text-[#5a4820]">{panel.badge}</span>
-          )}
+          <span className="text-[8.5px] font-semibold text-[#5a4820]">
+            {doneCount} / {panel.rows.length}
+          </span>
         </div>
         <div className="space-y-1">
-          {panel.rows.map((row, rIdx) => (
-            <div
-              key={row}
-              className="flex items-center gap-1.5 border-b border-[#5a4614]/20 pb-0.5 text-[9.5px] leading-tight"
-            >
-              <span
-                className={`flex h-3 w-3 shrink-0 items-center justify-center rounded-full border border-[#3D3420] ${
-                  rIdx === 0 ? 'bg-[#3D3420] text-[#f4e4a2]' : ''
-                }`}
+          {panel.rows.map((row, rIdx) => {
+            const isChecked = Boolean(checkedRows[rIdx]);
+            return (
+              <button
+                key={row}
+                type="button"
+                onClick={() => onToggleRow(rIdx)}
+                className="w-full text-left flex items-center gap-1.5 border-b border-[#5a4614]/20 pb-0.5 text-[9.5px] leading-tight cursor-pointer hover:bg-black/5 rounded-xs transition-colors"
               >
-                {rIdx === 0 && <Check className="h-2 w-2" aria-hidden="true" />}
-              </span>
-              <span className={`truncate ${rIdx === 0 ? 'line-through opacity-60' : ''}`}>{row}</span>
-            </div>
-          ))}
+                <span
+                  className={`flex h-3 w-3 shrink-0 items-center justify-center rounded-full border border-[#3D3420] ${
+                    isChecked ? 'bg-[#3D3420] text-[#f4e4a2]' : ''
+                  }`}
+                >
+                  {isChecked && <Check className="h-2 w-2" aria-hidden="true" />}
+                </span>
+                <span className={`truncate ${isChecked ? 'line-through opacity-60' : ''}`}>{row}</span>
+              </button>
+            );
+          })}
         </div>
         <div className="mt-auto pt-1 flex justify-center">
           <span className="inline-flex items-center gap-1 rounded-full bg-[#3D3420] px-2.5 py-0.5 text-[8.5px] font-semibold text-[#f4e4a2]">
@@ -578,7 +597,11 @@ const renderLaptopPanel = (panel: DemoPanel, idx: number, accent: string) => {
 };
 
 /* Faithful App-Matched iPad Content Renderer per Section */
-const TabletAppContent: React.FC<{ scene: DemoScene }> = ({ scene }) => {
+const TabletAppContent: React.FC<{
+  scene: DemoScene;
+  checkedTasks: Record<number, boolean>;
+  onToggleTask: (idx: number) => void;
+}> = ({ scene, checkedTasks, onToggleTask }) => {
   const { section, tablet } = scene;
 
   if (section.key === 'shelf') {
@@ -586,11 +609,13 @@ const TabletAppContent: React.FC<{ scene: DemoScene }> = ({ scene }) => {
   }
 
   if (section.key === 'cockpit') {
+    const tabletItems = ['Brachial Plexus', 'KDT NSAIDs', '30 Path PYQs'];
+    const doneCount = tabletItems.reduce((acc, _, i) => acc + (checkedTasks[i] ? 1 : 0), 0);
     return (
       <div className="flex-1 min-h-0 flex flex-col gap-2">
         <div className="grid grid-cols-2 gap-2 flex-1 min-h-0">
           {/* Mini Academic Calendar */}
-          <div className="rounded-xl border border-[#e3dbcf] bg-[#fdfaf4] p-2 flex flex-col gap-1.5">
+          <div className="rounded-xl border border-[#e3dbcf] bg-[#fdfbf7]/92 p-2 flex flex-col gap-1.5">
             <div className="flex items-center justify-between border-b border-[#ebe3d5] pb-1">
               <span className="flex items-center gap-1 text-[9.5px] font-serif font-semibold text-[#1c140e]">
                 <Clock className="h-2.5 w-2.5 text-[#A47C43]" aria-hidden="true" />
@@ -608,25 +633,35 @@ const TabletAppContent: React.FC<{ scene: DemoScene }> = ({ scene }) => {
             </div>
           </div>
 
-          {/* Real Yellow 3D Tasks Sticky Note with Bottom-Centered Add Button */}
+          {/* Real Yellow 3D Tasks Sticky Note with Clickable Items */}
           <div className="relative rounded-[3px] border border-[#8a6c24]/45 bg-[#f4e4a2] p-2 text-[#3D3420] shadow-sm -rotate-[0.6deg] flex flex-col justify-between">
             <div className="space-y-1">
               <div className="flex items-center justify-between">
                 <span className="text-[9.5px] font-serif font-bold">Tasks</span>
-                <span className="text-[8px] font-semibold">2/4</span>
+                <span className="text-[8px] font-semibold">
+                  {doneCount}/{tabletItems.length}
+                </span>
               </div>
-              {['Brachial Plexus', 'KDT NSAIDs', '30 Path PYQs'].map((item, idx) => (
-                <div key={item} className="flex items-center gap-1 border-b border-[#5a4614]/20 pb-0.5 text-[8.5px]">
-                  <span
-                    className={`h-2.5 w-2.5 rounded-full border border-[#3D3420] flex items-center justify-center shrink-0 ${
-                      idx === 0 ? 'bg-[#3D3420] text-[#f4e4a2]' : ''
-                    }`}
+              {tabletItems.map((item, idx) => {
+                const isChecked = Boolean(checkedTasks[idx]);
+                return (
+                  <button
+                    key={item}
+                    type="button"
+                    onClick={() => onToggleTask(idx)}
+                    className="w-full text-left flex items-center gap-1 border-b border-[#5a4614]/20 pb-0.5 text-[8.5px] cursor-pointer hover:bg-black/5 rounded-xs transition-colors"
                   >
-                    {idx === 0 && <Check className="h-1.5 w-1.5" aria-hidden="true" />}
-                  </span>
-                  <span className={`truncate ${idx === 0 ? 'line-through opacity-60' : ''}`}>{item}</span>
-                </div>
-              ))}
+                    <span
+                      className={`h-2.5 w-2.5 rounded-full border border-[#3D3420] flex items-center justify-center shrink-0 ${
+                        isChecked ? 'bg-[#3D3420] text-[#f4e4a2]' : ''
+                      }`}
+                    >
+                      {isChecked && <Check className="h-1.5 w-1.5" aria-hidden="true" />}
+                    </span>
+                    <span className={`truncate ${isChecked ? 'line-through opacity-60' : ''}`}>{item}</span>
+                  </button>
+                );
+              })}
             </div>
             <div className="flex justify-center pt-1">
               <span className="rounded-full bg-[#3D3420] px-2 py-0.5 text-[7.5px] font-semibold text-[#f4e4a2]">
@@ -637,9 +672,9 @@ const TabletAppContent: React.FC<{ scene: DemoScene }> = ({ scene }) => {
         </div>
 
         {/* Bottom Trackers Row */}
-        <div className="rounded-xl border border-[#e3dbcf] bg-[#fdfaf4] px-2.5 py-1.5 flex items-center justify-between gap-2 text-[8.5px]">
-          <span className="font-semibold text-[#1c140e] truncate">Anatomy MCQs · 32/40</span>
-          <div className="w-24 h-1.5 rounded-full bg-[#e8dcc7] overflow-hidden shrink-0">
+        <div className="rounded-xl border border-[#e3dbcf] bg-[#fdfbf7]/92 px-2.5 py-1.5 flex items-center justify-between gap-2 text-[8.5px]">
+          <span className="font-semibold text-[#1c140e] truncate">Daily MCQ 32/40 · Image Qs 14/20</span>
+          <div className="w-20 h-1.5 rounded-full bg-[#e8dcc7] overflow-hidden shrink-0">
             <div className="h-full w-4/5 rounded-full bg-[#A47C43]" />
           </div>
         </div>
@@ -856,11 +891,19 @@ const TabletAppContent: React.FC<{ scene: DemoScene }> = ({ scene }) => {
   );
 };
 
-/* Latest Apple MacBook Pro Frame */
-export const LaptopFrame: React.FC<{ scene: DemoScene }> = ({ scene }) => {
+/* Latest Apple MacBook Pro Frame matching Default Theme 1 Light Mode */
+export const LaptopFrame: React.FC<{
+  scene: DemoScene;
+  onSelectSection?: (idx: number) => void;
+}> = ({ scene, onSelectSection }) => {
   const { section, laptop } = scene;
   const point = anchorPoint('laptop', laptop.anchor, DEMO_SECTIONS.indexOf(section));
   const isShelfScene = section.key === 'shelf';
+  const [checkedRows, setCheckedRows] = useState<Record<number, boolean>>({ 0: true });
+
+  const toggleRow = (rIdx: number) => {
+    setCheckedRows((prev) => ({ ...prev, [rIdx]: !prev[rIdx] }));
+  };
 
   return (
     <div className="w-full max-w-[680px] mx-auto flex flex-col items-center select-none">
@@ -874,51 +917,92 @@ export const LaptopFrame: React.FC<{ scene: DemoScene }> = ({ scene }) => {
           <span className="h-1.5 w-1.5 rounded-full bg-[#101815] ring-1 ring-[#30473a]" />
         </div>
 
-        {/* Display Viewport: Default Theme 1 Workspace */}
-        <div className="relative aspect-[16/10] overflow-hidden rounded-[0.65rem] bg-[#fbf9f5] text-[#1c140e] flex flex-col">
-          {/* Default Theme 1 Walnut Sidebar + Main Area */}
-          <div className="flex flex-1 min-h-0">
-            {/* Authentic #18110c Walnut Sidebar */}
-            <aside className="w-[18.5%] bg-[#18110c] text-[#efe4d4] border-r border-[#2d1e14] flex flex-col justify-between py-2.5 px-1.5 shrink-0">
+        {/* Display Viewport: Default Theme 1 Light Mode (Parchment Sidebar + Walnut Active Pill + Highland Stillness Wallpaper) */}
+        <div className="relative aspect-[16/10] overflow-hidden rounded-[0.65rem] bg-[#f6f2ea] text-[#1c140e] flex flex-col">
+          {/* Default Theme 1 Light Mode Highland Stillness Wallpaper layer */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0"
+            style={{
+              backgroundImage: `url(${THEME1_THUMB_URL})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center center',
+              opacity: 0.42,
+            }}
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background: 'linear-gradient(180deg, rgba(246,242,234,0.68) 0%, rgba(246,242,234,0.84) 100%)',
+            }}
+          />
+
+          <div className="relative z-10 flex flex-1 min-h-0">
+            {/* Authentic Default Theme 1 Light Mode Parchment Sidebar */}
+            <aside
+              className="w-[18.5%] border-r border-[#dcd0bd] text-[#2a1f18] flex flex-col justify-between py-2.5 px-1.5 shrink-0 backdrop-blur-[6px]"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(250,246,238,0.92) 0%, rgba(241,232,218,0.92) 55%, rgba(232,220,201,0.95) 100%)',
+              }}
+            >
               <div className="space-y-1.5">
-                <div className="px-1.5 pb-1.5 border-b border-[#2d1e14] flex items-center gap-1.5">
+                <div className="px-1.5 pb-1.5 border-b border-[#dcd0bd] flex items-center gap-1.5">
                   <img
                     src={ACHIEV_EMBLEM_URL}
                     alt="ACH1EV"
+                    width={928}
+                    height={324}
+                    loading="lazy"
+                    decoding="async"
                     className="h-4 w-4 object-contain shrink-0 bg-transparent"
                   />
-                  <span className="font-serif text-[10px] font-bold tracking-[0.08em] text-[#eccb82] uppercase">
+                  <span className="font-serif text-[10px] font-bold tracking-[0.08em] text-[#522e18] uppercase">
                     ACH1EV
                   </span>
                 </div>
 
                 <nav aria-label="Theme 1 sidebar preview" className="space-y-0.5 pt-0.5">
-                  {DEMO_SECTIONS.map((item) => {
+                  {DEMO_SECTIONS.map((item, sIdx) => {
                     const Icon = item.icon;
                     const active = item === section;
                     return (
-                      <div
+                      <button
                         key={item.key}
-                        className={`flex items-center gap-1.5 rounded-md px-1.5 py-[3px] text-[8.5px] font-medium transition-colors duration-300 ${
+                        type="button"
+                        onClick={() => onSelectSection?.(sIdx)}
+                        className={`w-full text-left flex items-center gap-1.5 rounded-md px-1.5 py-[3px] text-[8.5px] font-medium transition-all duration-200 cursor-pointer ${
                           active
-                            ? 'bg-gradient-to-r from-[#8f5f2c] to-[#A47C43] text-white font-semibold shadow-xs'
-                            : 'text-[#cbbba6]/85'
+                            ? 'text-white font-semibold shadow-xs border border-[#7f4c2a]'
+                            : 'text-[#4c3b31] hover:bg-[#e7dac4]/60'
                         }`}
+                        style={
+                          active
+                            ? {
+                                background: 'linear-gradient(155deg, #6f4225 0%, #522e18 100%)',
+                              }
+                            : undefined
+                        }
                       >
-                        <Icon className="h-2.5 w-2.5 shrink-0" aria-hidden="true" />
+                        <Icon
+                          className="h-2.5 w-2.5 shrink-0"
+                          style={{ color: active ? '#ffd899' : '#6c4830' }}
+                          aria-hidden="true"
+                        />
                         <span className="truncate">{item.label}</span>
-                      </div>
+                      </button>
                     );
                   })}
                 </nav>
               </div>
-              <div className="px-1.5 pt-1 border-t border-[#2d1e14] text-[8px] text-[#a69079] truncate">
+              <div className="px-1.5 pt-1 border-t border-[#dcd0bd] text-[8px] text-[#6b5340] truncate">
                 MBBS Year III
               </div>
             </aside>
 
             {/* Right Main Viewport */}
-            <div className="flex-1 min-w-0 flex flex-col bg-[#f7f3ec]">
+            <div className="flex-1 min-w-0 flex flex-col bg-transparent">
               <ThemeOneTopBar />
 
               <div
@@ -926,14 +1010,14 @@ export const LaptopFrame: React.FC<{ scene: DemoScene }> = ({ scene }) => {
                 className="flex-1 min-h-0 flex flex-col gap-2 p-2.5 sm:p-3 animate-[pdsFade_420ms_ease-out] motion-reduce:animate-none"
               >
                 {!isShelfScene && (
-                  <div className="flex items-baseline justify-between gap-2 border-b border-[#e3dbcf] pb-1.5">
+                  <div className="flex items-baseline justify-between gap-2 border-b border-[#d8c8b0]/80 pb-1.5">
                     <div className="min-w-0">
                       <p className="text-[8.5px] font-medium text-[#8f5f2c] truncate">{laptop.crumb}</p>
                       <h4 className="font-serif text-xs sm:text-sm font-semibold text-[#1c140e] truncate">
                         {laptop.heading}
                       </h4>
                     </div>
-                    <span className="text-[9px] font-medium text-[#6b5340] shrink-0">Heritage Ivory</span>
+                    <span className="text-[9px] font-medium text-[#6b5340] shrink-0">Theme 1 · Light</span>
                   </div>
                 )}
 
@@ -941,7 +1025,9 @@ export const LaptopFrame: React.FC<{ scene: DemoScene }> = ({ scene }) => {
                   <ShelfShowcaseRoom />
                 ) : (
                   <div className="grid flex-1 min-h-0 grid-cols-3 gap-2">
-                    {laptop.panels.map((panel, idx) => renderLaptopPanel(panel, idx, section.accent))}
+                    {laptop.panels.map((panel, idx) =>
+                      renderLaptopPanel(panel, idx, section.accent, checkedRows, toggleRow)
+                    )}
                   </div>
                 )}
               </div>
@@ -963,11 +1049,19 @@ export const LaptopFrame: React.FC<{ scene: DemoScene }> = ({ scene }) => {
   );
 };
 
-/* Latest Apple iPad Pro Frame */
-export const TabletFrame: React.FC<{ scene: DemoScene }> = ({ scene }) => {
+/* Latest Apple iPad Pro Frame matching Default Theme 1 Light Mode */
+export const TabletFrame: React.FC<{
+  scene: DemoScene;
+  onSelectSection?: (idx: number) => void;
+}> = ({ scene, onSelectSection }) => {
   const { section, tablet } = scene;
   const point = anchorPoint('tablet', tablet.anchor, DEMO_SECTIONS.indexOf(section));
   const isShelfScene = section.key === 'shelf';
+  const [checkedTasks, setCheckedTasks] = useState<Record<number, boolean>>({ 0: true });
+
+  const toggleTask = (idx: number) => {
+    setCheckedTasks((prev) => ({ ...prev, [idx]: !prev[idx] }));
+  };
 
   return (
     <div className="w-full max-w-[440px] mx-auto select-none">
@@ -979,30 +1073,74 @@ export const TabletFrame: React.FC<{ scene: DemoScene }> = ({ scene }) => {
           className="absolute top-[3.5px] sm:top-[4px] left-1/2 -translate-x-1/2 h-1.5 w-1.5 rounded-full bg-[#1a2420] ring-1 ring-[#354840]"
         />
 
-        {/* iPad Screen: Default Theme 1 Compact Rail + Ivory Content */}
-        <div className="relative aspect-[4/3] overflow-hidden rounded-[0.95rem] bg-[#f7f3ec] text-[#1c140e] flex flex-col">
-          <div className="flex flex-1 min-h-0">
-            {/* Compact #18110c Walnut Icon Rail */}
-            <aside className="w-[14%] bg-[#18110c] border-r border-[#2d1e14] flex flex-col items-center gap-1 py-2 shrink-0">
+        {/* iPad Screen: Default Theme 1 Light Mode Compact Rail + Highland Stillness Wallpaper */}
+        <div className="relative aspect-[4/3] overflow-hidden rounded-[0.95rem] bg-[#f6f2ea] text-[#1c140e] flex flex-col">
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0"
+            style={{
+              backgroundImage: `url(${THEME1_THUMB_URL})`,
+              backgroundSize: 'cover',
+              backgroundPosition: 'center center',
+              opacity: 0.42,
+            }}
+          />
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0"
+            style={{
+              background: 'linear-gradient(180deg, rgba(246,242,234,0.68) 0%, rgba(246,242,234,0.85) 100%)',
+            }}
+          />
+
+          <div className="relative z-10 flex flex-1 min-h-0">
+            {/* Compact Default Theme 1 Light Parchment Icon Rail */}
+            <aside
+              className="w-[14%] border-r border-[#dcd0bd] flex flex-col items-center gap-1 py-2 shrink-0 backdrop-blur-[6px]"
+              style={{
+                background:
+                  'linear-gradient(180deg, rgba(250,246,238,0.92) 0%, rgba(232,220,201,0.95) 100%)',
+              }}
+            >
               <div className="mb-1 flex items-center justify-center">
                 <img
                   src={ACHIEV_EMBLEM_URL}
                   alt="ACH1EV"
+                  width={928}
+                  height={324}
+                  loading="lazy"
+                  decoding="async"
                   className="h-4 w-4 object-contain bg-transparent"
                 />
               </div>
-              {DEMO_SECTIONS.map((item) => {
+              {DEMO_SECTIONS.map((item, sIdx) => {
                 const Icon = item.icon;
                 const active = item === section;
                 return (
-                  <div
+                  <button
                     key={item.key}
-                    className={`flex h-5 w-5 items-center justify-center rounded-md transition-colors duration-300 ${
-                      active ? 'bg-[#A47C43] text-white' : 'text-[#b7a38e]'
+                    type="button"
+                    aria-label={item.label}
+                    onClick={() => onSelectSection?.(sIdx)}
+                    className={`flex h-5 w-5 items-center justify-center rounded-md transition-all duration-200 cursor-pointer ${
+                      active
+                        ? 'text-white shadow-xs border border-[#7f4c2a]'
+                        : 'text-[#6c4830] hover:bg-[#e7dac4]/70'
                     }`}
+                    style={
+                      active
+                        ? {
+                            background: 'linear-gradient(155deg, #6f4225 0%, #522e18 100%)',
+                          }
+                        : undefined
+                    }
                   >
-                    <Icon className="h-2.5 w-2.5" aria-hidden="true" />
-                  </div>
+                    <Icon
+                      className="h-2.5 w-2.5"
+                      style={{ color: active ? '#ffd899' : '#6c4830' }}
+                      aria-hidden="true"
+                    />
+                  </button>
                 );
               })}
             </aside>
@@ -1015,7 +1153,7 @@ export const TabletFrame: React.FC<{ scene: DemoScene }> = ({ scene }) => {
                 className="flex-1 min-h-0 flex flex-col gap-1.5 p-2.5 animate-[pdsFade_420ms_ease-out] motion-reduce:animate-none"
               >
                 {!isShelfScene && (
-                  <div className="border-b border-[#e3dbcf] pb-1">
+                  <div className="border-b border-[#d8c8b0]/80 pb-1">
                     <p className="text-[8.5px] font-medium text-[#8f5f2c]">{tablet.subheading}</p>
                     <h4 className="font-serif text-xs sm:text-[13px] font-semibold text-[#1c140e] truncate">
                       {tablet.heading}
@@ -1023,13 +1161,13 @@ export const TabletFrame: React.FC<{ scene: DemoScene }> = ({ scene }) => {
                   </div>
                 )}
 
-                <TabletAppContent scene={scene} />
+                <TabletAppContent scene={scene} checkedTasks={checkedTasks} onToggleTask={toggleTask} />
               </div>
             </div>
           </div>
 
           {/* iPadOS Home Bar */}
-          <div aria-hidden="true" className="pb-1.5 pt-0.5 flex justify-center bg-transparent">
+          <div aria-hidden="true" className="relative z-10 pb-1.5 pt-0.5 flex justify-center bg-transparent">
             <span className="h-[3px] w-20 rounded-full bg-[#1c140e]/30" />
           </div>
 

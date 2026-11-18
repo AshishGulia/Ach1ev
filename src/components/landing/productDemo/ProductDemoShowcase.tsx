@@ -12,11 +12,11 @@ import {
 import { DEMO_SCENES } from './productDemoData';
 import { LaptopFrame, TabletFrame } from './ProductDemoDevices';
 import { SUBSCRIPTION_TIERS } from '../../../data/subscriptionData';
-import studentsStudyPhoto from '../../../assets/images/students_study_discussion_1794823058129.jpg';
-import studentNotesReaderPhoto from '../../../assets/images/student_notes_reader_1794933139826.jpg';
-import studentShelfFlowchartsPhoto from '../../../assets/images/student_shelf_flowcharts_1794933139670.jpg';
-import studentTablesLibraryPhoto from '../../../assets/images/student_tables_library_1794933140110.jpg';
-import studentFocusTimersPhoto from '../../../assets/images/student_focus_timers_1794933140912.jpg';
+import studentsStudyPhoto from '../../../assets/images/students_study_discussion_1794823058129.webp';
+import studentNotesReaderPhoto from '../../../assets/images/student_notes_reader_1794933139826.webp';
+import studentShelfFlowchartsPhoto from '../../../assets/images/student_shelf_flowcharts_1794933139670.webp';
+import studentTablesLibraryPhoto from '../../../assets/images/student_tables_library_1794933140110.webp';
+import studentFocusTimersPhoto from '../../../assets/images/student_focus_timers_1794933140912.webp';
 
 const SCENE_MS = 6500;
 
@@ -263,7 +263,7 @@ export const ProductDemoShowcase: React.FC = () => {
           </button>
 
           <div className="min-w-0 py-2">
-            <LaptopFrame scene={laptopScene} />
+            <LaptopFrame scene={laptopScene} onSelectSection={setLaptopIdx} />
           </div>
 
           <button
@@ -347,7 +347,7 @@ export const ProductDemoShowcase: React.FC = () => {
           </button>
 
           <div className="min-w-0 py-2">
-            <TabletFrame scene={tabletScene} />
+            <TabletFrame scene={tabletScene} onSelectSection={setTabletIdx} />
           </div>
 
           <button
@@ -379,6 +379,11 @@ export const ProductDemoShowcase: React.FC = () => {
               key={activePhoto.id}
               src={activePhoto.src}
               alt={activePhoto.alt}
+              width={1100}
+              height={614}
+              loading="lazy"
+              decoding="async"
+              fetchPriority="low"
               referrerPolicy="no-referrer"
               onError={() =>
                 setFailedPhotoIds((prev) => ({ ...prev, [activePhoto.id]: true }))
@@ -454,6 +459,11 @@ export const ProductDemoShowcase: React.FC = () => {
                     <img
                       src={photo.src}
                       alt={photo.alt}
+                      width={1100}
+                      height={614}
+                      loading="lazy"
+                      decoding="async"
+                      fetchPriority="low"
                       referrerPolicy="no-referrer"
                       onError={() =>
                         setFailedPhotoIds((prev) => ({ ...prev, [photo.id]: true }))

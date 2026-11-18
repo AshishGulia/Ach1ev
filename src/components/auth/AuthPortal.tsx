@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense } from 'react';
+import React, { useState, useEffect, useRef, Suspense } from 'react';
 import { useAuth, SocialProviderId } from '../../contexts/AuthContext';
 import { getSupabaseConfig, saveRuntimeSupabaseConfig } from '../../lib/supabaseClient';
 import {
@@ -125,18 +125,37 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [showShowcase, setShowShowcase] = useState<boolean>(false);
+  const showcaseMountRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
     if (isModal) return;
-    const activate = () => setShowShowcase(true);
-    const ric = (globalThis as { requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => number; cancelIdleCallback?: (id: number) => void }).requestIdleCallback;
-    const cic = (globalThis as { cancelIdleCallback?: (id: number) => void }).cancelIdleCallback;
-    if (typeof ric === 'function') {
-      const id = ric(activate, { timeout: 600 });
-      return () => cic?.(id);
+    let settled = false;
+    const activate = () => {
+      if (settled) return;
+      settled = true;
+      setShowShowcase(true);
+    };
+
+    const el = showcaseMountRef.current;
+    let observer: IntersectionObserver | null = null;
+    if (el && typeof IntersectionObserver !== 'undefined') {
+      observer = new IntersectionObserver(
+        (entries) => {
+          if (entries.some((entry) => entry.isIntersecting)) {
+            activate();
+            observer?.disconnect();
+          }
+        },
+        { rootMargin: '400px 0px' }
+      );
+      observer.observe(el);
     }
-    const timer = globalThis.setTimeout(activate, 180);
-    return () => globalThis.clearTimeout(timer);
+
+    const fallbackTimer = globalThis.setTimeout(activate, 2500);
+    return () => {
+      observer?.disconnect();
+      globalThis.clearTimeout(fallbackTimer);
+    };
   }, [isModal]);
 
   useEffect(() => {
@@ -308,29 +327,29 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
         @keyframes achievGloomyPulseA {
           0%, 100% {
             transform: translate3d(0, 0, 0) scale(1);
-            opacity: 0.42;
+            opacity: 0.48;
           }
           50% {
-            transform: translate3d(18px, -14px, 0) scale(1.16);
-            opacity: 0.72;
+            transform: translate3d(18px, -14px, 0) scale(1.12);
+            opacity: 0.78;
           }
         }
         @keyframes achievGloomyPulseB {
           0%, 100% {
-            transform: translate3d(0, 0, 0) scale(1.06);
-            opacity: 0.34;
+            transform: translate3d(0, 0, 0) scale(1.04);
+            opacity: 0.38;
           }
           50% {
-            transform: translate3d(-16px, 14px, 0) scale(0.94);
-            opacity: 0.62;
+            transform: translate3d(-16px, 14px, 0) scale(0.95);
+            opacity: 0.68;
           }
         }
-        @keyframes achievGlassBreathe {
+        @keyframes achievGlowOpacity {
           0%, 100% {
-            box-shadow: inset 0 1.5px 1px rgba(255, 226, 184, 0.16), inset 0 -2px 8px rgba(4, 1, 0, 0.65), 0 28px 70px rgba(4, 1, 0, 0.78), 0 0 38px rgba(132, 68, 24, 0.14);
+            opacity: 0.36;
           }
           50% {
-            box-shadow: inset 0 1.5px 1px rgba(255, 226, 184, 0.24), inset 0 -2px 8px rgba(4, 1, 0, 0.65), 0 32px 82px rgba(4, 1, 0, 0.85), 0 0 70px rgba(168, 92, 34, 0.28);
+            opacity: 0.78;
           }
         }
       `}</style>
@@ -349,7 +368,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
         </div>
       )}
 
-      {/* Gloomy Dark Chocolaty Glassmorphism Login Screen with Slow Pulsation */}
+      {/* Gloomy Dark Chocolaty Glassmorphism Login Screen with Slow Compositor Pulsation */}
       <div
         className={
           isModal
@@ -365,39 +384,38 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
               }
         }
       >
-        {/* Pure Blurry Gloomy Ambient Mist with Slow Pulsation (Zero Patterns) */}
+        {/* Multi-Stop Soft Radial Mist (Zero expensive software blur passes; GPU transform+opacity only) */}
         {!isModal && (
           <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden select-none">
             <div
-              className="absolute -top-28 -left-24 w-[520px] h-[520px] rounded-full"
+              className="absolute -top-44 -left-40 w-[760px] h-[760px] rounded-full will-change-transform"
               style={{
-                background: 'radial-gradient(circle, rgba(118, 56, 22, 0.44) 0%, rgba(16, 6, 2, 0) 70%)',
-                filter: 'blur(96px)',
+                background:
+                  'radial-gradient(circle, rgba(118, 56, 22, 0.38) 0%, rgba(96, 44, 16, 0.19) 34%, rgba(56, 24, 8, 0.06) 62%, rgba(16, 6, 2, 0) 76%)',
                 animation: 'achievGloomyPulseA 11s ease-in-out infinite',
               }}
             />
             <div
-              className="absolute top-[18%] -right-24 w-[540px] h-[540px] rounded-full"
+              className="absolute top-[8%] -right-44 w-[800px] h-[800px] rounded-full will-change-transform"
               style={{
-                background: 'radial-gradient(circle, rgba(145, 76, 30, 0.36) 0%, rgba(12, 4, 1, 0) 72%)',
-                filter: 'blur(110px)',
+                background:
+                  'radial-gradient(circle, rgba(145, 76, 30, 0.30) 0%, rgba(110, 52, 20, 0.14) 36%, rgba(62, 26, 9, 0.04) 64%, rgba(12, 4, 1, 0) 78%)',
                 animation: 'achievGloomyPulseB 14s ease-in-out infinite',
               }}
             />
             <div
-              className="absolute -bottom-32 left-[26%] w-[620px] h-[360px] rounded-full"
+              className="absolute -bottom-48 left-[16%] w-[860px] h-[540px] rounded-full will-change-transform"
               style={{
-                background: 'radial-gradient(circle, rgba(84, 38, 14, 0.48) 0%, rgba(10, 4, 1, 0) 72%)',
-                filter: 'blur(90px)',
+                background:
+                  'radial-gradient(circle, rgba(84, 38, 14, 0.42) 0%, rgba(58, 25, 9, 0.18) 38%, rgba(28, 12, 4, 0.05) 66%, rgba(10, 4, 1, 0) 78%)',
                 animation: 'achievGloomyPulseA 16s ease-in-out infinite reverse',
               }}
             />
-            {/* Soft frosted haze sheet + invisible bottom edge join into showcase */}
             <div
-              className="absolute inset-0 backdrop-blur-[22px]"
+              className="absolute inset-0"
               style={{
                 background:
-                  'linear-gradient(180deg, rgba(12, 5, 2, 0.18) 0%, rgba(11, 4, 2, 0.08) 72%, #0b0402 100%)',
+                  'linear-gradient(180deg, rgba(12, 5, 2, 0.16) 0%, rgba(11, 4, 2, 0.08) 72%, #0b0402 100%)',
               }}
             />
           </div>
@@ -407,6 +425,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
       <div className={isModal ? 'contents' : 'relative z-10 w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10 items-center my-auto'}>
         {/* Left: Centered Hero Brand & Tagline */}
         <div className="lg:col-span-5 flex flex-col items-center lg:items-start justify-center text-center lg:text-left px-2 py-4 sm:py-8 relative">
+          <h1 className="sr-only">Ach1ev — Notes, Split Textbook Reader &amp; Focus Study Platform</h1>
           <div className="flex flex-col items-center lg:items-start gap-3 w-full">
             <div className="relative flex items-center justify-center lg:justify-start mb-0.5 select-none max-w-full">
               <div
@@ -429,15 +448,25 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
         </div>
 
         {/* Right: Compact Gloomy Blurry Glassmorphism Login Card + External Skip Link */}
-        <div className="lg:col-span-7 lg:mt-8 w-full max-w-md mx-auto flex flex-col items-center">
+        <div className="lg:col-span-7 lg:mt-8 w-full max-w-md mx-auto flex flex-col items-center relative">
         <div
-          className="rounded-3xl p-4 sm:p-6 flex flex-col justify-between transition-all w-full border border-[#f5d093]/18"
+          aria-hidden="true"
+          className="pointer-events-none absolute -inset-5 rounded-[2.2rem] will-change-[opacity]"
+          style={{
+            background:
+              'radial-gradient(ellipse at 50% 45%, rgba(168, 92, 34, 0.28) 0%, rgba(122, 58, 18, 0.12) 48%, rgba(11, 4, 1, 0) 76%)',
+            animation: 'achievGlowOpacity 9s ease-in-out infinite',
+          }}
+        />
+        <div
+          className="relative rounded-3xl p-4 sm:p-6 flex flex-col justify-between transition-all w-full border border-[#f5d093]/18"
           style={{
             background:
               'linear-gradient(155deg, rgba(38, 17, 7, 0.46) 0%, rgba(20, 8, 3, 0.56) 55%, rgba(11, 4, 1, 0.66) 100%)',
-            backdropFilter: 'blur(34px) saturate(155%)',
-            WebkitBackdropFilter: 'blur(34px) saturate(155%)',
-            animation: 'achievGlassBreathe 9s ease-in-out infinite',
+            backdropFilter: 'blur(26px) saturate(145%)',
+            WebkitBackdropFilter: 'blur(26px) saturate(145%)',
+            boxShadow:
+              'inset 0 1.5px 1px rgba(255, 226, 184, 0.18), inset 0 -2px 8px rgba(4, 1, 0, 0.65), 0 28px 70px rgba(4, 1, 0, 0.80)',
           }}
         >
           <div>
@@ -531,6 +560,8 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                   <button
                     type="button"
                     disabled={!!submitting}
+                    onPointerEnter={() => void prefetchGoogleOAuth()}
+                    onFocus={() => void prefetchGoogleOAuth()}
                     onClick={() => handleSocialAuth('google')}
                     aria-label="Sign in with Google"
                     title="Google"
@@ -970,8 +1001,9 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
 
       {!isModal && (
         <section
+          ref={showcaseMountRef}
           aria-label="Achiev Medical Study Guide & Tour"
-          className="w-full relative z-10 overflow-hidden"
+          className="w-full relative z-10 overflow-hidden min-h-[120px]"
           style={{ backgroundColor: '#0b0402' }}
         >
           <div className="relative z-10">
