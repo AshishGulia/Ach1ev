@@ -1,6 +1,7 @@
-const CACHE_NAME = 'achiev-app-shell-v11';
+const CACHE_NAME = 'achiev-app-shell-v12';
 const STATIC_ASSETS = [
   '/manifest.webmanifest',
+  '/assets/aistudio/Transparent_result_fff796aa.webp',
   '/assets/aistudio/achiev-logo-login.webp',
   '/android-chrome-192x192.png?v=2',
   '/android-chrome-512x512.png?v=2',

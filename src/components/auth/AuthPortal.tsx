@@ -424,7 +424,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
       {/* Clean Split Layout: Vertically Centered Brand Panel Beside Slightly Lower Compact Login Box */}
       <div className={isModal ? 'contents' : 'relative z-10 w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-10 items-center my-auto'}>
         {/* Left: Centered Hero Brand & Tagline */}
-        <div className="lg:col-span-5 flex flex-col items-center lg:items-start justify-center text-center lg:text-left px-2 py-4 sm:py-8 relative">
+        <div className="lg:col-span-6 flex flex-col items-center lg:items-start justify-center text-center lg:text-left px-2 py-4 sm:py-8 relative">
           <h1 className="sr-only">Ach1ev — Notes, Split Textbook Reader &amp; Focus Study Platform</h1>
           <div className="flex flex-col items-center lg:items-start gap-3 w-full">
             <div className="relative flex items-center justify-center lg:justify-start mb-0.5 select-none max-w-full">
@@ -448,7 +448,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
         </div>
 
         {/* Right: Compact Gloomy Blurry Glassmorphism Login Card + External Skip Link */}
-        <div className="lg:col-span-7 lg:mt-8 w-full max-w-md mx-auto flex flex-col items-center relative">
+        <div className="lg:col-span-6 lg:mt-8 w-full max-w-md mx-auto flex flex-col items-center relative">
         <div
           aria-hidden="true"
           className="pointer-events-none absolute -inset-5 rounded-[2.2rem] will-change-[opacity]"

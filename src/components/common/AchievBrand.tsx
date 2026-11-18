@@ -17,10 +17,11 @@ const resolveAssetUrl = (relativePath: string): string => {
 };
 
 export const ACHIEV_DEFAULT_LOGO_URL = resolveAssetUrl('assets/aistudio/achiev-logo-login.webp');
+export const ACHIEV_LOGIN_LOGO_URL = resolveAssetUrl('assets/aistudio/Transparent_result_fff796aa.webp');
 export const ACHIEV_LOGO_URL = resolveAssetUrl('assets/aistudio/achiev-logo-login.webp');
 export const ACHIEV_EMBLEM_URL = resolveAssetUrl('assets/aistudio/achiev-logo-login.webp');
 export const ACHIEV_WORDMARK_URL = resolveAssetUrl('assets/aistudio/achiev-logo-login.webp');
-export const ACHIEV_LOCKUP_URL = resolveAssetUrl('assets/aistudio/achiev-logo-login.webp');
+export const ACHIEV_LOCKUP_URL = ACHIEV_LOGIN_LOGO_URL;
 export const ACHIEV_LEATHER_HERO_URL = '';
 export const ACHIEV_LEATHER_LOGIN_URL = '';
 
@@ -70,17 +71,17 @@ export const AchievBrand: React.FC<AchievBrandProps> = ({
         title={title}
       >
         <img
-          src={ACHIEV_DEFAULT_LOGO_URL}
+          src={ACHIEV_LOGIN_LOGO_URL}
           alt={title}
-          width={928}
-          height={324}
+          width={1376}
+          height={768}
           loading="eager"
           decoding="sync"
           fetchPriority="high"
           draggable={false}
           className={
             imgClassName ||
-            'h-[121px] sm:h-[150px] w-auto max-w-full object-contain bg-transparent select-none'
+            'w-[330px] sm:w-[428px] max-w-full h-auto object-contain bg-transparent select-none -my-5 sm:-my-7'
           }
           style={{
             filter: 'drop-shadow(0 6px 16px rgba(0, 0, 0, 0.45))',
