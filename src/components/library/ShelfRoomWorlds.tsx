@@ -44,7 +44,7 @@ const SHELF_SCENE_IMAGES: Record<ShelfThemeId, { day: string; night: string }> =
   },
 };
 
-const BAY_BG_POSITIONS = ['40% 42%', '46% 45%', '50% 46%', '55% 44%', '60% 42%'];
+const BAY_BG_POSITIONS = ['50% 45%', '50% 45%', '50% 45%', '50% 45%', '50% 45%'];
 
 /* ───────────── REAL SCENIC PHOTOGRAPHIC CSS VISTA (MATCHED DAY & NIGHT) ───────────── */
 const ScenicPhotoVista: React.FC<{
@@ -81,8 +81,8 @@ const ScenicPhotoVista: React.FC<{
           backgroundRepeat: 'no-repeat',
           filter: dayFilter,
           opacity: night ? 0 : 1,
-          transform: `scale(${1.02 + v * 0.01})`,
-          transition: 'opacity 0.65s ease, filter 0.65s ease, background-position 0.7s ease',
+          transform: 'scale(1.02)',
+          transition: 'opacity 0.65s ease, filter 0.65s ease',
         }}
       />
       {/* Real Nighttime Scenic Photograph */}
@@ -96,8 +96,8 @@ const ScenicPhotoVista: React.FC<{
           backgroundRepeat: 'no-repeat',
           filter: nightFilter,
           opacity: night ? 1 : 0,
-          transform: `scale(${1.02 + v * 0.01})`,
-          transition: 'opacity 0.65s ease, filter 0.65s ease, background-position 0.7s ease',
+          transform: 'scale(1.02)',
+          transition: 'opacity 0.65s ease, filter 0.65s ease',
         }}
       />
       {/* Atmospheric Depth & Readability Vignette */}
@@ -134,12 +134,8 @@ const CelestialSkyOrb: React.FC<{
   cloudVeiled?: boolean;
   topOffset?: number;
 }> = ({ night, variantIdx = 0, cloudVeiled = false, topOffset = 14 }) => {
-  const v = ((variantIdx % 5) + 5) % 5;
-  // Place clearly in upper-left or upper-right sky wings flanking the central almirah (away from pull cord at 89.5%)
-  const alignRight = v === 2;
-  const horizontalPos: React.CSSProperties = alignRight
-    ? { right: '15.5%' }
-    : { left: `${10.5 + (v % 3) * 1.4}%` };
+  // Keep celestial orb anchored cleanly in the upper-left sky wing across all almirahs
+  const horizontalPos: React.CSSProperties = { left: '11.5%' };
 
   return (
     <>

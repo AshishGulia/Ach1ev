@@ -407,6 +407,34 @@ export const seed = (): AlmirahT[] => [
       mk('Lower Section', []),
     ],
   },
+  {
+    id: 'alm-creamy-caramel',
+    name: 'Creamy Caramel',
+    design: 'Creamy Caramel',
+    hasUpperDoor: true,
+    shelves: [mk('Section 1', []), mk('Section 2', []), mk('Lower Section', [])],
+  },
+  {
+    id: 'alm-vanilla-white',
+    name: 'Vanilla White',
+    design: 'Vanilla White',
+    hasUpperDoor: true,
+    shelves: [mk('Section 1', []), mk('Section 2', []), mk('Lower Section', [])],
+  },
+  {
+    id: 'alm-mocha-espresso',
+    name: 'Mocha Espresso',
+    design: 'Mocha Espresso',
+    hasUpperDoor: true,
+    shelves: [mk('Section 1', []), mk('Section 2', []), mk('Lower Section', [])],
+  },
+  {
+    id: 'alm-vault',
+    name: 'Vault',
+    design: 'Vault',
+    hasUpperDoor: true,
+    shelves: [mk('Section 1', []), mk('Section 2', []), mk('Lower Section', [])],
+  },
 ];
 
 export const KEY = 'medden_shelf_room_v6';
@@ -468,23 +496,20 @@ export function useStored(): [AlmirahT[], (next: AlmirahT[]) => void] {
         const parsed = JSON.parse(raw);
         if (Array.isArray(parsed) && parsed.length > 0) {
           let migrated = (parsed as AlmirahT[]).map(migrateAlmirah);
-          const legacySeedIds = new Set([
-            'alm-dark-chocolate',
-            'alm-creamy-caramel',
-            'alm-vanilla-white',
-            'alm-mocha-espresso',
-            'alm-vault',
-          ]);
-          const isOldFiveSeeds =
-            migrated.length === 5 && migrated.every((m) => legacySeedIds.has(m.id));
-          if (isOldFiveSeeds) {
-            const nonEmptyExtra = migrated
-              .slice(1)
-              .filter((m) =>
-                m.shelves.some((s) => s.books.length > 0 || (s.folders?.length ?? 0) > 0)
-              );
-            migrated = [migrated[0]!, ...nonEmptyExtra];
+
+          // Ensure all 5 distinct almirahs exist independently (one-time migration; books in Almirah 1 never leak to Almirahs 2-5)
+          if (localStorage.getItem('achiev_five_almirahs_v2') !== '1') {
+            const existingIds = new Set(migrated.map((m) => m.id));
+            const existingDesigns = new Set(migrated.map((m) => m.design));
+            const emptyDefaults = seed().filter(
+              (s) => !existingIds.has(s.id) && !existingDesigns.has(s.design)
+            );
+            if (emptyDefaults.length > 0) {
+              migrated = [...migrated, ...emptyDefaults];
+            }
+            localStorage.setItem('achiev_five_almirahs_v2', '1');
           }
+
           if (localStorage.getItem('achiev_shelf_v2_seeded') !== '1' && migrated.length > 0) {
             const firstAlmirah = migrated[0]!;
             const firstShelf = firstAlmirah.shelves[0];
@@ -507,6 +532,7 @@ export function useStored(): [AlmirahT[], (next: AlmirahT[]) => void] {
           localStorage.setItem(KEY, JSON.stringify(migrated));
         }
       } else {
+        localStorage.setItem('achiev_five_almirahs_v2', '1');
         localStorage.setItem('achiev_shelf_v2_seeded', '1');
       }
     } catch {
@@ -4563,25 +4589,26 @@ export function Almirah({
           borderRadius: look.isArched ? '190px 190px 10px 10px' : look.isCapsule ? 24 : 3,
         }}
       >
-        {/* Top Silhouette: Roman Arch Crown (Almirah 4), Flush Capsule Crown (Almirah 1 & 2), or Cornice Molding */}
+        {/* Top Silhouette: Identical 28px Crown & Width Across All 5 Almirahs */}
         {look.isArched ? (
           <div
             style={{
-              height: 54,
-              borderRadius: '999px 999px 0 0',
+              margin: '0',
+              height: 28,
+              borderRadius: '18px 18px 0 0',
               background: `linear-gradient(180deg, ${look.frame} 0%, ${look.dark} 100%)`,
               boxShadow: 'inset 0 2px 0 rgba(255,255,255,0.22), inset 0 -3px 6px rgba(0,0,0,0.55)',
               display: 'flex',
               alignItems: 'flex-end',
               justifyContent: 'center',
-              paddingBottom: 6,
+              paddingBottom: 3,
               position: 'relative',
             }}
           >
             <div
               style={{
                 width: '78%',
-                height: 30,
+                height: 20,
                 borderTopLeftRadius: 999,
                 borderTopRightRadius: 999,
                 background: look.back,
@@ -4595,13 +4622,13 @@ export function Almirah({
         ) : (
           <div
             style={{
-              margin: look.isCapsule ? '0' : '0 -8px',
-              height: look.isCapsule ? 20 : 26,
+              margin: '0',
+              height: 28,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               position: 'relative',
-              borderRadius: look.isCapsule ? '24px 24px 0 0' : '4px 4px 0 0',
+              borderRadius: look.isCapsule ? '20px 20px 0 0' : '4px 4px 0 0',
               boxShadow:
                 look.grain > 0
                   ? '0 5px 10px rgba(0,0,0,.45), inset 0 2px 0 rgba(255,245,220,.45), inset 0 -2px 3px rgba(0,0,0,.35)'
@@ -4611,7 +4638,7 @@ export function Almirah({
           >
             <div
               style={{
-                width: look.isCapsule ? '88%' : '94%',
+                width: '90%',
                 height: 3,
                 borderRadius: 1,
                 background: look.isVault
@@ -4733,10 +4760,10 @@ export function Almirah({
             position: 'relative',
             zIndex: 45,
             pointerEvents: 'auto',
-            margin: look.isCapsule || look.isArched ? '0' : '0 -6px',
+            margin: '0',
             minHeight: 44,
             padding: '6px 12px',
-            borderRadius: look.isCapsule ? '0 0 22px 22px' : look.isArched ? '0 0 10px 10px' : '0 0 4px 4px',
+            borderRadius: look.isCapsule ? '0 0 20px 20px' : '0 0 8px 8px',
             boxShadow:
               look.grain > 0
                 ? '0 7px 14px rgba(0,0,0,.48), inset 0 2px 0 rgba(255,244,220,0.36), inset 0 -2px 4px rgba(0,0,0,0.45)'
@@ -4820,13 +4847,13 @@ export function Almirah({
           </div>
         </div>
 
-        {/* Feet / Legs / Plinth Base on Floor Matching Uploaded Photos */}
+        {/* Feet / Legs / Plinth Base on Floor — Identical 16px Ground Clearance Across All 5 Almirahs */}
         {look.legs === 'block-base' ? (
           <div
             style={{
               position: 'relative',
               margin: '0 30px',
-              height: 15,
+              height: 16,
               background: look.isVault
                 ? 'linear-gradient(180deg, #050608 0%, #0d1016 100%)'
                 : 'linear-gradient(180deg, #1b1512 0%, #0f0b09 100%)',
@@ -4835,14 +4862,14 @@ export function Almirah({
             }}
           />
         ) : look.legs === 'tapered-wood' ? (
-          <>
+          <div style={{ position: 'relative', height: 16 }}>
             <div
               style={{
                 position: 'absolute',
-                bottom: -18,
+                top: 0,
                 left: 24,
                 width: 13,
-                height: 20,
+                height: 16,
                 transform: 'rotate(11deg)',
                 transformOrigin: 'top center',
                 ...(look.grain > 0
@@ -4861,10 +4888,10 @@ export function Almirah({
             <div
               style={{
                 position: 'absolute',
-                bottom: -18,
+                top: 0,
                 right: 24,
                 width: 13,
-                height: 20,
+                height: 16,
                 transform: 'rotate(-11deg)',
                 transformOrigin: 'top center',
                 ...(look.grain > 0
@@ -4880,21 +4907,21 @@ export function Almirah({
                 boxShadow: 'inset 0 2px 3px rgba(0,0,0,0.45), 0 3px 6px rgba(0,0,0,0.5)',
               }}
             />
-          </>
+          </div>
         ) : look.legs === 'metal-pin' ? (
-          <>
-            <div style={{ position: 'absolute', bottom: -14, left: 16, width: 8, height: 14, backgroundColor: '#a1a1aa', borderRadius: '0 0 2px 2px' }} />
-            <div style={{ position: 'absolute', bottom: -14, right: 16, width: 8, height: 14, backgroundColor: '#a1a1aa', borderRadius: '0 0 2px 2px' }} />
-          </>
+          <div style={{ position: 'relative', height: 16 }}>
+            <div style={{ position: 'absolute', top: 0, left: 16, width: 8, height: 16, backgroundColor: '#a1a1aa', borderRadius: '0 0 2px 2px' }} />
+            <div style={{ position: 'absolute', top: 0, right: 16, width: 8, height: 16, backgroundColor: '#a1a1aa', borderRadius: '0 0 2px 2px' }} />
+          </div>
         ) : (
-          <>
+          <div style={{ position: 'relative', height: 16 }}>
             <div
               style={{
                 position: 'absolute',
-                bottom: -18,
+                top: 0,
                 left: 22,
                 width: 15,
-                height: 18,
+                height: 16,
                 ...(look.grain > 0
                   ? getWoodSurfaceStyle(look, 'v', 'frame', '90deg')
                   : {
@@ -4911,10 +4938,10 @@ export function Almirah({
             <div
               style={{
                 position: 'absolute',
-                bottom: -18,
+                top: 0,
                 right: 22,
                 width: 15,
-                height: 18,
+                height: 16,
                 ...(look.grain > 0
                   ? getWoodSurfaceStyle(look, 'v', 'frame', '270deg')
                   : {
@@ -4928,7 +4955,7 @@ export function Almirah({
                 boxShadow: 'inset 0 2px 3px rgba(0,0,0,0.5), 0 2px 5px rgba(0,0,0,0.45)',
               }}
             />
-          </>
+          </div>
         )}
       </div>
     </div>
@@ -6010,17 +6037,7 @@ export default function ShelfRoom({
                           if (data.length > 1) {
                             setAt((i) => (i - 1 + data.length) % Math.min(data.length, limits.maxAlmirahs));
                           } else {
-                            const allowedDesigns = DESIGNS.slice(0, limits.maxAlmirahs);
-                            const curPos = allowedDesigns.indexOf(a.design as DesignName);
-                            const prevPos = curPos <= 0 ? allowedDesigns.length - 1 : curPos - 1;
-                            const nextDesign = allowedDesigns[prevPos]!;
-                            const nextLook = LOOKS[nextDesign];
-                            patch(a.id, (x) => ({
-                              ...x,
-                              design: nextDesign,
-                              name: nextLook?.name || nextDesign,
-                              hasUpperDoor: nextLook?.hasUpperDoor ?? true,
-                            }));
+                            setIsNewAlmirahModalOpen(true);
                           }
                         }}
                         onNextAlmirah={() => {
@@ -6051,24 +6068,7 @@ export default function ShelfRoom({
                             }
                             setAt(nextIdx);
                           } else {
-                            const curPos = DESIGNS.indexOf(a.design as DesignName);
-                            const nextPos = ((curPos < 0 ? 0 : curPos) + 1) % DESIGNS.length;
-                            if (nextPos >= limits.maxAlmirahs) {
-                              openSubscriptionUpgradeModal({
-                                title: 'Unlock All 5 Almirahs with Master Ultimate (₹300/mo)',
-                                message: 'Scholar Pro unlocks the first 3 Almirah designs. Upgrade to ₹300/mo Master Ultimate to open all 5.',
-                                requiredPlanId: 'master-ultimate',
-                              });
-                              return;
-                            }
-                            const nextDesign = DESIGNS[nextPos]!;
-                            const nextLook = LOOKS[nextDesign];
-                            patch(a.id, (x) => ({
-                              ...x,
-                              design: nextDesign,
-                              name: nextLook?.name || nextDesign,
-                              hasUpperDoor: nextLook?.hasUpperDoor ?? true,
-                            }));
+                            setIsNewAlmirahModalOpen(true);
                           }
                         }}
                         onAddShelf={() => handleAddShelfToAlmirah(a.id)}

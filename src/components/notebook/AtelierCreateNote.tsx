@@ -94,6 +94,7 @@ import {
   Unlock,
   SlidersHorizontal,
   LayoutTemplate,
+  GripVertical,
 } from 'lucide-react';
 import { Notebook, DesignId, MedicalBook } from '../../types';
 import { AUTO_NOTE_TEMPLATES, AutoNoteTemplate } from '../../data/noteTemplates';
@@ -466,6 +467,16 @@ const MS_WORD_TABLE_STYLES: TableStylePreset[] = [
   },
 ];
 
+const LIGHT_MODE_RIBBON_BG: Record<string, string> = {
+  '1': '#f8f4eb',
+  '2': 'rgba(253, 241, 244, 0.94)',
+  '3': 'rgba(249, 238, 237, 0.94)',
+  '4': 'rgba(240, 243, 247, 0.94)',
+  '5': 'rgba(222, 239, 211, 0.94)',
+};
+
+type NoteSurroundMode = 'dashboard' | 'ribbon' | 'light-ribbon';
+
 export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
   notebook,
   onUpdateNotebook,
@@ -474,20 +485,26 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
   activeDesign = '1',
 }) => {
   const { user, googleUser, phoneUser, exitGuestToLogin } = useAuth();
-  const [noteSurroundDark, setNoteSurroundDark] = useState<boolean | null>(() => {
+  const [noteSurroundMode, setNoteSurroundMode] = useState<NoteSurroundMode>(() => {
     try {
-      const v = localStorage.getItem('achiev_note_surround_dark_v1');
-      return v === 'dark' ? true : v === 'light' ? false : null;
-    } catch {
-      return null;
-    }
+      const v2 = localStorage.getItem('achiev_note_surround_mode_v2');
+      if (v2 === 'dashboard' || v2 === 'ribbon' || v2 === 'light-ribbon') return v2;
+      const legacy = localStorage.getItem('achiev_note_surround_dark_v1');
+      if (legacy === 'light') return 'light-ribbon';
+      if (legacy === 'dark') return 'ribbon';
+    } catch {}
+    return 'dashboard';
   });
   useEffect(() => {
     try {
-      if (noteSurroundDark === null) localStorage.removeItem('achiev_note_surround_dark_v1');
-      else localStorage.setItem('achiev_note_surround_dark_v1', noteSurroundDark ? 'dark' : 'light');
+      localStorage.setItem('achiev_note_surround_mode_v2', noteSurroundMode);
     } catch {}
-  }, [noteSurroundDark]);
+  }, [noteSurroundMode]);
+  const [noteSplitOrder, setNoteSplitOrder] = useState<'doc-first' | 'note-first'>('doc-first');
+  const [draggedSplitPane, setDraggedSplitPane] = useState<string | null>(null);
+  const [dropTargetPane, setDropTargetPane] = useState<string | null>(null);
+  const [wsLeftPadPct, setWsLeftPadPct] = useState<number>(0);
+  const [wsRightPadPct, setWsRightPadPct] = useState<number>(0);
   // Title & Content (Starts with clean blank ruled paper by default)
   const initialTitle = notebook?.title || 'Untitled Note';
   const initialContent =
@@ -1013,29 +1030,46 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
     const ws = wsRef.current;
     if (!ws) return;
     const wsRect = ws.getBoundingClientRect();
+    const isNoteFirst = noteSplitOrder === 'note-first';
 
     const onPointerMove = (moveEv: PointerEvent) => {
       if (type === 'stacked') {
         const offsetY = moveEv.clientY - wsRect.top;
-        const newPct = Math.max(18, Math.min(82, (offsetY / wsRect.height) * 100));
-        setStackedRatio(Math.round(newPct));
+        const pct = (offsetY / wsRect.height) * 100;
+        const newPct = isNoteFirst ? 100 - pct : pct;
+        setStackedRatio(Math.round(Math.max(18, Math.min(82, newPct))));
       } else if (type === 'split') {
         const offsetX = moveEv.clientX - wsRect.left;
-        const newPct = Math.max(18, Math.min(82, (offsetX / wsRect.width) * 100));
-        setSplitRatio(Math.round(newPct));
+        const pct = (offsetX / wsRect.width) * 100;
+        const newPct = isNoteFirst ? 100 - pct : pct;
+        setSplitRatio(Math.round(Math.max(18, Math.min(82, newPct))));
       } else if (type === 'sub-1') {
-        const offsetX = moveEv.clientX - wsRect.left;
+        const offsetX = isNoteFirst ? wsRect.right - moveEv.clientX : moveEv.clientX - wsRect.left;
         const newPct = Math.max(15, Math.min(70, (offsetX / wsRect.width) * 100));
         setSplitRatio(Math.round(newPct));
       } else if (type === 'triple-1') {
-        const offsetX = moveEv.clientX - wsRect.left;
-        const newPct = Math.max(15, Math.min(45, (offsetX / wsRect.width) * 100));
-        setTripleRatios((prev) => [Math.round(newPct), prev[1]]);
+        if (isNoteFirst) {
+          const offsetX = moveEv.clientX - wsRect.left;
+          const noteW = Math.max(16, 100 - tripleRatios[0] - tripleRatios[1]);
+          const doc1Pct = ((offsetX / wsRect.width) * 100) - noteW;
+          setTripleRatios((prev) => [Math.round(Math.max(15, Math.min(45, doc1Pct))), prev[1]]);
+        } else {
+          const offsetX = moveEv.clientX - wsRect.left;
+          const newPct = Math.max(15, Math.min(45, (offsetX / wsRect.width) * 100));
+          setTripleRatios((prev) => [Math.round(newPct), prev[1]]);
+        }
       } else if (type === 'triple-2') {
         const offsetX = moveEv.clientX - wsRect.left;
         const totalPct = (offsetX / wsRect.width) * 100;
-        const newDoc2 = Math.max(15, Math.min(50, totalPct - tripleRatios[0]));
-        setTripleRatios((prev) => [prev[0], Math.round(newDoc2)]);
+        if (isNoteFirst) {
+          const remainingForDocs = Math.max(30, Math.min(80, 100 - totalPct));
+          const ratio0 = Math.round(remainingForDocs * 0.5);
+          const ratio1 = Math.round(remainingForDocs - ratio0);
+          setTripleRatios([Math.max(15, Math.min(45, ratio0)), Math.max(15, Math.min(45, ratio1))]);
+        } else {
+          const newDoc2 = Math.max(15, Math.min(50, totalPct - tripleRatios[0]));
+          setTripleRatios((prev) => [prev[0], Math.round(newDoc2)]);
+        }
       }
     };
 
@@ -1052,6 +1086,131 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
     document.body.style.userSelect = 'none';
     window.addEventListener('pointermove', onPointerMove);
     window.addEventListener('pointerup', onPointerUp);
+  };
+
+  // Mouse Hover Edge Resize Handler for both Book pane(s) & Note pane
+  const handleEdgeResizePointerDown = (
+    edgeSide: 'left' | 'right',
+    paneKind: 'doc' | 'note',
+    paneIdx: number,
+    visibleCount: number,
+    e: React.PointerEvent
+  ) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const isOuterLeft =
+      edgeSide === 'left' &&
+      ((layout === 'focus' && paneKind === 'note') ||
+        (noteSplitOrder === 'note-first' ? paneKind === 'note' : paneKind === 'doc' && paneIdx === 0));
+    const isOuterRight =
+      edgeSide === 'right' &&
+      ((layout === 'focus' && paneKind === 'note') ||
+        (noteSplitOrder === 'note-first'
+          ? paneKind === 'doc' && paneIdx === visibleCount - 1
+          : paneKind === 'note'));
+
+    if (!isOuterLeft && !isOuterRight && layout !== 'focus' && layout !== 'stacked') {
+      const splitType: 'split' | 'sub-1' | 'triple-1' | 'triple-2' =
+        layout === 'triple'
+          ? paneKind === 'doc' && paneIdx === 0 && noteSplitOrder === 'doc-first'
+            ? 'triple-1'
+            : paneKind === 'doc' && paneIdx === 0 && noteSplitOrder === 'note-first' && edgeSide === 'right'
+            ? 'triple-1'
+            : 'triple-2'
+          : visibleCount === 2 &&
+            ((paneKind === 'doc' && paneIdx === 0 && edgeSide === 'right') ||
+              (paneKind === 'doc' && paneIdx === 1 && edgeSide === 'left'))
+          ? 'sub-1'
+          : 'split';
+      handleSplitterPointerDown(splitType, e);
+      return;
+    }
+
+    const ws = wsRef.current;
+    if (!ws) return;
+    const wsRect = ws.getBoundingClientRect();
+    setIsDraggingWsSplitter(true);
+
+    const onMove = (moveEv: PointerEvent) => {
+      if (isOuterLeft) {
+        const pct = Math.max(0, Math.min(24, ((moveEv.clientX - wsRect.left) / wsRect.width) * 100));
+        setWsLeftPadPct(Math.round(pct));
+      } else if (isOuterRight) {
+        const pct = Math.max(0, Math.min(24, ((wsRect.right - moveEv.clientX) / wsRect.width) * 100));
+        setWsRightPadPct(Math.round(pct));
+      }
+    };
+    const onUp = () => {
+      setIsDraggingWsSplitter(false);
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+    document.body.style.cursor = 'ew-resize';
+    document.body.style.userSelect = 'none';
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+  };
+
+  // Drag-to-Swap Handlers between Open Book Pane(s) and Create Note
+  const handlePaneDragStart = (paneKey: string, e: React.DragEvent) => {
+    if (layout === 'focus' || maximizedWindowId) {
+      e.preventDefault();
+      return;
+    }
+    const targetEl = e.target as HTMLElement | null;
+    if (targetEl?.closest('button, select, input, textarea, [contenteditable="true"]')) {
+      e.preventDefault();
+      return;
+    }
+    setDraggedSplitPane(paneKey);
+    try {
+      e.dataTransfer.effectAllowed = 'move';
+      e.dataTransfer.setData('text/plain', paneKey);
+    } catch {}
+  };
+
+  const handlePaneDragOver = (targetKey: string, e: React.DragEvent) => {
+    if (!draggedSplitPane || draggedSplitPane === targetKey || layout === 'focus') return;
+    e.preventDefault();
+    try {
+      e.dataTransfer.dropEffect = 'move';
+    } catch {}
+    if (dropTargetPane !== targetKey) {
+      setDropTargetPane(targetKey);
+    }
+  };
+
+  const handlePaneDrop = (targetKey: string, e: React.DragEvent) => {
+    e.preventDefault();
+    const srcKey = draggedSplitPane || e.dataTransfer?.getData('text/plain') || '';
+    setDraggedSplitPane(null);
+    setDropTargetPane(null);
+    if (!srcKey || srcKey === targetKey || layout === 'focus') return;
+
+    if (srcKey === 'note' || targetKey === 'note') {
+      setNoteSplitOrder((prev) => (prev === 'doc-first' ? 'note-first' : 'doc-first'));
+      showToast('Swapped Create Note & Book position');
+      return;
+    }
+
+    setDocPanes((prev) => {
+      const idxA = prev.findIndex((p) => p.id === srcKey);
+      const idxB = prev.findIndex((p) => p.id === targetKey);
+      if (idxA === -1 || idxB === -1) return prev;
+      const next = [...prev];
+      const temp = next[idxA]!;
+      next[idxA] = next[idxB]!;
+      next[idxB] = temp;
+      return next;
+    });
+    showToast('Swapped open book positions');
+  };
+
+  const handlePaneDragEnd = () => {
+    setDraggedSplitPane(null);
+    setDropTargetPane(null);
   };
 
   // Selection Pill
@@ -3101,8 +3260,17 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
   const closedPanes = docPanes.filter((p) => p.isClosed);
   const isNoteVisible = !isNoteClosed && !isNoteMinimized;
 
-  // Dynamic Grid Style for Workspace with Windows Folder Mouse Cursor Resize Joystick
+  // Dynamic Grid Style for Workspace with Windows Folder Mouse Cursor Resize Joystick & Swappable Split Order
   const getDynamicWsStyle = (): React.CSSProperties => {
+    const padStyle: React.CSSProperties =
+      wsLeftPadPct > 0 || wsRightPadPct > 0
+        ? {
+            paddingLeft: wsLeftPadPct > 0 ? `${wsLeftPadPct}%` : undefined,
+            paddingRight: wsRightPadPct > 0 ? `${wsRightPadPct}%` : undefined,
+          }
+        : {};
+    const isNoteFirst = noteSplitOrder === 'note-first';
+
     if (maximizedWindowId) {
       return {
         gridTemplateColumns: '1fr',
@@ -3112,64 +3280,90 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
     if (layout === 'focus') {
       return {
         gridTemplateColumns: '1fr',
+        ...padStyle,
       };
     }
     if (layout === 'split') {
       if (visiblePanes.length === 1 && isNoteVisible) {
         return {
-          gridTemplateColumns: `${splitRatio}% 14px minmax(0, 1fr)`,
+          gridTemplateColumns: isNoteFirst
+            ? `${Math.max(18, Math.min(82, 100 - splitRatio))}% 14px minmax(0, 1fr)`
+            : `${splitRatio}% 14px minmax(0, 1fr)`,
           gap: 0,
+          ...padStyle,
         };
       }
       if (visiblePanes.length === 2 && isNoteVisible) {
+        const halfDoc = Math.max(15, Math.round(splitRatio * 0.5));
+        const noteColPct = Math.max(18, Math.min(70, 100 - splitRatio));
         return {
-          gridTemplateColumns: `${Math.round(splitRatio * 0.5)}% 14px ${Math.round(splitRatio * 0.5)}% 14px minmax(0, 1fr)`,
+          gridTemplateColumns: isNoteFirst
+            ? `${noteColPct}% 14px ${halfDoc}% 14px minmax(0, 1fr)`
+            : `${halfDoc}% 14px ${halfDoc}% 14px minmax(0, 1fr)`,
           gap: 0,
+          ...padStyle,
         };
       }
       if (visiblePanes.length > 0 && isNoteVisible) {
         return {
-          gridTemplateColumns: `repeat(${visiblePanes.length}, minmax(0, 1fr)) 14px minmax(0, 1.25fr)`,
+          gridTemplateColumns: isNoteFirst
+            ? `minmax(0, 1.25fr) 14px repeat(${visiblePanes.length}, minmax(0, 1fr))`
+            : `repeat(${visiblePanes.length}, minmax(0, 1fr)) 14px minmax(0, 1.25fr)`,
           gap: 0,
+          ...padStyle,
         };
       }
-      return { gridTemplateColumns: '1fr' };
+      return { gridTemplateColumns: '1fr', ...padStyle };
     }
     if (layout === 'triple') {
       if (visiblePanes.length === 2 && isNoteVisible) {
+        const noteColPct = Math.max(18, 100 - tripleRatios[0] - tripleRatios[1]);
         return {
-          gridTemplateColumns: `${tripleRatios[0]}% 14px ${tripleRatios[1]}% 14px minmax(0, 1fr)`,
+          gridTemplateColumns: isNoteFirst
+            ? `${noteColPct}% 14px ${tripleRatios[0]}% 14px minmax(0, 1fr)`
+            : `${tripleRatios[0]}% 14px ${tripleRatios[1]}% 14px minmax(0, 1fr)`,
           gap: 0,
+          ...padStyle,
         };
       }
       if (visiblePanes.length === 1 && isNoteVisible) {
         return {
-          gridTemplateColumns: `${splitRatio}% 14px minmax(0, 1fr)`,
+          gridTemplateColumns: isNoteFirst
+            ? `${Math.max(18, Math.min(82, 100 - splitRatio))}% 14px minmax(0, 1fr)`
+            : `${splitRatio}% 14px minmax(0, 1fr)`,
           gap: 0,
+          ...padStyle,
         };
       }
       if (visiblePanes.length > 0 && isNoteVisible) {
         return {
-          gridTemplateColumns: `repeat(${visiblePanes.length}, minmax(0, 1fr)) 14px minmax(0, 1.25fr)`,
+          gridTemplateColumns: isNoteFirst
+            ? `minmax(0, 1.25fr) 14px repeat(${visiblePanes.length}, minmax(0, 1fr))`
+            : `repeat(${visiblePanes.length}, minmax(0, 1fr)) 14px minmax(0, 1.25fr)`,
           gap: 0,
+          ...padStyle,
         };
       }
-      return { gridTemplateColumns: '1fr' };
+      return { gridTemplateColumns: '1fr', ...padStyle };
     }
     if (layout === 'stacked') {
       if (visiblePanes.length > 0 && isNoteVisible) {
         return {
           gridTemplateColumns: `repeat(${visiblePanes.length}, minmax(0, 1fr))`,
-          gridTemplateRows: `${stackedRatio}% 14px minmax(0, 1fr)`,
+          gridTemplateRows: isNoteFirst
+            ? `${Math.max(18, Math.min(82, 100 - stackedRatio))}% 14px minmax(0, 1fr)`
+            : `${stackedRatio}% 14px minmax(0, 1fr)`,
           gap: 0,
+          ...padStyle,
         };
       }
       return {
         gridTemplateColumns: '1fr',
         gridTemplateRows: '1fr',
+        ...padStyle,
       };
     }
-    return {};
+    return padStyle;
   };
 
   return (
@@ -3330,14 +3524,36 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
 
         <button
           type="button"
-          className="an-icon-btn"
-          aria-label="Toggle note desk backdrop"
-          title="Toggle light / dark desk surrounding paper sheet"
-          onClick={() => setNoteSurroundDark((prev) => !(prev ?? isDarkThemeDoc))}
+          className="an-btn"
+          style={{ padding: '6px 10px', fontSize: 11.5 }}
+          aria-label="Cycle paper surrounding backdrop"
+          title={`Paper surround: ${
+            noteSurroundMode === 'dashboard'
+              ? 'Main Dashboard'
+              : noteSurroundMode === 'ribbon'
+              ? 'Active Theme Ribbon'
+              : 'Light Mode Ribbon'
+          } (click to switch)`}
+          onClick={() => {
+            const next: NoteSurroundMode =
+              noteSurroundMode === 'dashboard'
+                ? 'ribbon'
+                : noteSurroundMode === 'ribbon'
+                ? 'light-ribbon'
+                : 'dashboard';
+            setNoteSurroundMode(next);
+            showToast(
+              next === 'dashboard'
+                ? 'Paper surround: Main Dashboard'
+                : next === 'ribbon'
+                ? 'Paper surround: Theme Ribbon'
+                : 'Paper surround: Light Mode Ribbon'
+            );
+          }}
         >
           <svg
             viewBox="0 0 24 24"
-            className="w-4 h-4"
+            className="w-3.5 h-3.5 shrink-0"
             fill="none"
             stroke="currentColor"
             strokeWidth="1.9"
@@ -3347,12 +3563,19 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
             <rect x="2.5" y="3.5" width="19" height="17" rx="2.5" strokeOpacity="0.65" />
             <path
               d="M7 6.5h10v11H7z"
-              fill={(noteSurroundDark ?? isDarkThemeDoc) ? 'currentColor' : 'none'}
-              fillOpacity={(noteSurroundDark ?? isDarkThemeDoc) ? 0.22 : 0}
+              fill="currentColor"
+              fillOpacity={
+                noteSurroundMode === 'ribbon' ? 0.35 : noteSurroundMode === 'light-ribbon' ? 0.14 : 0
+              }
             />
-            <line x1="9.5" y1="10" x2="14.5" y2="10" />
-            <line x1="9.5" y1="13" x2="14.5" y2="13" />
           </svg>
+          <span className="lbl">
+            {noteSurroundMode === 'dashboard'
+              ? 'Dashboard'
+              : noteSurroundMode === 'ribbon'
+              ? 'Theme Ribbon'
+              : 'Light Ribbon'}
+          </span>
         </button>
       </header>
 
@@ -3466,21 +3689,76 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
         data-m={mobileTab}
         style={getDynamicWsStyle()}
       >
-        {/* Dynamic Document Subwindows (Supports 1, 2, 3 or more open books!) */}
+        {/* Dynamic Document Subwindows (Supports 1, 2, 3 or more open books + Drag Swap & Hover Edge Resize!) */}
         {layout !== 'focus' &&
           visiblePanes.map((pane, idx) => {
             const doc = docsList.find((d) => d.id === pane.docId) || docsList[0];
             const isPaneMaximized = maximizedWindowId === pane.id;
+            const isNoteFirst = noteSplitOrder === 'note-first' && isNoteVisible;
+            const docGridStyle: React.CSSProperties | undefined = isPaneMaximized
+              ? undefined
+              : layout === 'stacked'
+              ? { gridRow: isNoteFirst ? 3 : 1, gridColumn: `${idx + 1}` }
+              : visiblePanes.length > 1
+              ? {
+                  gridRow: 1,
+                  gridColumn: isNoteFirst ? 3 + idx * 2 : 1 + idx * 2,
+                }
+              : isNoteVisible
+              ? { gridRow: 1, gridColumn: isNoteFirst ? 3 : 1 }
+              : undefined;
 
             return (
               <React.Fragment key={pane.id}>
                 <div
-                  className={`an-pane an-doc ${isPaneMaximized ? 'is-maximized' : ''}`}
+                  className={`an-pane an-doc ${isPaneMaximized ? 'is-maximized' : ''} ${
+                    draggedSplitPane === pane.id ? 'is-dragging-pane' : ''
+                  } ${dropTargetPane === pane.id ? 'is-drop-target' : ''}`}
                   data-pane-id={pane.id}
-                  style={layout === 'stacked' ? { gridRow: 1 } : undefined}
+                  style={docGridStyle}
+                  onDragOver={(e) => handlePaneDragOver(pane.id, e)}
+                  onDragLeave={() => {
+                    if (dropTargetPane === pane.id) setDropTargetPane(null);
+                  }}
+                  onDrop={(e) => handlePaneDrop(pane.id, e)}
                 >
-                {/* Window Folder Header Bar */}
-                <div className="an-pane-h">
+                {/* Hover-to-Resize Left & Right Borders */}
+                {!isPaneMaximized && layout !== 'stacked' && (
+                  <>
+                    <div
+                      className="an-pane-edge-rz left"
+                      title="Drag left border to resize window thickness"
+                      onPointerDown={(e) =>
+                        handleEdgeResizePointerDown('left', 'doc', idx, visiblePanes.length, e)
+                      }
+                    />
+                    <div
+                      className="an-pane-edge-rz right"
+                      title="Drag right border to resize window thickness"
+                      onPointerDown={(e) =>
+                        handleEdgeResizePointerDown('right', 'doc', idx, visiblePanes.length, e)
+                      }
+                    />
+                  </>
+                )}
+
+                {/* Window Folder Header Bar (Drag to Swap Book ↔ Note) */}
+                <div
+                  className="an-pane-h"
+                  draggable={!isPaneMaximized}
+                  onDragStart={(e) => handlePaneDragStart(pane.id, e)}
+                  onDragEnd={handlePaneDragEnd}
+                  title="Drag header or grip to swap Book and Note positions"
+                >
+                  <span
+                    className="an-drag-handle"
+                    draggable={!isPaneMaximized}
+                    onDragStart={(e) => handlePaneDragStart(pane.id, e)}
+                    onDragEnd={handlePaneDragEnd}
+                    title="Drag to swap Book & Note position"
+                  >
+                    <GripVertical className="w-3.5 h-3.5" />
+                  </span>
                   <span className={`an-tag ${pane.tagColorClass || ''}`}>{pane.tag}</span>
 
                   <label className="an-doc-pick">
@@ -3644,6 +3922,13 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                         ? 'is-dragging'
                         : ''
                     }`}
+                    style={{
+                      gridRow: 1,
+                      gridColumn:
+                        noteSplitOrder === 'note-first' && isNoteVisible
+                          ? 4 + idx * 2
+                          : 2 + idx * 2,
+                    }}
                     onPointerDown={(e) =>
                       handleSplitterPointerDown(layout === 'triple' ? 'triple-1' : 'sub-1', e)
                     }
@@ -3685,7 +3970,13 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
               style={
                 layout === 'stacked'
                   ? { gridRow: 2, gridColumn: '1 / -1' }
-                  : undefined
+                  : {
+                      gridRow: 1,
+                      gridColumn:
+                        noteSplitOrder === 'note-first'
+                          ? 2
+                          : visiblePanes.length * 2,
+                    }
               }
               onPointerDown={(e) =>
                 handleSplitterPointerDown(
@@ -3724,12 +4015,54 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
             </div>
           )}
 
-        {/* Note Pane with Matching Window Folder Controls */}
+        {/* Note Pane with Matching Window Folder Controls + Drag Swap & Hover Edge Resize */}
         {isNoteVisible && (
           <div
-            className={`an-pane an-note ${maximizedWindowId === 'note' ? 'is-maximized' : ''}`}
-            style={layout === 'stacked' ? { gridRow: 3, gridColumn: '1 / -1' } : undefined}
+            className={`an-pane an-note ${maximizedWindowId === 'note' ? 'is-maximized' : ''} ${
+              draggedSplitPane === 'note' ? 'is-dragging-pane' : ''
+            } ${dropTargetPane === 'note' ? 'is-drop-target' : ''}`}
+            style={
+              maximizedWindowId === 'note'
+                ? undefined
+                : layout === 'stacked'
+                ? {
+                    gridRow: noteSplitOrder === 'note-first' && visiblePanes.length > 0 ? 1 : 3,
+                    gridColumn: '1 / -1',
+                  }
+                : layout !== 'focus' && visiblePanes.length > 0
+                ? {
+                    gridRow: 1,
+                    gridColumn:
+                      noteSplitOrder === 'note-first' ? 1 : visiblePanes.length * 2 + 1,
+                  }
+                : undefined
+            }
+            onDragOver={(e) => handlePaneDragOver('note', e)}
+            onDragLeave={() => {
+              if (dropTargetPane === 'note') setDropTargetPane(null);
+            }}
+            onDrop={(e) => handlePaneDrop('note', e)}
           >
+            {/* Hover-to-Resize Left & Right Borders on Note Window */}
+            {maximizedWindowId !== 'note' && layout !== 'stacked' && (
+              <>
+                <div
+                  className="an-pane-edge-rz left"
+                  title="Drag left border to resize Note window thickness"
+                  onPointerDown={(e) =>
+                    handleEdgeResizePointerDown('left', 'note', 0, visiblePanes.length, e)
+                  }
+                />
+                <div
+                  className="an-pane-edge-rz right"
+                  title="Drag right border to resize Note window thickness"
+                  onPointerDown={(e) =>
+                    handleEdgeResizePointerDown('right', 'note', 0, visiblePanes.length, e)
+                  }
+                />
+              </>
+            )}
+
             {/* Single Slideable Basic Ribbon + Add Tools + More Tools */}
             <div
               className="an-note-ribbon"
@@ -3745,6 +4078,17 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                 }
               }}
             >
+              {layout !== 'focus' && visiblePanes.length > 0 && maximizedWindowId !== 'note' && (
+                <span
+                  className="an-drag-handle"
+                  draggable
+                  onDragStart={(e) => handlePaneDragStart('note', e)}
+                  onDragEnd={handlePaneDragEnd}
+                  title="Drag to swap Create Note & Book position"
+                >
+                  <GripVertical className="w-3.5 h-3.5" />
+                </span>
+              )}
               <button
                 type="button"
                 className="an-ribbon-slide-btn"
@@ -4309,11 +4653,20 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                 activeOpenVideo && !canSideReserve
                   ? { maxHeight: `calc(100% - ${openVideoH + 24}px)` }
                   : undefined;
+              const surroundBgColor =
+                noteSurroundMode === 'ribbon'
+                  ? 'var(--th-header)'
+                  : noteSurroundMode === 'light-ribbon'
+                  ? LIGHT_MODE_RIBBON_BG[docDesignId] || '#f8f4eb'
+                  : undefined;
               const noteBodyStyle: React.CSSProperties | undefined =
                 activeOpenVideo && canSideReserve
                   ? {
                       paddingRight: `${Math.max(20, openVideoW + (isAttachmentsDrawerOpen ? 20 : 32))}px`,
+                      ...(surroundBgColor ? { backgroundColor: surroundBgColor } : {}),
                     }
+                  : surroundBgColor
+                  ? { backgroundColor: surroundBgColor }
                   : undefined;
 
               return (
@@ -4321,7 +4674,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
             <div
               className="an-note-body"
               style={noteBodyStyle}
-              data-surround={noteSurroundDark === null ? undefined : noteSurroundDark ? 'dark' : 'light'}
+              data-surround={noteSurroundMode}
             >
               {(() => {
                 const normFontKey = normalizeNoteFontKey(fontStyle);

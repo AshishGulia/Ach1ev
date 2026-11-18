@@ -3154,6 +3154,11 @@ html.dark .an-ed .an-hand-underline {
   .an-ws {
     padding: 8px 10px 14px;
   }
+  .an-ws.has-resizer {
+    grid-template-columns: 1fr !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
   .an-note-body {
     padding: 12px 10px;
   }
