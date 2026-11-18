@@ -41,7 +41,11 @@ import {
   HardDrive,
   AlertCircle,
   RefreshCw,
+  Download,
+  Cloud,
 } from 'lucide-react';
+import { saveFileToAch1evDeviceFolder } from '../../utils/deviceStorage';
+import { CloudDriveSaveModal, CloudDriveTargetFile } from '../common/CloudDriveSaveModal';
 
 // Attached Document Interface
 export interface AttachedDoc {
@@ -106,6 +110,7 @@ export const ReadStudioView: React.FC<ReadStudioViewProps> = ({
   const [drivePickerFiles, setDrivePickerFiles] = useState<DriveListedPdf[]>([]);
   const [isLoadingDriveFiles, setIsLoadingDriveFiles] = useState<boolean>(false);
   const [hasLoadedDriveList, setHasLoadedDriveList] = useState<boolean>(false);
+  const [cloudSaveTarget, setCloudSaveTarget] = useState<CloudDriveTargetFile | null>(null);
   // 1. Initial State: Open pending book from Favourites / Read Desk if queued, otherwise clean Study Desk
   const consumePendingReadBook = (): MedicalBook | null => {
     try {
@@ -827,6 +832,80 @@ export const ReadStudioView: React.FC<ReadStudioViewProps> = ({
     setSelectionPos(null);
   };
 
+  const buildActiveDocPayload = async (
+    target?: { title: string; pdfUrl?: string; driveFileId?: string; docId?: string; html?: string }
+  ): Promise<CloudDriveTargetFile> => {
+    const title = target?.title || (activeTab === 'main' ? mainBook.title : currentAttachedDoc?.title || 'Study Document');
+    const safeBase = title.replace(/[^a-zA-Z0-9._-]+/g, '_');
+    const url = target?.pdfUrl || (activeTab === 'main' ? mainBook.pdfFileUrl : currentAttachedDoc?.pdfUrl);
+    if (url && !url.includes('drive.google.com')) {
+      return {
+        title,
+        fileName: `${safeBase}.pdf`,
+        mimeType: 'application/pdf',
+        sourceUrl: url,
+      };
+    }
+    if (target?.docId) {
+      const idbUrl = await getFileBlobFromIdb(target.docId).catch(() => undefined);
+      if (idbUrl) {
+        return {
+          title,
+          fileName: `${safeBase}.pdf`,
+          mimeType: 'application/pdf',
+          sourceUrl: idbUrl,
+        };
+      }
+    }
+    const htmlBody =
+      target?.html ||
+      (activeTab === 'main'
+        ? mainBook.pages.map((p) => `<h2>${p.title}</h2>${p.contentHtml || ''}`).join('\n')
+        : (currentAttachedDoc?.pages || []).map((p) => `<h2>${p.title}</h2>${p.contentHtml || ''}`).join('\n')) ||
+      `<p>${title}</p>`;
+    const docHtml = `<!doctype html><html><head><meta charset="utf-8"/><title>${title}</title><style>body{font-family:Urbanist,sans-serif;max-width:820px;margin:40px auto;line-height:1.6;color:#222;}</style></head><body><h1>${title}</h1>${htmlBody}</body></html>`;
+    const blob = new Blob([docHtml], { type: 'text/html;charset=utf-8' });
+    return {
+      title,
+      fileName: `${safeBase}.html`,
+      mimeType: 'text/html',
+      blob,
+    };
+  };
+
+  const handleSaveDocToDevice = async (target?: {
+    title: string;
+    pdfUrl?: string;
+    driveFileId?: string;
+    docId?: string;
+    html?: string;
+  }) => {
+    try {
+      const payload = await buildActiveDocPayload(target);
+      const sourceOrBlob = payload.blob || payload.sourceUrl || '';
+      const res = await saveFileToAch1evDeviceFolder(payload.fileName, sourceOrBlob, {
+        promptFolderIfMissing: true,
+        mimeType: payload.mimeType,
+      });
+      setCopyToast(`Saved "${res.fileName}" to ${res.destinationLabel}`);
+      setTimeout(() => setCopyToast(null), 3200);
+    } catch (err: any) {
+      setCopyToast(err?.message || 'Unable to save document to device.');
+      setTimeout(() => setCopyToast(null), 3200);
+    }
+  };
+
+  const handleOpenCloudDriveSave = async (target?: {
+    title: string;
+    pdfUrl?: string;
+    driveFileId?: string;
+    docId?: string;
+    html?: string;
+  }) => {
+    const payload = await buildActiveDocPayload(target);
+    setCloudSaveTarget(payload);
+  };
+
   // Watermark study desk view when main book is closed per user request
   const renderBlankDeskView = () => (
     <div className="themed-workspace-surface relative flex-1 flex flex-col items-center justify-center p-8 bg-transparent overflow-hidden select-none min-h-[480px]">
@@ -882,22 +961,58 @@ export const ReadStudioView: React.FC<ReadStudioViewProps> = ({
             </div>
             <div className="max-h-56 overflow-y-auto custom-scrollbar space-y-1.5 pr-1">
               {recentUploadedDocs.slice(0, 20).map((doc) => (
-                <button
+                <div
                   key={doc.id}
-                  type="button"
-                  onClick={() => handleOpenUploadedDocInRead(doc)}
-                  className="w-full px-3 py-2 rounded-xl border border-stone-200/80 dark:border-[#382518] bg-stone-50/90 hover:bg-amber-50 dark:bg-[#231811] dark:hover:bg-[#322218] flex items-center justify-between gap-2 text-left transition-colors cursor-pointer"
+                  className="w-full px-3 py-2 rounded-xl border border-stone-200/80 dark:border-[#382518] bg-stone-50/90 hover:bg-amber-50 dark:bg-[#231811] dark:hover:bg-[#322218] flex items-center justify-between gap-2 text-left transition-colors"
                 >
-                  <div className="flex items-center gap-2 min-w-0">
+                  <button
+                    type="button"
+                    onClick={() => handleOpenUploadedDocInRead(doc)}
+                    className="flex items-center gap-2 min-w-0 flex-1 text-left cursor-pointer"
+                  >
                     <FileText className="w-3.5 h-3.5 text-[#A47C43] shrink-0" />
                     <span className="text-xs font-semibold text-stone-900 dark:text-stone-100 truncate">
                       {doc.fileName}
                     </span>
+                  </button>
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    <span className="text-[10px] font-mono text-stone-500 hidden sm:inline">
+                      {doc.ext.toUpperCase()} · {doc.sizeLabel}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        void handleSaveDocToDevice({
+                          title: doc.fileName,
+                          pdfUrl: doc.pdfFileUrl || doc.dataUrl || getSessionFileUrl(doc.id),
+                          driveFileId: doc.driveFileId,
+                          docId: doc.id,
+                        })
+                      }
+                      className="px-2 py-1 rounded-lg bg-white dark:bg-[#1a120d] border border-stone-200 dark:border-[#382518] text-[10px] font-bold text-stone-700 dark:text-stone-200 hover:border-[#A47C43] flex items-center gap-1 cursor-pointer"
+                      title="Save to Device (Ach1ev/Documents)"
+                    >
+                      <Download className="w-3 h-3 text-[#A47C43]" />
+                      <span className="hidden sm:inline">Device</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        void handleOpenCloudDriveSave({
+                          title: doc.fileName,
+                          pdfUrl: doc.pdfFileUrl || doc.dataUrl || getSessionFileUrl(doc.id),
+                          driveFileId: doc.driveFileId,
+                          docId: doc.id,
+                        })
+                      }
+                      className="px-2 py-1 rounded-lg bg-[#8f5f2c]/12 border border-[#A47C43]/35 text-[10px] font-bold text-[#7c5321] dark:text-amber-300 hover:bg-[#8f5f2c]/20 flex items-center gap-1 cursor-pointer"
+                      title="Upload to Drive / Cloud Web View"
+                    >
+                      <Cloud className="w-3 h-3" />
+                      <span className="hidden sm:inline">Drive</span>
+                    </button>
                   </div>
-                  <span className="text-[10px] font-mono text-stone-500 shrink-0">
-                    {doc.ext.toUpperCase()} · {doc.sizeLabel}
-                  </span>
-                </button>
+                </div>
               ))}
             </div>
           </div>
@@ -1123,6 +1238,28 @@ export const ReadStudioView: React.FC<ReadStudioViewProps> = ({
           >
             <Type className="w-4 h-4" />
           </button>
+
+          {/* Save to Device & Upload to Drive */}
+          {!isBookClosed && (
+            <>
+              <button
+                type="button"
+                className="read-icon-btn"
+                onClick={() => void handleSaveDocToDevice()}
+                title="Save PDF / Document to Device (Ach1ev/Documents)"
+              >
+                <Download className="w-4 h-4 text-[#A47C43] dark:text-amber-400" />
+              </button>
+              <button
+                type="button"
+                className="read-icon-btn"
+                onClick={() => void handleOpenCloudDriveSave()}
+                title="Upload to Google Drive or open Cloud Drive website"
+              >
+                <Cloud className="w-4 h-4 text-[#A47C43] dark:text-amber-400" />
+              </button>
+            </>
+          )}
 
           {/* Jump to Create Note */}
           {onOpenStudio && (
@@ -2235,6 +2372,15 @@ export const ReadStudioView: React.FC<ReadStudioViewProps> = ({
           </aside>
         </>
       )}
+
+      <CloudDriveSaveModal
+        file={cloudSaveTarget}
+        onClose={() => setCloudSaveTarget(null)}
+        onUploaded={({ webViewLink }) => {
+          setCopyToast(`Uploaded cleanly to Drive (${webViewLink})`);
+          setTimeout(() => setCopyToast(null), 3200);
+        }}
+      />
 
       {/* Toast Notification */}
       {copyToast && (

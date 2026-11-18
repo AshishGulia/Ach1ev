@@ -243,19 +243,6 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
   const handleUploadBookToPersonalDrive = async (e: React.FormEvent) => {
     e.preventDefault();
-    const limits = getPlanLimits();
-    const userDocsCount = getUploadedDocuments().filter((d) => !d.id.startsWith('doc-sample-')).length;
-    if (userDocsCount >= limits.maxDocuments) {
-      openSubscriptionUpgradeModal({
-        title: `Document Upload Limit (${limits.maxDocuments} Files)`,
-        message:
-          limits.planId === 'free'
-            ? 'Free plan supports up to 5 documents. Upgrade to ₹100/mo Scholar Pro for 50 documents.'
-            : 'Scholar Pro supports up to 50 documents. Upgrade to ₹300/mo Master Ultimate for unlimited uploads.',
-        requiredPlanId: limits.planId === 'free' ? 'scholar-pro' : 'master-ultimate',
-      });
-      return;
-    }
     if (!drivePdfFile) {
       setDriveUploadError('Please select a PDF textbook or medical document to upload.');
       return;

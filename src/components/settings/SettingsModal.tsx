@@ -88,6 +88,7 @@ import {
   Menu,
   Timer,
   Clock,
+  ExternalLink,
   Image as ImageIcon,
 } from 'lucide-react';
 
@@ -115,11 +116,9 @@ interface SettingsModalProps {
   onResetSession: () => void;
   activeDesign?: DesignId;
   onSelectDesign?: (design: DesignId) => void;
-  onOpenAIStudioModal?: () => void;
   isWorkspaceView?: boolean;
   initialTab?: SettingsTabId;
   onSyncNow?: () => Promise<void> | void;
-  onLogout?: () => void;
 }
 
 export interface MasterEdition {
@@ -268,11 +267,9 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   onResetSession,
   activeDesign = '1',
   onSelectDesign,
-  onOpenAIStudioModal,
   isWorkspaceView = false,
   initialTab = 'profile',
   onSyncNow,
-  onLogout,
 }) => {
   const {
     user,
@@ -284,7 +281,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     connectGoogleDrive,
     disconnectGoogleDrive,
     openAuthModal,
-    signOut,
   } = useAuth();
 
   const [activeTab, setActiveTab] = useState<SettingsTabId>(initialTab);
@@ -760,15 +756,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     removeCustomLanguage(code);
     setCustomLanguages(getCustomLanguages());
     setSelectedLang(getCurrentLanguage());
-  };
-
-  const handleSettingsLogout = async () => {
-    if (onLogout) {
-      await onLogout();
-    } else {
-      await signOut();
-    }
-    onClose?.();
   };
 
   const handleImportNotesFromApp = (appName: string) => {

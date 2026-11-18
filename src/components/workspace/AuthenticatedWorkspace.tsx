@@ -1585,7 +1585,6 @@ export const AuthenticatedWorkspace: React.FC = () => {
                           isWorkspaceView={true}
                           initialTab={settingsInitialTab}
                           onSyncNow={handleSyncAllNow}
-                          onLogout={signOut}
                           onClose={() => setActiveView('home')}
                           userProfile={userProfile}
                           onUpdateProfile={setUserProfile}
@@ -1733,7 +1732,6 @@ export const AuthenticatedWorkspace: React.FC = () => {
             isOpen={isSettingsOpen}
             initialTab={settingsInitialTab}
             onSyncNow={handleSyncAllNow}
-            onLogout={signOut}
             onClose={() => setIsSettingsOpen(false)}
             userProfile={userProfile}
             onUpdateProfile={setUserProfile}

@@ -35,12 +35,16 @@ import {
   Table2,
   FileSpreadsheet,
   FileImage,
+  UploadCloud,
+  Download,
 } from 'lucide-react';
 import {
   RoundColorColumnsPicker,
   UNIFIED_COLOR_COLUMNS,
 } from '../common/RoundColorColumnsPicker';
 import { WebViewDocumentModal, WebViewDocPayload } from '../common/WebViewDocumentModal';
+import { CloudDriveSaveModal, CloudDriveTargetFile } from '../common/CloudDriveSaveModal';
+import { saveFileToAch1evDeviceFolder } from '../../utils/deviceStorage';
 import { getPlanLimits, openSubscriptionUpgradeModal } from '../../utils/subscriptionLimits';
 
 interface RosterCalendarModalProps {
@@ -193,6 +197,8 @@ export const RosterCalendarModal: React.FC<RosterCalendarModalProps> = ({
     return firstWithTables?.extractedTables || [];
   });
   const [viewingRosterFile, setViewingRosterFile] = useState<UploadedDocumentRecord | null>(null);
+  const [cloudDriveFile, setCloudDriveFile] = useState<CloudDriveTargetFile | null>(null);
+  const [lastScannedDoc, setLastScannedDoc] = useState<UploadedDocumentRecord | null>(null);
 
   useEffect(() => {
     const syncDocs = () => setRecentRosterFiles(getUploadedDocuments());
@@ -418,11 +424,36 @@ export const RosterCalendarModal: React.FC<RosterCalendarModalProps> = ({
         dataUrl,
       });
       registerSessionFileUrl(fallbackDoc.id, localUrl);
+      setLastScannedDoc(fallbackDoc);
       setRecentRosterFiles(getUploadedDocuments());
       setScanStatus(`Saved "${file.name}" to Recent Files. Single-click below to open it.`);
     } finally {
       setIsScanning(false);
     }
+  };
+
+  const handleSaveRosterDocToDevice = async (doc: UploadedDocumentRecord) => {
+    const sourceUrl = getSessionFileUrl(doc.id) || doc.pdfFileUrl || doc.dataUrl;
+    const payload =
+      sourceUrl ||
+      new Blob([doc.extractedText || doc.fileName], { type: 'text/plain;charset=utf-8' });
+    const res = await saveFileToAch1evDeviceFolder(
+      doc.fileName || `${doc.title}.${doc.ext || 'pdf'}`,
+      payload,
+      { mimeType: doc.mimeType || 'application/pdf' }
+    );
+    setScanStatus(`Saved "${res.fileName}" to ${res.destinationLabel}`);
+  };
+
+  const handleUploadRosterDocToDrive = (doc: UploadedDocumentRecord) => {
+    const sourceUrl = getSessionFileUrl(doc.id) || doc.pdfFileUrl || doc.dataUrl;
+    setCloudDriveFile({
+      title: doc.title || doc.fileName,
+      fileName: doc.fileName || `${doc.title}.${doc.ext || 'pdf'}`,
+      mimeType: doc.mimeType || 'application/pdf',
+      sourceUrl,
+      fallbackText: doc.extractedText || doc.fileName,
+    });
   };
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -436,6 +467,7 @@ export const RosterCalendarModal: React.FC<RosterCalendarModalProps> = ({
   const handleOpenRecentRosterFile = (doc: UploadedDocumentRecord) => {
     touchUploadedDocument(doc.id);
     setRecentRosterFiles(getUploadedDocuments());
+    setLastScannedDoc(doc);
     if (doc.extractedTables && doc.extractedTables.length > 0) {
       setScannedTables(doc.extractedTables);
     }
@@ -1407,19 +1439,51 @@ export const RosterCalendarModal: React.FC<RosterCalendarModalProps> = ({
                 Uploaded files appear right below in Recent Files and Library → Recent Files. Click any file to open in Web View.
               </p>
 
-              <button
-                type="button"
-                onClick={() => rosterFileInputRef.current?.click()}
-                disabled={isScanning}
-                className="themed-accent-btn cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-[#A47C43] hover:bg-[#8e6834] text-white rounded-xl text-xs font-semibold shadow-xs transition-colors"
-              >
-                <Upload className="w-4 h-4" />
-                <span>{isScanning ? 'Scanning...' : 'Upload Roster File'}</span>
-              </button>
+              <div className="flex flex-wrap items-center justify-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => rosterFileInputRef.current?.click()}
+                  disabled={isScanning}
+                  className="themed-accent-btn cursor-pointer inline-flex items-center gap-2 px-4 py-2 bg-[#A47C43] hover:bg-[#8e6834] text-white rounded-xl text-xs font-semibold shadow-xs transition-colors"
+                >
+                  <Upload className="w-4 h-4" />
+                  <span>{isScanning ? 'Scanning...' : 'Upload Roster File'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const target = lastScannedDoc || recentRosterFiles[0];
+                    if (target) {
+                      handleUploadRosterDocToDrive(target);
+                    } else {
+                      setCloudDriveFile({
+                        title: 'Roster Upload',
+                        fileName: 'roster-schedule.pdf',
+                        mimeType: 'application/pdf',
+                        fallbackText: 'Upload roster files to your Cloud Drive.',
+                      });
+                    }
+                  }}
+                  className="cursor-pointer inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-stone-300 dark:border-[#3d291b] bg-white dark:bg-[#1e150f] hover:border-[#A47C43] text-stone-800 dark:text-stone-100 text-xs font-semibold transition-colors"
+                >
+                  <UploadCloud className="w-4 h-4 text-[#A47C43]" />
+                  <span>Upload to Drive</span>
+                </button>
+                {(lastScannedDoc || recentRosterFiles[0]) && (
+                  <button
+                    type="button"
+                    onClick={() => void handleSaveRosterDocToDevice(lastScannedDoc || recentRosterFiles[0]!)}
+                    className="cursor-pointer inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl border border-stone-300 dark:border-[#3d291b] bg-white dark:bg-[#1e150f] hover:border-[#A47C43] text-stone-800 dark:text-stone-100 text-xs font-semibold transition-colors"
+                  >
+                    <Download className="w-4 h-4 text-[#A47C43]" />
+                    <span>Save to Device</span>
+                  </button>
+                )}
+              </div>
             </div>
 
             {scanStatus && (
-              <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl text-xs text-amber-900 dark:text-amber-200 flex items-center justify-between gap-2">
+              <div className="p-3 bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-800 rounded-xl text-xs text-amber-900 dark:text-amber-200 flex flex-wrap items-center justify-between gap-2">
                 <div className="flex items-center gap-2">
                   {isScanning ? (
                     <RefreshCw className="w-4 h-4 animate-spin text-amber-600" />
@@ -1429,13 +1493,35 @@ export const RosterCalendarModal: React.FC<RosterCalendarModalProps> = ({
                   <span>{scanStatus}</span>
                 </div>
                 {!isScanning && (
-                  <button
-                    type="button"
-                    onClick={() => setViewMode('table')}
-                    className="px-2.5 py-1 rounded-lg bg-[#A47C43] text-white text-[11px] font-semibold shrink-0 cursor-pointer"
-                  >
-                    View Extracted Table →
-                  </button>
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    {(lastScannedDoc || recentRosterFiles[0]) && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => handleUploadRosterDocToDrive(lastScannedDoc || recentRosterFiles[0]!)}
+                          className="px-2.5 py-1 rounded-lg bg-white dark:bg-[#241811] border border-amber-400/50 text-amber-900 dark:text-amber-200 text-[11px] font-semibold cursor-pointer inline-flex items-center gap-1"
+                        >
+                          <UploadCloud className="w-3 h-3" />
+                          <span>Upload to Drive</span>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => void handleSaveRosterDocToDevice(lastScannedDoc || recentRosterFiles[0]!)}
+                          className="px-2.5 py-1 rounded-lg bg-white dark:bg-[#241811] border border-amber-400/50 text-amber-900 dark:text-amber-200 text-[11px] font-semibold cursor-pointer inline-flex items-center gap-1"
+                        >
+                          <Download className="w-3 h-3" />
+                          <span>Save to Device</span>
+                        </button>
+                      </>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setViewMode('table')}
+                      className="px-2.5 py-1 rounded-lg bg-[#A47C43] text-white text-[11px] font-semibold shrink-0 cursor-pointer"
+                    >
+                      View Extracted Table →
+                    </button>
+                  </div>
                 )}
               </div>
             )}
@@ -1449,7 +1535,7 @@ export const RosterCalendarModal: React.FC<RosterCalendarModalProps> = ({
                     <span>Recent Files ({recentRosterFiles.length})</span>
                   </h4>
                   <span className="text-[11px] text-stone-500">
-                    Single-click any file to view its extracted tables &amp; content · Use top ribbon&apos;s Roster File AI Scan to add more
+                    Single-click any file to open · Save to Device or Upload to Drive anytime
                   </span>
                 </div>
 
@@ -1459,9 +1545,8 @@ export const RosterCalendarModal: React.FC<RosterCalendarModalProps> = ({
                     const isSheet = extLow === 'xls' || extLow === 'xlsx' || extLow === 'csv';
                     const isImg = extLow === 'png' || extLow === 'jpg' || extLow === 'jpeg' || extLow === 'webp';
                     return (
-                      <button
+                      <div
                         key={doc.id}
-                        type="button"
                         onClick={() => handleOpenRecentRosterFile(doc)}
                         className="text-left p-3.5 rounded-2xl border border-stone-200 dark:border-[#382518] bg-white dark:bg-[#1a120d] hover:border-[#A47C43] shadow-2xs hover:shadow-md transition-all cursor-pointer flex items-start gap-3 group"
                       >
@@ -1493,15 +1578,36 @@ export const RosterCalendarModal: React.FC<RosterCalendarModalProps> = ({
                               </span>
                             )}
                           </div>
+                          <div
+                            className="flex flex-wrap items-center gap-1.5 mt-2 pt-2 border-t border-stone-200/60 dark:border-[#322116]"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <button
+                              type="button"
+                              onClick={() => void handleSaveRosterDocToDevice(doc)}
+                              className="px-2 py-1 rounded-lg bg-stone-100 dark:bg-[#251a12] hover:bg-stone-200 dark:hover:bg-[#322318] text-[10.5px] font-semibold inline-flex items-center gap-1 cursor-pointer"
+                            >
+                              <Download className="w-3 h-3 text-[#A47C43]" />
+                              <span>Save to Device</span>
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleUploadRosterDocToDrive(doc)}
+                              className="px-2 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-900 dark:text-amber-200 text-[10.5px] font-semibold inline-flex items-center gap-1 cursor-pointer"
+                            >
+                              <UploadCloud className="w-3 h-3" />
+                              <span>Upload to Drive</span>
+                            </button>
+                          </div>
                         </div>
-                      </button>
+                      </div>
                     );
                   })}
                 </div>
               </div>
             )}
 
-            {/* Web View Window Modal with Share, Save to Device, Mark Favourite top ribbon */}
+            {/* Web View Window Modal with Share, Save to Device, Upload to Drive, Mark Favourite top ribbon */}
             <WebViewDocumentModal
               doc={
                 viewingRosterFile
@@ -1526,6 +1632,12 @@ export const RosterCalendarModal: React.FC<RosterCalendarModalProps> = ({
                 setViewingRosterFile(null);
                 setViewMode('table');
               }}
+            />
+
+            <CloudDriveSaveModal
+              file={cloudDriveFile}
+              onClose={() => setCloudDriveFile(null)}
+              onUploaded={() => setScanStatus('Uploaded file cleanly to Google Drive.')}
             />
           </div>
         )}

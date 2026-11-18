@@ -95,6 +95,9 @@ import {
   SlidersHorizontal,
   LayoutTemplate,
   GripVertical,
+  Camera,
+  Eraser,
+  SquarePen,
 } from 'lucide-react';
 import { Notebook, DesignId, MedicalBook } from '../../types';
 import { AUTO_NOTE_TEMPLATES, AutoNoteTemplate } from '../../data/noteTemplates';
@@ -107,6 +110,8 @@ import {
   UNIFIED_COLOR_COLUMNS,
   UNIFIED_HIGHLIGHT_COLUMNS,
 } from '../common/RoundColorColumnsPicker';
+import { saveFileToAch1evDeviceFolder } from '../../utils/deviceStorage';
+import { CloudDriveSaveModal, CloudDriveTargetFile } from '../common/CloudDriveSaveModal';
 
 export interface AtelierCreateNoteProps {
   notebook?: Notebook;
@@ -148,6 +153,7 @@ interface VideoWindowState {
   zIndex: number;
   isPlaying: boolean;
   currentTime: number;
+  initialStartTime?: number;
   playbackRate: number;
   isMinimized: boolean;
   isMaximized: boolean;
@@ -363,11 +369,11 @@ const NOTE_FONT_OPTIONS: Array<{
 ];
 
 const normalizeNoteFontKey = (raw: string): string => {
-  if (!raw) return 'domine';
+  if (!raw || raw === 'baskerville') return 'urbanist';
   if (raw === 'sans' || raw === 'helvetica' || raw === 'inter' || raw === 'roboto' || raw === 'open-sans' || raw === 'lato' || raw === 'montserrat' || raw === 'source-sans-3' || raw === 'arial' || raw === 'futura') {
     return 'urbanist';
   }
-  if (raw === 'serif' || raw === 'baskerville' || raw === 'merriweather' || raw === 'georgia' || raw === 'garamond' || raw === 'playfair' || raw === 'palatino' || raw === 'lora' || raw === 'cinzel') {
+  if (raw === 'serif' || raw === 'merriweather' || raw === 'georgia' || raw === 'garamond' || raw === 'playfair' || raw === 'palatino' || raw === 'lora' || raw === 'cinzel') {
     return 'domine';
   }
   if (raw === 'bodoni') return 'bodoni-moda';
@@ -375,7 +381,7 @@ const normalizeNoteFontKey = (raw: string): string => {
     return 'caveat-brush';
   }
   const matched = NOTE_FONT_OPTIONS.some((f) => f.key === raw);
-  return matched ? raw : 'domine';
+  return matched ? raw : 'urbanist';
 };
 
 const formatTodayDate = () =>
@@ -583,9 +589,11 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
   }, [paperColor]);
   const [fontStyle, setFontStyle] = useState<string>(() => {
     try {
-      return localStorage.getItem('medden_note_font_style') || 'baskerville';
+      const saved = localStorage.getItem('medden_note_font_style');
+      if (!saved || saved === 'baskerville') return 'urbanist';
+      return saved;
     } catch {
-      return 'baskerville';
+      return 'urbanist';
     }
   });
   const [isLinkModalOpen, setIsLinkModalOpen] = useState(false);
@@ -987,6 +995,129 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
   const [hoverSheetEdge, setHoverSheetEdge] = useState<'left' | 'right' | 'bottom' | 'bottom-right' | 'bottom-left' | null>(null);
   const [isDictating, setIsDictating] = useState<boolean>(false);
   const recognitionRef = useRef<any>(null);
+
+  // Pencil / Tablet Stylus auto-detect + Turn Off Pencil (Typing Only) + Ink Strokes
+  interface InkStrokeItem {
+    id: string;
+    points: Array<[number, number]>;
+    color: string;
+    width: number;
+  }
+  interface VectorScreenshotCard {
+    id: string;
+    title: string;
+    svgDataUrl: string;
+    width: number;
+    height: number;
+    strokes: InkStrokeItem[];
+  }
+  interface NoteVoiceClip {
+    id: string;
+    title: string;
+    durationSec: number;
+    dataUrl: string;
+    createdAt: string;
+  }
+
+  const MAX_VOICE_SECONDS = 900; // 15 min max voice note
+  const [isPencilDisabled, setIsPencilDisabled] = useState<boolean>(() => {
+    try {
+      return localStorage.getItem('achiev_note_pencil_disabled_v1') === '1';
+    } catch {
+      return false;
+    }
+  });
+  const [isPencilManualDraw, setIsPencilManualDraw] = useState<boolean>(false);
+  const [activeInkColor, setActiveInkColor] = useState<string>('#23160C');
+  const inkStorageKey = `achiev_note_ink_v1_${notebook?.id || 'draft'}::${activePageIndex}`;
+  const snapsStorageKey = `achiev_note_snaps_v1_${notebook?.id || 'draft'}::${activePageIndex}`;
+  const voiceStorageKey = `achiev_note_voice_v1_${notebook?.id || 'draft'}::${activePageIndex}`;
+
+  const [sheetInkStrokes, setSheetInkStrokes] = useState<InkStrokeItem[]>(() => {
+    try {
+      const raw = localStorage.getItem(inkStorageKey);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [liveSheetStroke, setLiveSheetStroke] = useState<InkStrokeItem | null>(null);
+  const sheetRef = useRef<HTMLElement | null>(null);
+
+  const [paperVectorSnaps, setPaperVectorSnaps] = useState<VectorScreenshotCard[]>(() => {
+    try {
+      const raw = localStorage.getItem(snapsStorageKey);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [liveSnapStroke, setLiveSnapStroke] = useState<{ snapId: string; stroke: InkStrokeItem } | null>(null);
+  const [capturedVectorPreview, setCapturedVectorPreview] = useState<{
+    title: string;
+    svgDataUrl: string;
+    svgMarkup: string;
+    width: number;
+    height: number;
+  } | null>(null);
+
+  const [voiceNotes, setVoiceNotes] = useState<NoteVoiceClip[]>(() => {
+    try {
+      const raw = localStorage.getItem(voiceStorageKey);
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [isRecordingVoice, setIsRecordingVoice] = useState<boolean>(false);
+  const [voiceRecSeconds, setVoiceRecSeconds] = useState<number>(0);
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const mediaStreamRef = useRef<MediaStream | null>(null);
+  const audioChunksRef = useRef<Blob[]>([]);
+  const voiceTimerRef = useRef<any>(null);
+  const [cloudSaveTarget, setCloudSaveTarget] = useState<CloudDriveTargetFile | null>(null);
+
+  const ytIframeRefs = useRef<Record<string, HTMLIFrameElement | null>>({});
+  const lastYtDeliveryAtRef = useRef<Record<string, number>>({});
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('achiev_note_pencil_disabled_v1', isPencilDisabled ? '1' : '0');
+    } catch {}
+  }, [isPencilDisabled]);
+
+  useEffect(() => {
+    try {
+      const rawInk = localStorage.getItem(inkStorageKey);
+      setSheetInkStrokes(rawInk ? JSON.parse(rawInk) : []);
+      const rawSnaps = localStorage.getItem(snapsStorageKey);
+      setPaperVectorSnaps(rawSnaps ? JSON.parse(rawSnaps) : []);
+      const rawVoice = localStorage.getItem(voiceStorageKey);
+      setVoiceNotes(rawVoice ? JSON.parse(rawVoice) : []);
+    } catch {
+      setSheetInkStrokes([]);
+      setPaperVectorSnaps([]);
+      setVoiceNotes([]);
+    }
+  }, [inkStorageKey, snapsStorageKey, voiceStorageKey]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(inkStorageKey, JSON.stringify(sheetInkStrokes));
+    } catch {}
+  }, [inkStorageKey, sheetInkStrokes]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(snapsStorageKey, JSON.stringify(paperVectorSnaps));
+    } catch {}
+  }, [snapsStorageKey, paperVectorSnaps]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(voiceStorageKey, JSON.stringify(voiceNotes));
+    } catch {}
+  }, [voiceStorageKey, voiceNotes]);
   const [isAttachOpen, setIsAttachOpen] = useState(false);
   const [isAttachmentsDrawerOpen, setIsAttachmentsDrawerOpen] = useState(false);
   const [attachType, setAttachType] = useState<'youtube' | 'web' | 'pdf' | 'image' | 'audio'>('youtube');
@@ -1355,13 +1486,89 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
     }
     pushHistorySnapshot();
     restoreRange();
-    try {
-      document.execCommand('styleWithCSS', false, 'true');
-    } catch {}
-    document.execCommand(cmd, false, val);
+    if (cmd === 'bold' || cmd === 'italic' || cmd === 'underline' || cmd === 'strikeThrough') {
+      try {
+        document.execCommand('styleWithCSS', false, 'false');
+      } catch {}
+    } else {
+      try {
+        document.execCommand('styleWithCSS', false, 'true');
+      } catch {}
+    }
+    const ok = document.execCommand(cmd, false, val);
+    // Range fallback if browser execCommand failed on non-collapsed range
+    if (!ok && (cmd === 'bold' || cmd === 'italic')) {
+      const sel = window.getSelection();
+      if (sel && sel.rangeCount > 0 && !sel.isCollapsed) {
+        const range = sel.getRangeAt(0);
+        const wrapper = document.createElement(cmd === 'bold' ? 'strong' : 'em');
+        try {
+          range.surroundContents(wrapper);
+        } catch {
+          const frag = range.extractContents();
+          wrapper.appendChild(frag);
+          range.insertNode(wrapper);
+        }
+      }
+    }
     saveRange();
     pushHistorySnapshot();
     triggerSave();
+  };
+
+  const handleStepNoteFontSize = (delta: number) => {
+    const sel = window.getSelection();
+    const hasTextSel =
+      !!sel &&
+      !sel.isCollapsed &&
+      !!editorRef.current &&
+      editorRef.current.contains(sel.anchorNode) &&
+      (sel.toString() || '').trim().length > 0;
+
+    if (hasTextSel && sel) {
+      pushHistorySnapshot();
+      const range = sel.getRangeAt(0);
+      const anchorEl =
+        sel.anchorNode?.nodeType === 1
+          ? (sel.anchorNode as HTMLElement)
+          : sel.anchorNode?.parentElement;
+      const curPx = anchorEl ? parseFloat(window.getComputedStyle(anchorEl).fontSize || '') || editorFontSizePx : editorFontSizePx;
+      const nextSelPx = Math.max(11, Math.min(36, Math.round((curPx + delta) * 10) / 10));
+      const span = document.createElement('span');
+      span.style.fontSize = `${nextSelPx}px`;
+      try {
+        const frag = range.extractContents();
+        frag.querySelectorAll('[style*="font-size"]').forEach((child) => {
+          (child as HTMLElement).style.fontSize = '';
+        });
+        span.appendChild(frag);
+        range.insertNode(span);
+        const nr = document.createRange();
+        nr.selectNodeContents(span);
+        sel.removeAllRanges();
+        sel.addRange(nr);
+        saveRange();
+      } catch {}
+      pushHistorySnapshot();
+      triggerSave();
+      showToast(`Selected text: ${Math.round(nextSelPx)}px`);
+      return;
+    }
+
+    const nextSize = Math.max(11, Math.min(30, +(editorFontSizePx + delta).toFixed(1)));
+    setEditorFontSizePx(nextSize);
+    if (editorRef.current) {
+      // Scale or clear any baked-in inline pixel sizes so every line responds to A- / A+
+      editorRef.current.querySelectorAll('[style*="font-size"]').forEach((el) => {
+        const htmlEl = el as HTMLElement;
+        const inlineSz = parseFloat(htmlEl.style.fontSize || '');
+        if (!Number.isNaN(inlineSz) && inlineSz > 0) {
+          htmlEl.style.fontSize = `${Math.max(11, Math.min(36, Math.round(inlineSz + delta)))}px`;
+        }
+      });
+    }
+    triggerSave();
+    showToast(`Text size: ${Math.round(nextSize)}px`);
   };
 
   const insertHtmlAtCursor = (html: string) => {
@@ -1641,19 +1848,91 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
     showToast(`Opened ${doc?.short || doc?.title || 'document'}`);
   };
 
-  // Video Management
+  // Video Management (Live YouTube Timestamp Sync & PostMessage Controls)
+  const sendYoutubeCommand = useCallback((winId: string, func: string, args: unknown[] = []) => {
+    const iframe = ytIframeRefs.current[winId];
+    if (!iframe?.contentWindow) return;
+    try {
+      iframe.contentWindow.postMessage(
+        JSON.stringify({ event: 'command', func, args, id: winId }),
+        '*'
+      );
+    } catch {}
+  }, []);
+
+  useEffect(() => {
+    const handleYtMessage = (ev: MessageEvent) => {
+      if (typeof ev.origin !== 'string' || (!ev.origin.includes('youtube.com') && !ev.origin.includes('youtube-nocookie.com'))) {
+        return;
+      }
+      let data: any = ev.data;
+      if (typeof data === 'string') {
+        try {
+          data = JSON.parse(data);
+        } catch {
+          return;
+        }
+      }
+      if (!data || typeof data !== 'object') return;
+      const winId = typeof data.id === 'string' ? data.id : undefined;
+      if (data.event === 'infoDelivery' && data.info) {
+        const cTime = typeof data.info.currentTime === 'number' ? data.info.currentTime : null;
+        const pState = typeof data.info.playerState === 'number' ? data.info.playerState : null;
+        setVideoWindows((prev) =>
+          prev.map((v) => {
+            const matchById = winId ? v.id === winId : false;
+            const matchBySource =
+              !matchById && ytIframeRefs.current[v.id]?.contentWindow === ev.source;
+            if (!matchById && !matchBySource) return v;
+            lastYtDeliveryAtRef.current[v.id] = Date.now();
+            return {
+              ...v,
+              currentTime: cTime !== null ? cTime : v.currentTime,
+              isPlaying: pState === 1 ? true : pState === 2 || pState === 0 ? false : v.isPlaying,
+            };
+          })
+        );
+      }
+    };
+    window.addEventListener('message', handleYtMessage);
+    return () => window.removeEventListener('message', handleYtMessage);
+  }, []);
+
+  // Fallback 1s live clock tick when YouTube video is playing so Timestamp stays accurate
+  const hasPlayingVideo = videoWindows.some((v) => v.isPlaying);
+  useEffect(() => {
+    if (!hasPlayingVideo) return;
+    const timer = window.setInterval(() => {
+      const now = Date.now();
+      setVideoWindows((prev) =>
+        prev.map((v) => {
+          if (!v.isPlaying) return v;
+          const lastSync = lastYtDeliveryAtRef.current[v.id] || 0;
+          if (now - lastSync < 1200) return v;
+          return { ...v, currentTime: v.currentTime + (v.playbackRate || 1) };
+        })
+      );
+    }, 1000);
+    return () => window.clearInterval(timer);
+  }, [hasPlayingVideo]);
+
   const openVideoWindow = (resource: AttachedResource, startTime = 0) => {
     const vid = resource.vid || 'jNQXAC9IVRw';
     setVideoWindows((prev) => {
       const existing = prev.find((v) => v.id === resource.id);
       if (existing) {
         topZIndexRef.current += 1;
+        const targetSec = startTime > 0 ? startTime : existing.currentTime;
+        if (startTime >= 0) {
+          sendYoutubeCommand(existing.id, 'seekTo', [targetSec, true]);
+          sendYoutubeCommand(existing.id, 'playVideo', []);
+        }
         return prev.map((v) =>
           v.id === resource.id
             ? {
                 ...v,
                 isMinimized: false,
-                currentTime: startTime || v.currentTime,
+                currentTime: targetSec,
                 isPlaying: true,
                 zIndex: topZIndexRef.current,
               }
@@ -1677,6 +1956,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
           zIndex: topZIndexRef.current,
           isPlaying: true,
           currentTime: startTime,
+          initialStartTime: startTime,
           playbackRate: 1,
           isMinimized: false,
           isMaximized: false,
@@ -1713,18 +1993,30 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
 
   // Video Window Controls (Bottom-docked)
   const togglePlayVideo = (id: string) => {
-    setVideoWindows((prev) => prev.map((v) => (v.id === id ? { ...v, isPlaying: !v.isPlaying } : v)));
+    setVideoWindows((prev) =>
+      prev.map((v) => {
+        if (v.id !== id) return v;
+        const nextPlaying = !v.isPlaying;
+        sendYoutubeCommand(id, nextPlaying ? 'playVideo' : 'pauseVideo', []);
+        return { ...v, isPlaying: nextPlaying };
+      })
+    );
   };
 
   const seekVideo = (id: string, delta: number) => {
     setVideoWindows((prev) =>
-      prev.map((v) => (v.id === id ? { ...v, currentTime: Math.max(0, v.currentTime + delta) } : v))
+      prev.map((v) => {
+        if (v.id !== id) return v;
+        const nextSec = Math.max(0, v.currentTime + delta);
+        sendYoutubeCommand(id, 'seekTo', [nextSec, true]);
+        return { ...v, currentTime: nextSec };
+      })
     );
   };
 
   const stampVideoTimestamp = (vid: VideoWindowState) => {
     const formatted = formatTime(vid.currentTime);
-    const stampHtml = `<button class="ts" contenteditable="false" data-res="${vid.id}" data-t="${Math.floor(
+    const stampHtml = `<button class="ts" contenteditable="false" data-res="${vid.id}" data-vid="${vid.vid}" data-t="${Math.floor(
       vid.currentTime
     )}"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-play"><polygon points="6 3 20 12 6 21 6 3"/></svg>${formatted}</button>&nbsp;`;
     insertHtmlAtCursor(stampHtml);
@@ -2814,9 +3106,49 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
     try {
       document.execCommand('styleWithCSS', false, 'true');
     } catch {}
-    const ok = document.execCommand('hiliteColor', false, color === 'transparent' ? 'rgba(0,0,0,0)' : color);
-    if (!ok) {
-      document.execCommand('backColor', false, color === 'transparent' ? 'rgba(0,0,0,0)' : color);
+    const targetCol = color === 'transparent' ? 'transparent' : color;
+    const sel = window.getSelection();
+    let appliedCustom = false;
+    if (sel && sel.rangeCount > 0 && !sel.isCollapsed && editorRef.current?.contains(sel.anchorNode)) {
+      const range = sel.getRangeAt(0);
+      if (color === 'transparent') {
+        editorRef.current.querySelectorAll('mark[data-an-hl], span[style*="background"]').forEach((el) => {
+          if (range.intersectsNode(el)) {
+            (el as HTMLElement).style.backgroundColor = '';
+            if (el.tagName === 'MARK') {
+              const p = el.parentNode;
+              if (p) {
+                while (el.firstChild) p.insertBefore(el.firstChild, el);
+                p.removeChild(el);
+              }
+            }
+          }
+        });
+        appliedCustom = true;
+      } else {
+        try {
+          const mark = document.createElement('mark');
+          mark.setAttribute('data-an-hl', 'true');
+          mark.style.backgroundColor = targetCol;
+          mark.style.color = '#1b130c';
+          const frag = range.extractContents();
+          mark.appendChild(frag);
+          range.insertNode(mark);
+          const nr = document.createRange();
+          nr.selectNodeContents(mark);
+          sel.removeAllRanges();
+          sel.addRange(nr);
+          appliedCustom = true;
+        } catch {
+          appliedCustom = false;
+        }
+      }
+    }
+    if (!appliedCustom) {
+      const ok = document.execCommand('hiliteColor', false, color === 'transparent' ? 'rgba(0,0,0,0)' : color);
+      if (!ok) {
+        document.execCommand('backColor', false, color === 'transparent' ? 'rgba(0,0,0,0)' : color);
+      }
     }
     saveRange();
     pushHistorySnapshot();
@@ -2824,11 +3156,306 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
     setOpenColorMenu(null);
   };
 
-  // Cleanup speech recognition on unmount
+  // Export edited note directly to Ach1ev/Documents on device (Windows, macOS, Android, iOS)
+  const buildNoteHtmlExportBlob = () => {
+    const safeTitle = (noteTitle || 'Untitled_Note').trim();
+    const htmlBody = editorRef.current?.innerHTML || '';
+    const snapsHtml = paperVectorSnaps
+      .map(
+        (s) =>
+          `<div style="margin:18px 0;border:1px solid #d6c7b0;border-radius:10px;overflow:hidden;"><div style="padding:6px 10px;background:#f8f3ea;font-weight:700;font-size:12px;">${s.title}</div><div style="position:relative;"><img src="${s.svgDataUrl}" style="width:100%;display:block;"/><svg viewBox="0 0 ${s.width} ${s.height}" style="position:absolute;inset:0;width:100%;height:100%;">${s.strokes
+            .map((st) => {
+              const d = st.points.map((pt, i) => `${i === 0 ? 'M' : 'L'}${pt[0].toFixed(1)},${pt[1].toFixed(1)}`).join(' ');
+              return `<path d="${d}" fill="none" stroke="${st.color}" stroke-width="${st.width}" stroke-linecap="round" stroke-linejoin="round"/>`;
+            })
+            .join('')}</svg></div></div>`
+      )
+      .join('');
+    const fullDoc = `<!doctype html><html><head><meta charset="utf-8"/><title>${safeTitle}</title><style>body{font-family:Urbanist,sans-serif;max-width:820px;margin:40px auto;padding:24px;color:#23160c;background:#fffdf8;line-height:1.65;}h1{margin-bottom:8px;}</style></head><body><h1>${safeTitle}</h1>${htmlBody}${snapsHtml}</body></html>`;
+    return {
+      fileName: `${safeTitle.replace(/[^a-zA-Z0-9._-]+/g, '_')}_Achiev.html`,
+      blob: new Blob([fullDoc], { type: 'text/html;charset=utf-8' }),
+    };
+  };
+
+  const handleSaveEditedNoteToDevice = async () => {
+    const { fileName, blob } = buildNoteHtmlExportBlob();
+    const res = await saveFileToAch1evDeviceFolder(fileName, blob, {
+      promptFolderIfMissing: true,
+      mimeType: 'text/html',
+    });
+    showToast(`Saved "${res.fileName}" to ${res.destinationLabel}`);
+  };
+
+  // Book Pane Vector SVG Screenshot Capture + Copy to Paper
+  const handleCaptureBookVectorScreenshot = () => {
+    const targetPane = visiblePanes[0];
+    if (!targetPane) {
+      showToast('Open a book beside your note first to take a screenshot');
+      return;
+    }
+    const doc = docsList.find((d) => d.id === targetPane.docId);
+    const bodyEl = docBodyRefs.current[targetPane.id];
+    const w = 720;
+    const h = 450;
+    const escXml = (s: string) =>
+      s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+    const titleStr = doc?.title || targetPane.tag || 'Open Book';
+    const rawText = (bodyEl?.innerText || '').trim();
+    const lines = rawText
+      ? rawText
+          .split(/\n+/)
+          .map((l) => l.trim())
+          .filter(Boolean)
+          .slice(0, 14)
+      : [
+          `Source: ${titleStr}`,
+          doc?.url ? `Document URL: ${doc.url}` : 'Side-by-side textbook viewport snapshot',
+          'Vector capture ready — annotate directly with stylus or pencil!',
+        ];
+
+    const wrappedLines: string[] = [];
+    lines.forEach((line) => {
+      let cur = line;
+      while (cur.length > 82 && wrappedLines.length < 18) {
+        wrappedLines.push(cur.slice(0, 82));
+        cur = cur.slice(82);
+      }
+      if (wrappedLines.length < 18) wrappedLines.push(cur);
+    });
+
+    const textElements = wrappedLines
+      .map(
+        (ln, i) =>
+          `<text x="28" y="${96 + i * 20}" font-family="Urbanist, sans-serif" font-size="13" fill="#2b1e14">${escXml(ln)}</text>`
+      )
+      .join('');
+
+    const svgMarkup = `<svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
+  <rect x="0" y="0" width="${w}" height="${h}" rx="14" fill="#fdfaf3" stroke="#b8975a" stroke-width="2"/>
+  <rect x="0" y="0" width="${w}" height="46" rx="14" fill="#f2e6d0"/>
+  <rect x="0" y="34" width="${w}" height="12" fill="#f2e6d0"/>
+  <line x1="0" y1="46" x2="${w}" y2="46" stroke="#d6c096" stroke-width="1.5"/>
+  <circle cx="24" cy="23" r="6" fill="#a47c43"/>
+  <text x="40" y="28" font-family="Urbanist, sans-serif" font-size="14" font-weight="700" fill="#3a2414">${escXml(titleStr.slice(0, 64))}</text>
+  <text x="${w - 24}" y="27" text-anchor="end" font-family="monospace" font-size="11" fill="#7c5a32">VECTOR SVG</text>
+  ${textElements}
+  <line x1="24" y1="${h - 28}" x2="${w - 24}" y2="${h - 28}" stroke="#e7dac2" stroke-width="1"/>
+  <text x="28" y="${h - 11}" font-family="Urbanist, sans-serif" font-size="10.5" fill="#7c5a32">Captured cleanly in vector SVG — write notes or stylus annotations right on top</text>
+</svg>`;
+
+    const svgDataUrl = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgMarkup)}`;
+    setCapturedVectorPreview({
+      title: titleStr,
+      svgDataUrl,
+      svgMarkup,
+      width: w,
+      height: h,
+    });
+  };
+
+  const handleCopyVectorScreenshotToPaper = () => {
+    if (!capturedVectorPreview) return;
+    const newCard: VectorScreenshotCard = {
+      id: `vsnap-${Date.now()}`,
+      title: capturedVectorPreview.title,
+      svgDataUrl: capturedVectorPreview.svgDataUrl,
+      width: capturedVectorPreview.width,
+      height: capturedVectorPreview.height,
+      strokes: [],
+    };
+    setPaperVectorSnaps((prev) => [...prev, newCard]);
+    setCapturedVectorPreview(null);
+    triggerSave();
+    showToast('Vector screenshot copied onto paper — write over it anytime with pencil!');
+  };
+
+  // Voice Note Recorder (Max 15 Minutes = 900 Seconds)
+  const stopVoiceNoteRecording = useCallback((limitReached = false) => {
+    if (voiceTimerRef.current) {
+      clearInterval(voiceTimerRef.current);
+      voiceTimerRef.current = null;
+    }
+    try {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+        mediaRecorderRef.current.stop();
+      }
+    } catch {}
+    setIsRecordingVoice(false);
+    if (limitReached) {
+      showToast('Reached 15:00 max duration — voice note saved cleanly!');
+    }
+  }, [showToast]);
+
+  const startVoiceNoteRecording = async () => {
+    if (isRecordingVoice) {
+      stopVoiceNoteRecording(false);
+      return;
+    }
+    if (typeof navigator === 'undefined' || !navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') {
+      showToast('Microphone recording is not supported in this browser');
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      mediaStreamRef.current = stream;
+      audioChunksRef.current = [];
+      const mr = new MediaRecorder(stream);
+      mediaRecorderRef.current = mr;
+      const startedAt = Date.now();
+      mr.ondataavailable = (ev) => {
+        if (ev.data && ev.data.size > 0) {
+          audioChunksRef.current.push(ev.data);
+        }
+      };
+      mr.onstop = () => {
+        const blob = new Blob(audioChunksRef.current, { type: mr.mimeType || 'audio/webm' });
+        const elapsed = Math.min(MAX_VOICE_SECONDS, Math.max(1, Math.round((Date.now() - startedAt) / 1000)));
+        stream.getTracks().forEach((t) => t.stop());
+        mediaStreamRef.current = null;
+
+        const saveClipWithUrl = (dataUrl: string) => {
+          const clip: NoteVoiceClip = {
+            id: `vnote-${Date.now()}`,
+            title: `Voice Note ${voiceNotes.length + 1}`,
+            durationSec: elapsed,
+            dataUrl,
+            createdAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          };
+          setVoiceNotes((prev) => [...prev, clip]);
+          setResources((prev) => [
+            ...prev,
+            {
+              id: clip.id,
+              type: 'audio',
+              title: clip.title,
+              url: dataUrl,
+              meta: `Voice (${formatTime(elapsed)} / 15:00 max)`,
+            },
+          ]);
+          triggerSave();
+          showToast(`Voice note saved (${formatTime(elapsed)})`);
+        };
+
+        const reader = new FileReader();
+        reader.onload = () => {
+          if (typeof reader.result === 'string') {
+            saveClipWithUrl(reader.result);
+          } else {
+            saveClipWithUrl(URL.createObjectURL(blob));
+          }
+        };
+        reader.onerror = () => saveClipWithUrl(URL.createObjectURL(blob));
+        reader.readAsDataURL(blob);
+      };
+
+      mr.start(500);
+      setVoiceRecSeconds(0);
+      setIsRecordingVoice(true);
+      voiceTimerRef.current = setInterval(() => {
+        setVoiceRecSeconds((prev) => {
+          const next = prev + 1;
+          if (next >= MAX_VOICE_SECONDS) {
+            stopVoiceNoteRecording(true);
+            return MAX_VOICE_SECONDS;
+          }
+          return next;
+        });
+      }, 1000);
+      showToast('Recording voice note (max 15:00)...');
+    } catch {
+      showToast('Allow microphone permission to record voice notes');
+    }
+  };
+
+  // Sheet & Screenshot SVG Stylus / Pencil Stroke Capture
+  const startSheetInkDraw = (e: React.PointerEvent<Element>) => {
+    if (isPencilDisabled) return;
+    const isStylus = e.pointerType === 'pen';
+    if (!isStylus && !isPencilManualDraw) return;
+    const sheetEl = sheetRef.current;
+    if (!sheetEl) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const rect = sheetEl.getBoundingClientRect();
+    const toPoint = (ev: PointerEvent): [number, number] => [
+      Math.max(0, Math.round((ev.clientX - rect.left) * 10) / 10),
+      Math.max(0, Math.round((ev.clientY - rect.top) * 10) / 10),
+    ];
+    let currentStroke: InkStrokeItem = {
+      id: `ink-${Date.now()}`,
+      points: [toPoint(e.nativeEvent)],
+      color: activeInkColor,
+      width: isStylus ? 2.4 : 2.8,
+    };
+    setLiveSheetStroke(currentStroke);
+
+    const onMove = (ev: PointerEvent) => {
+      const pt = toPoint(ev);
+      currentStroke = { ...currentStroke, points: [...currentStroke.points, pt] };
+      setLiveSheetStroke(currentStroke);
+    };
+    const onUp = () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      if (currentStroke.points.length >= 2) {
+        setSheetInkStrokes((prev) => [...prev, currentStroke]);
+      }
+      setLiveSheetStroke(null);
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+  };
+
+  const startSnapInkDraw = (snap: VectorScreenshotCard, e: React.PointerEvent<SVGSVGElement>) => {
+    if (isPencilDisabled) return;
+    const isStylus = e.pointerType === 'pen';
+    if (!isStylus && !isPencilManualDraw) return;
+    e.preventDefault();
+    e.stopPropagation();
+    const svgEl = e.currentTarget;
+    const rect = svgEl.getBoundingClientRect();
+    const scaleX = snap.width / Math.max(1, rect.width);
+    const scaleY = snap.height / Math.max(1, rect.height);
+    const toPt = (ev: PointerEvent): [number, number] => [
+      Math.max(0, Math.min(snap.width, Math.round((ev.clientX - rect.left) * scaleX * 10) / 10)),
+      Math.max(0, Math.min(snap.height, Math.round((ev.clientY - rect.top) * scaleY * 10) / 10)),
+    ];
+    let stroke: InkStrokeItem = {
+      id: `sink-${Date.now()}`,
+      points: [toPt(e.nativeEvent)],
+      color: activeInkColor,
+      width: 2.5,
+    };
+    setLiveSnapStroke({ snapId: snap.id, stroke });
+    const onMove = (ev: PointerEvent) => {
+      stroke = { ...stroke, points: [...stroke.points, toPt(ev)] };
+      setLiveSnapStroke({ snapId: snap.id, stroke });
+    };
+    const onUp = () => {
+      window.removeEventListener('pointermove', onMove);
+      window.removeEventListener('pointerup', onUp);
+      if (stroke.points.length >= 2) {
+        setPaperVectorSnaps((prev) =>
+          prev.map((s) => (s.id === snap.id ? { ...s, strokes: [...s.strokes, stroke] } : s))
+        );
+      }
+      setLiveSnapStroke(null);
+    };
+    window.addEventListener('pointermove', onMove);
+    window.addEventListener('pointerup', onUp);
+  };
+
+  // Cleanup speech recognition & voice recorder on unmount
   useEffect(() => {
     return () => {
       try {
         recognitionRef.current?.stop?.();
+      } catch {}
+      try {
+        if (voiceTimerRef.current) clearInterval(voiceTimerRef.current);
+        mediaRecorderRef.current?.stop?.();
+        mediaStreamRef.current?.getTracks().forEach((t) => t.stop());
       } catch {}
     };
   }, []);
@@ -3519,6 +4146,37 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
           <span className="lbl">Attachments ({resources.length})</span>
         </button>
 
+        {/* Save Edited PDF to Ach1ev/Documents + Cloud Drive */}
+        <button
+          type="button"
+          className="an-btn"
+          style={{ padding: '6px 10px', fontSize: 11.5 }}
+          onClick={() => void handleSaveEditedNoteToDevice()}
+          title="Save edited note to device folder (Ach1ev/Documents)"
+        >
+          <Download className="w-3.5 h-3.5 text-[#A47C43]" />
+          <span className="lbl">Save PDF</span>
+        </button>
+
+        <button
+          type="button"
+          className="an-btn"
+          style={{ padding: '6px 10px', fontSize: 11.5 }}
+          onClick={() => {
+            const { fileName, blob } = buildNoteHtmlExportBlob();
+            setCloudSaveTarget({
+              title: noteTitle || 'Study Note',
+              fileName,
+              mimeType: 'text/html',
+              blob,
+            });
+          }}
+          title="Upload edited note to Google Drive or Cloud Drive"
+        >
+          <UploadCloud className="w-3.5 h-3.5 text-[#A47C43]" />
+          <span className="lbl">Drive</span>
+        </button>
+
         {/* Delete Note Option */}
         <button
           className="an-btn border-[#7f1d1d]/35 dark:border-[#962d32]/45 text-[#7f1d1d] dark:text-[#b0363b] hover:bg-[#7f1d1d]/10 dark:hover:bg-[#6e171b]/25"
@@ -4096,6 +4754,46 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                   <GripVertical className="w-3.5 h-3.5" />
                 </span>
               )}
+              {/* Left-most Turn Off Pencil button (typing only when turned off; stylus auto-detected when on) */}
+              <button
+                type="button"
+                className={`an-pencil-toggle-btn ${isPencilDisabled ? 'is-off' : isPencilManualDraw ? 'is-drawing' : ''}`}
+                onClick={() => {
+                  const nextDisabled = !isPencilDisabled;
+                  setIsPencilDisabled(nextDisabled);
+                  if (nextDisabled) {
+                    setIsPencilManualDraw(false);
+                    showToast('Pencil turned off — typing only mode active');
+                  } else {
+                    showToast('Pencil enabled — stylus writes automatically on paper & screenshots');
+                  }
+                }}
+                title={
+                  isPencilDisabled
+                    ? 'Pencil is off (typing only). Click to turn Pencil back on.'
+                    : 'Turn off pencil & stylus detection for pure typing only'
+                }
+              >
+                <PenTool className="w-3.5 h-3.5 shrink-0" />
+                <span>{isPencilDisabled ? 'Turn On Pencil' : 'Turn Off Pencil'}</span>
+              </button>
+
+              {!isPencilDisabled && (
+                <button
+                  type="button"
+                  className={`an-pencil-toggle-btn ${isPencilManualDraw ? 'is-drawing' : ''}`}
+                  onClick={() => {
+                    const next = !isPencilManualDraw;
+                    setIsPencilManualDraw(next);
+                    showToast(next ? 'Draw mode active (mouse/touch & stylus)' : 'Auto stylus-only ink (mouse/finger types normally)');
+                  }}
+                  title="Draw with mouse/touch or let tablet stylus auto-detect"
+                >
+                  <SquarePen className="w-3.5 h-3.5 shrink-0" />
+                  <span>{isPencilManualDraw ? 'Drawing' : 'Draw'}</span>
+                </button>
+              )}
+
               <button
                 type="button"
                 className="an-ribbon-slide-btn"
@@ -4107,10 +4805,36 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
               </button>
 
               <div className="an-ribbon-scroll" ref={ribbonScrollRef}>
+                {layout !== 'focus' && visiblePanes.length > 0 && (
+                  <button
+                    type="button"
+                    className="an-ribbon-feat"
+                    title="Take a Vector SVG screenshot of the open side book & copy to paper"
+                    onClick={handleCaptureBookVectorScreenshot}
+                  >
+                    <Camera className="w-4 h-4 text-[#8f5f2c] dark:text-[#c49257]" />
+                    <span>Screenshot</span>
+                  </button>
+                )}
+
+                <button
+                  type="button"
+                  className={`an-ribbon-feat ${isRecordingVoice ? 'text-red-600 dark:text-red-400 font-bold' : ''}`}
+                  title="Record a voice note directly in this note (up to 15 minutes)"
+                  onClick={() => void startVoiceNoteRecording()}
+                >
+                  {isRecordingVoice ? (
+                    <MicOff className="w-4 h-4 text-red-600 animate-pulse" />
+                  ) : (
+                    <Mic className="w-4 h-4 text-[#8f5f2c] dark:text-[#c49257]" />
+                  )}
+                  <span>{isRecordingVoice ? `Rec ${formatTime(voiceRecSeconds)} / 15:00` : 'Voice Note'}</span>
+                </button>
+
                 <button
                   type="button"
                   className="an-ribbon-feat"
-                  title="Choose from 5 auto-created Ach1ev note templates"
+                  title="Choose from 5 auto-created Achiev note templates"
                   onClick={() => setIsTemplatePickerOpen(true)}
                 >
                   <LayoutTemplate className="w-4 h-4 text-[#8f5f2c] dark:text-[#c49257]" />
@@ -4190,13 +4914,13 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                   ))}
                 </select>
 
-                {/* Base Text Size Controls */}
-                <div className="inline-flex items-center overflow-hidden h-[28px] shrink-0" title="Adjust paper text size">
+                {/* Base & Selected Text Size Controls */}
+                <div className="inline-flex items-center overflow-hidden h-[28px] shrink-0" title="Decrease / Increase note text size">
                   <button
                     type="button"
                     className="an-ribbon-feat compact px-1.5 h-full text-[11px] font-bold"
-                    onClick={() => setEditorFontSizePx((s) => Math.max(12, +(s - 1).toFixed(1)))}
-                    title="Decrease note text size"
+                    onClick={() => handleStepNoteFontSize(-1.5)}
+                    title="Decrease text size"
                   >
                     A-
                   </button>
@@ -4206,8 +4930,8 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                   <button
                     type="button"
                     className="an-ribbon-feat compact px-1.5 h-full text-[11px] font-bold"
-                    onClick={() => setEditorFontSizePx((s) => Math.min(26, +(s + 1).toFixed(1)))}
-                    title="Increase note text size"
+                    onClick={() => handleStepNoteFontSize(1.5)}
+                    title="Increase text size"
                   >
                     A+
                   </button>
@@ -4762,12 +5486,25 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                 const ruleSize = rulerStyle === 'solid' || rulerStyle === 'double' ? `100% ${h}px` : `96px ${h}px`;
                 return (
               <article
-                className={`an-sheet ${isDraggingSheetWidth ? 'is-sheet-resizing' : ''}`}
+                ref={(el) => {
+                  sheetRef.current = el;
+                }}
+                className={`an-sheet ${isDraggingSheetWidth ? 'is-sheet-resizing' : ''} ${
+                  !isPencilDisabled && isPencilManualDraw ? 'pencil-draw-armed' : ''
+                }`}
                 id="sheet"
                 data-paper={paperStyle}
                 data-font={normFontKey}
                 data-hand={activeFontObj.isHandwriting ? 'true' : undefined}
                 data-hover-edge={hoverSheetEdge || undefined}
+                onPointerDownCapture={(e) => {
+                  if (!isPencilDisabled && e.pointerType === 'pen') {
+                    const targetEl = e.target as HTMLElement;
+                    if (!targetEl.closest('.an-vector-snap-stage') && !targetEl.closest('button')) {
+                      startSheetInkDraw(e);
+                    }
+                  }
+                }}
                 style={{
                   width: `${sheetWidthPx}px`,
                   maxWidth: '100%',
@@ -4781,6 +5518,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                   ['--an-rule' as string]: effectiveRuleColor,
                   ['--an-margin' as string]: isLightSheet ? 'rgba(180,88,74,0.34)' : 'rgba(196,92,96,0.36)',
                   ['--an-nf' as string]: activeFontObj.family,
+                  ['--an-ed-size' as string]: `${editorFontSizePx}px`,
                   ['--lh' as string]: `${h}px`,
                   ['--an-rule-bg' as string]: ruleBg,
                   ['--an-rule-size' as string]: ruleSize,
@@ -5071,6 +5809,164 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                   onMouseUp={handleCanvasMouseUp}
                   onBlur={saveRange}
                 />
+
+                {/* Vector SVG Ink Layer over Note Paper (Auto-detects tablet stylus unless Turn Off Pencil is clicked) */}
+                {(sheetInkStrokes.length > 0 || liveSheetStroke || (!isPencilDisabled && isPencilManualDraw)) && (
+                  <svg
+                    className="an-sheet-ink-svg"
+                    onPointerDown={(e) => {
+                      if (!isPencilDisabled && (e.pointerType === 'pen' || isPencilManualDraw)) {
+                        startSheetInkDraw(e);
+                      }
+                    }}
+                  >
+                    {[...sheetInkStrokes, ...(liveSheetStroke ? [liveSheetStroke] : [])].map((st) => {
+                      const d = st.points
+                        .map((pt, i) => `${i === 0 ? 'M' : 'L'}${pt[0].toFixed(1)},${pt[1].toFixed(1)}`)
+                        .join(' ');
+                      return (
+                        <path
+                          key={st.id}
+                          d={d}
+                          fill="none"
+                          stroke={st.color}
+                          strokeWidth={st.width}
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      );
+                    })}
+                  </svg>
+                )}
+
+                {/* Live Voice Note Recording Banner inside Create Note (Max 15:00) */}
+                {isRecordingVoice && (
+                  <div className="my-3 rounded-xl border border-red-500/40 bg-red-500/10 px-3.5 py-2.5 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2 text-xs font-bold text-red-700 dark:text-red-300">
+                      <span className="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse" />
+                      <span>Recording Voice Note · {formatTime(voiceRecSeconds)} / 15:00 max</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => stopVoiceNoteRecording(false)}
+                      className="px-3 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold cursor-pointer"
+                    >
+                      Stop &amp; Save
+                    </button>
+                  </div>
+                )}
+
+                {/* Vector Book Screenshots Copied onto Paper (Annotatable directly by Stylus / Pencil) */}
+                {paperVectorSnaps.length > 0 && (
+                  <div className="an-vector-snap-section">
+                    {paperVectorSnaps.map((snap) => (
+                      <div key={snap.id} className="an-vector-snap-card">
+                        <div className="an-vector-snap-bar">
+                          <span className="font-bold truncate flex items-center gap-1.5">
+                            <Camera className="w-3.5 h-3.5 text-[#A47C43]" />
+                            <span className="truncate">{snap.title} (Vector SVG)</span>
+                          </span>
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {snap.strokes.length > 0 && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setPaperVectorSnaps((prev) =>
+                                    prev.map((s) => (s.id === snap.id ? { ...s, strokes: [] } : s))
+                                  )
+                                }
+                                className="px-2 py-0.5 rounded border border-[var(--an-line)] hover:border-[#A47C43] text-[10.5px] font-semibold flex items-center gap-1 cursor-pointer"
+                                title="Clear pencil annotations on this screenshot"
+                              >
+                                <Eraser className="w-3 h-3" />
+                                <span>Clear Ink</span>
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setPaperVectorSnaps((prev) => prev.filter((s) => s.id !== snap.id))
+                              }
+                              className="p-1 rounded text-red-600 hover:bg-red-500/15 cursor-pointer"
+                              title="Remove screenshot from paper"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                        <div className="an-vector-snap-stage">
+                          <img
+                            src={snap.svgDataUrl}
+                            alt={snap.title}
+                            draggable={false}
+                            className="w-full h-auto block select-none"
+                          />
+                          <svg
+                            className="an-snap-ink-overlay"
+                            viewBox={`0 0 ${snap.width} ${snap.height}`}
+                            style={{
+                              pointerEvents: isPencilDisabled ? 'none' : 'auto',
+                              cursor: !isPencilDisabled && isPencilManualDraw ? 'crosshair' : undefined,
+                            }}
+                            onPointerDown={(e) => {
+                              if (!isPencilDisabled && (e.pointerType === 'pen' || isPencilManualDraw)) {
+                                startSnapInkDraw(snap, e);
+                              }
+                            }}
+                          >
+                            {[
+                              ...snap.strokes,
+                              ...(liveSnapStroke?.snapId === snap.id ? [liveSnapStroke.stroke] : []),
+                            ].map((st) => {
+                              const d = st.points
+                                .map((pt, i) => `${i === 0 ? 'M' : 'L'}${pt[0].toFixed(1)},${pt[1].toFixed(1)}`)
+                                .join(' ');
+                              return (
+                                <path
+                                  key={st.id}
+                                  d={d}
+                                  fill="none"
+                                  stroke={st.color}
+                                  strokeWidth={st.width}
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                />
+                              );
+                            })}
+                          </svg>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Saved Voice Notes right inside Note Paper (Max 15 min) */}
+                {voiceNotes.length > 0 && (
+                  <div className="mt-4 space-y-2 relative z-20">
+                    {voiceNotes.map((vn) => (
+                      <div key={vn.id} className="an-voice-note-card">
+                        <div className="flex items-center justify-between gap-2 text-xs">
+                          <span className="font-bold flex items-center gap-1.5">
+                            <Mic className="w-3.5 h-3.5 text-[#A47C43]" />
+                            <span>{vn.title}</span>
+                            <span className="font-mono text-[10.5px] opacity-70">
+                              ({formatTime(vn.durationSec)} / 15:00 · {vn.createdAt})
+                            </span>
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => setVoiceNotes((prev) => prev.filter((x) => x.id !== vn.id))}
+                            className="p-1 rounded text-red-600 hover:bg-red-500/15 cursor-pointer"
+                            title="Delete voice note"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                        <audio src={vn.dataUrl} controls className="w-full h-8" />
+                      </div>
+                    ))}
+                  </div>
+                )}
 
                 {/* Draggable, Resizable, Lockable Custom Text Boxes Overlay */}
                 {customBoxes.map((box) => {
@@ -5756,13 +6652,31 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
               </button>
             </div>
 
-            {/* Video Body / iframe */}
+            {/* Video Body / iframe (stable initialStartTime prevents iframe reload on timer ticks) */}
             <div className="an-vw-b">
               <iframe
-                src={`https://www.youtube-nocookie.com/embed/${win.vid}?enablejsapi=1&rel=0&modestbranding=1&playsinline=1&start=${Math.floor(
-                  win.currentTime
-                )}`}
+                ref={(el) => {
+                  ytIframeRefs.current[win.id] = el;
+                }}
+                src={`https://www.youtube-nocookie.com/embed/${win.vid}?enablejsapi=1&rel=0&modestbranding=1&playsinline=1&widgetid=1&origin=${encodeURIComponent(
+                  typeof window !== 'undefined' ? window.location.origin : ''
+                )}&start=${Math.floor(win.initialStartTime ?? 0)}`}
                 title={win.title}
+                onLoad={() => {
+                  const iframe = ytIframeRefs.current[win.id];
+                  if (iframe?.contentWindow) {
+                    try {
+                      iframe.contentWindow.postMessage(
+                        JSON.stringify({ event: 'listening', id: win.id, channel: 'widget' }),
+                        '*'
+                      );
+                      iframe.contentWindow.postMessage(
+                        JSON.stringify({ event: 'command', func: 'addEventListener', args: ['onStateChange'], id: win.id }),
+                        '*'
+                      );
+                    } catch {}
+                  }
+                }}
                 allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
                 allowFullScreen
               />
@@ -6608,6 +7522,81 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
           </div>
         </div>
       )}
+
+      {/* Vector Book Screenshot Capture Modal (Copy to Paper or Save SVG) */}
+      {capturedVectorPreview && (
+        <div
+          className="fixed inset-0 z-[135] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4"
+          onClick={() => setCapturedVectorPreview(null)}
+        >
+          <div
+            className="w-full max-w-2xl rounded-2xl border shadow-2xl overflow-hidden flex flex-col"
+            style={{
+              background: 'var(--an-paper)',
+              borderColor: 'var(--an-line)',
+              color: 'var(--an-ink)',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="px-5 py-3.5 border-b flex items-center justify-between gap-3" style={{ borderColor: 'var(--an-line)' }}>
+              <div className="flex items-center gap-2 min-w-0">
+                <Camera className="w-4 h-4 text-[#A47C43] shrink-0" />
+                <div className="min-w-0">
+                  <h3 className="text-sm font-bold truncate">Vector Screenshot · {capturedVectorPreview.title}</h3>
+                  <p className="text-[11px] opacity-70">Crisp Vector SVG format — copy onto paper &amp; write directly with tablet pencil</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setCapturedVectorPreview(null)}
+                className="p-1.5 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 cursor-pointer"
+                aria-label="Close screenshot preview"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <div className="p-4 bg-black/5 dark:bg-black/25 max-h-[60vh] overflow-y-auto">
+              <img
+                src={capturedVectorPreview.svgDataUrl}
+                alt={capturedVectorPreview.title}
+                className="w-full h-auto rounded-xl border border-black/10 shadow-sm"
+              />
+            </div>
+            <div className="px-5 py-3.5 border-t flex flex-wrap items-center justify-end gap-2.5" style={{ borderColor: 'var(--an-line)' }}>
+              <button
+                type="button"
+                onClick={async () => {
+                  const blob = new Blob([capturedVectorPreview.svgMarkup], { type: 'image/svg+xml;charset=utf-8' });
+                  const fileName = `${capturedVectorPreview.title.replace(/[^a-zA-Z0-9._-]+/g, '_')}.svg`;
+                  const res = await saveFileToAch1evDeviceFolder(fileName, blob, {
+                    promptFolderIfMissing: true,
+                    mimeType: 'image/svg+xml',
+                  });
+                  showToast(`Vector SVG saved to ${res.destinationLabel}`);
+                }}
+                className="an-btn"
+              >
+                <Download className="w-3.5 h-3.5" />
+                <span>Save Vector (.svg)</span>
+              </button>
+              <button
+                type="button"
+                onClick={handleCopyVectorScreenshotToPaper}
+                className="an-btn primary font-bold"
+              >
+                <Copy className="w-3.5 h-3.5" />
+                <span>Copy to Paper</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <CloudDriveSaveModal
+        file={cloudSaveTarget}
+        onClose={() => setCloudSaveTarget(null)}
+        onUploaded={({ webViewLink }) => showToast(`Uploaded to Drive (${webViewLink})`)}
+      />
 
       {/* 9. Toast Feedback Popup */}
       <div className={`an-toast ${isToastVisible ? 'on' : ''}`} role="status">

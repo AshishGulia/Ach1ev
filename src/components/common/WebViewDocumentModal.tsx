@@ -9,6 +9,7 @@ import {
   Check,
   Table2,
   CalendarPlus,
+  UploadCloud,
 } from 'lucide-react';
 import {
   UploadedDocumentRecord,
@@ -18,6 +19,8 @@ import {
 import { extractDriveFileId } from '../../services/googleDriveService';
 import { getPlanLimits, openSubscriptionUpgradeModal } from '../../utils/subscriptionLimits';
 import { SmartDocumentFrame } from './SmartDocumentFrame';
+import { saveFileToAch1evDeviceFolder } from '../../utils/deviceStorage';
+import { CloudDriveSaveModal, CloudDriveTargetFile } from './CloudDriveSaveModal';
 
 export interface WebViewDocPayload {
   id: string;
@@ -80,6 +83,7 @@ export const WebViewDocumentModal: React.FC<WebViewDocumentModalProps> = ({
   const [isFav, setIsFav] = useState(false);
   const [ribbonFeedback, setRibbonFeedback] = useState<string | null>(null);
   const [idbBlobUrl, setIdbBlobUrl] = useState<string | undefined>(undefined);
+  const [cloudDriveFile, setCloudDriveFile] = useState<CloudDriveTargetFile | null>(null);
 
   useEffect(() => {
     if (!doc) {
@@ -119,8 +123,8 @@ export const WebViewDocumentModal: React.FC<WebViewDocumentModalProps> = ({
   };
 
   const handleShare = async () => {
-    const shareTitle = `${doc.title} · Ach1ev`;
-    const shareText = `Check out "${doc.title}" stored in Ach1ev Academic Workspace.`;
+    const shareTitle = `${doc.title} · Achiev`;
+    const shareText = `Check out "${doc.title}" stored in Achiev Academic Workspace.`;
     try {
       if (navigator.share) {
         await navigator.share({
@@ -140,32 +144,43 @@ export const WebViewDocumentModal: React.FC<WebViewDocumentModalProps> = ({
     }
   };
 
-  const handleSaveToDevice = () => {
-    const downloadHref =
+  const resolvedFilename =
+    doc.fileName ||
+    `${doc.title.replace(/[^a-zA-Z0-9._-]+/g, '_')}.${isHtmlContent ? 'html' : lowExt || 'pdf'}`;
+
+  const handleSaveToDevice = async () => {
+    const downloadPayload =
       mediaUrl ||
       (doc.contentHtml
-        ? `data:text/html;charset=utf-8,${encodeURIComponent(doc.contentHtml)}`
+        ? new Blob([doc.contentHtml], { type: 'text/html;charset=utf-8' })
         : doc.extractedText
-        ? `data:text/plain;charset=utf-8,${encodeURIComponent(doc.extractedText)}`
-        : '');
+        ? new Blob([doc.extractedText], { type: 'text/plain;charset=utf-8' })
+        : null);
 
-    if (!downloadHref) {
+    if (!downloadPayload) {
       showToast('No downloadable file stream available');
       return;
     }
 
-    const filename =
-      doc.fileName ||
-      `${doc.title.replace(/[^a-zA-Z0-9._-]+/g, '_')}.${isHtmlContent ? 'html' : lowExt || 'pdf'}`;
-    const a = document.createElement('a');
-    a.href = downloadHref;
-    a.download = isHtmlContent && filename.endsWith('.pdf')
-      ? filename.replace(/\.pdf$/i, '.html')
-      : filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    showToast(`Saved "${a.download}" to device`);
+    const safeFileName =
+      isHtmlContent && resolvedFilename.endsWith('.pdf')
+        ? resolvedFilename.replace(/\.pdf$/i, '.html')
+        : resolvedFilename;
+
+    const res = await saveFileToAch1evDeviceFolder(safeFileName, downloadPayload, {
+      mimeType: doc.mimeType || 'application/pdf',
+    });
+    showToast(`Saved "${res.fileName}" to ${res.destinationLabel}`);
+  };
+
+  const handleOpenUploadToDrive = () => {
+    setCloudDriveFile({
+      title: doc.title,
+      fileName: resolvedFilename,
+      mimeType: doc.mimeType || 'application/pdf',
+      sourceUrl: mediaUrl || undefined,
+      fallbackText: doc.extractedText || doc.contentHtml || doc.title,
+    });
   };
 
   const handleToggleFavourite = () => {
@@ -271,6 +286,15 @@ export const WebViewDocumentModal: React.FC<WebViewDocumentModalProps> = ({
             >
               <Download className="w-3.5 h-3.5 text-[#8f5f2c] dark:text-amber-400" />
               <span>Save to Device</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={handleOpenUploadToDrive}
+              className="px-3 py-1.5 rounded-lg border border-stone-200 dark:border-[#3d291b] bg-white dark:bg-[#231811] hover:bg-stone-100 dark:hover:bg-[#2e2017] text-stone-800 dark:text-stone-100 text-xs font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
+            >
+              <UploadCloud className="w-3.5 h-3.5 text-[#8f5f2c] dark:text-amber-400" />
+              <span>Upload to Drive</span>
             </button>
 
             <button
@@ -412,11 +436,17 @@ export const WebViewDocumentModal: React.FC<WebViewDocumentModalProps> = ({
 
           {!isHtmlContent && !isPdfEmbed && !isImage && !doc.pages?.length && !doc.contentHtml && (
             <div className="w-full max-w-none p-6 rounded-2xl bg-white dark:bg-[#1a120d] border border-stone-200 dark:border-[#352317] text-xs text-stone-700 dark:text-stone-300 whitespace-pre-wrap">
-              {doc.extractedText || 'Document stored safely in Ach1ev Library. Use Save to Device or Share from the top ribbon.'}
+              {doc.extractedText || 'Document stored safely in Achiev Library. Use Save to Device or Upload to Drive from the top ribbon.'}
             </div>
           )}
         </div>
       </div>
+
+      <CloudDriveSaveModal
+        file={cloudDriveFile}
+        onClose={() => setCloudDriveFile(null)}
+        onUploaded={() => showToast('Uploaded to Google Drive')}
+      />
     </div>
   );
 };

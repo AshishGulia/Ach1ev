@@ -44,9 +44,16 @@ import {
   CheckSquare,
   Square,
   MinusSquare,
+  HardDrive,
 } from 'lucide-react';
 import { WebViewDocumentModal, WebViewDocPayload } from '../common/WebViewDocumentModal';
+import { CloudDriveSaveModal, CloudDriveTargetFile } from '../common/CloudDriveSaveModal';
 import { getPlanLimits, openSubscriptionUpgradeModal } from '../../utils/subscriptionLimits';
+import {
+  chooseDeviceDestinationFolder,
+  getSavedDestinationLabel,
+  saveFileToAch1evDeviceFolder,
+} from '../../utils/deviceStorage';
 
 interface LibraryWorkspaceViewProps {
   notebooks: Notebook[];
@@ -120,6 +127,10 @@ export const LibraryWorkspaceView: React.FC<LibraryWorkspaceViewProps> = ({
   const [previewDoc, setPreviewDoc] = useState<UploadedDocumentRecord | null>(null);
   const [openMenuDocId, setOpenMenuDocId] = useState<string | null>(null);
   const [movingDocId, setMovingDocId] = useState<string | null>(null);
+  const [destLabel, setDestLabel] = useState<string>(() => getSavedDestinationLabel());
+  const [isDestModalOpen, setIsDestModalOpen] = useState(false);
+  const [destInputDraft, setDestInputDraft] = useState<string>(() => getSavedDestinationLabel());
+  const [cloudDriveFile, setCloudDriveFile] = useState<CloudDriveTargetFile | null>(null);
 
   const flashBanner = (msg: string) => {
     setStatusBanner(msg);
@@ -133,13 +144,16 @@ export const LibraryWorkspaceView: React.FC<LibraryWorkspaceViewProps> = ({
       setFolders(getLibraryFolders());
       setUploadedDocs(getUploadedDocuments());
       setNotebookFolderMapState(getNotebookFolderMap());
+      setDestLabel(getSavedDestinationLabel());
     };
     window.addEventListener('achiev_uploaded_files_changed', syncAll);
     window.addEventListener('achiev_recent_files_changed', syncAll);
+    window.addEventListener('achiev_destination_changed', syncAll);
     window.addEventListener('storage', syncAll);
     return () => {
       window.removeEventListener('achiev_uploaded_files_changed', syncAll);
       window.removeEventListener('achiev_recent_files_changed', syncAll);
+      window.removeEventListener('achiev_destination_changed', syncAll);
       window.removeEventListener('storage', syncAll);
     };
   }, []);
@@ -301,33 +315,47 @@ export const LibraryWorkspaceView: React.FC<LibraryWorkspaceViewProps> = ({
     setPreviewDoc(doc);
   };
 
-  // Explorer Download / Share / Delete Helpers
-  const triggerDownloadFile = async (doc: UploadedDocumentRecord) => {
+  const resolveDocPayload = async (doc: UploadedDocumentRecord): Promise<{ url?: string; blob?: Blob; fallbackText: string }> => {
     const idbUrl = !getSessionFileUrl(doc.id) && !doc.pdfFileUrl && !doc.dataUrl
       ? await getFileBlobFromIdb(doc.id)
       : undefined;
     const url = getSessionFileUrl(doc.id) || idbUrl || doc.pdfFileUrl || doc.dataUrl;
-    const link = document.createElement('a');
-    if (url) {
-      link.href = url;
-      link.download = doc.fileName || `${doc.title || 'document'}.${doc.ext || 'pdf'}`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      flashBanner(`Downloading "${doc.fileName || doc.title}"...`);
+    const fallbackText = doc.extractedText || `${doc.title}\nSubject: ${doc.subject}\nFile: ${doc.fileName}`;
+    return { url, fallbackText };
+  };
+
+  // Explorer Save to Device (Ach1ev/Documents) / Upload to Drive / Share / Delete Helpers
+  const triggerDownloadFile = async (doc: UploadedDocumentRecord) => {
+    const { url, fallbackText } = await resolveDocPayload(doc);
+    const fileName = doc.fileName || `${(doc.title || 'document').replace(/[^\w\s.-]/g, '_')}.${doc.ext || 'pdf'}`;
+    const payload = url || new Blob([fallbackText], { type: 'text/plain;charset=utf-8' });
+    const res = await saveFileToAch1evDeviceFolder(fileName, payload, {
+      mimeType: doc.mimeType || 'application/pdf',
+    });
+    flashBanner(`Saved "${res.fileName}" to ${res.destinationLabel}`);
+  };
+
+  const triggerOpenDriveUpload = async (doc: UploadedDocumentRecord) => {
+    const { url, fallbackText } = await resolveDocPayload(doc);
+    setCloudDriveFile({
+      title: doc.title || doc.fileName,
+      fileName: doc.fileName || `${doc.title || 'document'}.${doc.ext || 'pdf'}`,
+      mimeType: doc.mimeType || 'application/pdf',
+      sourceUrl: url,
+      fallbackText,
+    });
+  };
+
+  const handleChangeDestinationClick = async () => {
+    const res = await chooseDeviceDestinationFolder();
+    if (res.cancelled) return;
+    if (res.usedNativePicker && res.ok) {
+      setDestLabel(res.label);
+      flashBanner(`Device save destination set to "${res.label}"`);
       return;
     }
-    const fallbackText =
-      doc.extractedText || `${doc.title}\nSubject: ${doc.subject}\nFile: ${doc.fileName}`;
-    const blob = new Blob([fallbackText], { type: 'text/plain;charset=utf-8' });
-    const blobUrl = URL.createObjectURL(blob);
-    link.href = blobUrl;
-    link.download = `${(doc.title || 'document').replace(/[^\w\s.-]/g, '_')}.txt`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.setTimeout(() => URL.revokeObjectURL(blobUrl), 2500);
-    flashBanner(`Downloaded "${doc.title}"`);
+    setDestInputDraft(destLabel);
+    setIsDestModalOpen(true);
   };
 
   const triggerDownloadNote = (nb: Notebook) => {
@@ -563,6 +591,17 @@ export const LibraryWorkspaceView: React.FC<LibraryWorkspaceViewProps> = ({
               className="pl-8 pr-3 py-1.5 rounded-xl border border-stone-200 dark:border-[#382518] bg-white/90 dark:bg-[#1a120d] text-xs text-stone-800 dark:text-stone-100 outline-none focus:border-[#A47C43] w-40 sm:w-52"
             />
           </div>
+
+          <button
+            type="button"
+            onClick={handleChangeDestinationClick}
+            title={`Current device save folder: ${destLabel}. Click to change destination folder.`}
+            className="themed-soft-pill px-3 py-1.5 rounded-xl border border-stone-300 dark:border-[#3d291c] bg-white/80 dark:bg-[#1f150f] hover:border-[#A47C43] text-stone-700 dark:text-[#e6d6c3] text-xs font-semibold flex items-center gap-1.5 cursor-pointer"
+          >
+            <HardDrive className="w-3.5 h-3.5 text-[#A47C43]" />
+            <span className="hidden sm:inline max-w-[160px] truncate">{destLabel}</span>
+            <span className="text-[#8f5f2c] dark:text-amber-300 font-bold">· Change Destination</span>
+          </button>
 
           <button
             type="button"
@@ -1075,10 +1114,20 @@ export const LibraryWorkspaceView: React.FC<LibraryWorkspaceViewProps> = ({
                               type="button"
                               onClick={() => triggerDownloadFile(doc)}
                               className="p-1.5 rounded-lg text-stone-600 dark:text-stone-300 hover:text-[#8f5f2c] dark:hover:text-amber-300 hover:bg-stone-200/70 dark:hover:bg-[#2a1c13] cursor-pointer"
-                              title="Download file"
-                              aria-label={`Download ${doc.title}`}
+                              title={`Save to Device (${destLabel})`}
+                              aria-label={`Save ${doc.title} to device`}
                             >
                               <Download className="w-3.5 h-3.5" />
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() => void triggerOpenDriveUpload(doc)}
+                              className="p-1.5 rounded-lg text-stone-600 dark:text-stone-300 hover:text-[#8f5f2c] dark:hover:text-amber-300 hover:bg-stone-200/70 dark:hover:bg-[#2a1c13] cursor-pointer"
+                              title="Upload to Cloud Drive"
+                              aria-label={`Upload ${doc.title} to Drive`}
+                            >
+                              <UploadCloud className="w-3.5 h-3.5" />
                             </button>
 
                             <button
@@ -1137,6 +1186,30 @@ export const LibraryWorkspaceView: React.FC<LibraryWorkspaceViewProps> = ({
                                       <span>Open in Read Studio</span>
                                     </button>
                                   )}
+
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setOpenMenuDocId(null);
+                                      void triggerDownloadFile(doc);
+                                    }}
+                                    className="w-full px-2.5 py-1.5 rounded-lg text-left hover:bg-stone-100 dark:hover:bg-[#281b12] flex items-center gap-2 text-stone-800 dark:text-stone-100 cursor-pointer"
+                                  >
+                                    <Download className="w-3.5 h-3.5 text-[#A47C43]" />
+                                    <span>Save to Device</span>
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setOpenMenuDocId(null);
+                                      void triggerOpenDriveUpload(doc);
+                                    }}
+                                    className="w-full px-2.5 py-1.5 rounded-lg text-left hover:bg-stone-100 dark:hover:bg-[#281b12] flex items-center gap-2 text-stone-800 dark:text-stone-100 cursor-pointer"
+                                  >
+                                    <UploadCloud className="w-3.5 h-3.5 text-[#A47C43]" />
+                                    <span>Upload to Drive</span>
+                                  </button>
 
                                   <button
                                     type="button"
@@ -1267,9 +1340,17 @@ export const LibraryWorkspaceView: React.FC<LibraryWorkspaceViewProps> = ({
                                     type="button"
                                     onClick={() => triggerDownloadFile(synth)}
                                     className="p-1.5 rounded-lg text-stone-600 dark:text-stone-300 hover:text-[#8f5f2c] hover:bg-stone-200/70 dark:hover:bg-[#2a1c13] cursor-pointer"
-                                    title="Download textbook"
+                                    title={`Save to Device (${destLabel})`}
                                   >
                                     <Download className="w-3.5 h-3.5" />
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => void triggerOpenDriveUpload(synth)}
+                                    className="p-1.5 rounded-lg text-stone-600 dark:text-stone-300 hover:text-[#8f5f2c] hover:bg-stone-200/70 dark:hover:bg-[#2a1c13] cursor-pointer"
+                                    title="Upload to Drive"
+                                  >
+                                    <UploadCloud className="w-3.5 h-3.5" />
                                   </button>
                                   <button
                                     type="button"
@@ -1398,6 +1479,70 @@ export const LibraryWorkspaceView: React.FC<LibraryWorkspaceViewProps> = ({
               }
             : undefined
         }
+      />
+
+      {isDestModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs"
+          onClick={() => setIsDestModalOpen(false)}
+        >
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              void chooseDeviceDestinationFolder(destInputDraft).then((res) => {
+                setDestLabel(res.label);
+                setIsDestModalOpen(false);
+                flashBanner(`Device save destination set to "${res.label}"`);
+              });
+            }}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-md rounded-2xl bg-[#faf6ee] dark:bg-[#1a120d] border border-[#d6c7b0] dark:border-[#382518] p-5 shadow-2xl space-y-4"
+          >
+            <div className="flex items-center justify-between">
+              <h3 className="font-serif font-bold text-base text-stone-900 dark:text-stone-100">
+                Change Device Save Destination
+              </h3>
+              <button
+                type="button"
+                onClick={() => setIsDestModalOpen(false)}
+                className="p-1 text-stone-400 hover:text-stone-700 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+            <p className="text-xs text-stone-600 dark:text-stone-300">
+              Default folder across Windows, Mac, Android &amp; iOS is <strong>Ach1ev/Documents</strong>. Enter any preferred folder path label below:
+            </p>
+            <input
+              type="text"
+              value={destInputDraft}
+              onChange={(e) => setDestInputDraft(e.target.value)}
+              placeholder="e.g. Documents/Ach1ev/Documents"
+              className="w-full px-3 py-2 rounded-xl border border-stone-300 dark:border-[#3d291c] bg-white dark:bg-[#120c08] text-xs font-mono text-stone-900 dark:text-stone-100 outline-none focus:border-[#A47C43]"
+            />
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setIsDestModalOpen(false)}
+                className="px-3 py-1.5 rounded-xl text-xs font-semibold text-stone-600 dark:text-stone-300 cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="themed-accent-btn px-4 py-1.5 rounded-xl bg-[#8f5f2c] text-white text-xs font-semibold cursor-pointer"
+              >
+                Save Destination
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      <CloudDriveSaveModal
+        file={cloudDriveFile}
+        onClose={() => setCloudDriveFile(null)}
+        onUploaded={() => flashBanner('Uploaded to Google Drive')}
       />
     </div>
   );

@@ -959,26 +959,18 @@ button[class*="border"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-bt
     inset 0 1px 0 rgba(255, 255, 255, 0.16);
 }
 
-/* All handwriting fonts upright & straight (no italics) per user request */
-.font-handwriting,
-[data-font="hand"],
-.handwritten,
-.font-caveat,
-.font-kalam,
-.font-patrick,
-.font-architects,
-.font-dancing,
-.font-shadows,
-[style*="Annie Use Your Telescope"],
-[style*="Caveat Brush"],
-[style*="Comic Neue"],
-[style*="Delius"],
-[style*="Indie Flower"],
-[style*="Lobster Two"],
-[style*="Patrick Hand"],
-[style*="Dancing Script"],
-[style*="Jojoba"] {
-  font-style: normal !important;
+/* Explicit Bold & Italic restoration inside rich note editor across all fonts */
+.an-ed b,
+.an-ed strong,
+.an-ed [style*="font-weight: 700"],
+.an-ed [style*="font-weight: bold"] {
+  font-weight: 700 !important;
+}
+
+.an-ed i,
+.an-ed em,
+.an-ed [style*="font-style: italic"] {
+  font-style: italic !important;
 }
 
 /* 3D Realistic Book Perspective */
