@@ -14,12 +14,14 @@ import {
   QrCode,
   Sliders,
   Sparkles,
-  Sun,
   Table2,
+  Timer,
   Users,
 } from 'lucide-react';
 import { DEMO_SECTIONS, type DemoAnchor, type DemoPanel, type DemoScene } from './productDemoData';
 import { ACHIEV_EMBLEM_URL } from '../../common/AchievBrand';
+
+const THEME1_THUMB_URL = '/assets/aistudio/theme1_preview_thumb.webp';
 
 type Point = { x: number; y: number };
 
