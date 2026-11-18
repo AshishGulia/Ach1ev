@@ -421,9 +421,10 @@ const LegacyRichNoteEditor: React.FC<RichNoteEditorProps> = ({
   const [showPip, setShowPip] = useState<boolean>(false);
   const [isPdfDrawerOpen, setIsPdfDrawerOpen] = useState<boolean>(false);
 
-  // Active Note Font State (supports all 15 master fonts & 6 handwriting fonts)
+  // Active Note Font State
   const [activeNoteFont, setActiveNoteFont] = useState<string>(() => {
-    return localStorage.getItem('medden_app_font') || 'Baskerville';
+    const saved = localStorage.getItem('medden_app_font');
+    return APP_FONTS.some((f) => f.name === saved) ? (saved as string) : 'Domine';
   });
 
   const handleSelectNoteFont = (fontName: string) => {
@@ -2377,39 +2378,24 @@ const LegacyRichNoteEditor: React.FC<RichNoteEditorProps> = ({
         {/* Tab 1: HOME (Font Styling, Paragraph, Alignments) */}
         {ribbonTab === 'home' && (
           <div className="p-1.5 px-3 flex flex-wrap items-center gap-2 text-xs">
-            {/* Font Family Dropdown (15 Fonts including 6 Handwriting Fonts) */}
+            {/* Font Family Dropdown (Handwriting · Casual · Official) */}
             <div className="flex items-center gap-1.5 bg-white/85 dark:bg-black/35 p-1 px-2 rounded-lg border border-stone-200 dark:border-stone-700/60 shadow-2xs">
               <Type className="w-3.5 h-3.5 text-stone-500" />
               <select
-                value={activeNoteFont}
+                value={APP_FONTS.some((f) => f.name === activeNoteFont) ? activeNoteFont : 'Domine'}
                 onChange={(e) => handleSelectNoteFont(e.target.value)}
                 className="bg-transparent text-xs font-semibold text-slate-800 dark:text-stone-200 outline-none cursor-pointer pr-1"
                 title="Change Note Font"
               >
-                <optgroup label="✍️ Handwriting Fonts">
-                  <option value="Caveat">✍️ Caveat (Natural Cursive)</option>
-                  <option value="Kalam">✍️ Kalam (Ballpoint Pen)</option>
-                  <option value="Patrick Hand">✍️ Patrick Hand (Neat Print)</option>
-                  <option value="Shadows Into Light">✍️ Shadows Into Light (Fine Liner)</option>
-                  <option value="Architects Daughter">✍️ Architects Daughter (Blueprint)</option>
-                  <option value="Dancing Script">✍️ Dancing Script (Flowing Cursive)</option>
-                </optgroup>
-                <optgroup label="📄 Clean UI & Reading">
-                  <option value="Alata">Alata</option>
-                  <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
-                  <option value="Inter">Inter</option>
-                  <option value="Outfit">Outfit</option>
-                  <option value="Poppins">Poppins</option>
-                </optgroup>
-                <optgroup label="📖 Editorial & Academic Serif">
-                  <option value="Playfair Display">Playfair Display</option>
-                  <option value="Merriweather">Merriweather</option>
-                  <option value="EB Garamond">EB Garamond</option>
-                  <option value="Lora">Lora</option>
-                </optgroup>
-                <optgroup label="💻 Monospace & Precision">
-                  <option value="JetBrains Mono">JetBrains Mono</option>
-                </optgroup>
+                {(['Handwriting', 'Casual', 'Official'] as const).map((cat) => (
+                  <optgroup key={cat} label={cat}>
+                    {APP_FONTS.filter((f) => f.category === cat).map((font) => (
+                      <option key={font.id} value={font.name}>
+                        {font.name}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
               </select>
             </div>
 

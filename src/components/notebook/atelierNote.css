@@ -1897,15 +1897,15 @@ mark.hit {
 }
 
 .an-sheet[data-font="sans"] {
-  --an-nf: 'Inter', var(--an-sans);
+  --an-nf: 'Urbanist', var(--an-sans);
 }
 
 .an-sheet[data-font="serif"] {
-  --an-nf: 'Merriweather', var(--an-serif);
+  --an-nf: 'Domine', var(--an-serif);
 }
 
 .an-sheet[data-font="hand"] {
-  --an-nf: 'Caveat', cursive;
+  --an-nf: 'Caveat Brush', cursive;
 }
 
 .an-sheet[data-font="hand"] .an-ed {

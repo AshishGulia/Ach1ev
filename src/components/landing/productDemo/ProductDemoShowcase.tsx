@@ -19,6 +19,7 @@ import studentTablesLibraryPhoto from '../../../assets/images/student_tables_lib
 import studentFocusTimersPhoto from '../../../assets/images/student_focus_timers_1794933140912.webp';
 
 const SCENE_MS = 6500;
+const PHOTO_MS = 4500;
 
 interface StudyEnvironmentPhoto {
   id: string;
@@ -99,7 +100,7 @@ const PRODUCT_FAQS = [
   },
   {
     q: 'Can I customize fonts, line spacing, paper color, and themes across the whole app?',
-    a: 'Yes. Choose from Handwriting, Sans-Serif, and Serif fonts across every view, customize sepia or custom paper shades and ruled line spacing, and switch between 5 curated themes and 10 abstract wallpapers.',
+    a: 'Yes. Choose from a curated bag of Handwriting, Casual, and Official fonts across every view, customize sepia or custom paper shades and ruled line spacing, and switch between 5 curated themes and 10 abstract wallpapers.',
   },
   {
     q: 'Can I try Create Note immediately before signing up?',
@@ -182,6 +183,14 @@ export const ProductDemoShowcase: React.FC = () => {
     return () => window.clearInterval(id);
   }, [total]);
 
+  useEffect(() => {
+    if (prefersReducedMotion()) return;
+    const id = window.setTimeout(() => {
+      setActivePhotoIdx((i) => (i + 1) % STUDY_GALLERY_PHOTOS.length);
+    }, PHOTO_MS);
+    return () => window.clearTimeout(id);
+  }, [activePhotoIdx]);
+
   const prevLaptop = () => setLaptopIdx((i) => (i - 1 + total) % total);
   const nextLaptop = () => setLaptopIdx((i) => (i + 1) % total);
   const prevTablet = () => setTabletIdx((i) => (i - 1 + total) % total);
@@ -221,13 +230,13 @@ export const ProductDemoShowcase: React.FC = () => {
       <div className="w-full px-4 sm:px-8 pt-20 sm:pt-32 pb-16 sm:pb-24">
         <div className="max-w-4xl mx-auto text-center px-3 space-y-3">
           <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.22em] text-[#f5d093] drop-shadow-[0_1px_6px_rgba(6,2,0,0.85)]">
-            Cheapest Medical Note-Making &amp; Focus Study Platform · ₹0 Free, ₹100 Pro &amp; ₹300 Master
+            1st Ever Luxury &amp; Cozy Fully Customisable Study Sanctuary · ₹0 Free, ₹100 Pro &amp; ₹300 Master
           </p>
           <h2 className="text-2xl sm:text-4xl font-bold text-[#fffaf0] leading-tight text-balance drop-shadow-[0_2px_12px_rgba(6,2,0,0.85)]">
-            Side-by-Side Textbooks, Ruled Notes, 3D Almirahs &amp; Focus Timers in One Workspace
+            High-End Note Maker &amp; Focus Workspace Crafted for Millions of Students Worldwide
           </h2>
           <p className="text-sm sm:text-base text-[#f7e5ca] max-w-2xl mx-auto leading-relaxed drop-shadow-[0_1px_6px_rgba(6,2,0,0.8)]">
-            Built for MBBS, NEET-PG, USMLE, Nursing, and deep learners: read PDFs/DOCX beside handwriting or serif notes, pin timestamped YouTube lectures, build multi-level flowcharts, and organize every file neatly.
+            Experience a high-end study app built from understanding what global learners truly need—a focus app and a studying app at one quiet place. Compile notes, heavy books, and lecture video sources together without carrying weighty bags.
           </p>
         </div>
       </div>
@@ -277,48 +286,87 @@ export const ProductDemoShowcase: React.FC = () => {
         </div>
       </div>
 
-      {/* ═══════════════ 2. EDITORIAL PRAISE STRIP BELOW LAPTOP (PURE TEXT WITHOUT BOX WRAPPER) ═══════════════ */}
-      <div className="max-w-4xl mx-auto py-4 px-2 sm:px-4">
-        <div className="text-center space-y-3 max-w-2xl mx-auto px-2">
+      {/* ═══════════════ 2. EDITORIAL PRAISE HIGHLIGHTS BELOW LAPTOP (PURE TEXT WITHOUT BOX WRAPPER) ═══════════════ */}
+      <div className="max-w-5xl mx-auto py-4 px-2 sm:px-4">
+        <div className="text-center space-y-3 max-w-3xl mx-auto px-2">
           <p className="text-[11px] font-bold uppercase tracking-[0.22em] text-[#f5d093] drop-shadow-[0_1px_6px_rgba(8,2,0,0.85)]">
-            Why Scholars Switch to Ach1ev
+            Why Scholars Around the World Choose Ach1ev
           </p>
           <h3 className="text-xl sm:text-3xl font-bold text-[#fffaf0] leading-snug text-balance drop-shadow-[0_2px_12px_rgba(8,2,0,0.85)]">
-            One quiet desk where your textbooks, clinical tables, and revision memory finally live together.
+            1st ever luxury, cozy &amp; fully customisable studying sanctuary built so you stay focused and healthy.
           </h3>
           <p className="text-sm sm:text-[15px] text-[#f5e3c6] leading-relaxed drop-shadow-[0_1px_6px_rgba(8,2,0,0.8)]">
-            Built specifically for long library hours and ward postings—Ach1ev pairs paper-calm reading comfort with
-            instant diagram capture, tactile 3D bookshelves, and clinical flowcharts so nothing breaks your focus.
+            Crafted by experience and deep understanding of millions of students across the globe—every shelf, font, timer, flowchart, and study circle works seamlessly together without ever reaching for social media.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8 pt-6 border-t border-[#f5d093]/25 text-left px-2">
-          <div className="space-y-1.5">
-            <h4 className="text-base font-bold text-[#fff8ea] drop-shadow-[0_1px_6px_rgba(8,2,0,0.8)]">
-              Textbooks Beside Living Notes
-            </h4>
-            <p className="text-xs sm:text-[13px] text-[#f3dfc1] leading-relaxed drop-shadow-[0_1px_4px_rgba(8,2,0,0.75)]">
-              Keep Harrison or Robbins open right beside ruled sepia pages, snip charts cleanly, and pin your lecture at
-              the bottom without juggling five windows.
-            </p>
-          </div>
-          <div className="space-y-1.5">
-            <h4 className="text-base font-bold text-[#fff8ea] drop-shadow-[0_1px_6px_rgba(8,2,0,0.8)]">
-              Effortless Table &amp; Flowchart Recall
-            </h4>
-            <p className="text-xs sm:text-[13px] text-[#f3dfc1] leading-relaxed drop-shadow-[0_1px_4px_rgba(8,2,0,0.75)]">
-              Turn dense pharmacology photographs into structured editable tables and zoom effortlessly through branching
-              clinical pathways before exams.
-            </p>
-          </div>
-          <div className="space-y-1.5">
-            <h4 className="text-base font-bold text-[#fff8ea] drop-shadow-[0_1px_6px_rgba(8,2,0,0.8)]">
-              Laptop Depth, iPad Fluidity
-            </h4>
-            <p className="text-xs sm:text-[13px] text-[#f3dfc1] leading-relaxed drop-shadow-[0_1px_4px_rgba(8,2,0,0.75)]">
-              Start an outline on your MacBook at the library and review flashcards or ward rosters seamlessly on your iPad—zero hardware lock-in.
-            </p>
-          </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-6 mt-10 pt-8 border-t border-[#f5d093]/25 text-left px-2">
+          {[
+            {
+              num: '01',
+              title: '1st Ever Luxury, Cozy & Customisable Study Vibe',
+              body: 'Crafted from real student experience across the globe—customize every theme, paper tint, font, and layout so your desk feels calm, personal, and genuinely inviting.',
+            },
+            {
+              num: '02',
+              title: 'Compile Notes, Books & Lecture Videos in One Place',
+              body: 'Read textbooks side-by-side while pinning lecture video sources beside your sheet—make better, cleaner notes without carrying heavy books.',
+            },
+            {
+              num: '03',
+              title: 'Homely Vibes With a Real 3D Almirah Setup',
+              body: 'Organize books in realistic wooden & glass bookshelf almirahs and choose any cabinet design of your choice, just like your study room at home.',
+            },
+            {
+              num: '04',
+              title: 'Make Flowcharts With Gemini to Master Theory',
+              body: 'Turn sprawling theory chapters into structured multi-level Gemini flowcharts so complex mechanisms, drugs, and pathways stay organized for rapid recall.',
+            },
+            {
+              num: '05',
+              title: 'Dedicated Eye Rest Timer to Keep You Healthy',
+              body: 'Featured exclusively to protect your eyes during long study hours so you stay healthy, excel anywhere, and Achiev your goals in life.',
+            },
+            {
+              num: '06',
+              title: 'Connect With Friends — Zero Social Media Distraction',
+              body: 'Create your study group without moving from your seat and stay connected with classmates without losing focus—zero need to ever reach out to social media.',
+            },
+            {
+              num: '07',
+              title: 'Feeling Bored? Explore the World in Leisure Mode',
+              body: 'When not in the mood to study, unwind inside the Leisure segment as if exploring the world—complete with a smart break-time reminder tracking how long you rest.',
+            },
+            {
+              num: '08',
+              title: 'Talk to the Developer & Earn Idea Credits',
+              body: 'Suggest changes anytime. Ideas worth implementing are discussed with the developer team and showcased to users with credit while strictly maintaining your privacy.',
+            },
+            {
+              num: '09',
+              title: 'A Bag Full of Handwriting, Casual & Official Fonts',
+              body: 'Switch effortlessly across curated Handwriting, Casual, and Official font styles to craft notes that feel crisp, expressive, and uniquely yours.',
+            },
+            {
+              num: '10',
+              title: 'Observe Goals & Habits With Customised Trackers',
+              body: 'Monitor daily focus timer logs, MCQs, image questions, and study habits using tailored trackers built to help you Achiev efficiently every day.',
+            },
+          ].map((item) => (
+            <div key={item.num} className="pt-4 border-t border-[#f5d093]/15 flex items-start gap-3.5">
+              <span className="text-xs font-mono font-bold text-[#f5d093] pt-0.5 shrink-0 tabular-nums drop-shadow-[0_1px_4px_rgba(8,2,0,0.8)]">
+                {item.num}
+              </span>
+              <div className="space-y-1">
+                <h4 className="text-sm sm:text-base font-bold text-[#fff8ea] leading-snug drop-shadow-[0_1px_6px_rgba(8,2,0,0.8)]">
+                  {item.title}
+                </h4>
+                <p className="text-xs sm:text-[13px] text-[#f3dfc1] leading-relaxed drop-shadow-[0_1px_4px_rgba(8,2,0,0.75)]">
+                  {item.body}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -402,8 +450,23 @@ export const ProductDemoShowcase: React.FC = () => {
             className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#140803]/90 via-[#140803]/22 to-transparent"
           />
 
-          {/* Prev / Next arrows on photo */}
+          {/* Photo index indicators + Prev / Next arrows on photo */}
           <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+            <div className="hidden sm:flex items-center gap-1.5 mr-1 px-2.5 py-1.5 rounded-full bg-[#140803]/70 border border-[#f5d093]/25">
+              {STUDY_GALLERY_PHOTOS.map((photo, idx) => (
+                <button
+                  key={photo.id}
+                  type="button"
+                  onClick={() => setActivePhotoIdx(idx)}
+                  aria-label={`View study environment ${idx + 1}: ${photo.featureLabel}`}
+                  className={`h-1.5 rounded-full transition-all cursor-pointer ${
+                    idx === activePhotoIdx
+                      ? 'w-5 bg-[#f5d093]'
+                      : 'w-1.5 bg-[#f5d093]/40 hover:bg-[#f5d093]/75'
+                  }`}
+                />
+              ))}
+            </div>
             <button
               type="button"
               onClick={() =>

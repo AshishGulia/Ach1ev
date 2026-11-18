@@ -969,11 +969,15 @@ button[class*="border"]:not([data-swatch]):not([role="switch"]):not(.raw-icon-bt
 .font-architects,
 .font-dancing,
 .font-shadows,
-[style*="Caveat"],
-[style*="Kalam"],
+[style*="Annie Use Your Telescope"],
+[style*="Caveat Brush"],
+[style*="Comic Neue"],
+[style*="Delius"],
+[style*="Indie Flower"],
+[style*="Lobster Two"],
 [style*="Patrick Hand"],
-[style*="Architects Daughter"],
-[style*="Dancing Script"] {
+[style*="Dancing Script"],
+[style*="Jojoba"] {
   font-style: normal !important;
 }
 

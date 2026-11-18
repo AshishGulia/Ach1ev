@@ -210,49 +210,47 @@ export const MASTER_EDITIONS: MasterEdition[] = [
 export interface FontOption {
   id: string;
   name: string;
-  category: string;
-  fontType: 'handwriting' | 'sans' | 'serif';
+  category: 'Handwriting' | 'Casual' | 'Official';
+  fontType: 'handwriting' | 'casual' | 'official';
   cssFamily: string;
   description: string;
   sample: string;
 }
 
 export const APP_FONTS: FontOption[] = [
-  // 10 HANDWRITING FONTS
-  { id: 'pacifico', name: 'Pacifico', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Pacifico', cursive", description: 'Expressive brush script for warm personal headers.', sample: 'High-Yield Ward Pearl: Check Airway, Breathing & SpO2 first!' },
-  { id: 'dancing-script', name: 'Dancing Script', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Dancing Script', cursive", description: 'Fluid calligraphic strokes for memorable study anchors.', sample: 'Important: Discontinue Metformin 48 hrs prior to IV contrast.' },
-  { id: 'caveat', name: 'Caveat', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Caveat', cursive", description: 'Natural rapid medical student notebook cursive.', sample: 'Differential Diagnosis: Pneumothorax vs Cardiac Tamponade.' },
-  { id: 'architects-daughter', name: 'Architects Daughter', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Architects Daughter', cursive", description: 'Grid-aligned blueprint hand lettering for diagrams.', sample: 'Formula: MAP = DBP + 1/3 (SBP - DBP) >= 65 mmHg.' },
-  { id: 'brush-script', name: 'Brush Script', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Brush Script MT', 'Great Vibes', cursive", description: 'Classic painterly fountain script feel.', sample: 'Clinical Round Notes — Cardiology Morning Posting.' },
-  { id: 'marker-felt', name: 'Marker Felt', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Marker Felt', 'Comic Sans MS', 'Patrick Hand', cursive", description: 'Bold felt-tip whiteboard highlight lettering.', sample: 'Remember triad: Beck’s Triad -> Hypotension, JVD, Muffled heart sounds.' },
-  { id: 'chalkduster', name: 'Chalkduster', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Chalkduster', 'Patrick Hand', cursive", description: 'Textured lecture blackboard chalk lettering.', sample: 'Cranial Nerve Exam: CN I to XII Quick Recall.' },
-  { id: 'alex-brush', name: 'Alex Brush', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Alex Brush', cursive", description: 'Elegant flowing ink cursive for refined titles.', sample: 'The Art & Science of Physical Examination.' },
-  { id: 'great-vibes', name: 'Great Vibes', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Great Vibes', cursive", description: 'Formal royal calligraphy penmanship.', sample: 'Certificate of Clinical Distinction & Focus.' },
-  { id: 'satisfy', name: 'Satisfy', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Satisfy', cursive", description: 'Clean effortless cursive signature strokes.', sample: 'Rx: Tab. Amoxicillin-Clavulanate 625mg PO TDS x 7d.' },
+  // 9 HANDWRITING FONTS
+  { id: 'annie-use-your-telescope', name: 'Annie Use Your Telescope', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Annie Use Your Telescope', cursive", description: 'Tall airy fine-pen lettering ideal for cozy annotations.', sample: 'High-Yield Ward Pearl: Check Airway, Breathing & SpO2 first!' },
+  { id: 'caveat-brush', name: 'Caveat Brush', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Caveat Brush', cursive", description: 'Bold expressive marker-brush stroke for standout headlines.', sample: 'Beck Triad -> Hypotension, JVD & Muffled Heart Sounds.' },
+  { id: 'comic-neue', name: 'Comic Neue', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Comic Neue', cursive", description: 'Friendly crisp printed notebook hand with wide readability.', sample: 'Formula: MAP = DBP + 1/3 (SBP - DBP) >= 65 mmHg.' },
+  { id: 'delius', name: 'Delius', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Delius', cursive", description: 'Neat rounded ballpoint print balanced for whole study pages.', sample: 'Differential Diagnosis: Pneumothorax vs Cardiac Tamponade.' },
+  { id: 'indie-flower', name: 'Indie Flower', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Indie Flower', cursive", description: 'Playful upbeat student margin-note handwriting.', sample: 'Discontinue Metformin 48 hrs prior to iodinated IV contrast.' },
+  { id: 'lobster-two', name: 'Lobster Two', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Lobster Two', cursive", description: 'Clean upright brush display script with warm editorial flair.', sample: 'Clinical Round Notes — Cardiology Morning Posting.' },
+  { id: 'dancing-script', name: 'Dancing Script', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Dancing Script', cursive", description: 'Fluid calligraphic strokes for memorable study anchors.', sample: 'The Art & Science of Bedside Physical Examination.' },
+  { id: 'patrick-hand', name: 'Patrick Hand', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Patrick Hand', cursive", description: 'Clean effortless everyday notebook penmanship.', sample: 'Cranial Nerve Exam: CN I to XII Quick Recall Sheet.' },
+  { id: 'jojoba', name: 'Jojoba', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Jojoba', 'Patrick Hand', cursive", description: 'Organic studio hand-script style with gentle organic rhythm.', sample: 'Rx: Tab. Amoxicillin-Clavulanate 625mg PO TDS x 7d.' },
 
-  // 10 SANS-SERIF FONTS
-  { id: 'helvetica', name: 'Helvetica', category: 'Sans-Serif', fontType: 'sans', cssFamily: "'Helvetica Neue', Helvetica, Arial, sans-serif", description: 'Iconic Swiss clinical precision typography.', sample: 'Cardiovascular Hemodynamics & Clinical Triage' },
-  { id: 'arial', name: 'Arial', category: 'Sans-Serif', fontType: 'sans', cssFamily: "Arial, Helvetica, sans-serif", description: 'Clean universal medical chart sans-serif.', sample: 'Arterial Blood Gas Analysis & Anion Gap Synthesis' },
-  { id: 'calibri', name: 'Calibri', category: 'Sans-Serif', fontType: 'sans', cssFamily: "Calibri, 'Source Sans 3', 'Open Sans', sans-serif", description: 'Soft warm modern humanist sans-serif.', sample: 'Pharmacokinetics: Volume of Distribution & Half-Life' },
-  { id: 'inter', name: 'Inter', category: 'Sans-Serif', fontType: 'sans', cssFamily: "'Inter', sans-serif", description: 'High x-height UI font built for dense lab tables.', sample: 'Glasgow Coma Scale (GCS) Assessment in Trauma' },
-  { id: 'roboto', name: 'Roboto', category: 'Sans-Serif', fontType: 'sans', cssFamily: "'Roboto', sans-serif", description: 'Geometric Android-native friendly clarity.', sample: 'Systemic Vascular Resistance & Cardiac Output' },
-  { id: 'open-sans', name: 'Open Sans', category: 'Sans-Serif', fontType: 'sans', cssFamily: "'Open Sans', sans-serif", description: 'Neutral ultra-legible humanist lecture typography.', sample: 'Renal Clearance & Glomerular Filtration Curves' },
-  { id: 'lato', name: 'Lato', category: 'Sans-Serif', fontType: 'sans', cssFamily: "'Lato', sans-serif", description: 'Balanced semi-rounded warmth and seriousness.', sample: 'Pediatric Immunization & Developmental Milestones' },
-  { id: 'montserrat', name: 'Montserrat', category: 'Sans-Serif', fontType: 'sans', cssFamily: "'Montserrat', sans-serif", description: 'Wide geometric modernist headlines & labels.', sample: 'ACLS & Emergency Trauma Protocol Summary' },
-  { id: 'source-sans-3', name: 'Source Sans 3', category: 'Sans-Serif', fontType: 'sans', cssFamily: "'Source Sans 3', sans-serif", description: 'Adobe editorial sans calibrated for long screens.', sample: 'Evidence-Based Internal Medicine Pocket Guide' },
-  { id: 'futura', name: 'Futura', category: 'Sans-Serif', fontType: 'sans', cssFamily: "Futura, 'Plus Jakarta Sans', 'Outfit', sans-serif", description: 'Clean architectural Bauhaus geometric sans.', sample: 'Neuroanatomy Tracts & Brainstem Cross-Sections' },
+  // 9 CASUAL FONTS
+  { id: 'urbanist', name: 'Urbanist', category: 'Casual', fontType: 'casual', cssFamily: "'Urbanist', sans-serif", description: 'Low-contrast geometric sans built for modern calm workspaces.', sample: 'Cardiovascular Hemodynamics & Clinical Triage' },
+  { id: 'calibri', name: 'Calibri', category: 'Casual', fontType: 'casual', cssFamily: "Calibri, 'Urbanist', sans-serif", description: 'Soft warm modern humanist sans-serif for crisp documents.', sample: 'Pharmacokinetics: Volume of Distribution & Half-Life' },
+  { id: 'alata', name: 'Alata', category: 'Casual', fontType: 'casual', cssFamily: "'Alata', sans-serif", description: 'Friendly clean humanist strokes calibrated for long sessions.', sample: 'Renal Clearance & Glomerular Filtration Curves' },
+  { id: 'bahnschrift', name: 'Bahnschrift', category: 'Casual', fontType: 'casual', cssFamily: "'Bahnschrift', 'Afacad', sans-serif", description: 'Precision German DIN geometric clean technical lettering.', sample: 'Systemic Vascular Resistance & Cardiac Output' },
+  { id: 'century-gothic', name: 'Century Gothic', category: 'Casual', fontType: 'casual', cssFamily: "'Century Gothic', CenturyGothic, AppleGothic, 'Urbanist', sans-serif", description: 'Open circular geometric sans with wide airy breathing room.', sample: 'Neuroanatomy Tracts & Brainstem Cross-Sections' },
+  { id: 'zen-maru-gothic', name: 'Zen Maru Gothic', category: 'Casual', fontType: 'casual', cssFamily: "'Zen Maru Gothic', sans-serif", description: 'Rounded gentle minimalist studio sans with zero harsh corners.', sample: 'Pediatric Immunization & Developmental Milestones' },
+  { id: 'afacad', name: 'Afacad', category: 'Casual', fontType: 'casual', cssFamily: "'Afacad', sans-serif", description: 'Warm contemporary editorial sans with subtle calligraphic curves.', sample: 'Arterial Blood Gas Analysis & Anion Gap Synthesis' },
+  { id: 'arsenal', name: 'Arsenal', category: 'Casual', fontType: 'casual', cssFamily: "'Arsenal', sans-serif", description: 'Compact sharp humanist sans great for dense comparison charts.', sample: 'ACLS & Emergency Trauma Protocol Summary' },
+  { id: 'cascadia-mono', name: 'Cascadia Mono', category: 'Casual', fontType: 'casual', cssFamily: "'Cascadia Mono', monospace", description: 'Crisp monospaced clarity ideal for lab ranges and formulas.', sample: 'Na+ 135-145 | K+ 3.5-5.0 | HCO3- 22-26 mEq/L' },
 
-  // 10 SERIF FONTS
-  { id: 'times-new-roman', name: 'Times New Roman', category: 'Serif', fontType: 'serif', cssFamily: "'Times New Roman', Times, serif", description: 'Timeless academic paper & medical journal standard.', sample: 'Harrison’s Principles of Internal Medicine — Review Notes' },
-  { id: 'georgia', name: 'Georgia', category: 'Serif', fontType: 'serif', cssFamily: "Georgia, serif", description: 'Wide generous screen serif built for clarity.', sample: 'Differential Diagnosis of Acute Abdomen & Peritonitis' },
-  { id: 'garamond', name: 'Garamond', category: 'Serif', fontType: 'serif', cssFamily: "Garamond, 'EB Garamond', serif", description: 'Graceful Old-Style scholarly print elegance.', sample: 'Classical Materia Medica & Pathophysiology Essays' },
-  { id: 'baskerville', name: 'Baskerville', category: 'Serif', fontType: 'serif', cssFamily: "'Libre Baskerville', Baskerville, Georgia, serif", description: 'Transitional high-contrast British academic serif (Default Ach1ev Style).', sample: 'Oxford Handbook of Clinical Medicine Notes' },
-  { id: 'merriweather', name: 'Merriweather', category: 'Serif', fontType: 'serif', cssFamily: "'Merriweather', serif", description: 'Robust condensed serif designed for deep textbook study.', sample: 'Diagnostic Criteria for Acute Coronary Syndromes' },
-  { id: 'playfair-display', name: 'Playfair Display', category: 'Serif', fontType: 'serif', cssFamily: "'Playfair Display', serif", description: 'Royal editorial display serif for classical headers.', sample: 'Ach1ev Editorial Study — Clinical Journal Synthesis' },
-  { id: 'bodoni', name: 'Bodoni', category: 'Serif', fontType: 'serif', cssFamily: "'Bodoni Moda', 'Bodoni MT', Didot, serif", description: 'Dramatic hairline Didone contrast for headers.', sample: 'Grand Rounds Case Compendium & Therapeutics' },
-  { id: 'palatino', name: 'Palatino', category: 'Serif', fontType: 'serif', cssFamily: "'Palatino Linotype', 'Book Antiqua', Palatino, serif", description: 'Broad sculptural Renaissance humanist serif.', sample: 'Physiological Basis of Medical Practice' },
-  { id: 'lora', name: 'Lora', category: 'Serif', fontType: 'serif', cssFamily: "'Lora', serif", description: 'Calligraphic contemporary serif with subtle curves.', sample: 'Integrated Pathology & Pharmacology Compendium' },
-  { id: 'cinzel', name: 'Cinzel', category: 'Serif', fontType: 'serif', cssFamily: "'Cinzel', serif", description: 'Regal engraved Roman inscription proportions.', sample: 'HIPPOCRATIC CLINICAL ARCHIVE & NOTES' },
+  // 10 OFFICIAL FONTS
+  { id: 'times-new-roman', name: 'Times New Roman', category: 'Official', fontType: 'official', cssFamily: "'Times New Roman', Times, serif", description: 'Timeless academic paper & medical journal standard.', sample: 'Harrison’s Principles of Internal Medicine — Review Notes' },
+  { id: 'amiri-quran', name: 'Amiri Quran', category: 'Official', fontType: 'official', cssFamily: "'Amiri Quran', serif", description: 'Classical Naskh & refined editorial scholarly proportions.', sample: 'Classical Materia Medica & Pathophysiology Compendium' },
+  { id: 'abhaya-libre', name: 'Abhaya Libre', category: 'Official', fontType: 'official', cssFamily: "'Abhaya Libre', serif", description: 'High-contrast stately serif crafted for serious reading.', sample: 'Oxford Handbook of Clinical Medicine Synthesis' },
+  { id: 'antic', name: 'Antic', category: 'Official', fontType: 'official', cssFamily: "'Antic', sans-serif", description: 'Formal clean newspaper & monograph display clarity.', sample: 'Diagnostic Criteria for Acute Coronary Syndromes' },
+  { id: 'didone', name: 'Didone', category: 'Official', fontType: 'official', cssFamily: "'Didone', 'Antic Didone', 'Bodoni Moda', 'Didot', serif", description: 'Sculptural hairline-serif formality for distinguished titles.', sample: 'Grand Rounds Case Compendium & Therapeutics' },
+  { id: 'bellefair', name: 'Bellefair', category: 'Official', fontType: 'official', cssFamily: "'Bellefair', serif", description: 'Poetic humanist classic serif with graceful open counters.', sample: 'Differential Diagnosis of Acute Abdomen & Peritonitis' },
+  { id: 'bodoni-moda', name: 'Bodoni Moda', category: 'Official', fontType: 'official', cssFamily: "'Bodoni Moda', 'Bodoni MT', serif", description: 'Dramatic luxury editorial serif with sharp contrast.', sample: 'Ach1ev Editorial Study — Clinical Journal Archive' },
+  { id: 'bona-nova', name: 'Bona Nova', category: 'Official', fontType: 'official', cssFamily: "'Bona Nova', serif", description: 'Structured contemporary academic book serif for deep focus.', sample: 'Physiological Basis of Medical Practice Notes' },
+  { id: 'caudex', name: 'Caudex', category: 'Official', fontType: 'official', cssFamily: "'Caudex', serif", description: 'Inspired by medieval manuscripts with disciplined modern rhythm.', sample: 'Integrated Pathology & Pharmacology Compendium' },
+  { id: 'domine', name: 'Domine', category: 'Official', fontType: 'official', cssFamily: "'Domine', serif", description: 'Sturdy authoritative serif tuned for razor-sharp on-screen body study.', sample: 'Evidence-Based Internal Medicine Pocket Guide' },
 ];
 
 export const SettingsModal: React.FC<SettingsModalProps> = ({
@@ -624,13 +622,16 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
   useEffect(() => {
     if (typeof document === 'undefined') return;
     const href =
-      'https://fonts.googleapis.com/css2?family=Alex+Brush&family=Architects+Daughter&family=Bodoni+Moda:wght@500;700&family=Caveat:wght@500;700&family=Cinzel:wght@600;700&family=Dancing+Script:wght@600;700&family=EB+Garamond:wght@400;600&family=Great+Vibes&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&family=Lato:wght@400;700&family=Libre+Baskerville:wght@400;700&family=Lora:wght@400;600;700&family=Merriweather:wght@400;700&family=Montserrat:wght@400;600;700&family=Open+Sans:wght@400;600;700&family=Outfit:wght@400;600;700&family=Pacifico&family=Patrick+Hand&family=Playfair+Display:ital,wght@0,500;0,700;1,400&family=Plus+Jakarta+Sans:wght@400;600;700&family=Roboto:wght@400;500;700&family=Satisfy&family=Source+Sans+3:wght@400;600;700&display=swap';
-    if (!document.getElementById('achiev-google-fonts-30')) {
+      'https://fonts.googleapis.com/css2?family=Abhaya+Libre:wght@400;600;700&family=Afacad:wght@400;500;600;700&family=Alata&family=Amiri+Quran&family=Annie+Use+Your+Telescope&family=Antic&family=Antic+Didone&family=Arsenal:wght@400;700&family=Bellefair&family=Bodoni+Moda:wght@500;700&family=Bona+Nova:wght@400;700&family=Cascadia+Mono:wght@400;600&family=Caudex:wght@400;700&family=Caveat+Brush&family=Comic+Neue:wght@400;700&family=Dancing+Script:wght@600;700&family=Delius&family=Domine:wght@400;600;700&family=Indie+Flower&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Lobster+Two:wght@400;700&family=Patrick+Hand&family=Urbanist:wght@400;600;700&family=Zen+Maru+Gothic:wght@400;700&display=swap';
+    const existing = document.getElementById('achiev-google-fonts-30') as HTMLLinkElement | null;
+    if (!existing) {
       const link = document.createElement('link');
       link.id = 'achiev-google-fonts-30';
       link.rel = 'stylesheet';
       link.href = href;
       document.head.appendChild(link);
+    } else if (existing.href !== href) {
+      existing.href = href;
     }
   }, []);
 
@@ -857,7 +858,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     const saved = localStorage.getItem('medden_font_scale');
     return saved ? parseInt(saved, 10) : 100;
   });
-  const [fontCategoryFilter, setFontCategoryFilter] = useState<'all' | 'handwriting' | 'sans' | 'serif'>('all');
+  const [fontCategoryFilter, setFontCategoryFilter] = useState<'all' | 'handwriting' | 'casual' | 'official'>('all');
   const [copiedAppletId, setCopiedAppletId] = useState<boolean>(false);
 
   const activeAccountEmail = user?.email || googleUser?.email || profileForm.email || '';
@@ -2031,8 +2032,8 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     {[
                       { key: 'all', label: `All (${APP_FONTS.length})`, count: APP_FONTS.length },
                       { key: 'handwriting', label: `Handwriting (${APP_FONTS.filter(f => f.fontType === 'handwriting').length})`, count: APP_FONTS.filter(f => f.fontType === 'handwriting').length },
-                      { key: 'sans', label: `Sans-Serif (${APP_FONTS.filter(f => f.fontType === 'sans').length})`, count: APP_FONTS.filter(f => f.fontType === 'sans').length },
-                      { key: 'serif', label: `Serif (${APP_FONTS.filter(f => f.fontType === 'serif').length})`, count: APP_FONTS.filter(f => f.fontType === 'serif').length },
+                      { key: 'casual', label: `Casual (${APP_FONTS.filter(f => f.fontType === 'casual').length})`, count: APP_FONTS.filter(f => f.fontType === 'casual').length },
+                      { key: 'official', label: `Official (${APP_FONTS.filter(f => f.fontType === 'official').length})`, count: APP_FONTS.filter(f => f.fontType === 'official').length },
                     ].map((btn) => (
                       <button
                         key={btn.key}
@@ -2050,24 +2051,24 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   </div>
                 </div>
 
-                {/* Grouped Individual Category Font Sections (Handwriting · Sans-Serif · Serif) */}
+                {/* Grouped Individual Category Font Sections (Handwriting · Casual · Official) */}
                 <div className="space-y-6">
                   {(
                     [
                       {
                         key: 'handwriting',
                         title: 'Handwriting',
-                        subtitle: 'Expressive cursive, brush, blackboard & studio pen lettering',
+                        subtitle: 'Expressive cursive, brush, and studio notebook lettering',
                       },
                       {
-                        key: 'sans',
-                        title: 'Sans-Serif',
-                        subtitle: 'Clean geometric, neo-grotesque & humanist clarity',
+                        key: 'casual',
+                        title: 'Casual',
+                        subtitle: 'Clean geometric, rounded, humanist, and monospace clarity',
                       },
                       {
-                        key: 'serif',
-                        title: 'Serif',
-                        subtitle: 'Editorial book, medical journal & royal classic serif typography',
+                        key: 'official',
+                        title: 'Official',
+                        subtitle: 'Academic, classical serif, and distinguished journal typography',
                       },
                     ] as const
                   )

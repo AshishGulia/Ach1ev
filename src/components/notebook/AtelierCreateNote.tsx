@@ -323,52 +323,59 @@ const NOTE_FONT_OPTIONS: Array<{
   key: string;
   short: string;
   label: string;
-  category: 'Handwriting' | 'Sans-Serif' | 'Serif';
+  category: 'Handwriting' | 'Casual' | 'Official';
   family: string;
   isHandwriting?: boolean;
 }> = [
-  // Handwriting (10)
-  { id: 'font-pacifico', key: 'pacifico', short: 'Pacifico', label: 'Pacifico', category: 'Handwriting', family: "'Pacifico', cursive", isHandwriting: true },
+  // Handwriting (9)
+  { id: 'font-annie-use-your-telescope', key: 'annie-use-your-telescope', short: 'Annie Use Your Telescope', label: 'Annie Use Your Telescope', category: 'Handwriting', family: "'Annie Use Your Telescope', cursive", isHandwriting: true },
+  { id: 'font-caveat-brush', key: 'caveat-brush', short: 'Caveat Brush', label: 'Caveat Brush', category: 'Handwriting', family: "'Caveat Brush', cursive", isHandwriting: true },
+  { id: 'font-comic-neue', key: 'comic-neue', short: 'Comic Neue', label: 'Comic Neue', category: 'Handwriting', family: "'Comic Neue', cursive", isHandwriting: true },
+  { id: 'font-delius', key: 'delius', short: 'Delius', label: 'Delius', category: 'Handwriting', family: "'Delius', cursive", isHandwriting: true },
+  { id: 'font-indie-flower', key: 'indie-flower', short: 'Indie Flower', label: 'Indie Flower', category: 'Handwriting', family: "'Indie Flower', cursive", isHandwriting: true },
+  { id: 'font-lobster-two', key: 'lobster-two', short: 'Lobster Two', label: 'Lobster Two', category: 'Handwriting', family: "'Lobster Two', cursive", isHandwriting: true },
   { id: 'font-dancing-script', key: 'dancing-script', short: 'Dancing Script', label: 'Dancing Script', category: 'Handwriting', family: "'Dancing Script', cursive", isHandwriting: true },
-  { id: 'font-caveat', key: 'caveat', short: 'Caveat', label: 'Caveat', category: 'Handwriting', family: "'Caveat', cursive", isHandwriting: true },
-  { id: 'font-architects-daughter', key: 'architects-daughter', short: 'Architects Daughter', label: 'Architects Daughter', category: 'Handwriting', family: "'Architects Daughter', cursive", isHandwriting: true },
-  { id: 'font-brush-script', key: 'brush-script', short: 'Brush Script', label: 'Brush Script', category: 'Handwriting', family: "'Brush Script MT', 'Great Vibes', cursive", isHandwriting: true },
-  { id: 'font-marker-felt', key: 'marker-felt', short: 'Marker Felt', label: 'Marker Felt', category: 'Handwriting', family: "'Marker Felt', 'Comic Sans MS', 'Patrick Hand', cursive", isHandwriting: true },
-  { id: 'font-chalkduster', key: 'chalkduster', short: 'Chalkduster', label: 'Chalkduster', category: 'Handwriting', family: "'Chalkduster', 'Patrick Hand', cursive", isHandwriting: true },
-  { id: 'font-alex-brush', key: 'alex-brush', short: 'Alex Brush', label: 'Alex Brush', category: 'Handwriting', family: "'Alex Brush', cursive", isHandwriting: true },
-  { id: 'font-great-vibes', key: 'great-vibes', short: 'Great Vibes', label: 'Great Vibes', category: 'Handwriting', family: "'Great Vibes', cursive", isHandwriting: true },
-  { id: 'font-satisfy', key: 'satisfy', short: 'Satisfy', label: 'Satisfy', category: 'Handwriting', family: "'Satisfy', cursive", isHandwriting: true },
+  { id: 'font-patrick-hand', key: 'patrick-hand', short: 'Patrick Hand', label: 'Patrick Hand', category: 'Handwriting', family: "'Patrick Hand', cursive", isHandwriting: true },
+  { id: 'font-jojoba', key: 'jojoba', short: 'Jojoba', label: 'Jojoba', category: 'Handwriting', family: "'Jojoba', 'Patrick Hand', cursive", isHandwriting: true },
 
-  // Sans-Serif (10)
-  { id: 'font-helvetica', key: 'helvetica', short: 'Helvetica', label: 'Helvetica', category: 'Sans-Serif', family: "'Helvetica Neue', Helvetica, Arial, sans-serif" },
-  { id: 'font-arial', key: 'arial', short: 'Arial', label: 'Arial', category: 'Sans-Serif', family: "Arial, Helvetica, sans-serif" },
-  { id: 'font-calibri', key: 'calibri', short: 'Calibri', label: 'Calibri', category: 'Sans-Serif', family: "Calibri, 'Source Sans 3', 'Open Sans', sans-serif" },
-  { id: 'font-inter', key: 'inter', short: 'Inter', label: 'Inter', category: 'Sans-Serif', family: "'Inter', sans-serif" },
-  { id: 'font-roboto', key: 'roboto', short: 'Roboto', label: 'Roboto', category: 'Sans-Serif', family: "'Roboto', sans-serif" },
-  { id: 'font-open-sans', key: 'open-sans', short: 'Open Sans', label: 'Open Sans', category: 'Sans-Serif', family: "'Open Sans', sans-serif" },
-  { id: 'font-lato', key: 'lato', short: 'Lato', label: 'Lato', category: 'Sans-Serif', family: "'Lato', sans-serif" },
-  { id: 'font-montserrat', key: 'montserrat', short: 'Montserrat', label: 'Montserrat', category: 'Sans-Serif', family: "'Montserrat', sans-serif" },
-  { id: 'font-source-sans-3', key: 'source-sans-3', short: 'Source Sans 3', label: 'Source Sans 3', category: 'Sans-Serif', family: "'Source Sans 3', sans-serif" },
-  { id: 'font-futura', key: 'futura', short: 'Futura', label: 'Futura', category: 'Sans-Serif', family: "Futura, 'Plus Jakarta Sans', 'Outfit', sans-serif" },
+  // Casual (9)
+  { id: 'font-urbanist', key: 'urbanist', short: 'Urbanist', label: 'Urbanist', category: 'Casual', family: "'Urbanist', sans-serif" },
+  { id: 'font-calibri', key: 'calibri', short: 'Calibri', label: 'Calibri', category: 'Casual', family: "Calibri, 'Urbanist', sans-serif" },
+  { id: 'font-alata', key: 'alata', short: 'Alata', label: 'Alata', category: 'Casual', family: "'Alata', sans-serif" },
+  { id: 'font-bahnschrift', key: 'bahnschrift', short: 'Bahnschrift', label: 'Bahnschrift', category: 'Casual', family: "'Bahnschrift', 'Afacad', sans-serif" },
+  { id: 'font-century-gothic', key: 'century-gothic', short: 'Century Gothic', label: 'Century Gothic', category: 'Casual', family: "'Century Gothic', CenturyGothic, AppleGothic, 'Urbanist', sans-serif" },
+  { id: 'font-zen-maru-gothic', key: 'zen-maru-gothic', short: 'Zen Maru Gothic', label: 'Zen Maru Gothic', category: 'Casual', family: "'Zen Maru Gothic', sans-serif" },
+  { id: 'font-afacad', key: 'afacad', short: 'Afacad', label: 'Afacad', category: 'Casual', family: "'Afacad', sans-serif" },
+  { id: 'font-arsenal', key: 'arsenal', short: 'Arsenal', label: 'Arsenal', category: 'Casual', family: "'Arsenal', sans-serif" },
+  { id: 'font-cascadia-mono', key: 'cascadia-mono', short: 'Cascadia Mono', label: 'Cascadia Mono', category: 'Casual', family: "'Cascadia Mono', monospace" },
 
-  // Serif (10)
-  { id: 'font-times-new-roman', key: 'times-new-roman', short: 'Times New Roman', label: 'Times New Roman', category: 'Serif', family: "'Times New Roman', Times, serif" },
-  { id: 'font-georgia', key: 'georgia', short: 'Georgia', label: 'Georgia', category: 'Serif', family: "Georgia, serif" },
-  { id: 'font-garamond', key: 'garamond', short: 'Garamond', label: 'Garamond', category: 'Serif', family: "Garamond, 'EB Garamond', serif" },
-  { id: 'font-baskerville', key: 'baskerville', short: 'Baskerville', label: 'Baskerville', category: 'Serif', family: "Baskerville, 'Libre Baskerville', serif" },
-  { id: 'font-merriweather', key: 'merriweather', short: 'Merriweather', label: 'Merriweather', category: 'Serif', family: "'Merriweather', serif" },
-  { id: 'font-playfair', key: 'playfair', short: 'Playfair Display', label: 'Playfair Display', category: 'Serif', family: "'Playfair Display', serif" },
-  { id: 'font-bodoni', key: 'bodoni', short: 'Bodoni', label: 'Bodoni', category: 'Serif', family: "'Bodoni Moda', 'Bodoni MT', Didot, serif" },
-  { id: 'font-palatino', key: 'palatino', short: 'Palatino', label: 'Palatino', category: 'Serif', family: "'Palatino Linotype', 'Book Antiqua', Palatino, serif" },
-  { id: 'font-lora', key: 'lora', short: 'Lora', label: 'Lora', category: 'Serif', family: "'Lora', serif" },
-  { id: 'font-cinzel', key: 'cinzel', short: 'Cinzel', label: 'Cinzel', category: 'Serif', family: "'Cinzel', serif" },
+  // Official (10)
+  { id: 'font-times-new-roman', key: 'times-new-roman', short: 'Times New Roman', label: 'Times New Roman', category: 'Official', family: "'Times New Roman', Times, serif" },
+  { id: 'font-amiri-quran', key: 'amiri-quran', short: 'Amiri Quran', label: 'Amiri Quran', category: 'Official', family: "'Amiri Quran', serif" },
+  { id: 'font-abhaya-libre', key: 'abhaya-libre', short: 'Abhaya Libre', label: 'Abhaya Libre', category: 'Official', family: "'Abhaya Libre', serif" },
+  { id: 'font-antic', key: 'antic', short: 'Antic', label: 'Antic', category: 'Official', family: "'Antic', sans-serif" },
+  { id: 'font-didone', key: 'didone', short: 'Didone', label: 'Didone', category: 'Official', family: "'Didone', 'Antic Didone', 'Bodoni Moda', 'Didot', serif" },
+  { id: 'font-bellefair', key: 'bellefair', short: 'Bellefair', label: 'Bellefair', category: 'Official', family: "'Bellefair', serif" },
+  { id: 'font-bodoni-moda', key: 'bodoni-moda', short: 'Bodoni Moda', label: 'Bodoni Moda', category: 'Official', family: "'Bodoni Moda', 'Bodoni MT', serif" },
+  { id: 'font-bona-nova', key: 'bona-nova', short: 'Bona Nova', label: 'Bona Nova', category: 'Official', family: "'Bona Nova', serif" },
+  { id: 'font-caudex', key: 'caudex', short: 'Caudex', label: 'Caudex', category: 'Official', family: "'Caudex', serif" },
+  { id: 'font-domine', key: 'domine', short: 'Domine', label: 'Domine', category: 'Official', family: "'Domine', serif" },
 ];
 
 const normalizeNoteFontKey = (raw: string): string => {
-  if (raw === 'sans' || raw === 'alata') return 'helvetica';
-  if (raw === 'serif') return 'baskerville';
-  if (raw === 'hand') return 'caveat';
-  return raw || 'baskerville';
+  if (!raw) return 'domine';
+  if (raw === 'sans' || raw === 'helvetica' || raw === 'inter' || raw === 'roboto' || raw === 'open-sans' || raw === 'lato' || raw === 'montserrat' || raw === 'source-sans-3' || raw === 'arial' || raw === 'futura') {
+    return 'urbanist';
+  }
+  if (raw === 'serif' || raw === 'baskerville' || raw === 'merriweather' || raw === 'georgia' || raw === 'garamond' || raw === 'playfair' || raw === 'palatino' || raw === 'lora' || raw === 'cinzel') {
+    return 'domine';
+  }
+  if (raw === 'bodoni') return 'bodoni-moda';
+  if (raw === 'hand' || raw === 'caveat' || raw === 'pacifico' || raw === 'architects-daughter' || raw === 'brush-script' || raw === 'marker-felt' || raw === 'chalkduster' || raw === 'alex-brush' || raw === 'great-vibes' || raw === 'satisfy') {
+    return 'caveat-brush';
+  }
+  const matched = NOTE_FONT_OPTIONS.some((f) => f.key === raw);
+  return matched ? raw : 'domine';
 };
 
 const formatTodayDate = () =>
@@ -4158,7 +4165,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                 </button>
 
                 <span className="an-vsep" />
-                {/* Compact Categorized Font Picker (30 Fonts) */}
+                {/* Compact Categorized Font Picker */}
                 <select
                   className="an-select-sm an-font-select"
                   value={normalizeNoteFontKey(fontStyle)}
@@ -4172,7 +4179,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                   aria-label="Note font family"
                   title="Choose font"
                 >
-                  {(['Handwriting', 'Sans-Serif', 'Serif'] as const).map((cat) => (
+                  {(['Handwriting', 'Casual', 'Official'] as const).map((cat) => (
                     <optgroup key={cat} label={cat}>
                       {NOTE_FONT_OPTIONS.filter((f) => f.category === cat).map((f) => (
                         <option key={f.key} value={f.key} style={{ fontFamily: f.family }}>

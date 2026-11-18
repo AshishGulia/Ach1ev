@@ -142,7 +142,7 @@ export const DEMO_SCENES: DemoScene[] = [
     hint: 'Save Note directly to your cloud notebooks',
     tablet: {
       heading: 'Create Note',
-      subheading: 'Ruled Thin · Playfair Display',
+      subheading: 'Ruled Thin · Domine & Caveat Brush',
       cards: ['Autonomic Drugs Comparison', 'Lines: Full page continuous', 'Save Note to Shelf'],
       anchor: 2,
     },
@@ -349,9 +349,13 @@ export const DEMO_SCENES: DemoScene[] = [
         },
         {
           title: 'Font Library',
-          badge: '33 Fonts',
+          badge: '28 Fonts',
           kind: 'settings',
-          rows: ['Editorial Serif: Playfair Display', 'Sans: Inter · Lato · Montserrat', 'Handwriting: Caveat · Dancing'],
+          rows: [
+            'Handwriting: Annie · Caveat Brush · Patrick Hand',
+            'Casual: Urbanist · Zen Maru Gothic · Cascadia Mono',
+            'Official: Bodoni Moda · Bona Nova · Domine',
+          ],
         },
       ],
       anchor: 1,
