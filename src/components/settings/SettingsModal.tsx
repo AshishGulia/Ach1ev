@@ -89,6 +89,7 @@ import {
   Timer,
   Clock,
   ExternalLink,
+  LogOut,
   Image as ImageIcon,
 } from 'lucide-react';
 
@@ -221,9 +222,10 @@ export interface FontOption {
 }
 
 export const APP_FONTS: FontOption[] = [
-  // 9 HANDWRITING FONTS
+  // 10 HANDWRITING FONTS
   { id: 'annie-use-your-telescope', name: 'Annie Use Your Telescope', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Annie Use Your Telescope', cursive", description: 'Tall airy fine-pen lettering ideal for cozy annotations.', sample: 'High-Yield Ward Pearl: Check Airway, Breathing & SpO2 first!' },
   { id: 'caveat-brush', name: 'Caveat Brush', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Caveat Brush', cursive", description: 'Bold expressive marker-brush stroke for standout headlines.', sample: 'Beck Triad -> Hypotension, JVD & Muffled Heart Sounds.' },
+  { id: 'gochi-hand', name: 'Gochi Hand', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Gochi Hand', cursive", description: 'Expressive lively marker pen script for margin notes.', sample: 'Emergency Triage: Primary Survey & Resuscitation.' },
   { id: 'comic-neue', name: 'Comic Neue', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Comic Neue', cursive", description: 'Friendly crisp printed notebook hand with wide readability.', sample: 'Formula: MAP = DBP + 1/3 (SBP - DBP) >= 65 mmHg.' },
   { id: 'delius', name: 'Delius', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Delius', cursive", description: 'Neat rounded ballpoint print balanced for whole study pages.', sample: 'Differential Diagnosis: Pneumothorax vs Cardiac Tamponade.' },
   { id: 'indie-flower', name: 'Indie Flower', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Indie Flower', cursive", description: 'Playful upbeat student margin-note handwriting.', sample: 'Discontinue Metformin 48 hrs prior to iodinated IV contrast.' },
@@ -232,7 +234,7 @@ export const APP_FONTS: FontOption[] = [
   { id: 'patrick-hand', name: 'Patrick Hand', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Patrick Hand', cursive", description: 'Clean effortless everyday notebook penmanship.', sample: 'Cranial Nerve Exam: CN I to XII Quick Recall Sheet.' },
   { id: 'jojoba', name: 'Jojoba', category: 'Handwriting', fontType: 'handwriting', cssFamily: "'Jojoba', 'Patrick Hand', cursive", description: 'Organic studio hand-script style with gentle organic rhythm.', sample: 'Rx: Tab. Amoxicillin-Clavulanate 625mg PO TDS x 7d.' },
 
-  // 9 CASUAL FONTS
+  // 10 CASUAL FONTS
   { id: 'urbanist', name: 'Urbanist', category: 'Casual', fontType: 'casual', cssFamily: "'Urbanist', sans-serif", description: 'Low-contrast geometric sans built for modern calm workspaces.', sample: 'Cardiovascular Hemodynamics & Clinical Triage' },
   { id: 'calibri', name: 'Calibri', category: 'Casual', fontType: 'casual', cssFamily: "Calibri, 'Urbanist', sans-serif", description: 'Soft warm modern humanist sans-serif for crisp documents.', sample: 'Pharmacokinetics: Volume of Distribution & Half-Life' },
   { id: 'alata', name: 'Alata', category: 'Casual', fontType: 'casual', cssFamily: "'Alata', sans-serif", description: 'Friendly clean humanist strokes calibrated for long sessions.', sample: 'Renal Clearance & Glomerular Filtration Curves' },
@@ -240,6 +242,7 @@ export const APP_FONTS: FontOption[] = [
   { id: 'century-gothic', name: 'Century Gothic', category: 'Casual', fontType: 'casual', cssFamily: "'Century Gothic', CenturyGothic, AppleGothic, 'Urbanist', sans-serif", description: 'Open circular geometric sans with wide airy breathing room.', sample: 'Neuroanatomy Tracts & Brainstem Cross-Sections' },
   { id: 'zen-maru-gothic', name: 'Zen Maru Gothic', category: 'Casual', fontType: 'casual', cssFamily: "'Zen Maru Gothic', sans-serif", description: 'Rounded gentle minimalist studio sans with zero harsh corners.', sample: 'Pediatric Immunization & Developmental Milestones' },
   { id: 'afacad', name: 'Afacad', category: 'Casual', fontType: 'casual', cssFamily: "'Afacad', sans-serif", description: 'Warm contemporary editorial sans with subtle calligraphic curves.', sample: 'Arterial Blood Gas Analysis & Anion Gap Synthesis' },
+  { id: 'outfit', name: 'Outfit', category: 'Casual', fontType: 'casual', cssFamily: "'Outfit', sans-serif", description: 'Aesthetic geometric sans crafted for clear modern interfaces.', sample: 'Critical Care Monitoring & Hemodynamic Support' },
   { id: 'arsenal', name: 'Arsenal', category: 'Casual', fontType: 'casual', cssFamily: "'Arsenal', sans-serif", description: 'Compact sharp humanist sans great for dense comparison charts.', sample: 'ACLS & Emergency Trauma Protocol Summary' },
   { id: 'cascadia-mono', name: 'Cascadia Mono', category: 'Casual', fontType: 'casual', cssFamily: "'Cascadia Mono', monospace", description: 'Crisp monospaced clarity ideal for lab ranges and formulas.', sample: 'Na+ 135-145 | K+ 3.5-5.0 | HCO3- 22-26 mEq/L' },
 
@@ -281,6 +284,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
     connectGoogleDrive,
     disconnectGoogleDrive,
     openAuthModal,
+    signOut,
   } = useAuth();
 
   const [activeTab, setActiveTab] = useState<SettingsTabId>(initialTab);
@@ -1177,6 +1181,30 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   );
                 })}
               </div>
+
+              {/* Logout Button */}
+              <button
+                type="button"
+                onClick={() => {
+                  if (signOut) signOut();
+                  if (onClose) onClose();
+                }}
+                style={{
+                  background: sb.idleBtnBg,
+                  border: '1px solid rgba(220, 38, 38, 0.35)',
+                  color: '#ef4444',
+                  borderRadius: resolvedDesign === '1' ? '9px' : themeMeta.buttonRadius,
+                }}
+                className="raw-icon-btn w-full min-h-[34px] sm:min-h-[30px] h-auto flex items-center gap-1.5 px-1.5 py-1.5 text-[11.5px] sm:text-[11px] font-medium transition-all hover:brightness-110 cursor-pointer text-left mt-1.5"
+                title="Logout"
+              >
+                <div className="w-3.5 h-3.5 flex items-center justify-center shrink-0">
+                  <LogOut className="w-3.5 h-3.5 shrink-0 text-red-500" />
+                </div>
+                <span className="leading-tight break-words whitespace-normal flex-1 min-w-0 font-bold">
+                  Logout
+                </span>
+              </button>
             </div>
           </div>
 
@@ -1421,123 +1449,108 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                   {[
                     {
                       id: 'wp-1',
-                      title: 'Sunrise Mountains Mist',
-                      desc: 'Golden mountain ridges at first light',
+                      title: 'Sunrise',
                       path: '/assets/aistudio/ahmetyuksek-sunrise-mountains-9821308_1920_result_fe248584.webp',
                     },
                     {
                       id: 'wp-2',
-                      title: 'Artemis Moon & Earthrise',
-                      desc: 'Orbital lunar horizon & Earth glow',
+                      title: 'Moon',
                       path: '/assets/aistudio/wallpaperswide.com-artemis-ii---moon-a-setting-earth-wallpaper-2560x1440_result_70398d70.webp',
                     },
                     {
                       id: 'wp-3',
-                      title: 'Autumn Twilight Leaves',
-                      desc: 'Deep amber foliage under dusk sky',
+                      title: 'Autumn',
                       path: '/assets/aistudio/wallpaperswide.com-autumn-leaves-against-a-twilight-sky-wallpaper-2560x1440_result_4a72cf04.webp',
                     },
                     {
                       id: 'wp-4',
-                      title: 'Midnight Stallion',
-                      desc: 'Dramatic equestrian dark portrait',
+                      title: 'Stallion',
                       path: '/assets/aistudio/wallpaperswide.com-black-horse-5-wallpaper-2560x1440_result_b109a16e.webp',
                     },
                     {
                       id: 'wp-5',
-                      title: 'Milky Way Galactic Core',
-                      desc: 'Crystal night sky starfields',
+                      title: 'Galaxy',
                       path: '/assets/aistudio/wallpaperswide.com-milky-way-galactic-core-across-the-night-sky-wallpaper-2560x1440_result_6dffa9c5.webp',
                     },
                     {
                       id: 'wp-6',
-                      title: 'Coniferous Sun Rays',
-                      desc: 'Warm forest road bathed in sunlight',
+                      title: 'Forest',
                       path: '/assets/aistudio/wallpaperswide.com-coniferous-forest-road-sun-rays-shines-through-trees-wallpaper-2560x1440_result_9e59136e.webp',
                     },
                     {
                       id: 'wp-7',
-                      title: 'Brittany Sea Cliffs',
-                      desc: 'Atlantic waves at Plougrescant coast',
+                      title: 'Coast',
                       path: '/assets/aistudio/wallpaperswide.com-le-gouffre-plougrescant-brittany-coast-wallpaper-2560x1440_result_b2864272.webp',
                     },
                     {
                       id: 'wp-8',
-                      title: 'Aspen Autumn Avenue',
-                      desc: 'Golden-leaf forest study sanctuary',
+                      title: 'Aspen',
                       path: '/assets/aistudio/wallpaperswide.com-scenic-autumn-road-through-aspen-forest-wallpaper-2560x1440_result_85124750.webp',
                     },
                     {
                       id: 'wp-9',
-                      title: 'Cathedral Valley Mesa',
-                      desc: 'Utah sandstone peaks in soft desert sun',
+                      title: 'Valley',
                       path: '/assets/aistudio/wallpaperswide.com-cathedral-valley-capitol-reef-national-park-utah-us-wallpaper-2560x1440_result_59b95122.webp',
                     },
                     {
                       id: 'wp-10',
-                      title: 'Alpine Serenity',
-                      desc: 'Crisp high-altitude still horizon',
+                      title: 'Alpine',
                       path: '/assets/aistudio/alena-ganzhela-_OLiar50J-A-unsplash_result_90183260.webp',
                     },
                     {
                       id: 'wp-11',
-                      title: 'Coastal Horizon Calm',
-                      desc: 'Balanced blue ocean & stone shore',
+                      title: 'Ocean',
                       path: '/assets/aistudio/paul-carroll-pLD6UKygDCU-unsplash_result_7388935e.webp',
                     },
                     {
                       id: 'wp-12',
-                      title: 'Warm Evening Peak',
-                      desc: 'Quiet dusk light across high ridges',
+                      title: 'Peak',
                       path: '/assets/aistudio/kev-chan-KB9z4FsemnQ-unsplash_result_171fea34.webp',
                     },
                     {
                       id: 'wp-13',
-                      title: 'Botanical Dew Shade',
-                      desc: 'Deep natural green leaf close-up',
+                      title: 'Botanical',
                       path: '/assets/aistudio/pexels-brenocardosofotografia-8240133_result_7894c6b8.webp',
                     },
                     {
                       id: 'wp-14',
-                      title: 'Canyon Silence',
-                      desc: 'Earth tones & warm mineral textures',
+                      title: 'Canyon',
                       path: '/assets/aistudio/braden-egli-yHEKf0FkET4-unsplash_result_099169e8.webp',
                     },
                     {
                       id: 'wp-15',
-                      title: 'Solitude Pass',
-                      desc: 'Clean mountain silhouette vista',
+                      title: 'Pass',
                       path: '/assets/aistudio/daniel-stiel-FG1Ny76EO38-unsplash_result_2cd60d1b.webp',
                     },
                     {
                       id: 'wp-16',
-                      title: 'Timber & Fog Valley',
-                      desc: 'Low clouds gliding through pine hills',
+                      title: 'Timber',
                       path: '/assets/aistudio/victor-de-santiago-eW1YRNtb2No-unsplash_result_5138de46.webp',
                     },
                     {
                       id: 'wp-17',
-                      title: 'Golden Meadow Breeze',
-                      desc: 'Warm daylight over tranquil fields',
+                      title: 'Meadow',
                       path: '/assets/aistudio/philipp-dusel-tEtVuxPBLNI-unsplash_result_bb8cf3f7.webp',
                     },
                     {
                       id: 'wp-18',
-                      title: 'Highland Stillness',
-                      desc: 'Atmospheric mist over slate cliffs',
+                      title: 'Mist',
                       path: '/assets/aistudio/kellen-riggin-GHyl3680YJs-unsplash_result_0db549ed.webp',
                     },
                     {
                       id: 'wp-19',
-                      title: 'Terra Desert Glow',
-                      desc: 'Rich burnt terracotta sunset dunes',
+                      title: 'Desert',
                       path: '/assets/aistudio/john-towner-JgOeRuGD_Y4-unsplash_result_6d8f7593.webp',
                     },
                     {
                       id: 'wp-20',
-                      title: 'Emerald Woodland',
-                      desc: 'Calm forest light for deep reading',
+                      title: 'Emerald',
                       path: '/assets/aistudio/rebeca-trifan-dATa8H-S-NQ-unsplash_result_be2735e6.webp',
+                    },
+                    {
+                      id: 'wp-21',
+                      title: 'Waterfall',
+                      path: '/src/assets/images/misty_pine_waterfall_1795478917235.jpg',
                     },
                   ].map((preset) => {
                     const uri = `url("${preset.path}")`;
@@ -1572,9 +1585,6 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           <div className="min-w-0">
                             <div className="text-xs font-bold text-stone-900 dark:text-stone-100 truncate">
                               {preset.title}
-                            </div>
-                            <div className="text-[10.5px] text-stone-500 dark:text-stone-400 truncate">
-                              {preset.desc}
                             </div>
                           </div>
                           {isSelected && <CheckCircle2 className="w-4 h-4 shrink-0" style={themeAccentIconStyle} />}

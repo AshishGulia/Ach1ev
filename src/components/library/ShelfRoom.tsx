@@ -958,6 +958,9 @@ export function Room({
   design: _design,
   bayIdx = 0,
   themeId = '1',
+  totalAlmirahs,
+  onPrevAlmirah,
+  onNextAlmirah,
   children,
 }: {
   night: boolean;
@@ -967,8 +970,25 @@ export function Room({
   design: string;
   bayIdx?: number;
   themeId?: ShelfThemeId;
+  totalAlmirahs?: number;
+  onPrevAlmirah?: () => void;
+  onNextAlmirah?: () => void;
   children: ReactNode;
 }) {
+  const touchStartX = useRef<number>(0);
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0]?.clientX || 0;
+  };
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const diff = (e.changedTouches[0]?.clientX || 0) - touchStartX.current;
+    if (Math.abs(diff) > 45) {
+      if (diff > 0 && onPrevAlmirah) {
+        onPrevAlmirah();
+      } else if (diff < 0 && onNextAlmirah) {
+        onNextAlmirah();
+      }
+    }
+  };
   const abs = (s: CSSProperties): CSSProperties => ({ position: 'absolute', ...s });
 
   const floorBg = (() => {
@@ -1012,6 +1032,8 @@ export function Room({
   return (
     <div
       className="shelf-world-root sh-world-shell"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
       style={{
         position: 'relative',
         isolation: 'isolate',
@@ -1024,6 +1046,35 @@ export function Room({
         touchAction: 'pan-x pan-y pinch-zoom',
       }}
     >
+      {/* PC Invisible Periphery Click Zones for Multi-Almirah Switching */}
+      {totalAlmirahs !== undefined && totalAlmirahs > 1 && (
+        <>
+          <button
+            type="button"
+            onClick={onPrevAlmirah}
+            title="Previous Almirah (Left Edge)"
+            aria-label="Previous Almirah"
+            className="absolute left-0 top-0 bottom-0 w-16 md:w-24 z-20 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-start pl-4 cursor-pointer group"
+            style={{ background: 'linear-gradient(90deg, rgba(0,0,0,0.4), transparent)' }}
+          >
+            <span className="w-10 h-10 rounded-full bg-black/60 text-white flex items-center justify-center shadow-lg transform -translate-x-2 group-hover:translate-x-0 transition-transform font-bold text-lg">
+              ◀
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={onNextAlmirah}
+            title="Next Almirah (Right Edge)"
+            aria-label="Next Almirah"
+            className="absolute right-0 top-0 bottom-0 w-16 md:w-24 z-20 opacity-0 hover:opacity-100 transition-opacity flex items-center justify-end pr-4 cursor-pointer group"
+            style={{ background: 'linear-gradient(270deg, rgba(0,0,0,0.4), transparent)' }}
+          >
+            <span className="w-10 h-10 rounded-full bg-black/60 text-white flex items-center justify-center shadow-lg transform translate-x-2 group-hover:translate-x-0 transition-transform font-bold text-lg">
+              ▶
+            </span>
+          </button>
+        </>
+      )}
       {/* 1. ROOM WALL / WORLD BACKDROP (5 Themes x 5 Almirah Bays = 25 Zero-Repeat Backdrops) */}
       {themeId === '1' ? (
         <ShelfTheme1BayWall night={night} variantIdx={bayIdx} />
@@ -6001,6 +6052,44 @@ export default function ShelfRoom({
             design={current ? current.design : DESIGNS[0]}
             bayIdx={idx}
             themeId={themeId}
+            totalAlmirahs={data.length}
+            onPrevAlmirah={() => {
+              const limits = getPlanLimits();
+              if (limits.maxAlmirahs <= 1) {
+                openSubscriptionUpgradeModal({
+                  title: 'Almirah Access Locked (Free Plan: 1 Almirah)',
+                  message: 'Free plan opens the 1st Almirah only. Upgrade to ₹100/mo Scholar Pro to unlock 3 Almirahs, or ₹300/mo Master Ultimate for all 5.',
+                  requiredPlanId: 'scholar-pro',
+                });
+                return;
+              }
+              if (data.length > 1) {
+                setAt((i) => (i - 1 + data.length) % Math.min(data.length, limits.maxAlmirahs));
+              }
+            }}
+            onNextAlmirah={() => {
+              const limits = getPlanLimits();
+              if (limits.maxAlmirahs <= 1) {
+                openSubscriptionUpgradeModal({
+                  title: 'Unlock More Almirahs with Scholar Pro (₹100/mo)',
+                  message: 'Free accounts include the 1st Almirah. Upgrade to ₹100/mo Scholar Pro to unlock the first 3 Almirahs, or ₹300/mo Master Ultimate for all 5.',
+                  requiredPlanId: 'scholar-pro',
+                });
+                return;
+              }
+              if (data.length > 1) {
+                const nextIdx = (idx + 1) % data.length;
+                if (nextIdx >= limits.maxAlmirahs) {
+                  openSubscriptionUpgradeModal({
+                    title: 'Unlock All 5 Almirahs with Master Ultimate (₹300/mo)',
+                    message: 'Scholar Pro unlocks the first 3 Almirahs. Upgrade to ₹300/mo Master Ultimate to access all 5 Cabinets.',
+                    requiredPlanId: 'master-ultimate',
+                  });
+                  return;
+                }
+                setAt(nextIdx);
+              }
+            }}
           >
             {data.length === 0 ? (
               <p style={{ textAlign: 'center', color: '#fff', textShadow: '0 1px 3px #000', pointerEvents: 'auto' }}>
