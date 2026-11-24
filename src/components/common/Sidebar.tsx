@@ -465,7 +465,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         className={`fixed md:relative top-0 left-0 bottom-0 z-50 md:z-40 shrink-0 h-[100dvh] flex flex-col justify-between select-none shadow-2xl md:shadow-none transition-all duration-200 ease-in-out overflow-hidden ${
           isOpen
             ? 'w-[200px] md:w-[148px] translate-x-0'
-            : '-translate-x-full md:translate-x-0 w-0 md:w-8 overflow-hidden md:overflow-visible'
+            : '-translate-x-full md:translate-x-0 w-0 md:w-11 overflow-hidden md:overflow-visible'
         }`}
         style={sidebarSurfaceStyle}
       >
@@ -826,7 +826,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
               <div className="w-4 h-[1px]" style={{ background: sb.sectionBorder }} />
 
-              <div className="flex flex-col items-center space-y-1 w-full">
+              <div className="flex flex-col items-center space-y-2 w-full">
                 {navItems.map((item) => {
                   const Icon = item.icon;
                   const isActive = activeView === item.id;
@@ -836,10 +836,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       onClick={() => handleItemClick(item.id)}
                       title={item.label}
                       style={getBtnStyle(isActive)}
-                      className={`w-6 h-6 flex items-center justify-center transition-all hover:brightness-110 cursor-pointer ${leatherBtnCls}`}
+                      className={`w-8 h-8 flex items-center justify-center transition-all hover:brightness-110 cursor-pointer ${leatherBtnCls}`}
                     >
                       <Icon
-                        className="w-3.5 h-3.5"
+                        className="w-4 h-4"
                         style={{ color: isActive ? sb.activeIconColor : sb.idleIconColor }}
                       />
                     </button>

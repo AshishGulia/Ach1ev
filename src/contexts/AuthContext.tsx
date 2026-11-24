@@ -340,7 +340,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, [clientRevision]);
 
+  const checkAndRegisterDevice = (identifier: string): { allowed: boolean; error?: string } => {
+    if (typeof window === 'undefined') return { allowed: true };
+    try {
+      let deviceId = localStorage.getItem('achiev_client_device_id_v1');
+      if (!deviceId) {
+        deviceId = `dev_${Math.random().toString(36).substring(2, 12)}`;
+        localStorage.setItem('achiev_client_device_id_v1', deviceId);
+      }
+      const rawMap = localStorage.getItem('achiev_device_sessions_v1');
+      const sessionsMap = rawMap ? JSON.parse(rawMap) : {};
+      const key = identifier.toLowerCase().trim();
+      const devices: string[] = Array.isArray(sessionsMap[key]) ? sessionsMap[key] : [];
+      if (!devices.includes(deviceId)) {
+        if (devices.length >= 3) {
+          return { allowed: false, error: 'devices limit exceeded' };
+        }
+        devices.push(deviceId);
+        sessionsMap[key] = devices;
+        localStorage.setItem('achiev_device_sessions_v1', JSON.stringify(sessionsMap));
+      }
+      return { allowed: true };
+    } catch {
+      return { allowed: true };
+    }
+  };
+
   const signInWithEmail = async (email: string, password: string) => {
+    const devCheck = checkAndRegisterDevice(email.trim());
+    if (!devCheck.allowed) {
+      return { error: 'devices limit exceeded: maximum 3 active devices allowed per email.' };
+    }
     const supabase = getSupabaseClient();
     if (!supabase) {
       return { error: 'Supabase environment variables are not configured yet.' };
@@ -587,6 +617,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const verifyPhoneOtp = async (phone: string, token: string): Promise<{ error: string | null }> => {
     const cleanPhone = normalizeE164Phone(phone);
+    const devCheck = checkAndRegisterDevice(cleanPhone);
+    if (!devCheck.allowed) {
+      return { error: 'devices limit exceeded: maximum 3 active devices allowed per phone number.' };
+    }
     const cleanToken = token.trim().replace(/\s+/g, '');
     if (!cleanToken || cleanToken.length < 4) {
       return { error: 'Please enter the 6-digit SMS verification code.' };
