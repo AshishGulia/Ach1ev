@@ -24,9 +24,9 @@ export const SUBSCRIPTION_TIERS: SubscriptionTier[] = [
     name: 'Clinical Scholar Pro',
     priceMonthly: 100,
     priceAnnual: 1200,
-    badge: 'Most Popular · ₹100/mo',
+    badge: '₹100/mo or 1 coffee price per month',
     highlight: true,
-    description: 'Essential upgrade for serious prep: 50 documents, first 3 Almirahs, all Peace Sounds & Club access.',
+    description: 'Essential upgrade for serious prep: 50 documents, first 3 Almirahs, all Peace Sounds & Club access. (Only 1 coffee price per month)',
     features: [
       'Unlimited Notes + Upload up to 50 Total Documents',
       'First 3 3D Almirahs Unlocked (Walnut, Brass & Glass Panels)',
@@ -41,8 +41,8 @@ export const SUBSCRIPTION_TIERS: SubscriptionTier[] = [
     name: 'Chief Fellow Master',
     priceMonthly: 300,
     priceAnnual: 3600,
-    badge: 'Gemini AI + All 5 Almirahs · ₹300/mo',
-    description: 'Complete AI-powered command center: exclusive Gemini AI tutor, unlimited docs, all 5 Almirahs & unlimited favourites.',
+    badge: '₹300/mo or 1 tea cake price per month',
+    description: 'Complete AI-powered command center: exclusive Gemini AI tutor, unlimited docs, all 5 Almirahs & unlimited favourites. (Only 1 tea cake price per month)',
     features: [
       'Exclusive Gemini AI Tutor, Mnemonics Generator & Live AI News',
       'Unlimited PDF / Document Uploads & Unlimited Notes',
