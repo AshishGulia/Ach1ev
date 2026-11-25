@@ -19,7 +19,7 @@ const resolveAssetUrl = (relativePath: string): string => {
 export const ACHIEV_DEFAULT_LOGO_URL = resolveAssetUrl('assets/aistudio/achiev-logo-login.webp');
 export const ACHIEV_LOGIN_LOGO_URL = resolveAssetUrl('assets/aistudio/Transparent_result_fff796aa.webp');
 export const ACHIEV_LOGO_URL = resolveAssetUrl('assets/aistudio/achiev-logo-login.webp');
-export const ACHIEV_EMBLEM_URL = resolveAssetUrl('assets/aistudio/achiev-logo-login.webp');
+export const ACHIEV_EMBLEM_URL = resolveAssetUrl('assets/aistudio/android-chrome-512x512_1f22961a.png');
 export const ACHIEV_WORDMARK_URL = resolveAssetUrl('assets/aistudio/achiev-logo-login.webp');
 export const ACHIEV_LOCKUP_URL = ACHIEV_LOGIN_LOGO_URL;
 export const ACHIEV_LEATHER_HERO_URL = '';
@@ -33,8 +33,8 @@ const GoldEmblem3D: React.FC<{
   <img
     src={ACHIEV_EMBLEM_URL}
     alt={ariaLabel}
-    width={928}
-    height={324}
+    width={512}
+    height={512}
     draggable={false}
     className={`select-none shrink-0 bg-transparent object-contain ${sizeClass}`}
     style={{
