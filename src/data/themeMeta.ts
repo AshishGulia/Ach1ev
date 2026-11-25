@@ -397,7 +397,7 @@ export const THEME_META_MAP: Record<ThemeId, ThemeMeta> = {
         activeBtnBg: 'linear-gradient(155deg, #6f4225 0%, #522e18 100%)',
         activeBtnBorder: '#7f4c2a',
         activeBtnText: '#ffffff',
-        idleBtnBg: 'transparent',
+        idleBtnBg: '#fbf7f0',
         idleBtnText: '#4c3b31',
         activeIconColor: '#ffd899',
         idleIconColor: '#6c4830',
