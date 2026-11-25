@@ -1494,6 +1494,11 @@ export const AuthenticatedWorkspace: React.FC = () => {
                         currentSubject={currentSubject}
                         onOpenNotebook={(nb) => handleOpenNotebook(nb.id)}
                         onCreateBlankNote={handleCreateBlankNote}
+                        onAddNotebook={(newNb) => {
+                          const updated = [newNb, ...notebooks];
+                          setNotebooks(updated);
+                          localStorage.setItem('medden_notebooks', JSON.stringify(updated));
+                        }}
                         onDeleteNotebook={handleDeleteNotebook}
                         onAddBook={handleAddBook}
                         onOpenInRead={(doc) => {

@@ -10,6 +10,7 @@ import {
   getFileBlobFromIdb,
   getLibraryFolders,
   getNotebookFolderMap,
+  getRecentOpenedFiles,
   getSessionFileUrl,
   getUploadedDocuments,
   readFileAsDataUrl,
@@ -45,6 +46,7 @@ import {
   Square,
   MinusSquare,
   HardDrive,
+  Clock,
 } from 'lucide-react';
 import { WebViewDocumentModal, WebViewDocPayload } from '../common/WebViewDocumentModal';
 import { CloudDriveSaveModal, CloudDriveTargetFile } from '../common/CloudDriveSaveModal';
@@ -61,6 +63,7 @@ interface LibraryWorkspaceViewProps {
   currentSubject: SubjectCourse;
   onOpenNotebook: (nb: Notebook) => void;
   onCreateBlankNote: () => void;
+  onAddNotebook?: (nb: Notebook) => void;
   onDeleteNotebook?: (notebookId: string) => void;
   onAddBook?: (book: MedicalBook) => void;
   onOpenInRead?: (doc: UploadedDocumentRecord) => void;
@@ -95,6 +98,7 @@ export const LibraryWorkspaceView: React.FC<LibraryWorkspaceViewProps> = ({
   currentSubject,
   onOpenNotebook,
   onCreateBlankNote,
+  onAddNotebook,
   onDeleteNotebook,
   onAddBook,
   onOpenInRead,
@@ -132,6 +136,11 @@ export const LibraryWorkspaceView: React.FC<LibraryWorkspaceViewProps> = ({
   const [destInputDraft, setDestInputDraft] = useState<string>(() => getSavedDestinationLabel());
   const [cloudDriveFile, setCloudDriveFile] = useState<CloudDriveTargetFile | null>(null);
 
+  // Add Note Modal State (From Shelf vs Recent Files)
+  const [isAddNoteModalOpen, setIsAddNoteModalOpen] = useState(false);
+  const [addNoteTab, setAddNoteTab] = useState<'shelf' | 'recent'>('shelf');
+  const [addNoteFilter, setAddNoteFilter] = useState('');
+
   const flashBanner = (msg: string) => {
     setStatusBanner(msg);
     window.setTimeout(() => {
@@ -160,6 +169,237 @@ export const LibraryWorkspaceView: React.FC<LibraryWorkspaceViewProps> = ({
 
   const notesFolders = folders.filter((f) => f.kind === 'notes');
   const fileFolders = folders.filter((f) => f.kind === 'files');
+
+  // Helper to collect all shelf items across 5 Almirahs & Books
+  const getShelfItems = () => {
+    interface ShelfPickItem {
+      id: string;
+      title: string;
+      source: 'shelf-book' | 'notebook';
+      location: string;
+      coverColor?: string;
+      author?: string;
+    }
+    const list: ShelfPickItem[] = [];
+    const seenTitles = new Set<string>();
+
+    try {
+      const raw = localStorage.getItem('medden_shelf_room_v6');
+      if (raw) {
+        const almirahs = JSON.parse(raw);
+        if (Array.isArray(almirahs)) {
+          for (const alm of almirahs) {
+            const almTitle = alm.name || alm.design || 'Almirah';
+            if (Array.isArray(alm.shelves)) {
+              for (const shelf of alm.shelves) {
+                const shelfTitle = shelf.name || 'Shelf';
+                if (Array.isArray(shelf.books)) {
+                  for (const b of shelf.books) {
+                    const t = String(b?.title || '').trim();
+                    if (t && !seenTitles.has(t.toLowerCase())) {
+                      seenTitles.add(t.toLowerCase());
+                      list.push({
+                        id: b.id || `shelf-${t}`,
+                        title: t,
+                        source: 'shelf-book',
+                        location: `${almTitle} · ${shelfTitle}`,
+                        coverColor: b.cover || '#8f5f2c',
+                        author: b.author || 'Shelf Book',
+                      });
+                    }
+                  }
+                }
+                if (Array.isArray(shelf.folders)) {
+                  for (const fld of shelf.folders) {
+                    if (Array.isArray(fld.books)) {
+                      for (const b of fld.books) {
+                        const t = String(b?.title || '').trim();
+                        if (t && !seenTitles.has(t.toLowerCase())) {
+                          seenTitles.add(t.toLowerCase());
+                          list.push({
+                            id: b.id || `shelf-fld-${t}`,
+                            title: t,
+                            source: 'shelf-book',
+                            location: `${almTitle} · ${fld.name || 'Folder'}`,
+                            coverColor: fld.color || '#8f5f2c',
+                            author: b.author || 'Folder Book',
+                          });
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    } catch {}
+
+    if (list.length === 0 && Array.isArray(books)) {
+      for (const b of books) {
+        const t = b.title.trim();
+        if (t && !seenTitles.has(t.toLowerCase())) {
+          seenTitles.add(t.toLowerCase());
+          list.push({
+            id: b.id,
+            title: t,
+            source: 'shelf-book',
+            location: 'Medical Shelf',
+            coverColor: b.coverColor || '#8f5f2c',
+            author: b.author || 'Medical Textbook',
+          });
+        }
+      }
+    }
+
+    if (Array.isArray(notebooks)) {
+      for (const nb of notebooks) {
+        const assigned = notebookFolderMap[nb.id] || DEFAULT_NOTES_FOLDER_ID;
+        if (assigned !== selectedNotesFolderId) {
+          list.push({
+            id: nb.id,
+            title: nb.title,
+            source: 'notebook',
+            location: assigned === DEFAULT_NOTES_FOLDER_ID ? 'All Notes' : 'Other Folder',
+            coverColor: nb.coverColor || '#A47C43',
+            author: `${nb.pages?.length || 1} pages`,
+          });
+        }
+      }
+    }
+
+    return list;
+  };
+
+  // Helper to collect recent files
+  const getRecentItems = () => {
+    interface RecentPickItem {
+      id: string;
+      refId: string;
+      title: string;
+      kind: 'uploaded-doc' | 'book' | 'note';
+      ext?: string;
+      subtitle?: string;
+      openedAt?: string;
+    }
+    const map = new Map<string, RecentPickItem>();
+
+    const recentOpened = getRecentOpenedFiles();
+    for (const r of recentOpened) {
+      if (!r.title) continue;
+      map.set(r.refId || r.id, {
+        id: r.id,
+        refId: r.refId || r.id,
+        title: r.title,
+        kind: r.kind || 'uploaded-doc',
+        ext: r.ext || (r.kind === 'note' ? 'note' : 'pdf'),
+        subtitle: r.subtitle || (r.source ? `Source: ${r.source}` : 'Recently opened'),
+        openedAt: r.openedAt,
+      });
+    }
+
+    for (const doc of uploadedDocs) {
+      if (!map.has(doc.id)) {
+        map.set(doc.id, {
+          id: doc.id,
+          refId: doc.id,
+          title: doc.title || doc.fileName,
+          kind: 'uploaded-doc',
+          ext: doc.ext || 'doc',
+          subtitle: `${(doc.ext || 'FILE').toUpperCase()} · ${doc.sizeLabel || ''}`,
+          openedAt: doc.uploadedAt,
+        });
+      }
+    }
+
+    for (const nb of notebooks) {
+      if (!map.has(nb.id)) {
+        map.set(nb.id, {
+          id: nb.id,
+          refId: nb.id,
+          title: nb.title,
+          kind: 'note',
+          ext: 'note',
+          subtitle: `${nb.subject} · ${nb.pages?.length || 1} pages`,
+          openedAt: nb.updatedAt,
+        });
+      }
+    }
+
+    return Array.from(map.values());
+  };
+
+  const handleAddNoteToFolder = (item: {
+    id: string;
+    refId?: string;
+    title: string;
+    source?: string;
+    kind?: string;
+    coverColor?: string;
+  }) => {
+    const currentFolder = notesFolders.find((f) => f.id === selectedNotesFolderId);
+    const folderName = currentFolder ? currentFolder.name : 'Notes Folder';
+
+    // 1. If it matches an existing notebook, assign/move it into this folder
+    const targetId = item.refId || item.id;
+    const existingNb = notebooks.find((n) => n.id === targetId || n.id === item.id);
+    if (existingNb) {
+      setNotebookFolder(existingNb.id, selectedNotesFolderId);
+      setNotebookFolderMapState(getNotebookFolderMap());
+      flashBanner(`Added "${existingNb.title}" to ${folderName}`);
+      setIsAddNoteModalOpen(false);
+      return;
+    }
+
+    // 2. Otherwise create a new notebook linked to this shelf book / recent file
+    const today = new Date().toISOString().split('T')[0];
+    const nowIso = new Date().toISOString();
+    const newNb: Notebook = {
+      id: `nb-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+      title: item.title,
+      subject: currentSubject,
+      coverTheme: 'botany',
+      coverTitle: item.title.toUpperCase().slice(0, 24),
+      coverSubtitle: item.source === 'shelf-book' ? 'Added from Shelf' : 'Added from Recent Files',
+      coverColor: item.coverColor || '#A47C43',
+      paperType: 'ruled-thin',
+      paperColor: 'beige',
+      activePageIndex: 0,
+      createdAt: today,
+      updatedAt: nowIso,
+      pages: [
+        {
+          id: `p-${Date.now()}`,
+          title: item.title,
+          contentHtml: `<h2>${item.title}</h2><p>Notes added from ${
+            item.source === 'shelf-book' ? '3D Shelf' : 'Recent Files'
+          }.</p>`,
+          inkStrokes: [],
+          screenshots: [],
+          date: today,
+          updatedAt: nowIso,
+        },
+      ],
+    };
+
+    if (onAddNotebook) {
+      onAddNotebook(newNb);
+    } else {
+      try {
+        const raw = localStorage.getItem('medden_notebooks');
+        const existing = raw ? JSON.parse(raw) : [];
+        const updated = [newNb, ...existing];
+        localStorage.setItem('medden_notebooks', JSON.stringify(updated));
+        window.dispatchEvent(new CustomEvent('medden_notebooks_updated'));
+      } catch {}
+    }
+
+    setNotebookFolder(newNb.id, selectedNotesFolderId);
+    setNotebookFolderMapState(getNotebookFolderMap());
+    flashBanner(`Added "${newNb.title}" to ${folderName}`);
+    setIsAddNoteModalOpen(false);
+  };
 
   const handleCreateFolder = (e: React.FormEvent) => {
     e.preventDefault();
@@ -613,14 +853,28 @@ export const LibraryWorkspaceView: React.FC<LibraryWorkspaceViewProps> = ({
           </button>
 
           {activeTab === 'notes' ? (
-            <button
-              type="button"
-              onClick={onCreateBlankNote}
-              className="themed-accent-btn px-3 py-1.5 rounded-xl bg-[#8f5f2c] hover:bg-[#734a1f] text-white text-xs font-semibold flex items-center gap-1.5 shadow-xs cursor-pointer"
-            >
-              <Plus className="w-3.5 h-3.5" />
-              <span>New Note</span>
-            </button>
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setAddNoteTab('shelf');
+                  setIsAddNoteModalOpen(true);
+                }}
+                className="themed-soft-pill px-3 py-1.5 rounded-xl border border-[#A47C43]/35 bg-[#A47C43]/12 hover:bg-[#A47C43]/22 text-[#735222] dark:text-[#e6c38d] text-xs font-semibold flex items-center gap-1.5 cursor-pointer shadow-xs"
+                title="Add note from 3D Shelf or Recent Files into this folder"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Note</span>
+              </button>
+              <button
+                type="button"
+                onClick={onCreateBlankNote}
+                className="themed-accent-btn px-3 py-1.5 rounded-xl bg-[#8f5f2c] hover:bg-[#734a1f] text-white text-xs font-semibold flex items-center gap-1.5 shadow-xs cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>New Note</span>
+              </button>
+            </div>
           ) : (
             <>
               <input
@@ -777,21 +1031,42 @@ export const LibraryWorkspaceView: React.FC<LibraryWorkspaceViewProps> = ({
         <div className="flex-1 min-w-0 min-h-0 flex flex-col p-3 sm:p-5 overflow-hidden">
           {activeTab === 'notes' ? (
             filteredNotebooks.length === 0 ? (
-              <div className="themed-glass-card max-w-md mx-auto my-auto p-8 rounded-3xl border border-stone-200 dark:border-[#382518] bg-white/80 dark:bg-[#1a120d]/90 text-center space-y-3">
+              <div className="themed-glass-card max-w-md mx-auto my-auto p-8 rounded-3xl border border-stone-200 dark:border-[#382518] bg-white/80 dark:bg-[#1a120d]/90 text-center space-y-4 shadow-sm">
                 <StickyNote className="w-10 h-10 mx-auto text-[#A47C43]" />
-                <h3 className="font-serif font-bold text-base text-stone-900 dark:text-stone-100">
-                  No notes in this folder yet
-                </h3>
-                <p className="text-xs text-stone-500 dark:text-stone-400">
-                  Create a new note or move any saved note into this folder.
-                </p>
-                <button
-                  type="button"
-                  onClick={onCreateBlankNote}
-                  className="themed-accent-btn px-4 py-2 rounded-xl bg-[#8f5f2c] text-white text-xs font-semibold cursor-pointer"
-                >
-                  + Create Note
-                </button>
+                <div className="space-y-1">
+                  <h3 className="font-serif font-bold text-base text-stone-900 dark:text-stone-100">
+                    No notes in {notesFolders.find((f) => f.id === selectedNotesFolderId)?.name || 'this folder'} yet
+                  </h3>
+                  <p className="text-xs text-stone-500 dark:text-stone-400">
+                    Add notes into this folder from your 3D shelf or recent study files.
+                  </p>
+                </div>
+
+                {/* Add Note Options: From Shelf or Recent Files */}
+                <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-2.5">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAddNoteTab('shelf');
+                      setIsAddNoteModalOpen(true);
+                    }}
+                    className="w-full sm:w-auto themed-accent-btn px-4 py-2.5 rounded-xl bg-[#8f5f2c] hover:bg-[#734a1f] text-white text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-sm transition-all"
+                  >
+                    <BookOpen className="w-4 h-4" />
+                    <span>Add Note (From Shelf)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAddNoteTab('recent');
+                      setIsAddNoteModalOpen(true);
+                    }}
+                    className="w-full sm:w-auto themed-soft-pill px-4 py-2.5 rounded-xl border border-[#A47C43]/40 bg-[#A47C43]/15 hover:bg-[#A47C43]/25 text-[#735222] dark:text-[#e6c38d] text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer transition-all"
+                  >
+                    <Clock className="w-4 h-4" />
+                    <span>Add Note (Recent Files)</span>
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="themed-glass-card flex-1 min-h-0 flex flex-col rounded-2xl border border-stone-200/90 dark:border-[#382518] bg-white/88 dark:bg-[#17100b]/92 overflow-hidden shadow-xs">
@@ -1536,6 +1811,197 @@ export const LibraryWorkspaceView: React.FC<LibraryWorkspaceViewProps> = ({
               </button>
             </div>
           </form>
+        </div>
+      )}
+
+      {/* ADD NOTE MODAL: FROM SHELF OR RECENT FILES */}
+      {isAddNoteModalOpen && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs animate-in fade-in duration-150"
+          onClick={() => setIsAddNoteModalOpen(false)}
+        >
+          <div
+            className="w-full max-w-xl max-h-[85vh] rounded-3xl bg-[#faf6ee] dark:bg-[#1a120d] border border-[#d6c7b0] dark:border-[#382518] p-5 sm:p-6 shadow-2xl flex flex-col space-y-4 overflow-hidden"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-3 border-b border-stone-200 dark:border-[#382518] shrink-0">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#A47C43]/20 text-[#8f5f2c] dark:text-amber-300 flex items-center justify-center border border-[#A47C43]/40">
+                  <Plus className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-serif font-bold text-base text-stone-900 dark:text-stone-100">
+                    Add Note to {notesFolders.find((f) => f.id === selectedNotesFolderId)?.name || 'Folder'}
+                  </h3>
+                  <p className="text-xs text-stone-500 dark:text-stone-400">
+                    Choose from your 3D Shelf or Recent Files to add as a note
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAddNoteModalOpen(false)}
+                className="p-1 rounded-lg hover:bg-black/5 dark:hover:bg-white/10 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Segmented Option Tabs: From Shelf vs Recent Files */}
+            <div className="grid grid-cols-2 gap-2 p-1 rounded-2xl bg-stone-200/60 dark:bg-[#251a14] shrink-0">
+              <button
+                type="button"
+                onClick={() => setAddNoteTab('shelf')}
+                className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                  addNoteTab === 'shelf'
+                    ? 'bg-white dark:bg-[#150f0c] text-[#8f5f2c] dark:text-amber-300 shadow-xs'
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+                }`}
+              >
+                <BookOpen className="w-4 h-4" />
+                <span>From Shelf</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setAddNoteTab('recent')}
+                className={`py-2 px-3 rounded-xl text-xs font-bold flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                  addNoteTab === 'recent'
+                    ? 'bg-white dark:bg-[#150f0c] text-[#8f5f2c] dark:text-amber-300 shadow-xs'
+                    : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
+                }`}
+              >
+                <Clock className="w-4 h-4" />
+                <span>Recent Files</span>
+              </button>
+            </div>
+
+            {/* Filter Search Input */}
+            <div className="relative shrink-0">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+              <input
+                type="text"
+                placeholder={addNoteTab === 'shelf' ? 'Filter shelf books & notes...' : 'Filter recent files & documents...'}
+                value={addNoteFilter}
+                onChange={(e) => setAddNoteFilter(e.target.value)}
+                className="w-full pl-9 pr-3 py-2 rounded-xl border border-stone-300 dark:border-[#382518] bg-white dark:bg-[#120c08] text-xs text-stone-900 dark:text-stone-100 outline-none focus:border-[#A47C43]"
+              />
+            </div>
+
+            {/* List of Items */}
+            <div className="flex-1 min-h-[220px] overflow-y-auto custom-scrollbar space-y-2 pr-1">
+              {addNoteTab === 'shelf' ? (
+                (() => {
+                  const items = getShelfItems().filter((item) =>
+                    !addNoteFilter || item.title.toLowerCase().includes(addNoteFilter.toLowerCase())
+                  );
+                  if (items.length === 0) {
+                    return (
+                      <div className="py-12 text-center text-xs text-stone-500 dark:text-stone-400 space-y-2">
+                        <BookOpen className="w-8 h-8 mx-auto opacity-40 text-[#A47C43]" />
+                        <p>No matching shelf books or notes found.</p>
+                      </div>
+                    );
+                  }
+                  return items.map((item) => (
+                    <div
+                      key={item.id}
+                      onClick={() => handleAddNoteToFolder(item)}
+                      className="p-3 rounded-2xl border border-stone-200 dark:border-[#332216] bg-white/70 dark:bg-[#160f0b]/80 hover:bg-[#A47C43]/10 dark:hover:bg-[#A47C43]/15 transition-colors flex items-center justify-between gap-3 cursor-pointer group"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div
+                          className="w-9 h-11 rounded-lg shrink-0 flex items-center justify-center text-white text-[10px] font-bold shadow-xs border border-white/20"
+                          style={{ backgroundColor: item.coverColor || '#8f5f2c' }}
+                        >
+                          {item.source === 'notebook' ? <StickyNote className="w-4 h-4" /> : <BookOpen className="w-4 h-4" />}
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="text-xs font-semibold text-stone-900 dark:text-stone-100 truncate group-hover:text-[#8f5f2c] dark:group-hover:text-amber-300">
+                            {item.title}
+                          </h4>
+                          <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
+                            {item.location} · {item.author || ''}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAddNoteToFolder(item);
+                        }}
+                        className="shrink-0 px-3 py-1.5 rounded-xl bg-[#8f5f2c] text-white text-[11px] font-semibold cursor-pointer hover:bg-[#734a1f] transition-all flex items-center gap-1 shadow-xs"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add</span>
+                      </button>
+                    </div>
+                  ));
+                })()
+              ) : (
+                (() => {
+                  const items = getRecentItems().filter((item) =>
+                    !addNoteFilter || item.title.toLowerCase().includes(addNoteFilter.toLowerCase())
+                  );
+                  if (items.length === 0) {
+                    return (
+                      <div className="py-12 text-center text-xs text-stone-500 dark:text-stone-400 space-y-2">
+                        <Clock className="w-8 h-8 mx-auto opacity-40 text-[#A47C43]" />
+                        <p>No matching recent study files found.</p>
+                      </div>
+                    );
+                  }
+                  return items.map((item) => (
+                    <div
+                      key={item.id}
+                      onClick={() => handleAddNoteToFolder(item)}
+                      className="p-3 rounded-2xl border border-stone-200 dark:border-[#332216] bg-white/70 dark:bg-[#160f0b]/80 hover:bg-[#A47C43]/10 dark:hover:bg-[#A47C43]/15 transition-colors flex items-center justify-between gap-3 cursor-pointer group"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="w-9 h-11 rounded-lg shrink-0 flex items-center justify-center bg-stone-100 dark:bg-[#251a14] border border-stone-200 dark:border-[#3d291c] text-[#8f5f2c] dark:text-amber-300">
+                          {item.kind === 'note' ? <StickyNote className="w-4 h-4" /> : <FileText className="w-4 h-4" />}
+                        </div>
+                        <div className="min-w-0">
+                          <h4 className="text-xs font-semibold text-stone-900 dark:text-stone-100 truncate group-hover:text-[#8f5f2c] dark:group-hover:text-amber-300">
+                            {item.title}
+                          </h4>
+                          <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
+                            {item.subtitle || ''}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleAddNoteToFolder(item);
+                        }}
+                        className="shrink-0 px-3 py-1.5 rounded-xl bg-[#8f5f2c] text-white text-[11px] font-semibold cursor-pointer hover:bg-[#734a1f] transition-all flex items-center gap-1 shadow-xs"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span>Add</span>
+                      </button>
+                    </div>
+                  ));
+                })()
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="pt-2 border-t border-stone-200 dark:border-[#382518] flex items-center justify-between shrink-0">
+              <span className="text-[11px] text-stone-500 dark:text-stone-400">
+                Clicking Add immediately links the note to {notesFolders.find((f) => f.id === selectedNotesFolderId)?.name || 'this folder'}
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsAddNoteModalOpen(false)}
+                className="px-4 py-1.5 rounded-xl text-xs font-semibold text-stone-600 dark:text-stone-300 hover:bg-black/5 dark:hover:bg-white/5 cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+          </div>
         </div>
       )}
 
