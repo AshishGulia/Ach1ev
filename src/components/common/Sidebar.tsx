@@ -269,7 +269,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           borderRadius: resolvedDesign === '1' ? '9px' : themeMeta.buttonRadius,
           boxShadow: isNightMode
             ? '0 3px 8px -2px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.05)'
-            : undefined,
+            : '0 2px 6px -1px rgba(36, 22, 10, 0.16), inset 0 1px 0 rgba(255, 255, 255, 0.18)',
         };
 
   const toggleBtnStyle: React.CSSProperties = {
@@ -872,7 +872,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             </div>
 
             <div
-              className="w-full flex flex-col items-center space-y-1 pt-2"
+              className="w-full flex flex-col items-center space-y-2.5 pt-2"
               style={{ borderTop: `1px solid ${sb.sectionBorder}` }}
             >
               {onOpenSettings && (
@@ -885,10 +885,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   }}
                   title="Settings & Design Preferences"
                   style={getBtnStyle(isSettingsOn)}
-                  className={`w-6 h-6 flex items-center justify-center transition-all hover:brightness-110 cursor-pointer ${leatherBtnCls}`}
+                  className={`w-10 h-10 flex items-center justify-center transition-all hover:brightness-110 cursor-pointer ${leatherBtnCls}`}
                 >
                   <Settings
-                    className="w-3.5 h-3.5"
+                    className="w-5 h-5"
                     style={{ color: isSettingsOn ? sb.activeIconColor : sb.idleIconColor }}
                   />
                 </button>
@@ -896,20 +896,11 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <button
                 onClick={() => handleItemClick('recycle-bin')}
                 title="Trash"
-                style={
-                  activeView === 'recycle-bin'
-                    ? getBtnStyle(true)
-                    : {
-                        background: sb.idleBtnBg,
-                        border: '1px solid transparent',
-                        color: sb.trashTextColor,
-                        borderRadius: resolvedDesign === '1' ? '9px' : themeMeta.buttonRadius,
-                      }
-                }
-                className={`sidebar-trash-btn w-6 h-6 flex items-center justify-center transition-all hover:brightness-110 cursor-pointer ${leatherBtnCls}`}
+                style={getBtnStyle(activeView === 'recycle-bin')}
+                className={`sidebar-trash-btn w-10 h-10 flex items-center justify-center transition-all hover:brightness-110 cursor-pointer ${leatherBtnCls}`}
               >
                 <Trash2
-                  className="w-3.5 h-3.5"
+                  className="w-5 h-5"
                   style={{
                     color: activeView === 'recycle-bin' ? sb.activeIconColor : sb.trashIconColor,
                   }}
