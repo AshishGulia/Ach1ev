@@ -513,11 +513,83 @@ export function attachApiRoutes(app: express.Express): express.Express {
     'achiev-phone-otp-hmac-secret-2026';
 
   const normalizeE164Phone = (raw: string): string => {
-    const cleaned = String(raw || '').trim().replace(/[^\d+]/g, '');
+    let cleaned = String(raw || '').trim().replace(/[^\d+]/g, '');
+    if (!cleaned) return '';
+    if (!cleaned.startsWith('+')) {
+      if (cleaned.length === 10) {
+        cleaned = `+91${cleaned}`;
+      } else {
+        cleaned = `+${cleaned}`;
+      }
+    }
     // Strip accidental trunk '0' right after +91 / +44 / etc. when length > 12
     const m = cleaned.match(/^(\+\d{1,3})0(\d{7,12})$/);
     return m ? `${m[1]}${m[2]}` : cleaned;
   };
+
+  app.get('/api/auth/phone/config', (_req, res) => {
+    return res.json({
+      hasFast2Sms: Boolean(process.env.FAST2SMS_API_KEY),
+      hasTwilio: Boolean(
+        process.env.TWILIO_ACCOUNT_SID &&
+        process.env.TWILIO_AUTH_TOKEN &&
+        process.env.TWILIO_PHONE_NUMBER
+      ),
+    });
+  });
+
+  app.post('/api/auth/phone/config', (req, res) => {
+    try {
+      const fast2Key = String(req.body?.fast2smsKey || '').trim();
+      const twSid = String(req.body?.twilioSid || '').trim();
+      const twToken = String(req.body?.twilioToken || '').trim();
+      const twFrom = String(req.body?.twilioFrom || '').trim();
+
+      if (fast2Key) {
+        process.env.FAST2SMS_API_KEY = fast2Key;
+      }
+      if (twSid) {
+        process.env.TWILIO_ACCOUNT_SID = twSid;
+      }
+      if (twToken) {
+        process.env.TWILIO_AUTH_TOKEN = twToken;
+      }
+      if (twFrom) {
+        process.env.TWILIO_PHONE_NUMBER = twFrom;
+      }
+
+      try {
+        const envPath = path.resolve(process.cwd(), '.env.local');
+        let content = '';
+        if (fs.existsSync(envPath)) {
+          content = fs.readFileSync(envPath, 'utf8');
+        }
+        if (fast2Key && !content.includes('FAST2SMS_API_KEY')) {
+          content += `\nFAST2SMS_API_KEY="${fast2Key}"\n`;
+        }
+        if (twSid && !content.includes('TWILIO_ACCOUNT_SID')) {
+          content += `\nTWILIO_ACCOUNT_SID="${twSid}"\nTWILIO_AUTH_TOKEN="${twToken}"\nTWILIO_PHONE_NUMBER="${twFrom}"\n`;
+        }
+        fs.writeFileSync(envPath, content, 'utf8');
+      } catch (e) {
+        console.warn('Could not write SMS keys to .env.local:', e);
+      }
+
+      return res.json({
+        ok: true,
+        configured: {
+          hasFast2Sms: Boolean(process.env.FAST2SMS_API_KEY),
+          hasTwilio: Boolean(
+            process.env.TWILIO_ACCOUNT_SID &&
+            process.env.TWILIO_AUTH_TOKEN &&
+            process.env.TWILIO_PHONE_NUMBER
+          ),
+        },
+      });
+    } catch (err: any) {
+      return res.status(500).json({ error: err?.message || 'Failed to update phone SMS config.' });
+    }
+  });
 
   app.post('/api/auth/phone/send-otp', async (req, res) => {
     try {
@@ -533,60 +605,138 @@ export function attachApiRoutes(app: express.Express): express.Express {
       const sig = crypto.createHmac('sha256', getOtpSigningSecret()).update(payloadB64).digest('base64url');
       const challengeToken = `${payloadB64}.${sig}`;
 
-      // 1. Dispatch via Twilio SMS if configured
-      const twSid = process.env.TWILIO_ACCOUNT_SID;
-      const twToken = process.env.TWILIO_AUTH_TOKEN;
-      const twFrom = process.env.TWILIO_PHONE_NUMBER;
+      // 1. Dispatch via Twilio SMS if configured in env, request body, or header
+      const twSid = (
+        req.body?.twilioSid ||
+        req.headers['x-twilio-sid'] ||
+        process.env.TWILIO_ACCOUNT_SID ||
+        ''
+      ).toString().trim();
+      const twToken = (
+        req.body?.twilioToken ||
+        req.headers['x-twilio-token'] ||
+        process.env.TWILIO_AUTH_TOKEN ||
+        ''
+      ).toString().trim();
+      const twFrom = (
+        req.body?.twilioFrom ||
+        req.headers['x-twilio-from'] ||
+        process.env.TWILIO_PHONE_NUMBER ||
+        ''
+      ).toString().trim();
+
+      let twilioCarrierError: string | null = null;
       if (twSid && twToken && twFrom) {
-        const authHdr = Buffer.from(`${twSid}:${twToken}`).toString('base64');
-        const twResp = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${twSid}/Messages.json`, {
-          method: 'POST',
-          headers: {
-            Authorization: `Basic ${authHdr}`,
-            'Content-Type': 'application/x-www-form-urlencoded',
-          },
-          body: new URLSearchParams({
-            To: cleanPhone,
-            From: twFrom,
-            Body: `Your Achiev verification code is ${code}. Valid for 10 minutes.`,
-          }),
-        });
-        if (!twResp.ok) {
-          const errData = await twResp.json().catch(() => ({}));
-          return res.status(502).json({
-            error: errData?.message || 'Carrier SMS delivery failed via Twilio. Please verify number.',
+        try {
+          const authHdr = Buffer.from(`${twSid}:${twToken}`).toString('base64');
+          const twResp = await fetch(`https://api.twilio.com/2010-04-01/Accounts/${twSid}/Messages.json`, {
+            method: 'POST',
+            headers: {
+              Authorization: `Basic ${authHdr}`,
+              'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: new URLSearchParams({
+              To: cleanPhone,
+              From: twFrom,
+              Body: `Your Achiev verification code is ${code}. Valid for 10 minutes.`,
+            }),
           });
+          if (twResp.ok) {
+            return res.json({
+              ok: true,
+              channel: 'sms',
+              carrier: 'Twilio SMS',
+              phone: cleanPhone,
+              challengeToken,
+              expiresInSec: 600,
+            });
+          }
+          const errData = (await twResp.json().catch(() => ({}))) as Record<string, any>;
+          twilioCarrierError = String(errData?.message || 'Twilio carrier dispatch failed');
+          console.warn('Twilio carrier error:', twilioCarrierError);
+        } catch (tErr: any) {
+          twilioCarrierError = tErr?.message || 'Twilio network error';
+          console.warn('Twilio network exception:', twilioCarrierError);
         }
-        return res.json({ ok: true, channel: 'sms', phone: cleanPhone, challengeToken, expiresInSec: 600 });
       }
 
-      // 2. Dispatch via Fast2SMS if configured (India +91)
-      const fast2Key = process.env.FAST2SMS_API_KEY;
+      // 2. Dispatch via Fast2SMS if configured in env, request body, or header (India +91)
+      const fast2Key = (
+        req.body?.fast2smsKey ||
+        req.headers['x-fast2sms-key'] ||
+        process.env.FAST2SMS_API_KEY ||
+        ''
+      ).toString().trim();
+
+      let fast2CarrierError: string | null = null;
       if (fast2Key && cleanPhone.startsWith('+91')) {
         const localTen = cleanPhone.slice(3);
-        const fResp = await fetch('https://www.fast2sms.com/dev/bulkV2', {
-          method: 'POST',
-          headers: {
-            authorization: fast2Key,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            route: 'otp',
-            variables_values: code,
-            numbers: localTen,
-          }),
-        });
-        if (fResp.ok) {
-          return res.json({ ok: true, channel: 'sms', phone: cleanPhone, challengeToken, expiresInSec: 600 });
+        try {
+          // Attempt Fast2SMS OTP route
+          let fResp = await fetch('https://www.fast2sms.com/dev/bulkV2', {
+            method: 'POST',
+            headers: {
+              authorization: fast2Key,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              route: 'otp',
+              variables_values: code,
+              numbers: localTen,
+            }),
+          });
+          let fData = (await fResp.json().catch(() => ({}))) as Record<string, any>;
+
+          // Fallback to Fast2SMS Quick SMS route if OTP route returned return: false
+          if (!fResp.ok || fData?.return !== true) {
+            fResp = await fetch('https://www.fast2sms.com/dev/bulkV2', {
+              method: 'POST',
+              headers: {
+                authorization: fast2Key,
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                route: 'q',
+                message: `Your Achiev verification code is ${code}. Valid for 10 minutes.`,
+                numbers: localTen,
+              }),
+            });
+            fData = (await fResp.json().catch(() => ({}))) as Record<string, any>;
+          }
+
+          if (fResp.ok && fData?.return === true) {
+            return res.json({
+              ok: true,
+              channel: 'sms',
+              carrier: 'Fast2SMS (India)',
+              phone: cleanPhone,
+              challengeToken,
+              expiresInSec: 600,
+            });
+          }
+          fast2CarrierError = Array.isArray(fData?.message)
+            ? fData.message.join(', ')
+            : typeof fData?.message === 'string'
+            ? fData.message
+            : 'Fast2SMS dispatch rejected. Check account balance or API key.';
+          console.warn('Fast2SMS carrier error:', fast2CarrierError);
+        } catch (fErr: any) {
+          fast2CarrierError = fErr?.message || 'Fast2SMS network error';
+          console.warn('Fast2SMS network exception:', fast2CarrierError);
         }
       }
 
-      // 3. Server-signed instant OTP code fallback when no paid SMS gateway is configured yet
+      // 3. Fallback: Return instant secure OTP code with transparent status
+      const carrierNotice = fast2CarrierError || twilioCarrierError;
       return res.json({
         ok: true,
         channel: 'instant-code',
         phone: cleanPhone,
         previewCode: code,
+        carrierNotice: carrierNotice || undefined,
+        notice: carrierNotice
+          ? `Carrier SMS gateway reported: ${carrierNotice}. Instant verification code provided.`
+          : 'Live telecom SMS gateway (Twilio / Fast2SMS) is not configured. Instant verification code provided.',
         challengeToken,
         expiresInSec: 600,
       });

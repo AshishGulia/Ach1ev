@@ -36,7 +36,10 @@ export interface PhoneSessionUser {
 export interface PhoneOtpSendResult {
   error: string | null;
   channel?: 'sms' | 'instant-code' | 'supabase';
+  carrier?: string;
+  carrierNotice?: string;
   previewOtp?: string;
+  notice?: string;
 }
 
 interface AuthContextValue {
@@ -105,7 +108,15 @@ function writeStoredPhoneUser(u: PhoneSessionUser | null): void {
 }
 
 function normalizeE164Phone(raw: string): string {
-  const cleaned = String(raw || '').trim().replace(/[^\d+]/g, '');
+  let cleaned = String(raw || '').trim().replace(/[^\d+]/g, '');
+  if (!cleaned) return '';
+  if (!cleaned.startsWith('+')) {
+    if (cleaned.length === 10) {
+      cleaned = `+91${cleaned}`;
+    } else {
+      cleaned = `+${cleaned}`;
+    }
+  }
   const m = cleaned.match(/^(\+\d{1,3})0(\d{7,12})$/);
   return m ? `${m[1]}${m[2]}` : cleaned;
 }
@@ -544,33 +555,37 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       return { error: 'Enter a valid mobile number with country code (e.g. +919876543210).' };
     }
 
-    // 1. Try Supabase SMS OTP only when Supabase Phone/SMS provider is actively configured
+    // 1. Try Supabase SMS OTP directly if client is available
     const supabase = getSupabaseClient();
-    const providers = enabledProvidersRef.current ?? (supabase ? await fetchEnabledProviders() : null);
-    if (supabase && providers?.phone === true) {
-      const { error } = await supabase.auth.signInWithOtp({ phone: cleanPhone });
-      if (!error) {
-        phoneOtpChallengeRef.current = { mode: 'supabase', phone: cleanPhone };
-        return { error: null, channel: 'supabase' };
-      }
-      const msg = String(error.message || '').toLowerCase();
-      const providerMissing =
-        msg.includes('provider') ||
-        msg.includes('sms') ||
-        msg.includes('phone') ||
-        msg.includes('twilio') ||
-        msg.includes('disabled');
-      if (!providerMissing) {
-        return { error: error.message };
+    if (supabase) {
+      try {
+        const { error } = await supabase.auth.signInWithOtp({ phone: cleanPhone });
+        if (!error) {
+          phoneOtpChallengeRef.current = { mode: 'supabase', phone: cleanPhone };
+          return { error: null, channel: 'supabase', carrier: 'Supabase SMS' };
+        }
+      } catch {
+        // Fall through to server-based OTP route
       }
     }
 
-    // 2. Use signed backend Phone OTP service (/api/auth/phone/send-otp -> Twilio/Fast2SMS or signed instant code)
+    // 2. Use backend Phone OTP service (/api/auth/phone/send-otp -> Twilio/Fast2SMS or instant-code)
     try {
+      const localFast2Key = typeof window !== 'undefined' ? localStorage.getItem('achiev_fast2sms_key') || '' : '';
+      const localTwilioSid = typeof window !== 'undefined' ? localStorage.getItem('achiev_twilio_sid') || '' : '';
+      const localTwilioToken = typeof window !== 'undefined' ? localStorage.getItem('achiev_twilio_token') || '' : '';
+      const localTwilioFrom = typeof window !== 'undefined' ? localStorage.getItem('achiev_twilio_from') || '' : '';
+
       const resp = await fetch('/api/auth/phone/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ phone: cleanPhone }),
+        body: JSON.stringify({
+          phone: cleanPhone,
+          fast2smsKey: localFast2Key || undefined,
+          twilioSid: localTwilioSid || undefined,
+          twilioToken: localTwilioToken || undefined,
+          twilioFrom: localTwilioFrom || undefined,
+        }),
       });
       const contentType = resp.headers.get('content-type') || '';
       if (contentType.includes('application/json')) {
@@ -586,7 +601,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
         return {
           error: null,
-          channel: 'sms',
+          channel: data.channel || 'sms',
+          carrier: data.carrier,
+          carrierNotice: data.carrierNotice,
+          previewOtp: data.previewCode,
+          notice: data.notice,
         };
       }
     } catch {
@@ -609,7 +628,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
     return {
       error: null,
-      channel: 'sms',
+      channel: 'instant-code',
+      previewOtp: localOtp,
+      notice: 'Instant offline verification code generated.',
     };
   };
 

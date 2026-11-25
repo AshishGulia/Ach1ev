@@ -24,6 +24,8 @@ import {
   ShieldCheck,
   RotateCcw,
   ChevronDown,
+  ExternalLink,
+  ChevronRight,
 } from 'lucide-react';
 
 const ProductDemoShowcase = React.lazy(
@@ -172,12 +174,26 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
     }
   }, [authRedirectError, clearAuthRedirectError]);
 
-  // Optional in-app Supabase & Google OAuth credential configurator for quick local/preview testing
+  // Optional in-app Supabase, Google OAuth & SMS Gateway credential configurator
   const currentCfg = getSupabaseConfig();
   const [showConfigDrawer, setShowConfigDrawer] = useState(false);
   const [cfgUrl, setCfgUrl] = useState(currentCfg.url);
   const [cfgKey, setCfgKey] = useState(currentCfg.anonKey);
   const [cfgGoogleId, setCfgGoogleId] = useState(() => getGoogleClientId());
+  const [carrierNotice, setCarrierNotice] = useState<string | null>(null);
+  const [smsCarrier, setSmsCarrier] = useState<string | null>(null);
+  const [fast2smsKey, setFast2smsKey] = useState<string>(() => {
+    return typeof window !== 'undefined' ? localStorage.getItem('achiev_fast2sms_key') || '' : '';
+  });
+  const [twilioSid, setTwilioSid] = useState<string>(() => {
+    return typeof window !== 'undefined' ? localStorage.getItem('achiev_twilio_sid') || '' : '';
+  });
+  const [twilioToken, setTwilioToken] = useState<string>(() => {
+    return typeof window !== 'undefined' ? localStorage.getItem('achiev_twilio_token') || '' : '';
+  });
+  const [twilioFrom, setTwilioFrom] = useState<string>(() => {
+    return typeof window !== 'undefined' ? localStorage.getItem('achiev_twilio_from') || '' : '';
+  });
 
   const handleSocialAuth = async (provider: SocialProviderId) => {
     setErrorMsg(null);
@@ -207,6 +223,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
     e?.preventDefault();
     setErrorMsg(null);
     setSuccessMsg(null);
+    setCarrierNotice(null);
     if (cleanedDigits.length < 7) {
       setErrorMsg('Please enter a valid mobile number (without country code).');
       return;
@@ -219,8 +236,14 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
     } else {
       setOtpSent(true);
       setResendCooldown(30);
-      setInstantOtpPreview(null);
-      setSuccessMsg(`6-digit verification code successfully sent via SMS to mobile number ${fullPhone}. Please check your phone / SIM device.`);
+      setInstantOtpPreview(res.previewOtp || null);
+      setCarrierNotice(res.carrierNotice || null);
+      setSmsCarrier(res.carrier || null);
+      if (res.channel === 'sms' || res.channel === 'supabase') {
+        setSuccessMsg(`✓ SMS verification code dispatched via ${res.carrier || 'telecom network'} to mobile number ${fullPhone}. Please check your phone messages.`);
+      } else {
+        setSuccessMsg(null);
+      }
     }
   };
 
@@ -301,10 +324,30 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
       saveRuntimeGoogleClientId(cfgGoogleId);
       void prefetchGoogleOAuth();
     }
+    if (typeof window !== 'undefined') {
+      if (fast2smsKey.trim()) localStorage.setItem('achiev_fast2sms_key', fast2smsKey.trim());
+      else localStorage.removeItem('achiev_fast2sms_key');
+      if (twilioSid.trim()) localStorage.setItem('achiev_twilio_sid', twilioSid.trim());
+      else localStorage.removeItem('achiev_twilio_sid');
+      if (twilioToken.trim()) localStorage.setItem('achiev_twilio_token', twilioToken.trim());
+      else localStorage.removeItem('achiev_twilio_token');
+      if (twilioFrom.trim()) localStorage.setItem('achiev_twilio_from', twilioFrom.trim());
+      else localStorage.removeItem('achiev_twilio_from');
+    }
+    void fetch('/api/auth/phone/config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        fast2smsKey: fast2smsKey.trim(),
+        twilioSid: twilioSid.trim(),
+        twilioToken: twilioToken.trim(),
+        twilioFrom: twilioFrom.trim(),
+      }),
+    }).catch(() => {});
     refreshAuthClient();
     setShowConfigDrawer(false);
     setErrorMsg(null);
-    setSuccessMsg('Cloud & OAuth credentials saved in browser. You can sign in now.');
+    setSuccessMsg('Authentication & SMS gateway credentials saved. You can sign in now.');
   };
 
   return (
@@ -510,11 +553,47 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                       onChange={(e) => setCfgGoogleId(e.target.value)}
                       className="w-full px-3 py-1.5 rounded-lg border text-xs outline-none font-mono bg-[#110c09] border-[#382518] text-[#efe4d4]"
                     />
+                    <div className="pt-2 border-t border-amber-800/40 space-y-2">
+                      <div className="text-[10px] font-semibold tracking-wider uppercase text-amber-400 flex items-center justify-between">
+                        <span>Telecom SMS Gateway (For Real SIM SMS)</span>
+                        <span className="text-[9px] text-[#baa48d] normal-case">Fast2SMS (India) / Twilio</span>
+                      </div>
+                      <input
+                        type="password"
+                        placeholder="Fast2SMS API Key (Instant India +91 SMS)"
+                        value={fast2smsKey}
+                        onChange={(e) => setFast2smsKey(e.target.value)}
+                        className="w-full px-3 py-1.5 rounded-lg border text-xs outline-none bg-[#110c09] border-[#382518] text-[#efe4d4]"
+                      />
+                      <div className="grid grid-cols-2 gap-1.5">
+                        <input
+                          type="text"
+                          placeholder="Twilio SID"
+                          value={twilioSid}
+                          onChange={(e) => setTwilioSid(e.target.value)}
+                          className="w-full px-2.5 py-1.5 rounded-lg border text-[11px] outline-none font-mono bg-[#110c09] border-[#382518] text-[#efe4d4]"
+                        />
+                        <input
+                          type="password"
+                          placeholder="Twilio Token"
+                          value={twilioToken}
+                          onChange={(e) => setTwilioToken(e.target.value)}
+                          className="w-full px-2.5 py-1.5 rounded-lg border text-[11px] outline-none font-mono bg-[#110c09] border-[#382518] text-[#efe4d4]"
+                        />
+                      </div>
+                      <input
+                        type="text"
+                        placeholder="Twilio Phone Number (e.g. +1234567890)"
+                        value={twilioFrom}
+                        onChange={(e) => setTwilioFrom(e.target.value)}
+                        className="w-full px-3 py-1.5 rounded-lg border text-[11px] outline-none font-mono bg-[#110c09] border-[#382518] text-[#efe4d4]"
+                      />
+                    </div>
                     <button
                       type="submit"
                       className="px-3 py-1 rounded-lg bg-amber-600 text-[#110c09] font-semibold text-xs hover:bg-amber-500 cursor-pointer"
                     >
-                      Save Browser Keys
+                      Save Browser &amp; SMS Keys
                     </button>
                   </form>
                 )}
@@ -870,7 +949,13 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                       required
                     />
                     <div className="flex items-center justify-between text-[11px] text-[#c9b08a]">
-                      <span>SMS sent to mobile number {fullPhone}</span>
+                      <span>
+                        {smsCarrier
+                          ? `✓ Live SMS sent via ${smsCarrier} to ${fullPhone}`
+                          : instantOtpPreview
+                          ? `Verification code generated for ${fullPhone}`
+                          : `SMS sent to mobile number ${fullPhone}`}
+                      </span>
                       <button
                         type="button"
                         disabled={resendCooldown > 0 || submitting === 'phone-send'}
@@ -883,6 +968,65 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                         </span>
                       </button>
                     </div>
+
+                    {/* Instant OTP Card & Carrier Details */}
+                    {instantOtpPreview && (
+                      <div className="p-3 rounded-xl border border-amber-500/40 bg-gradient-to-b from-[#2a170d]/90 to-[#160b06]/95 text-[#efe4d4] space-y-2.5 shadow-lg">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex items-center gap-1.5 text-amber-300 font-semibold text-xs">
+                            <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />
+                            <span>Instant Access Verification</span>
+                          </div>
+                          <span className="text-[9.5px] uppercase font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                            Direct Code
+                          </span>
+                        </div>
+                        <p className="text-[11px] leading-relaxed text-[#d8c5ad]">
+                          {carrierNotice ? (
+                            <span className="text-amber-200/90 block mb-1">
+                              <strong>Carrier notice:</strong> {carrierNotice}
+                            </span>
+                          ) : null}
+                          Telecom carrier gateways (Fast2SMS / Twilio) require an active telecom API key in settings. For instant login on <strong className="text-white">{fullPhone}</strong>, your verification OTP is:
+                        </p>
+                        <div className="flex items-center justify-between gap-2 p-2 rounded-lg bg-black/45 border border-amber-500/30">
+                          <span className="font-mono text-base font-bold tracking-[0.3em] text-amber-400 pl-2 select-all">
+                            {instantOtpPreview}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setOtpCode(instantOtpPreview);
+                              setErrorMsg(null);
+                            }}
+                            className="px-2.5 py-1 rounded-md bg-amber-500 text-stone-950 font-bold text-[11px] hover:bg-amber-400 transition-all cursor-pointer shadow-sm active:scale-95"
+                          >
+                            Auto-Fill OTP
+                          </button>
+                        </div>
+                        <div className="flex items-center justify-between pt-0.5 text-[10.5px]">
+                          <a
+                            href={`https://api.whatsapp.com/send?phone=${fullPhone.replace(/[^\d]/g, '')}&text=${encodeURIComponent(
+                              `Your Achiev login verification code is ${instantOtpPreview}. Valid for 10 minutes.`
+                            )}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-emerald-400 hover:text-emerald-300 hover:underline flex items-center gap-1 transition-colors"
+                          >
+                            <span>Send to WhatsApp</span>
+                            <ExternalLink className="w-3 h-3" />
+                          </a>
+                          <button
+                            type="button"
+                            onClick={() => setShowConfigDrawer(true)}
+                            className="text-amber-400 hover:text-amber-300 hover:underline flex items-center gap-0.5 cursor-pointer transition-colors"
+                          >
+                            <span>Add SMS API Key</span>
+                            <ChevronRight className="w-3 h-3" />
+                          </button>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 )}
 
