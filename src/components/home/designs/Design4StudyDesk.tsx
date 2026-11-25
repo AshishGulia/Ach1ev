@@ -68,10 +68,9 @@ export const Design4StudyDesk: React.FC<Design4Props> = ({
         {/* Top Header Bar on Wood */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-[#8e6848]/60 text-[#f6eee3]">
           <div className="flex items-center gap-3">
-            <AchievBrand variant="emblem" imgClassName="w-8 h-8" />
             <div>
               <h1 className="text-xl md:text-2xl font-bold tracking-wide">
-                Achiev Desk
+                Study Desk
               </h1>
               <p className="text-xs italic text-amber-200/80">
                 Settle Ideas · Study Today. Heal Tomorrow.

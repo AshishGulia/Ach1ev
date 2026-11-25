@@ -86,9 +86,7 @@ export const Design2OfficeClassic: React.FC<Design2Props> = ({
         <div className="px-4 py-2 flex items-center justify-between border-b border-sky-400/20">
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-2 font-bold tracking-tight text-sm">
-              <AchievBrand variant="emblem" imgClassName="w-5 h-5" />
-              <span>ACHIEV</span>
-              <span className="text-blue-200 text-xs font-normal">| Cockpit</span>
+              <span className="text-white text-xs font-semibold">Cockpit</span>
             </div>
             {/* Ribbon Tabs */}
             <div className="flex items-center gap-0.5 ml-4">

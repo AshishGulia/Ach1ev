@@ -646,16 +646,6 @@ export const WindowsHeader: React.FC<WindowsHeaderProps> = ({
           </button>
         )}
         <div className="flex items-center gap-1.5 sm:gap-2.5 text-stone-500 dark:text-[#a9927b] font-mono text-[11px] min-w-0">
-          <AchievBrand
-            variant="inline"
-            isDarkMode={isDarkMode}
-            showTagline={!isSidebarOpen}
-            className={isSidebarOpen ? 'md:hidden shrink-0' : 'shrink-0'}
-            imgClassName="w-5 h-5"
-          />
-          {!isSidebarOpen && (
-            <span className="hidden sm:inline text-stone-300 dark:text-[#4b3322]">/</span>
-          )}
           <span className="text-[12px] sm:text-[13px] font-semibold text-slate-800 dark:text-[#f2e7d6] truncate">
             {getViewTitle()}
           </span>

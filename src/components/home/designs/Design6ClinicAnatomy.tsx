@@ -120,9 +120,8 @@ export const Design6ClinicAnatomy: React.FC<Design6Props> = ({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-3 border-b border-stone-200/80 dark:border-[#222b38]">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-2">
-            <AchievBrand variant="inline" showTagline={false} imgClassName="w-5 h-5" />
             <span className="text-xs px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-600 font-mono font-bold">
-              Settle Ideas · Clinic Anatomy
+              Clinic Anatomy
             </span>
           </div>
 
