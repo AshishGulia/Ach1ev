@@ -497,25 +497,27 @@ export function useStored(): [AlmirahT[], (next: AlmirahT[]) => void] {
         if (Array.isArray(parsed) && parsed.length > 0) {
           let migrated = (parsed as AlmirahT[]).map(migrateAlmirah);
 
-          // Ensure all 5 distinct almirahs exist independently (and Almirah 1 is always preserved/visible)
-          const seededList = seed();
-          const hasAlmirah1 = migrated.some(
-            (m) => m.id === 'alm-dark-chocolate' || m.design === 'Dark Chocolate'
-          );
-          if (!hasAlmirah1 && seededList[0]) {
-            migrated = [seededList[0], ...migrated];
-          }
-
-          if (localStorage.getItem('achiev_five_almirahs_v3') !== '1') {
-            const existingIds = new Set(migrated.map((m) => m.id));
-            const existingDesigns = new Set(migrated.map((m) => m.design));
-            const emptyDefaults = seededList.filter(
-              (s) => !existingIds.has(s.id) && !existingDesigns.has(s.design)
-            );
-            if (emptyDefaults.length > 0) {
-              migrated = [...migrated, ...emptyDefaults];
+          // Deduplicate almirahs by design to remove any repeats (keeping exactly 5 unique almirahs max)
+          const seenDesigns = new Set<string>();
+          const uniqueAlmirahs: AlmirahT[] = [];
+          for (const alm of migrated) {
+            const d = alm.design || 'Dark Chocolate';
+            if (!seenDesigns.has(d)) {
+              seenDesigns.add(d);
+              uniqueAlmirahs.push(alm);
             }
-            localStorage.setItem('achiev_five_almirahs_v3', '1');
+          }
+          migrated = uniqueAlmirahs;
+
+          // Ensure all 5 distinct almirahs exist independently
+          const seededList = seed();
+          for (const s of seededList) {
+            if (!migrated.some((m) => m.design === s.design)) {
+              migrated.push(s);
+            }
+          }
+          if (migrated.length > 5) {
+            migrated = migrated.slice(0, 5);
           }
 
           if (localStorage.getItem('achiev_shelf_v2_seeded') !== '1' && migrated.length > 0) {
