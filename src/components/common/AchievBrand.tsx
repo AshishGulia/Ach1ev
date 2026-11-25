@@ -95,12 +95,17 @@ export const AchievBrand: React.FC<AchievBrandProps> = ({
     return (
       <div className={`inline-flex items-center gap-1.5 bg-transparent select-none ${className}`} title={title}>
         <img
-          src={ACHIEV_DEFAULT_LOGO_URL}
+          src={resolveAssetUrl('achiev-emblem-3d.png')}
           alt="ACH1EV"
-          width={928}
-          height={324}
+          width={512}
+          height={512}
           draggable={false}
-          className={imgClassName || 'h-6 w-auto object-contain bg-transparent select-none'}
+          className={imgClassName || 'h-5 w-5 object-contain bg-transparent select-none'}
+          style={{
+            filter: darkFlag
+              ? 'drop-shadow(0 2px 6px rgba(0, 0, 0, 0.45))'
+              : 'drop-shadow(0 1px 4px rgba(42, 22, 6, 0.2))',
+          }}
         />
       </div>
     );
