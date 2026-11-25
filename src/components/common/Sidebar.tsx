@@ -802,11 +802,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 role="button"
                 tabIndex={0}
                 title="Achiev · Settle Ideas - Click to expand sidebar"
-                className="w-6 h-6 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform bg-transparent"
+                className="w-9 h-9 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform bg-transparent"
               >
                 <AchievBrand
                   variant="emblem"
-                  imgClassName="w-5 h-5"
+                  imgClassName="w-8 h-8"
+                  isDarkMode={isNightMode}
                   title="Achiev · Settle Ideas - Click to expand sidebar"
                 />
               </div>

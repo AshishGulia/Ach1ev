@@ -38,9 +38,10 @@ const GoldEmblem3D: React.FC<{
     draggable={false}
     className={`select-none shrink-0 bg-transparent object-contain ${sizeClass}`}
     style={{
+      mixBlendMode: isDarkMode ? 'screen' : 'multiply',
       filter: isDarkMode
-        ? 'drop-shadow(0 4px 10px rgba(0, 0, 0, 0.55))'
-        : 'drop-shadow(0 2px 6px rgba(42, 22, 6, 0.25))',
+        ? 'drop-shadow(0 4px 10px rgba(0, 0, 0, 0.55)) brightness(1.15)'
+        : 'drop-shadow(0 2px 6px rgba(42, 22, 6, 0.25)) contrast(1.1)',
     }}
   />
 );

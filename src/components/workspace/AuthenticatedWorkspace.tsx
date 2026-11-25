@@ -1469,6 +1469,7 @@ export const AuthenticatedWorkspace: React.FC = () => {
                         onUpdateBook={handleUpdateBook}
                         notebooks={notebooks}
                         onUpdateNotebook={handleUpdateNotebook}
+                        onNavigate={(view) => setActiveView(view)}
                         onOpenNotebook={(id) => {
                           setActiveNotebookId(id);
                           setActiveView('notebooks');

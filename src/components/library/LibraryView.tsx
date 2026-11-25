@@ -106,6 +106,7 @@ interface LibraryViewProps {
   onSnipToNote?: (snippet: SnippetScreenshot) => void;
   isDarkMode?: boolean;
   activeDesign?: DesignId;
+  onNavigate?: (view: any) => void;
 }
 
 export const LibraryView: React.FC<LibraryViewProps> = ({
@@ -120,6 +121,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
   onSnipToNote,
   isDarkMode = false,
   activeDesign = '1',
+  onNavigate,
 }) => {
   const { driveAccount, connectGoogleDrive, disconnectGoogleDrive, getValidDriveAccessToken } = useAuth();
   const [activeTab, setActiveTab] = useState<'books' | 'images' | 'flowcharts'>('books');
@@ -845,6 +847,8 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
       source: 'shelf',
     });
 
+    let bookObj: MedicalBook;
+
     if (
       shelfBook.id === 'achiev-features-guide-pdf' ||
       shelfBook.id === 'achiev-guide-custom-cover' ||
@@ -852,7 +856,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
       shelfBook.title.toLowerCase().includes('achiev features') ||
       shelfBook.title.toLowerCase().includes('achiev study handbook')
     ) {
-      setActiveBookModal({
+      bookObj = {
         id: shelfBook.id,
         title: shelfBook.title,
         subject: 'Pharmacology',
@@ -871,51 +875,53 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
             .map((s) => `<h4>${s.title}</h4><p>${s.body}</p>`)
             .join('')}${p.highlight ? `<div class="callout">${p.highlight}</div>` : ''}</div>`,
         })),
-      });
-      return;
+      };
+    } else {
+      const found =
+        CURATED_MEDICAL_BOOKS.find(
+          (b) =>
+            b.title.toLowerCase().includes(shelfBook.title.toLowerCase()) ||
+            shelfBook.title.toLowerCase().includes(b.title.toLowerCase())
+        ) ||
+        books.find(
+          (b) =>
+            b.title.toLowerCase().includes(shelfBook.title.toLowerCase()) ||
+            shelfBook.title.toLowerCase().includes(b.title.toLowerCase())
+        );
+
+      if (found) {
+        bookObj = shelfBook.thumbnail ? { ...found, thumbnail: shelfBook.thumbnail } : found;
+      } else {
+        bookObj = {
+          id: shelfBook.id,
+          title: shelfBook.title,
+          subject: 'Internal Medicine',
+          author: 'Achiev Medical Library',
+          edition: 'Standard Edition',
+          coverColor: shelfBook.thumbnail?.bgColor || SHELF_COVER[shelfBook.cover]?.from || '#1e3a8a',
+          thumbnail: shelfBook.thumbnail,
+          bookmarks: [1],
+          pages: [
+            {
+              pageNumber: 1,
+              title: `${shelfBook.title} · Chapter 1: Clinical High-Yield Review`,
+              keyTopic: 'Diagnostic Criteria & Pathophysiology Highlights',
+              summaryPearl: 'Comprehensive clinical study review and high-yield concepts.',
+              contentHtml: `<p>Welcome to <strong>${shelfBook.title}</strong>. Full digital study edition with clinical notes, diagnostic criteria, and board examination pearls.</p>`,
+            },
+          ],
+        };
+      }
     }
 
-    const found =
-      CURATED_MEDICAL_BOOKS.find(
-        (b) =>
-          b.title.toLowerCase().includes(shelfBook.title.toLowerCase()) ||
-          shelfBook.title.toLowerCase().includes(b.title.toLowerCase())
-      ) ||
-      books.find(
-        (b) =>
-          b.title.toLowerCase().includes(shelfBook.title.toLowerCase()) ||
-          shelfBook.title.toLowerCase().includes(b.title.toLowerCase())
-      );
+    try {
+      localStorage.setItem('medden_pending_read_book_v1', JSON.stringify(bookObj));
+    } catch {}
 
-    if (found) {
-      setActiveBookModal(
-        shelfBook.thumbnail ? { ...found, thumbnail: shelfBook.thumbnail } : found
-      );
+    if (onNavigate) {
+      onNavigate('read');
     } else {
-      const dynamicBook: FrontMedicalBook = {
-        id: shelfBook.id,
-        title: shelfBook.title,
-        subject: 'Internal Medicine',
-        author: 'Achiev Medical Library',
-        edition: 'Standard Edition',
-        coverColor: shelfBook.thumbnail?.bgColor || SHELF_COVER[shelfBook.cover]?.from || '#1e3a8a',
-        thumbnail: shelfBook.thumbnail,
-        readCount: 1,
-        lastOpenedText: 'Just now',
-        lastOpenedTimestamp: Date.now(),
-        addedTimestamp: Date.now(),
-        bookmarks: [1],
-        pages: [
-          {
-            pageNumber: 1,
-            title: `${shelfBook.title} · Chapter 1: Clinical High-Yield Review`,
-            keyTopic: 'Diagnostic Criteria & Pathophysiology Highlights',
-            summaryPearl: 'Comprehensive clinical study review and high-yield concepts.',
-            contentHtml: `<p>Welcome to <strong>${shelfBook.title}</strong>. Full digital study edition with clinical notes, diagnostic criteria, and board examination pearls.</p>`,
-          },
-        ],
-      };
-      setActiveBookModal(dynamicBook);
+      setActiveBookModal(bookObj);
     }
   };
 
