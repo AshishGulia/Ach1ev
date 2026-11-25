@@ -603,6 +603,51 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
   const [underlineMode, setUnderlineMode] = useState<'straight' | 'hand'>('straight');
   const [openUnderlineMenu, setOpenUnderlineMenu] = useState<{ left: number; top: number } | null>(null);
   const [saveStatus, setSaveStatus] = useState<'saved' | 'saving'>('saved');
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
+  const [exportPaperSize, setExportPaperSize] = useState<'A4' | 'A5' | 'A3' | 'Letter'>('A4');
+  const [exportFormat, setExportFormat] = useState<'pdf' | 'doc'>('pdf');
+
+  const handleExecuteExport = () => {
+    const safeTitle = (noteTitle || 'Untitled_Note').trim();
+    const htmlBody = editorRef.current?.innerHTML || '';
+    const snapsHtml = paperVectorSnaps
+      .map(
+        (s) =>
+          `<div style="margin:18px 0;border:1px solid #d6c7b0;border-radius:10px;overflow:hidden;"><div style="padding:6px 10px;background:#f8f3ea;font-weight:700;font-size:12px;">${s.title}</div><div style="position:relative;"><img src="${s.svgDataUrl}" style="width:100%;display:block;"/><svg viewBox="0 0 ${s.width} ${s.height}" style="position:absolute;inset:0;width:100%;height:100%;">${s.strokes
+            .map((st) => {
+              const d = st.points.map((pt, i) => `${i === 0 ? 'M' : 'L'}${pt[0].toFixed(1)},${pt[1].toFixed(1)}`).join(' ');
+              return `<path d="${d}" fill="none" stroke="${st.color}" stroke-width="${st.width}" stroke-linecap="round" stroke-linejoin="round"/>`;
+            })
+            .join('')}</svg></div></div>`
+      )
+      .join('');
+
+    const fullDoc = `<!doctype html><html><head><meta charset="utf-8"/><title>${safeTitle}</title><style>@page { size: ${exportPaperSize}; margin: 20mm; } body{font-family:Arial,sans-serif;max-width:820px;margin:30px auto;padding:24px;color:#23160c;background:#fffdf8;line-height:1.65;} h1{margin-bottom:12px;font-size:24px;border-bottom:2px solid #a47c43;padding-bottom:6px;}</style></head><body><h1>${safeTitle}</h1>${htmlBody}${snapsHtml}</body></html>`;
+
+    if (exportFormat === 'doc') {
+      const blob = new Blob([fullDoc], { type: 'application/msword;charset=utf-8' });
+      const fileName = `${safeTitle.replace(/[^a-zA-Z0-9._-]+/g, '_')}_${exportPaperSize}.doc`;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = fileName;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`Downloaded Word document (${exportPaperSize}) successfully!`);
+    } else {
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        showToast('Popup blocked. Please allow popups to save as PDF.');
+        return;
+      }
+      printWindow.document.write(fullDoc + '<script>window.onload=function(){window.print();}</script>');
+      printWindow.document.close();
+      showToast(`Preparing PDF (${exportPaperSize}) print & save...`);
+    }
+    setIsExportModalOpen(false);
+  };
 
   // Canvas Text Selection Floating Menu & Gemini AI popover
   const [canvasSelection, setCanvasSelection] = useState<{
@@ -4149,13 +4194,13 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
         {/* Save Edited PDF to Ach1ev/Documents + Cloud Drive */}
         <button
           type="button"
-          className="an-btn"
-          style={{ padding: '6px 10px', fontSize: 11.5 }}
-          onClick={() => void handleSaveEditedNoteToDevice()}
-          title="Save edited note to device folder (Ach1ev/Documents)"
+          className="an-btn primary"
+          style={{ padding: '6px 12px', fontSize: 11.5 }}
+          onClick={() => setIsExportModalOpen(true)}
+          title="Export note as PDF or Word document (.doc) with paper format (A4, A5, A3, Letter)"
         >
-          <Download className="w-3.5 h-3.5 text-[#A47C43]" />
-          <span className="lbl">Save PDF</span>
+          <Download className="w-3.5 h-3.5" />
+          <span className="lbl">Export / Download</span>
         </button>
 
         <button
@@ -7586,6 +7631,112 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
               >
                 <Copy className="w-3.5 h-3.5" />
                 <span>Copy to Paper</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* EXPORT NOTE MODAL (PDF / Word .doc + Paper Format A4, A5, A3, Letter) */}
+      {isExportModalOpen && (
+        <div className="fixed inset-0 z-[140] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div
+            className="w-full max-w-md rounded-3xl border p-6 shadow-2xl space-y-5"
+            style={{ background: 'var(--an-paper)', borderColor: 'var(--an-line)', color: 'var(--an-ink)' }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between pb-3 border-b" style={{ borderColor: 'var(--an-line)' }}>
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-[#A47C43]/20 text-[#A47C43] flex items-center justify-center border border-[#A47C43]/40">
+                  <Download className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-base">Export Study Note</h3>
+                  <p className="text-[11px] opacity-75">Choose format &amp; paper size</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsExportModalOpen(false)}
+                className="p-1 rounded-lg hover:bg-black/10 dark:hover:bg-white/10 cursor-pointer"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Format selection */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold block opacity-90">File Format</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setExportFormat('pdf')}
+                    className={`py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
+                      exportFormat === 'pdf'
+                        ? 'bg-[#A47C43] text-white border-[#A47C43] shadow-md'
+                        : 'border-[var(--an-line)] opacity-80 hover:opacity-100'
+                    }`}
+                  >
+                    <FileText className="w-4 h-4" />
+                    <span>PDF Document (.pdf)</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setExportFormat('doc')}
+                    className={`py-2 px-3 rounded-xl border text-xs font-bold flex items-center justify-center gap-2 cursor-pointer transition-all ${
+                      exportFormat === 'doc'
+                        ? 'bg-[#A47C43] text-white border-[#A47C43] shadow-md'
+                        : 'border-[var(--an-line)] opacity-80 hover:opacity-100'
+                    }`}
+                  >
+                    <FileText className="w-4 h-4" />
+                    <span>Word Document (.doc)</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Paper size selection */}
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold block opacity-90">Paper Size Format</label>
+                <div className="grid grid-cols-4 gap-2">
+                  {(['A4', 'A5', 'A3', 'Letter'] as const).map((sz) => (
+                    <button
+                      key={sz}
+                      type="button"
+                      onClick={() => setExportPaperSize(sz)}
+                      className={`py-2 rounded-xl border text-xs font-mono font-bold cursor-pointer transition-all ${
+                        exportPaperSize === sz
+                          ? 'bg-[#A47C43] text-white border-[#A47C43] shadow-md'
+                          : 'border-[var(--an-line)] opacity-80 hover:opacity-100'
+                      }`}
+                    >
+                      {sz}
+                    </button>
+                  ))}
+                </div>
+                <p className="text-[10.5px] opacity-65 italic">
+                  Note: Formatted with exact {exportPaperSize} page margins and typography.
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-2 flex gap-3">
+              <button
+                type="button"
+                onClick={() => setIsExportModalOpen(false)}
+                className="flex-1 py-2.5 rounded-xl border text-xs font-semibold cursor-pointer"
+                style={{ background: 'var(--an-bg)', borderColor: 'var(--an-line)', color: 'var(--an-ink)' }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleExecuteExport}
+                className="flex-1 py-2.5 rounded-xl bg-[#A47C43] hover:bg-[#8e6834] text-white text-xs font-bold shadow-md cursor-pointer flex items-center justify-center gap-1.5"
+              >
+                <Download className="w-4 h-4" />
+                <span>Download Now</span>
               </button>
             </div>
           </div>
