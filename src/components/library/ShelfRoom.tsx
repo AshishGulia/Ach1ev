@@ -506,7 +506,7 @@ export function useStored(): [AlmirahT[], (next: AlmirahT[]) => void] {
             migrated = [seededList[0], ...migrated];
           }
 
-          if (localStorage.getItem('achiev_five_almirahs_v2') !== '1') {
+          if (localStorage.getItem('achiev_five_almirahs_v3') !== '1') {
             const existingIds = new Set(migrated.map((m) => m.id));
             const existingDesigns = new Set(migrated.map((m) => m.design));
             const emptyDefaults = seededList.filter(
@@ -515,7 +515,7 @@ export function useStored(): [AlmirahT[], (next: AlmirahT[]) => void] {
             if (emptyDefaults.length > 0) {
               migrated = [...migrated, ...emptyDefaults];
             }
-            localStorage.setItem('achiev_five_almirahs_v2', '1');
+            localStorage.setItem('achiev_five_almirahs_v3', '1');
           }
 
           if (localStorage.getItem('achiev_shelf_v2_seeded') !== '1' && migrated.length > 0) {

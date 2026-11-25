@@ -23,6 +23,7 @@ import {
   Phone,
   ShieldCheck,
   RotateCcw,
+  ChevronDown,
 } from 'lucide-react';
 
 const ProductDemoShowcase = React.lazy(
@@ -218,13 +219,8 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
     } else {
       setOtpSent(true);
       setResendCooldown(30);
-      if (res.previewOtp) {
-        setInstantOtpPreview(res.previewOtp);
-        setSuccessMsg(`6-digit verification code ready for ${fullPhone}.`);
-      } else {
-        setInstantOtpPreview(null);
-        setSuccessMsg(`Verification code sent via SMS to ${fullPhone}.`);
-      }
+      setInstantOtpPreview(null);
+      setSuccessMsg(`6-digit verification code successfully sent via SMS to mobile number ${fullPhone}. Please check your phone / SIM device.`);
     }
   };
 
@@ -838,20 +834,6 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
 
                 {otpSent && (
                   <div className="space-y-2 animate-in fade-in duration-150">
-                    {instantOtpPreview && (
-                      <div className="px-3 py-2 rounded-xl bg-amber-500/15 border border-amber-400/35 flex items-center justify-between gap-2 text-xs text-amber-100">
-                        <span className="font-medium">
-                          Verification OTP: <strong className="font-mono tracking-[0.2em] text-amber-300">{instantOtpPreview}</strong>
-                        </span>
-                        <button
-                          type="button"
-                          onClick={() => setOtpCode(instantOtpPreview)}
-                          className="px-2 py-0.5 rounded-lg bg-amber-400 text-[#1b1007] font-bold text-[10px] hover:bg-amber-300 cursor-pointer shrink-0"
-                        >
-                          Auto-Fill
-                        </button>
-                      </div>
-                    )}
                     <div className="flex items-center justify-between">
                       <label className="text-xs font-semibold opacity-85 flex items-center gap-1.5">
                         <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
@@ -888,7 +870,7 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                       required
                     />
                     <div className="flex items-center justify-between text-[11px] text-[#c9b08a]">
-                      <span>{instantOtpPreview ? `Code generated for ${fullPhone}` : `SMS sent to ${fullPhone}`}</span>
+                      <span>SMS sent to mobile number {fullPhone}</span>
                       <button
                         type="button"
                         disabled={resendCooldown > 0 || submitting === 'phone-send'}
@@ -997,6 +979,14 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
         )}
         </div>
       </div>
+
+      {/* Bouncing down arrow indicating scroll down for tour */}
+      {!isModal && (
+        <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center pointer-events-none animate-bounce">
+          <span className="text-[10px] font-mono tracking-widest text-[#f5d093]/75 uppercase mb-0.5">Scroll Down For Tour</span>
+          <ChevronDown className="w-5 h-5 text-amber-400" />
+        </div>
+      )}
       </div>
 
       {!isModal && (

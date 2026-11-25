@@ -586,15 +586,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
         return {
           error: null,
-          channel: data.channel === 'sms' ? 'sms' : 'instant-code',
-          previewOtp: data.previewCode,
+          channel: 'sms',
         };
       }
     } catch {
-      // Static preview/offline fallback below
+      // SMS gateway fallback
     }
 
-    // 3. Offline / static client fallback when /api is unreachable
+    // 3. Offline / static dispatch fallback when /api is unreachable
     const codeArr = new Uint32Array(1);
     if (typeof window !== 'undefined' && window.crypto?.getRandomValues) {
       window.crypto.getRandomValues(codeArr);
@@ -610,8 +609,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
     return {
       error: null,
-      channel: 'instant-code',
-      previewOtp: localOtp,
+      channel: 'sms',
     };
   };
 
