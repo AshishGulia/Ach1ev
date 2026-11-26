@@ -19,7 +19,7 @@ const resolveAssetUrl = (relativePath: string): string => {
 export const ACHIEV_DEFAULT_LOGO_URL = resolveAssetUrl('assets/aistudio/achiev-logo-login.webp');
 export const ACHIEV_LOGIN_LOGO_URL = resolveAssetUrl('assets/aistudio/Transparent_result_fff796aa.webp');
 export const ACHIEV_LOGO_URL = resolveAssetUrl('assets/aistudio/achiev-logo-login.webp');
-export const ACHIEV_EMBLEM_URL = resolveAssetUrl('assets/aistudio/android-chrome-512x512_1f22961a.png');
+export const ACHIEV_EMBLEM_URL = resolveAssetUrl('assets/aistudio/transparent_512x512_264954dc.png');
 export const ACHIEV_WORDMARK_URL = resolveAssetUrl('assets/aistudio/achiev-logo-login.webp');
 export const ACHIEV_LOCKUP_URL = ACHIEV_LOGIN_LOGO_URL;
 export const ACHIEV_LEATHER_HERO_URL = '';
@@ -38,10 +38,9 @@ const GoldEmblem3D: React.FC<{
     draggable={false}
     className={`select-none shrink-0 bg-transparent object-contain ${sizeClass}`}
     style={{
-      mixBlendMode: isDarkMode ? 'screen' : 'multiply',
       filter: isDarkMode
-        ? 'drop-shadow(0 4px 10px rgba(0, 0, 0, 0.55)) brightness(1.15)'
-        : 'drop-shadow(0 2px 6px rgba(42, 22, 6, 0.25)) contrast(1.1)',
+        ? 'drop-shadow(0 4px 10px rgba(0, 0, 0, 0.55)) brightness(1.08)'
+        : 'drop-shadow(0 2px 6px rgba(42, 22, 6, 0.28)) contrast(1.05)',
     }}
   />
 );
