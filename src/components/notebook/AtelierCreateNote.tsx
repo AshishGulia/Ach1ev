@@ -607,6 +607,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
   const [exportPaperSize, setExportPaperSize] = useState<'A4' | 'A5' | 'A3' | 'Letter'>('A4');
   const [exportFormat, setExportFormat] = useState<'pdf' | 'doc'>('pdf');
 
+
   const handleExecuteExport = () => {
     const safeTitle = (noteTitle || 'Untitled_Note').trim();
     const htmlBody = editorRef.current?.innerHTML || '';
@@ -1018,6 +1019,13 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
 
   // Subwindow Panes State (empty until user opens a book or uploads a document)
   const [docPanes, setDocPanes] = useState<OpenDocPane[]>([]);
+  const [noteViewMode, setNoteViewMode] = useState<'single' | 'book'>('single');
+
+  useEffect(() => {
+    if (docPanes.length > 0 || layout !== 'focus') {
+      setNoteViewMode('single');
+    }
+  }, [docPanes.length, layout]);
 
   // Window State for Note & Maximization
   const [isNoteMinimized, setIsNoteMinimized] = useState(false);
@@ -4211,6 +4219,25 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
           <span className="lbl">Attachments ({resources.length})</span>
         </button>
 
+        {/* Notebook Book Format / Single Page View Toggle */}
+        <button
+          type="button"
+          className={`an-btn ${noteViewMode === 'book' ? 'primary' : ''}`}
+          onClick={() => setNoteViewMode((m) => (m === 'single' ? 'book' : 'single'))}
+          title={
+            docPanes.length > 0 || layout !== 'focus'
+              ? 'Book format switches to single page when side book/document is open'
+              : noteViewMode === 'book'
+              ? 'Switch to Single Page View'
+              : 'Switch to Notebook Book Spread (2 Pages Side-by-Side)'
+          }
+          disabled={docPanes.length > 0 || layout !== 'focus'}
+          style={docPanes.length > 0 || layout !== 'focus' ? { opacity: 0.5, cursor: 'not-allowed' } : undefined}
+        >
+          <BookOpen className="w-3.5 h-3.5" />
+          <span className="lbl">{noteViewMode === 'book' ? 'Book Spread' : 'Single Page'}</span>
+        </button>
+
         {/* Save Edited PDF to Ach1ev/Documents + Cloud Drive */}
         <button
           type="button"
@@ -6254,15 +6281,15 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                   );
                 })}
 
-                {/* Bottom Center Add Page Button for PDF / Word export */}
-                <div className="flex justify-center my-8 relative z-20" contentEditable={false}>
+                {/* Add Page Button docked at exact lower boundary of A4 note sheet */}
+                <div className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-1/2 z-30" contentEditable={false}>
                   <button
                     type="button"
                     onClick={handleAddPageBreak}
-                    className="px-4 py-2 rounded-xl bg-[#A47C43] hover:bg-[#8e6834] text-white font-bold text-xs flex items-center gap-2 shadow-md transition-colors cursor-pointer"
-                    title="Add a new page / page break at the end of the note for PDF & Word export"
+                    className="px-4 py-1.5 rounded-full bg-[#A47C43] hover:bg-[#8e6834] text-white font-bold text-xs flex items-center gap-1.5 shadow-lg border border-[#8e6834]/40 transition-colors cursor-pointer"
+                    title="Add a new page / page break at the bottom boundary of the note for PDF & Word export"
                   >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="w-3.5 h-3.5" />
                     <span>Add Page</span>
                   </button>
                 </div>
