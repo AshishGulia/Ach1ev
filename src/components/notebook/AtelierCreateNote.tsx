@@ -236,6 +236,59 @@ const FloatingBoxEditable: React.FC<{
   );
 };
 
+const PageContentEditor: React.FC<{
+  initialHtml: string;
+  fontSizePx: number;
+  onUpdate: (html: string) => void;
+  editorRefCallback: (el: HTMLDivElement | null) => void;
+  onClick: (e: React.MouseEvent) => void;
+  onMouseMove: (e: React.MouseEvent) => void;
+  onPointerDown: (e: React.PointerEvent) => void;
+  onKeyDown: (e: React.KeyboardEvent) => void;
+  onKeyUp: () => void;
+  onBlur: () => void;
+}> = ({
+  initialHtml,
+  fontSizePx,
+  onUpdate,
+  editorRefCallback,
+  onClick,
+  onMouseMove,
+  onPointerDown,
+  onKeyDown,
+  onKeyUp,
+  onBlur,
+}) => {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const el = ref.current;
+    if (el && document.activeElement !== el && el.innerHTML !== initialHtml) {
+      el.innerHTML = initialHtml;
+    }
+  }, [initialHtml]);
+
+  return (
+    <div
+      className="an-ed"
+      contentEditable
+      suppressContentEditableWarning
+      spellCheck
+      ref={(el) => {
+        ref.current = el;
+        editorRefCallback(el);
+      }}
+      onInput={(e) => onUpdate(e.currentTarget.innerHTML)}
+      onClick={onClick}
+      onMouseMove={onMouseMove}
+      onPointerDown={onPointerDown}
+      onKeyDown={onKeyDown}
+      onKeyUp={onKeyUp}
+      onBlur={onBlur}
+      style={{ fontSize: `${fontSizePx}px` }}
+    />
+  );
+};
+
 const INITIAL_RESOURCES: AttachedResource[] = [];
 
 const CUSTOMIZABLE_RIBBON_TOOLS: Array<{
@@ -518,11 +571,50 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
   const [dropTargetPane, setDropTargetPane] = useState<string | null>(null);
   const [wsLeftPadPct, setWsLeftPadPct] = useState<number>(0);
   const [wsRightPadPct, setWsRightPadPct] = useState<number>(0);
-  // Title & Content (Starts with clean blank ruled paper by default)
+  // Multi-page stack (MS Word document page view)
   const initialTitle = notebook?.title || 'Untitled Note';
-  const initialContent =
-    notebook?.pages?.[activePageIndex]?.contentHtml ||
-    `<p><br></p>`;
+  const [notePages, setNotePages] = useState<Array<{ id: string; title: string; contentHtml: string }>>(() => {
+    if (notebook?.pages && notebook.pages.length > 0) {
+      return notebook.pages.map((p, idx) => ({
+        id: p.id || `pg-${idx}`,
+        title: p.title || `Page ${idx + 1}`,
+        contentHtml: p.contentHtml || '<p><br></p>',
+      }));
+    }
+    return [
+      {
+        id: 'pg-0',
+        title: initialTitle,
+        contentHtml: notebook?.pages?.[activePageIndex]?.contentHtml || '<p><br></p>',
+      },
+    ];
+  });
+  const pageEditorRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const editorRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const firstId = notePages[0]?.id;
+    if (firstId && pageEditorRefs.current[firstId]) {
+      editorRef.current = pageEditorRefs.current[firstId];
+    }
+  }, [notePages]);
+
+  useEffect(() => {
+    if (onUpdateNotebook && notebook) {
+      const updatedPages = notePages.map((p, i) => ({
+        id: p.id,
+        pageNumber: i + 1,
+        title: p.title,
+        contentHtml: p.contentHtml,
+        updatedAt: new Date().toISOString(),
+      }));
+      onUpdateNotebook({
+        ...notebook,
+        pages: updatedPages,
+        updatedAt: new Date().toISOString(),
+      });
+    }
+  }, [notePages]);
 
   const [noteTitle, setNoteTitle] = useState(initialTitle);
   const [todayDate, setTodayDate] = useState<string>(() => formatTodayDate());
@@ -610,7 +702,12 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
 
   const handleExecuteExport = () => {
     const safeTitle = (noteTitle || 'Untitled_Note').trim();
-    const htmlBody = editorRef.current?.innerHTML || '';
+    const allPagesHtml = notePages
+      .map(
+        (p, idx) =>
+          `<div style="${idx > 0 ? 'page-break-before: always; break-before: page; margin-top: 40px;' : ''}"><h2>${p.title || `Page ${idx + 1}`}</h2>${p.contentHtml}</div>`
+      )
+      .join('');
     const snapsHtml = paperVectorSnaps
       .map(
         (s) =>
@@ -623,11 +720,11 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
       )
       .join('');
 
-    const fullDoc = `<!doctype html><html><head><meta charset="utf-8"/><title>${safeTitle}</title><style>@page { size: ${exportPaperSize}; margin: 20mm; } body{font-family:Arial,sans-serif;max-width:820px;margin:30px auto;padding:24px;color:#23160c;background:#fffdf8;line-height:1.65;} h1{margin-bottom:12px;font-size:24px;border-bottom:2px solid #a47c43;padding-bottom:6px;}</style></head><body><h1>${safeTitle}</h1>${htmlBody}${snapsHtml}</body></html>`;
+    const fullDoc = `<!doctype html><html><head><meta charset="utf-8"/><title>${safeTitle}</title><style>@page { size: A4; margin: 20mm; } body{font-family:Arial,sans-serif;max-width:820px;margin:30px auto;padding:24px;color:#23160c;background:#fffdf8;line-height:1.65;} h1{margin-bottom:12px;font-size:24px;border-bottom:2px solid #a47c43;padding-bottom:6px;}</style></head><body><h1>${safeTitle}</h1>${allPagesHtml}${snapsHtml}</body></html>`;
 
     if (exportFormat === 'doc') {
       const blob = new Blob([fullDoc], { type: 'application/msword;charset=utf-8' });
-      const fileName = `${safeTitle.replace(/[^a-zA-Z0-9._-]+/g, '_')}_${exportPaperSize}.doc`;
+      const fileName = `${safeTitle.replace(/[^a-zA-Z0-9._-]+/g, '_')}_A4.doc`;
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -636,7 +733,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      showToast(`Downloaded Word document (${exportPaperSize}) successfully!`);
+      showToast('Downloaded Word document (A4 Multi-page) successfully!');
     } else {
       const printWindow = window.open('', '_blank');
       if (!printWindow) {
@@ -645,45 +742,34 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
       }
       printWindow.document.write(fullDoc + '<script>window.onload=function(){window.print();}</script>');
       printWindow.document.close();
-      showToast(`Preparing PDF (${exportPaperSize}) print & save...`);
+      showToast('Preparing PDF (A4 Multi-page) print & save...');
     }
     setIsExportModalOpen(false);
   };
 
   const handleAddPageBreak = () => {
-    if (!editorRef.current) return;
-    const pageBreakHtml = `<div style="page-break-before: always; break-before: page; margin: 40px 0 20px 0; border-top: 2px dashed var(--an-brass, #A47C43); padding-top: 20px;"><div style="font-size:11px;font-weight:bold;color:var(--an-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">New Page / Page Break</div><p><br></p></div>`;
-    const sel = window.getSelection();
-    let insertedEl: HTMLElement | null = null;
-    if (sel && sel.rangeCount > 0 && editorRef.current.contains(sel.anchorNode)) {
-      const range = sel.getRangeAt(0);
-      range.deleteContents();
-      const div = document.createElement('div');
-      div.innerHTML = pageBreakHtml;
-      insertedEl = div.firstElementChild as HTMLElement || div;
-      range.insertNode(div);
-      range.collapse(false);
-    } else {
-      const div = document.createElement('div');
-      div.innerHTML = pageBreakHtml;
-      insertedEl = div.firstElementChild as HTMLElement || div;
-      editorRef.current.appendChild(div);
-    }
+    const newPageId = `pg-${Date.now()}`;
+    const newPageNum = notePages.length + 1;
+    const newPage = {
+      id: newPageId,
+      title: `Page ${newPageNum}`,
+      contentHtml: '<p><br></p>',
+    };
+    setNotePages((prev) => [...prev, newPage]);
     ensureTableDragHandles();
     pushHistorySnapshot();
     triggerSave();
+    showToast(`Added blank A4 page (${newPageNum}) — scrolled down`);
 
     setTimeout(() => {
-      if (insertedEl && typeof insertedEl.scrollIntoView === 'function') {
-        insertedEl.scrollIntoView({ behavior: 'smooth', block: 'end' });
-      } else if (sheetRef.current) {
-        sheetRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      const pageEls = document.querySelectorAll('.an-sheet');
+      const lastPageEl = pageEls[pageEls.length - 1];
+      if (lastPageEl) {
+        lastPageEl.scrollIntoView({ behavior: 'smooth', block: 'end' });
       } else {
         window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
       }
-    }, 50);
-
-    showToast('New page added & scrolled to end');
+    }, 60);
   };
 
   // Canvas Text Selection Floating Menu & Gemini AI popover

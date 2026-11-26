@@ -543,6 +543,137 @@ const LegacyRichNoteEditor: React.FC<RichNoteEditorProps> = ({
     });
   };
 
+  const handlePageContentChange = (pageIndex: number, newHtml: string) => {
+    const updatedPages = [...safeNotebook.pages];
+    updatedPages[pageIndex] = {
+      ...updatedPages[pageIndex],
+      contentHtml: newHtml,
+      updatedAt: new Date().toISOString().split('T')[0],
+    };
+    onUpdateNotebook({
+      ...safeNotebook,
+      pages: updatedPages,
+      updatedAt: new Date().toISOString().split('T')[0],
+    });
+  };
+
+  const handlePageTitleChange = (pageIndex: number, newTitle: string) => {
+    const updatedPages = [...safeNotebook.pages];
+    updatedPages[pageIndex] = {
+      ...updatedPages[pageIndex],
+      title: newTitle,
+      updatedAt: new Date().toISOString().split('T')[0],
+    };
+    onUpdateNotebook({
+      ...safeNotebook,
+      pages: updatedPages,
+      updatedAt: new Date().toISOString().split('T')[0],
+    });
+  };
+
+  const renderMsWordPagesStack = () => {
+    return (
+      <div className="flex flex-col items-center gap-8 w-full max-w-3xl mx-auto py-6">
+        {safeNotebook.pages.map((page, idx) => {
+          const isActive = activePageIndex === idx;
+          return (
+            <div
+              key={page.id || idx}
+              onClick={() => onSelectPage(idx)}
+              className={`relative w-full min-h-[640px] rounded-xl shadow-2xl transition-all border ${
+                isActive
+                  ? 'ring-2 ring-amber-500/80 dark:ring-amber-400/80 border-amber-600/60'
+                  : 'border-stone-300 dark:border-stone-700 opacity-90 hover:opacity-100'
+              } ${getPaperBackgroundClasses(safeNotebook.paperType)}`}
+              style={{
+                ...paperStyle,
+                boxShadow: '0 16px 40px -12px rgba(0,0,0,0.4), 0 2px 6px rgba(0,0,0,0.1)',
+              }}
+            >
+              {/* MS Word Page Number Header Badge & Delete Button */}
+              <div className="absolute -top-6 left-0 right-0 flex items-center justify-between px-3 text-[10.5px] font-mono text-stone-300 select-none">
+                <span className="bg-stone-900/90 dark:bg-stone-800 text-stone-200 px-3 py-1 rounded-full shadow-md border border-stone-700 font-bold flex items-center gap-1.5">
+                  <span>📄 MS Word Page {idx + 1} of {safeNotebook.pages.length}</span>
+                </span>
+                <div className="flex items-center gap-1.5">
+                  {safeNotebook.pages.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm(`Delete Page ${idx + 1}?`)) {
+                          const filtered = safeNotebook.pages.filter((_, i) => i !== idx);
+                          const nextIdx = Math.max(0, idx - 1);
+                          onUpdateNotebook({ ...safeNotebook, pages: filtered, activePageIndex: nextIdx });
+                          onSelectPage(nextIdx);
+                        }
+                      }}
+                      className="bg-rose-600 hover:bg-rose-700 text-white px-2.5 py-0.5 rounded-full text-[10px] font-bold shadow-md transition-colors cursor-pointer flex items-center gap-1"
+                      title="Delete this page"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                      <span>Delete Page</span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Ruled Margin Line */}
+              {safeNotebook.paperType === 'ruled-thin' && (
+                <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-rose-400/35 pointer-events-none" />
+              )}
+
+              <div className="p-6 sm:p-10 flex flex-col h-full">
+                {/* Page Title */}
+                <div className="mb-4 pb-2 border-b border-stone-300 dark:border-stone-700 flex items-center justify-between">
+                  <input
+                    type="text"
+                    value={page.title}
+                    onChange={(e) => handlePageTitleChange(idx, e.target.value)}
+                    className="text-base sm:text-lg font-bold bg-transparent outline-none w-full text-slate-900 dark:text-stone-100"
+                    placeholder={`Page ${idx + 1} Title...`}
+                  />
+                  <span className="text-[10px] font-mono text-stone-400 whitespace-nowrap pl-2">
+                    {page.date || new Date().toISOString().split('T')[0]}
+                  </span>
+                </div>
+
+                {/* Editable Page Body */}
+                <div
+                  contentEditable={editorMode !== 'pen'}
+                  suppressContentEditableWarning
+                  onFocus={() => onSelectPage(idx)}
+                  onInput={(e) => handlePageContentChange(idx, (e.currentTarget as HTMLDivElement).innerHTML)}
+                  dangerouslySetInnerHTML={{ __html: page.contentHtml || '<p><br/></p>' }}
+                  className="outline-none min-h-[500px] text-xs sm:text-sm leading-relaxed prose prose-stone max-w-none focus:outline-none"
+                  style={{
+                    fontFamily: "var(--app-font-family, inherit)",
+                  }}
+                />
+
+                {/* Pen Overlay Canvas if active */}
+                {editorMode === 'pen' && isActive && (
+                  <div className="absolute inset-0 z-10">
+                    <DigitalPenCanvas
+                      initialStrokes={page.inkStrokes || []}
+                      onStrokesChange={(strokes) => {
+                        const updatedPages = [...safeNotebook.pages];
+                        updatedPages[idx] = { ...page, inkStrokes: strokes };
+                        onUpdateNotebook({ ...safeNotebook, pages: updatedPages });
+                      }}
+                      isActive={true}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+  };
+
+
   // Insert Clinical Templates
   const handleInsertClinicalBox = (type: 'pearl' | 'warning' | 'rx' | 'ddx' | 'yt-timestamp') => {
     let boxHtml = '';
@@ -3007,86 +3138,7 @@ const LegacyRichNoteEditor: React.FC<RichNoteEditorProps> = ({
               </div>
             </div>
 
-            {/* The Notebook Page with physical shadow */}
-            <div
-              className={`relative w-full max-w-3xl min-h-[640px] rounded-2xl shadow-2xl transition-all border overflow-hidden ${
-                editorMode === 'split' ? 'flex flex-row' : ''
-              }`}
-              style={{
-                ...paperStyle,
-                borderColor: noteTheme.windowBorder,
-                boxShadow: '0 20px 40px -15px rgba(0,0,0,0.6), 0 0 1px 1px rgba(0,0,0,0.1)',
-              }}
-            >
-              {/* Split Mode: Left Side Stylus / Canvas */}
-              {editorMode === 'split' && (
-                <div className="w-1/2 border-r-2 border-dashed border-stone-400/40 relative bg-white/40 dark:bg-stone-900/40 p-3 flex flex-col">
-                  <div className="text-[10px] font-mono tracking-wide text-stone-500 uppercase mb-2 flex items-center justify-between">
-                    <span>Anatomy / Diagram Canvas</span>
-                    <span className="text-[9px] bg-stone-200 dark:bg-stone-800 px-1.5 py-0.5 rounded">Stylus Active</span>
-                  </div>
-                  <div className="flex-1 relative rounded border border-stone-300 dark:border-stone-700 bg-white dark:bg-stone-900/80 overflow-hidden">
-                    <DigitalPenCanvas
-                      initialStrokes={activePage.inkStrokes}
-                      onStrokesChange={handleStrokesChange}
-                      isActive={true}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Note Text Area */}
-              <div
-                className={`relative p-6 sm:p-8 flex-1 ${
-                  editorMode === 'split' ? 'w-1/2' : 'w-full'
-                } ${getPaperBackgroundClasses(safeNotebook.paperType)}`}
-              >
-                {/* Ruled Margin Line */}
-                {safeNotebook.paperType === 'ruled-thin' && (
-                  <div className="absolute left-8 top-0 bottom-0 w-0.5 bg-rose-400/35 pointer-events-none" />
-                )}
-
-                {/* Title Header */}
-                <div className="mb-4 pb-2 border-b border-stone-300 dark:border-stone-700 flex items-center justify-between">
-                  <input
-                    type="text"
-                    value={activePage.title}
-                    onChange={(e) => {
-                      const updatedPages = [...safeNotebook.pages];
-                      updatedPages[activePageIndex] = { ...activePage, title: e.target.value };
-                      onUpdateNotebook({ ...safeNotebook, pages: updatedPages });
-                    }}
-                    className="text-base sm:text-lg font-bold bg-transparent outline-none w-full"
-                    placeholder="Clinical Topic Title..."
-                  />
-                  <span className="text-[10px] font-mono text-stone-400 whitespace-nowrap pl-2">
-                    {activePage.date}
-                  </span>
-                </div>
-
-                {/* Editable Body */}
-                <div
-                  ref={editorRef}
-                  contentEditable={editorMode !== 'pen'}
-                  onInput={handleContentChange}
-                  className="outline-none min-h-[480px] text-xs sm:text-sm leading-relaxed prose prose-stone max-w-none focus:outline-none"
-                  style={{
-                    fontFamily: "var(--app-font-family, inherit)",
-                  }}
-                />
-
-                {/* Digital Pen Overlay if Pen Mode Only */}
-                {editorMode === 'pen' && (
-                  <div className="absolute inset-0 z-10">
-                    <DigitalPenCanvas
-                      initialStrokes={activePage.inkStrokes}
-                      onStrokesChange={handleStrokesChange}
-                      isActive={true}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
+            {renderMsWordPagesStack()}
           </div>
         </div>
       </div>
@@ -3409,39 +3461,7 @@ const LegacyRichNoteEditor: React.FC<RichNoteEditorProps> = ({
         {/* MS Word-Style Tabbed Ribbon */}
         {renderRibbonBar()}
 
-        {/* Real Horizontal Lined Paper Body (matching Screenshot 480) */}
-        <div
-          className="flex-1 overflow-y-auto px-6 sm:px-10 py-6 relative custom-scrollbar bg-[#faeee4] dark:bg-[#151210] transition-colors"
-          style={{
-            background: 'repeating-linear-gradient(to bottom, transparent, transparent 31px, rgba(165, 135, 115, 0.35) 31px, rgba(165, 135, 115, 0.35) 32px)',
-          }}
-        >
-          {/* Subtle Left Red Margin Line for authentic notebook look */}
-          <div className="absolute left-6 sm:left-10 top-0 bottom-0 w-0.5 bg-rose-400/25 pointer-events-none" />
-
-          {/* Note contentEditable text area */}
-          <div
-            ref={editorRef}
-            contentEditable={editorMode !== 'pen'}
-            onInput={handleContentChange}
-            className="outline-none min-h-[500px] text-xs sm:text-sm pl-4 sm:pl-6 text-slate-850 dark:text-stone-900 focus:outline-none"
-            style={{
-              lineHeight: '32px',
-              fontFamily: "var(--app-font-family, inherit)",
-            }}
-          />
-
-          {/* Pen Overlay Canvas */}
-          {editorMode === 'pen' && (
-            <div className="absolute inset-0 z-10">
-              <DigitalPenCanvas
-                initialStrokes={activePage.inkStrokes}
-                onStrokesChange={handleStrokesChange}
-                isActive={true}
-              />
-            </div>
-          )}
-        </div>
+        {renderMsWordPagesStack()}
       </div>
     );
   }
