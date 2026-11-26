@@ -649,6 +649,26 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
     setIsExportModalOpen(false);
   };
 
+  const handleAddPageBreak = () => {
+    if (!editorRef.current) return;
+    const pageBreakHtml = `<div style="page-break-before: always; break-before: page; margin: 40px 0 20px 0; border-top: 2px dashed var(--an-brass, #A47C43); padding-top: 20px;"><div style="font-size:11px;font-weight:bold;color:var(--an-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">New Page / Page Break</div><p><br></p></div>`;
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0 && editorRef.current.contains(sel.anchorNode)) {
+      const range = sel.getRangeAt(0);
+      range.deleteContents();
+      const div = document.createElement('div');
+      div.innerHTML = pageBreakHtml;
+      range.insertNode(div);
+      range.collapse(false);
+    } else {
+      editorRef.current.insertAdjacentHTML('beforeend', pageBreakHtml);
+    }
+    ensureTableDragHandles();
+    pushHistorySnapshot();
+    triggerSave();
+    showToast('New page break added (ready for PDF & Word export)');
+  };
+
   // Canvas Text Selection Floating Menu & Gemini AI popover
   const [canvasSelection, setCanvasSelection] = useState<{
     visible: boolean;
@@ -4197,7 +4217,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
           className="an-btn primary"
           style={{ padding: '6px 12px', fontSize: 11.5 }}
           onClick={() => setIsExportModalOpen(true)}
-          title="Export note as PDF or Word document (.doc) with paper format (A4, A5, A3, Letter)"
+          title="Export note as PDF or Word document (.doc) with A4 paper format"
         >
           <Download className="w-3.5 h-3.5" />
           <span className="lbl">Export / Download</span>
@@ -6233,6 +6253,19 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                     </div>
                   );
                 })}
+
+                {/* Bottom Center Add Page Button for PDF / Word export */}
+                <div className="flex justify-center my-8 relative z-20" contentEditable={false}>
+                  <button
+                    type="button"
+                    onClick={handleAddPageBreak}
+                    className="px-4 py-2 rounded-xl bg-[#A47C43] hover:bg-[#8e6834] text-white font-bold text-xs flex items-center gap-2 shadow-md transition-colors cursor-pointer"
+                    title="Add a new page / page break at the end of the note for PDF & Word export"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Add Page</span>
+                  </button>
+                </div>
               </article>
                 );
               })()}
@@ -7696,27 +7729,16 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                 </div>
               </div>
 
-              {/* Paper size selection */}
+              {/* Paper size selection (A4 default only) */}
               <div className="space-y-1.5">
                 <label className="text-xs font-semibold block opacity-90">Paper Size Format</label>
-                <div className="grid grid-cols-4 gap-2">
-                  {(['A4', 'A5', 'A3', 'Letter'] as const).map((sz) => (
-                    <button
-                      key={sz}
-                      type="button"
-                      onClick={() => setExportPaperSize(sz)}
-                      className={`py-2 rounded-xl border text-xs font-mono font-bold cursor-pointer transition-all ${
-                        exportPaperSize === sz
-                          ? 'bg-[#A47C43] text-white border-[#A47C43] shadow-md'
-                          : 'border-[var(--an-line)] opacity-80 hover:opacity-100'
-                      }`}
-                    >
-                      {sz}
-                    </button>
-                  ))}
+                <div className="flex items-center">
+                  <div className="py-2 px-4 rounded-xl border text-xs font-mono font-bold bg-[#A47C43] text-white border-[#A47C43] shadow-md">
+                    A4 Size (Default &amp; Standard)
+                  </div>
                 </div>
                 <p className="text-[10.5px] opacity-65 italic">
-                  Note: Formatted with exact {exportPaperSize} page margins and typography.
+                  Note: Formatted with exact A4 page margins and typography for pristine PDF and Word export.
                 </p>
               </div>
             </div>
