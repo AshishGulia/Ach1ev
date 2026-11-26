@@ -654,20 +654,36 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
     if (!editorRef.current) return;
     const pageBreakHtml = `<div style="page-break-before: always; break-before: page; margin: 40px 0 20px 0; border-top: 2px dashed var(--an-brass, #A47C43); padding-top: 20px;"><div style="font-size:11px;font-weight:bold;color:var(--an-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;">New Page / Page Break</div><p><br></p></div>`;
     const sel = window.getSelection();
+    let insertedEl: HTMLElement | null = null;
     if (sel && sel.rangeCount > 0 && editorRef.current.contains(sel.anchorNode)) {
       const range = sel.getRangeAt(0);
       range.deleteContents();
       const div = document.createElement('div');
       div.innerHTML = pageBreakHtml;
+      insertedEl = div.firstElementChild as HTMLElement || div;
       range.insertNode(div);
       range.collapse(false);
     } else {
-      editorRef.current.insertAdjacentHTML('beforeend', pageBreakHtml);
+      const div = document.createElement('div');
+      div.innerHTML = pageBreakHtml;
+      insertedEl = div.firstElementChild as HTMLElement || div;
+      editorRef.current.appendChild(div);
     }
     ensureTableDragHandles();
     pushHistorySnapshot();
     triggerSave();
-    showToast('New page break added (ready for PDF & Word export)');
+
+    setTimeout(() => {
+      if (insertedEl && typeof insertedEl.scrollIntoView === 'function') {
+        insertedEl.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      } else if (sheetRef.current) {
+        sheetRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      } else {
+        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+      }
+    }, 50);
+
+    showToast('New page added & scrolled to end');
   };
 
   // Canvas Text Selection Floating Menu & Gemini AI popover
