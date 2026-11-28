@@ -345,9 +345,9 @@ export async function signInWithGoogleIdentity(
   driveAccount: GoogleDriveAccount;
 }> {
   const clientId = getGoogleClientId() || (await resolveGoogleClientId());
-  if (!clientId) {
+  if (!clientId || clientId.includes('YOUR_GOOGLE')) {
     throw new Error(
-      `Google Client ID is not configured for ${getCurrentOriginLabel()}. Click "Configure Keys" below to paste your Google OAuth 2.0 Client ID (or enable Google in Supabase Auth Providers).`
+      `Google Client ID is not configured for ${getCurrentOriginLabel()}. Click "Enter Google Client ID" below to set up your OAuth credentials, or sign in using Email / Phone OTP.`
     );
   }
 
