@@ -2242,6 +2242,16 @@ html.dark .an-ed .an-hand-underline {
   transition: background 0.15s ease;
 }
 
+.an-ed table tr:hover td {
+  background: rgba(164, 124, 67, 0.08);
+}
+
+.an-ed th:hover,
+.an-ed td:hover {
+  background: rgba(164, 124, 67, 0.18) !important;
+  outline: 1px solid var(--th-accent, #A47C43);
+}
+
 .an-table-wrapper {
   position: relative;
   margin: 22px 0 14px;

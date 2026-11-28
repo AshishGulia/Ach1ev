@@ -5,7 +5,6 @@ import {
   Highlighter,
   Eraser,
   RotateCcw,
-  RotateCw,
   Trash2,
   Minimize2,
   Maximize2,
@@ -30,6 +29,7 @@ export const DigitalPenCanvas: React.FC<DigitalPenCanvasProps> = ({
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const [tool, setTool] = useState<'pen' | 'highlighter' | 'fountain' | 'eraser'>('pen');
+  const [eraserMode, setEraserMode] = useState<'object' | 'pixel'>('object');
   const [color, setColor] = useState<string>('#1e3a8a'); // medical navy blue
   const [strokeWidth, setStrokeWidth] = useState<number>(2.5);
   const [strokes, setStrokes] = useState<InkStroke[]>(initialStrokes);
@@ -140,7 +140,7 @@ export const DigitalPenCanvas: React.FC<DigitalPenCanvasProps> = ({
     setIsDrawing(true);
 
     if (tool === 'eraser') {
-      // Stroke eraser: erase strokes that are close to pointer
+      setUndoStack((prev) => [...prev, strokes]);
       eraseNear(x, y);
       return;
     }
@@ -211,15 +211,43 @@ export const DigitalPenCanvas: React.FC<DigitalPenCanvasProps> = ({
 
   const eraseNear = (x: number, y: number) => {
     const threshold = strokeWidth * 6;
-    const filtered = strokes.filter((st) => {
-      return !st.points.some(
-        (p) => Math.hypot(p.x - x, p.y - y) < threshold
-      );
-    });
+    if (eraserMode === 'object') {
+      // Remove entire stroke object if any point is within threshold
+      const filtered = strokes.filter((st) => {
+        return !st.points.some((p) => Math.hypot(p.x - x, p.y - y) < threshold);
+      });
 
-    if (filtered.length !== strokes.length) {
-      setStrokes(filtered);
-      onStrokesChange?.(filtered);
+      if (filtered.length !== strokes.length) {
+        setStrokes(filtered);
+        onStrokesChange?.(filtered);
+        redraw();
+      }
+    } else {
+      // Pixel / point eraser: remove specific points touched by eraser cursor
+      let changed = false;
+      const updatedStrokes: InkStroke[] = [];
+      for (const st of strokes) {
+        const remainingPoints = st.points.filter(
+          (p) => Math.hypot(p.x - x, p.y - y) >= threshold
+        );
+        if (remainingPoints.length !== st.points.length) {
+          changed = true;
+          if (remainingPoints.length >= 2) {
+            updatedStrokes.push({
+              ...st,
+              points: remainingPoints,
+            });
+          }
+        } else {
+          updatedStrokes.push(st);
+        }
+      }
+
+      if (changed) {
+        setStrokes(updatedStrokes);
+        onStrokesChange?.(updatedStrokes);
+        redraw();
+      }
     }
   };
 
@@ -269,15 +297,30 @@ export const DigitalPenCanvas: React.FC<DigitalPenCanvasProps> = ({
           <Highlighter className="w-4 h-4" />
         </button>
 
-        <button
-          onClick={() => setTool('eraser')}
-          title="Eraser"
-          className={`p-1.5 rounded-full transition-colors ${
-            tool === 'eraser' ? 'bg-[#7f1d1d] text-[#fdf2f2]' : 'hover:bg-[#2b1e15] text-stone-300'
-          }`}
-        >
-          <Eraser className="w-4 h-4" />
-        </button>
+        {/* Eraser with Object vs Pixel Mode Options right next to draw buttons */}
+        <div className="flex items-center gap-1 bg-[#251a12] px-2 py-0.5 rounded-full border border-[#382518]">
+          <button
+            onClick={() => setTool('eraser')}
+            title="Eraser (Object vs Pixel Mode)"
+            className={`p-1.5 rounded-full transition-colors flex items-center gap-1 ${
+              tool === 'eraser' ? 'bg-[#7f1d1d] text-[#fdf2f2]' : 'hover:bg-[#2b1e15] text-stone-300'
+            }`}
+          >
+            <Eraser className="w-4 h-4" />
+            <span className="text-[10px] font-mono">Eraser</span>
+          </button>
+          {tool === 'eraser' && (
+            <select
+              value={eraserMode}
+              onChange={(e) => setEraserMode(e.target.value as 'object' | 'pixel')}
+              className="bg-[#1a120d] text-[10px] text-amber-300 px-1.5 py-0.5 rounded border border-[#382518] outline-none cursor-pointer font-mono"
+              title="Choose Eraser Mode"
+            >
+              <option value="object">Object (Pura Object)</option>
+              <option value="pixel">Pixel (Touch Points)</option>
+            </select>
+          )}
+        </div>
 
         <div className="w-px h-4 bg-[#382518] mx-1" />
 

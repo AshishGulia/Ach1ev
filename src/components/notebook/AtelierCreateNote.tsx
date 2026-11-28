@@ -759,10 +759,11 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
       contentHtml: '<p><br></p>',
     };
     setNotePages((prev) => [...prev, newPage]);
+    setCurrentActivePageIndex(notePages.length);
     ensureTableDragHandles();
     pushHistorySnapshot();
     triggerSave();
-    showToast(`Added blank A4 page (${newPageNum}) — scrolled down`);
+    showToast(`Added Page ${newPageNum} — see left thumbnail pane & editor`);
 
     setTimeout(() => {
       const pageEls = document.querySelectorAll('.an-sheet');
@@ -1125,6 +1126,8 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
   // Subwindow Panes State (empty until user opens a book or uploads a document)
   const [docPanes, setDocPanes] = useState<OpenDocPane[]>([]);
   const [noteViewMode, setNoteViewMode] = useState<'single' | 'book'>('single');
+  const [isThumbnailPaneOpen, setIsThumbnailPaneOpen] = useState<boolean>(true);
+  const [currentActivePageIndex, setCurrentActivePageIndex] = useState<number>(activePageIndex);
 
   useEffect(() => {
     if (docPanes.length > 0 || layout !== 'focus') {
@@ -1612,7 +1615,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
           grip.setAttribute('contenteditable', 'false');
           grip.setAttribute('data-table-grip', 'move');
           grip.setAttribute('title', 'Hold & drag to move table anywhere · Double-click to reset position');
-          grip.innerHTML = '<span class="an-grip-dots">⋮⋮</span><span>Drag Table</span>';
+          grip.innerHTML = '<span class="an-grip-dots"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 9 2 12 5 15"></polyline><polyline points="9 5 12 2 15 5"></polyline><polyline points="15 19 12 22 9 19"></polyline><polyline points="19 9 22 12 19 15"></polyline><line x1="2" y1="12" x2="22" y2="12"></line><line x1="12" y1="2" x2="12" y2="22"></line></svg></span>';
           wrapper.insertBefore(grip, wrapper.firstChild);
         }
       }
@@ -2466,7 +2469,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
           break;
         case 'table':
           insertHtmlAtCursor(
-            '<div class="an-table-wrapper" contenteditable="false"><div class="an-table-drag-grip" contenteditable="false" data-table-grip="move" title="Hold & drag to move table anywhere · Double-click to reset position"><span class="an-grip-dots">⋮⋮</span><span>Drag Table</span></div><table contenteditable="true"><thead><tr><th>Parameter</th><th>Mechanism / Feature</th><th>Clinical Pearl</th></tr></thead><tbody><tr><td><br></td><td><br></td><td><br></td></tr><tr><td><br></td><td><br></td><td><br></td></tr></tbody></table></div><p><br></p>'
+            '<div class="an-table-wrapper" contenteditable="false"><div class="an-table-drag-grip" contenteditable="false" data-table-grip="move" title="Hold & drag to move table anywhere · Double-click to reset position"><span class="an-grip-dots"><svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="5 9 2 12 5 15"></polyline><polyline points="9 5 12 2 15 5"></polyline><polyline points="15 19 12 22 9 19"></polyline><polyline points="19 9 22 12 19 15"></polyline><line x1="2" y1="12" x2="22" y2="12"></line><line x1="12" y1="2" x2="12" y2="22"></line></svg></span></div><table contenteditable="true"><thead><tr><th>Parameter</th><th>Mechanism / Feature</th><th>Clinical Pearl</th></tr></thead><tbody><tr><td><br></td><td><br></td><td><br></td></tr><tr><td><br></td><td><br></td><td><br></td></tr></tbody></table></div><p><br></p>'
           );
           break;
         case 'code':
@@ -4328,17 +4331,24 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
           className={`an-btn ${noteViewMode === 'book' ? 'primary' : ''}`}
           onClick={() => setNoteViewMode((m) => (m === 'single' ? 'book' : 'single'))}
           title={
-            docPanes.length > 0 || layout !== 'focus'
-              ? 'Book format switches to single page when side book/document is open'
-              : noteViewMode === 'book'
+            noteViewMode === 'book'
               ? 'Switch to Single Page View'
               : 'Switch to Notebook Book Spread (2 Pages Side-by-Side)'
           }
-          disabled={docPanes.length > 0 || layout !== 'focus'}
-          style={docPanes.length > 0 || layout !== 'focus' ? { opacity: 0.5, cursor: 'not-allowed' } : undefined}
         >
           <BookOpen className="w-3.5 h-3.5" />
           <span className="lbl">{noteViewMode === 'book' ? 'Book Spread' : 'Single Page'}</span>
+        </button>
+
+        {/* Left Thumbnail Pane Toggle */}
+        <button
+          type="button"
+          className={`an-btn ${isThumbnailPaneOpen ? 'primary' : ''}`}
+          onClick={() => setIsThumbnailPaneOpen((p) => !p)}
+          title={isThumbnailPaneOpen ? 'Hide MS Word Page Thumbnails Pane' : 'Show MS Word Page Thumbnails Pane'}
+        >
+          <FileText className="w-3.5 h-3.5" />
+          <span className="lbl">Thumbnails</span>
         </button>
 
         {/* Save Edited PDF to Ach1ev/Documents + Cloud Drive */}
@@ -5596,9 +5606,96 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                   : undefined;
 
               return (
-            <div className="an-note-split-body" style={noteSplitStyle}>
+            <div className="an-note-split-body flex flex-row items-stretch" style={noteSplitStyle}>
+              {/* MS Word-Style Left Vertical Slide Bar (Page Thumbnails Pane) */}
+              {isThumbnailPaneOpen && (
+                <div className="w-56 bg-[var(--an-paper)] dark:bg-[#151b24] border-r border-[var(--an-line)] flex flex-col shrink-0 select-none shadow-lg overflow-y-auto z-20">
+                  <div className="p-3 border-b border-[var(--an-line)] flex items-center justify-between">
+                    <div className="flex items-center gap-1.5 font-bold text-xs text-[var(--an-ink)]">
+                      <FileText className="w-4 h-4 text-[#A47C43]" />
+                      <span>Pages ({notePages.length})</span>
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        type="button"
+                        onClick={handleAddPageBreak}
+                        className="px-2 py-1 rounded bg-[#A47C43] text-white text-[10px] font-bold flex items-center gap-1 shadow-2xs cursor-pointer hover:bg-[#8e6834]"
+                        title="Add new page"
+                      >
+                        <Plus className="w-3 h-3" />
+                        <span>+ Add</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsThumbnailPaneOpen(false)}
+                        className="p-1 rounded text-stone-400 hover:text-stone-700 cursor-pointer"
+                        title="Close thumbnail pane"
+                      >
+                        <X className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="p-2.5 space-y-2.5 overflow-y-auto flex-1">
+                    {notePages.map((page, idx) => {
+                      const isActive = currentActivePageIndex === idx;
+                      return (
+                        <div
+                          key={page.id}
+                          onClick={() => {
+                            setCurrentActivePageIndex(idx);
+                            const el = document.getElementById(`an-page-sheet-${idx}`);
+                            if (el) {
+                              el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                            }
+                          }}
+                          className={`p-2.5 rounded-xl border transition-all cursor-pointer flex flex-col gap-1.5 relative group ${
+                            isActive
+                              ? 'border-[#A47C43] bg-amber-500/15 ring-2 ring-[#A47C43]/60 shadow-md'
+                              : 'border-[var(--an-line)] bg-white/70 dark:bg-black/30 hover:border-amber-500/50'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-[10.5px] font-mono font-bold text-[#A47C43]">
+                              Page {idx + 1}
+                            </span>
+                            {notePages.length > 1 && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (confirm(`Delete Page ${idx + 1}?`)) {
+                                    const filtered = notePages.filter((_, i) => i !== idx);
+                                    setNotePages(filtered);
+                                    const nextIdx = Math.max(0, idx - 1);
+                                    setCurrentActivePageIndex(nextIdx);
+                                    triggerSave();
+                                    showToast(`Deleted Page ${idx + 1}`);
+                                  }
+                                }}
+                                className="p-1 rounded text-red-500 hover:bg-red-500/20 opacity-0 group-hover:opacity-100 transition-opacity"
+                                title="Delete page"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            )}
+                          </div>
+                          {/* Miniature Page Thumbnail Preview */}
+                          <div className="h-24 rounded-lg bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-2 overflow-hidden text-[9px] text-stone-700 dark:text-stone-300 font-serif leading-snug">
+                            <div className="font-bold truncate text-[10px] text-slate-900 dark:text-amber-100 mb-1">
+                              {page.title || `Page ${idx + 1}`}
+                            </div>
+                            <div className="line-clamp-4 opacity-75 overflow-hidden" dangerouslySetInnerHTML={{ __html: page.contentHtml || 'Empty page...' }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
             <div
-              className="an-note-body"
+              className="an-note-body flex-1"
               style={noteBodyStyle}
               data-surround={noteSurroundMode}
             >
@@ -5874,25 +5971,25 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
 
                       <div className="w-px h-3.5 bg-stone-200 dark:bg-stone-700 mx-0.5" />
 
-                      {/* Resize Width & Column Width */}
-                      <div className="flex items-center gap-1" title="Resize Table & Selected Column">
-                        <span className="text-[9.5px] font-mono text-[var(--an-muted)]">Size:</span>
-                        {[55, 75, 100].map((pct) => (
-                          <button
-                            key={pct}
-                            type="button"
-                            onClick={() => handleResizeTableWidth(pct)}
-                            className={`an-table-word-btn ${tableWidthPct === pct ? 'bg-[#A47C43]/20 text-[#85532d] dark:text-amber-300 font-bold' : ''}`}
-                            title={`Set table width to ${pct}%`}
-                          >
-                            {pct}%
-                          </button>
-                        ))}
-                        <button type="button" className="an-table-word-btn" onClick={() => handleResizeActiveCol(-24)} title="Narrow selected column">Col -</button>
-                        <button type="button" className="an-table-word-btn" onClick={() => handleResizeActiveCol(24)} title="Widen selected column">Col +</button>
-                        <button type="button" className="an-table-word-btn" onClick={() => handleTablePadding('3px 6px', 'Compact')} title="Compact cell spacing">Compact</button>
-                        <button type="button" className="an-table-word-btn" onClick={() => handleTablePadding('9px 12px', 'Spacious')} title="Spacious cell padding">Wide</button>
-                      </div>
+                      {/* Lock / Unlock Table Button */}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (!activeTableEl) return;
+                          const isLocked = activeTableEl.getAttribute('contenteditable') === 'false';
+                          const nextLocked = !isLocked;
+                          activeTableEl.setAttribute('contenteditable', String(!nextLocked));
+                          const wrapper = activeTableEl.closest('.an-table-wrapper');
+                          if (wrapper) wrapper.setAttribute('data-locked', String(nextLocked));
+                          triggerSave();
+                          showToast(nextLocked ? 'Table position & content locked' : 'Table unlocked');
+                        }}
+                        className={`an-table-word-btn ${activeTableEl?.getAttribute('contenteditable') === 'false' ? 'bg-red-500/20 text-red-600 font-bold' : ''}`}
+                        title="Lock or Unlock Table Position and Content"
+                      >
+                        {activeTableEl?.getAttribute('contenteditable') === 'false' ? <Lock className="w-3 h-3" /> : <Unlock className="w-3 h-3" />}
+                        <span>{activeTableEl?.getAttribute('contenteditable') === 'false' ? 'Locked' : 'Unlocked'}</span>
+                      </button>
                     </div>
 
                     {/* Row 2: MS Word Table Color Formats & Cell Shading */}
