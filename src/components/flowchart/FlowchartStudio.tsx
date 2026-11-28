@@ -23,6 +23,7 @@ import {
   Palette,
   Columns,
   Tag,
+  LayoutGrid,
 } from 'lucide-react';
 import {
   RoundColorColumnsPicker,
@@ -404,6 +405,11 @@ export const FlowchartStudio: React.FC<FlowchartStudioProps> = ({
     level: number;
     colIdx?: number;
   } | null>(null);
+
+  const [canvasPatternId, setCanvasPatternId] = useState<string>('dashed-grid');
+  const [isPatternPopoverOpen, setIsPatternPopoverOpen] = useState<boolean>(false);
+  const [isCanvasColorPopoverOpen, setIsCanvasColorPopoverOpen] = useState<boolean>(false);
+  const [canvasCustomColor, setCanvasCustomColor] = useState<string>('');
 
   const [infoBanner, setInfoBanner] = useState<string | null>(null);
   const showBanner = (msg: string) => {
@@ -860,6 +866,100 @@ export const FlowchartStudio: React.FC<FlowchartStudioProps> = ({
             </div>
           )}
 
+          {/* Pattern Button with 10 Sober Simple Patterns */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => {
+                setIsCanvasColorPopoverOpen(false);
+                setIsPatternPopoverOpen((v) => !v);
+              }}
+              className="p-1.5 px-2.5 rounded-xl border border-stone-300 dark:border-stone-700 hover:bg-stone-200 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-300 transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-semibold"
+              title="Canvas Background Patterns (10 sober styles)"
+            >
+              <LayoutGrid className="w-3.5 h-3.5 text-[#A47C43]" />
+              <span className="hidden sm:inline">Pattern</span>
+            </button>
+
+            {isPatternPopoverOpen && (
+              <div className="absolute right-0 top-full mt-2 z-50 w-64 bg-white dark:bg-[#160f0b] border border-stone-200 dark:border-[#382518] rounded-2xl shadow-2xl p-3 space-y-2">
+                <div className="flex items-center justify-between pb-2 border-b border-stone-200 dark:border-[#382518]">
+                  <span className="text-xs font-bold text-stone-900 dark:text-[#efe4d4]">Canvas Patterns (10)</span>
+                  <button onClick={() => setIsPatternPopoverOpen(false)} className="text-stone-400 hover:text-stone-700">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <div className="grid grid-cols-2 gap-1.5 max-h-60 overflow-y-auto custom-scrollbar pr-1">
+                  {[
+                    { id: 'dot-grid', label: '1. Dot Grid' },
+                    { id: 'dashed-grid', label: '2. Dashed Grid' },
+                    { id: 'crosshatch', label: '3. Crosshatch' },
+                    { id: 'solid-parchment', label: '4. Parchment' },
+                    { id: 'minimal-lines', label: '5. Ruling Lines' },
+                    { id: 'diagonal-stripe', label: '6. Diagonal' },
+                    { id: 'oxford-linen', label: '7. Oxford Linen' },
+                    { id: 'warm-sepia', label: '8. Warm Sepia' },
+                    { id: 'blueprint-grid', label: '9. Blueprint' },
+                    { id: 'clean-minimal', label: '10. Clean Minimal' },
+                  ].map((pat) => (
+                    <button
+                      key={pat.id}
+                      type="button"
+                      onClick={() => {
+                        setCanvasPatternId(pat.id);
+                        setIsPatternPopoverOpen(false);
+                        showBanner(`Canvas pattern: ${pat.label}`);
+                      }}
+                      className={`px-2 py-1.5 rounded-lg text-left text-xs font-medium transition-all cursor-pointer flex items-center gap-1.5 ${
+                        canvasPatternId === pat.id
+                          ? 'bg-[#A47C43] text-white font-bold'
+                          : 'bg-stone-100 dark:bg-[#211711] text-stone-700 dark:text-[#d8c7b0] hover:bg-amber-100/50'
+                      }`}
+                    >
+                      <span className="truncate">{pat.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Colors Button with Colour Columns */}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => {
+                setIsPatternPopoverOpen(false);
+                setIsCanvasColorPopoverOpen((v) => !v);
+              }}
+              className="p-1.5 px-2.5 rounded-xl border border-stone-300 dark:border-stone-700 hover:bg-stone-200 dark:hover:bg-stone-800 text-stone-600 dark:text-stone-300 transition-colors cursor-pointer flex items-center gap-1.5 text-xs font-semibold"
+              title="Canvas Theme Color Columns"
+            >
+              <Palette className="w-3.5 h-3.5 text-[#A47C43]" />
+              <span className="hidden sm:inline">Colors</span>
+            </button>
+
+            {isCanvasColorPopoverOpen && (
+              <div className="absolute right-0 top-full mt-2 z-50 w-72 bg-white dark:bg-[#160f0b] border border-stone-200 dark:border-[#382518] rounded-2xl shadow-2xl p-3 space-y-2.5">
+                <div className="flex items-center justify-between pb-2 border-b border-stone-200 dark:border-[#382518]">
+                  <span className="text-xs font-bold text-stone-900 dark:text-[#efe4d4]">Canvas Color Columns</span>
+                  <button onClick={() => setIsCanvasColorPopoverOpen(false)} className="text-stone-400 hover:text-stone-700">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+                <RoundColorColumnsPicker
+                  columns={UNIFIED_COLOR_COLUMNS}
+                  selectedColor={canvasCustomColor}
+                  onSelectColor={(hex) => {
+                    setCanvasCustomColor(hex);
+                    setIsCanvasColorPopoverOpen(false);
+                    showBanner(`Canvas theme color updated`);
+                  }}
+                />
+              </div>
+            )}
+          </div>
+
           <button
             type="button"
             onClick={() => setIsFullscreen(!isFullscreen)}
@@ -890,14 +990,36 @@ export const FlowchartStudio: React.FC<FlowchartStudioProps> = ({
         >
           <div
             ref={canvasScrollRef}
-            className="flex-1 overflow-auto p-6 relative custom-scrollbar bg-[#f8f5ee] dark:bg-[#0e0907]"
+            className="flex-1 overflow-auto p-6 relative custom-scrollbar"
             style={{
               overflowX: 'auto',
               overflowY: 'auto',
               touchAction: 'pan-x pan-y pinch-zoom',
-              backgroundImage: isDarkThemeMode
-                ? `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Cline x1='0' y1='0' x2='28' y2='0' stroke='rgba(226,192,146,0.13)' stroke-width='1' stroke-dasharray='1.5 4'/%3E%3Cline x1='0' y1='0' x2='0' y2='28' stroke='rgba(226,192,146,0.13)' stroke-width='1' stroke-dasharray='1.5 4'/%3E%3C/svg%3E")`
-                : `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Cline x1='0' y1='0' x2='28' y2='0' stroke='rgba(104,78,48,0.13)' stroke-width='1' stroke-dasharray='1.5 4'/%3E%3Cline x1='0' y1='0' x2='0' y2='28' stroke='rgba(104,78,48,0.13)' stroke-width='1' stroke-dasharray='1.5 4'/%3E%3C/svg%3E")`,
+              backgroundColor: canvasCustomColor || (isDarkThemeMode ? '#0e0907' : '#f8f5ee'),
+              backgroundImage: (() => {
+                switch (canvasPatternId) {
+                  case 'dot-grid':
+                    return isDarkThemeMode
+                      ? `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ccircle cx='3' cy='3' r='1.2' fill='rgba(226,192,146,0.2)'/%3E%3C/svg%3E")`
+                      : `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ccircle cx='3' cy='3' r='1.2' fill='rgba(104,78,48,0.2)'/%3E%3C/svg%3E")`;
+                  case 'crosshatch':
+                    return isDarkThemeMode
+                      ? `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Cpath d='M0 20L20 0M0 0L20 20' stroke='rgba(226,192,146,0.1)' stroke-width='1'/%3E%3C/svg%3E")`
+                      : `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Cpath d='M0 20L20 0M0 0L20 20' stroke='rgba(104,78,48,0.1)' stroke-width='1'/%3E%3C/svg%3E")`;
+                  case 'minimal-lines':
+                    return isDarkThemeMode
+                      ? `repeating-linear-gradient(to bottom, transparent, transparent 27px, rgba(226,192,146,0.12) 27px, rgba(226,192,146,0.12) 28px)`
+                      : `repeating-linear-gradient(to bottom, transparent, transparent 27px, rgba(104,78,48,0.12) 27px, rgba(104,78,48,0.12) 28px)`;
+                  case 'blueprint-grid':
+                    return `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='32' height='32'%3E%3Crect width='32' height='32' fill='none' stroke='%233b82f6' stroke-width='0.4' stroke-opacity='0.25'/%3E%3C/svg%3E")`;
+                  case 'solid-parchment':
+                    return 'none';
+                  default:
+                    return isDarkThemeMode
+                      ? `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Cline x1='0' y1='0' x2='28' y2='0' stroke='rgba(226,192,146,0.13)' stroke-width='1' stroke-dasharray='1.5 4'/%3E%3Cline x1='0' y1='0' x2='0' y2='28' stroke='rgba(226,192,146,0.13)' stroke-width='1' stroke-dasharray='1.5 4'/%3E%3C/svg%3E")`
+                      : `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Cline x1='0' y1='0' x2='28' y2='0' stroke='rgba(104,78,48,0.13)' stroke-width='1' stroke-dasharray='1.5 4'/%3E%3Cline x1='0' y1='0' x2='0' y2='28' stroke='rgba(104,78,48,0.13)' stroke-width='1' stroke-dasharray='1.5 4'/%3E%3C/svg%3E")`;
+                }
+              })(),
               backgroundSize: '28px 28px',
             }}
             onTouchStart={(e) => {
