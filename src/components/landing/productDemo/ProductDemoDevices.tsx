@@ -895,157 +895,42 @@ const TabletAppContent: React.FC<{
 
 /* Latest Apple MacBook Pro Frame matching Default Theme 1 Light Mode */
 export const LaptopFrame: React.FC<{
-  scene: DemoScene;
+  scene?: DemoScene;
   onSelectSection?: (idx: number) => void;
-}> = ({ scene, onSelectSection }) => {
-  const { section, laptop } = scene;
-  const point = anchorPoint('laptop', laptop.anchor, DEMO_SECTIONS.indexOf(section));
-  const isShelfScene = section.key === 'shelf';
-  const [checkedRows, setCheckedRows] = useState<Record<number, boolean>>({ 0: true });
-
-  const toggleRow = (rIdx: number) => {
-    setCheckedRows((prev) => ({ ...prev, [rIdx]: !prev[rIdx] }));
-  };
-
+}> = () => {
   return (
-    <div className="w-full max-w-[680px] mx-auto flex flex-col items-center select-none">
-      {/* Lid / Matte Graphite Aluminum Display Shell with Ultra-Thin Bezel */}
-      <div className="w-[93%] rounded-t-[1.1rem] bg-[#141416] p-[7px] sm:p-[9px] ring-1 ring-white/15 shadow-[0_26px_54px_rgba(24,14,7,0.3)] relative">
-        {/* Authentic MacBook Pro Camera Notch */}
-        <div
-          aria-hidden="true"
-          className="absolute top-[7px] sm:top-[9px] left-1/2 -translate-x-1/2 z-30 w-16 sm:w-20 h-[10px] sm:h-[12px] rounded-b-[6px] bg-[#141416] flex items-center justify-center"
-        >
-          <span className="h-1.5 w-1.5 rounded-full bg-[#101815] ring-1 ring-[#30473a]" />
-        </div>
-
-        {/* Display Viewport: Default Theme 1 Light Mode (Parchment Sidebar + Walnut Active Pill + Highland Stillness Wallpaper) */}
-        <div className="relative aspect-[16/10] overflow-hidden rounded-[0.65rem] bg-[#f6f2ea] text-[#1c140e] flex flex-col">
-          {/* Default Theme 1 Light Mode Highland Stillness Wallpaper layer */}
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0"
-            style={{
-              backgroundImage: `url(${THEME1_THUMB_URL})`,
-              backgroundSize: 'cover',
-              backgroundPosition: 'center center',
-              opacity: 0.42,
-            }}
-          />
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0"
-            style={{
-              background: 'linear-gradient(180deg, rgba(246,242,234,0.68) 0%, rgba(246,242,234,0.84) 100%)',
-            }}
-          />
-
-          <div className="relative z-10 flex flex-1 min-h-0">
-            {/* Authentic Default Theme 1 Light Mode Parchment Sidebar */}
-            <aside
-              className="w-[18.5%] border-r border-[#dcd0bd] text-[#2a1f18] flex flex-col justify-between py-2.5 px-1.5 shrink-0 backdrop-blur-[6px]"
-              style={{
-                background:
-                  'linear-gradient(180deg, rgba(250,246,238,0.92) 0%, rgba(241,232,218,0.92) 55%, rgba(232,220,201,0.95) 100%)',
-              }}
-            >
-              <div className="space-y-1.5">
-                <div className="px-1.5 pb-1.5 border-b border-[#dcd0bd] flex items-center gap-1.5">
-                  <img
-                    src={ACHIEV_EMBLEM_URL}
-                    alt="ACH1EV"
-                    width={928}
-                    height={324}
-                    loading="lazy"
-                    decoding="async"
-                    className="h-4 w-4 object-contain shrink-0 bg-transparent"
-                  />
-                  <span className="font-serif text-[10px] font-bold tracking-[0.08em] text-[#522e18] uppercase">
-                    ACH1EV
-                  </span>
-                </div>
-
-                <nav aria-label="Theme 1 sidebar preview" className="space-y-0.5 pt-0.5">
-                  {DEMO_SECTIONS.map((item, sIdx) => {
-                    const Icon = item.icon;
-                    const active = item === section;
-                    return (
-                      <button
-                        key={item.key}
-                        type="button"
-                        onClick={() => onSelectSection?.(sIdx)}
-                        className={`w-full text-left flex items-center gap-1.5 rounded-md px-1.5 py-[3px] text-[8.5px] font-medium transition-all duration-200 cursor-pointer ${
-                          active
-                            ? 'text-white font-semibold shadow-xs border border-[#7f4c2a]'
-                            : 'text-[#4c3b31] hover:bg-[#e7dac4]/60'
-                        }`}
-                        style={
-                          active
-                            ? {
-                                background: 'linear-gradient(155deg, #6f4225 0%, #522e18 100%)',
-                              }
-                            : undefined
-                        }
-                      >
-                        <Icon
-                          className="h-2.5 w-2.5 shrink-0"
-                          style={{ color: active ? '#ffd899' : '#6c4830' }}
-                          aria-hidden="true"
-                        />
-                        <span className="truncate">{item.label}</span>
-                      </button>
-                    );
-                  })}
-                </nav>
-              </div>
-              <div className="px-1.5 pt-1 border-t border-[#dcd0bd] text-[8px] text-[#6b5340] truncate">
-                MBBS Year III
-              </div>
-            </aside>
-
-            {/* Right Main Viewport */}
-            <div className="flex-1 min-w-0 flex flex-col bg-transparent">
-              <ThemeOneTopBar />
-
-              <div
-                key={scene.title}
-                className="flex-1 min-h-0 flex flex-col gap-2 p-2.5 sm:p-3 animate-[pdsFade_420ms_ease-out] motion-reduce:animate-none"
-              >
-                {!isShelfScene && (
-                  <div className="flex items-baseline justify-between gap-2 border-b border-[#d8c8b0]/80 pb-1.5">
-                    <div className="min-w-0">
-                      <p className="text-[8.5px] font-medium text-[#8f5f2c] truncate">{laptop.crumb}</p>
-                      <h4 className="font-serif text-xs sm:text-sm font-semibold text-[#1c140e] truncate">
-                        {laptop.heading}
-                      </h4>
-                    </div>
-                    <span className="text-[9px] font-medium text-[#6b5340] shrink-0">Theme 1 · Light</span>
-                  </div>
-                )}
-
-                {isShelfScene ? (
-                  <ShelfShowcaseRoom />
-                ) : (
-                  <div className="grid flex-1 min-h-0 grid-cols-3 gap-2">
-                    {laptop.panels.map((panel, idx) =>
-                      renderLaptopPanel(panel, idx, section.accent, checkedRows, toggleRow)
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <DemoPointer point={point} accent={section.accent} hint={scene.hint} />
-        </div>
-      </div>
-
-      {/* Brushed Aluminum MacBook Lower Chassis + Center Thumb Scoop */}
+    <div
+      className="w-full max-w-[760px] mx-auto flex flex-col items-center select-none"
+      style={{
+        maskImage:
+          'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.55) 3.5%, black 8.5%, black 92.5%, rgba(0,0,0,0.55) 97%, transparent 100%)',
+        WebkitMaskImage:
+          'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.55) 3.5%, black 8.5%, black 92.5%, rgba(0,0,0,0.55) 97%, transparent 100%)',
+      }}
+    >
       <div
-        aria-hidden="true"
-        className="relative w-full h-[11px] sm:h-[14px] rounded-b-[14px] bg-gradient-to-b from-[#dcd7cf] via-[#bdb7ae] to-[#8f8980] shadow-[0_14px_26px_rgba(32,18,8,0.22)] flex justify-center"
+        className="w-full"
+        style={{
+          maskImage:
+            'linear-gradient(to bottom, transparent 0%, black 4%, black 90%, rgba(0,0,0,0.45) 96%, transparent 100%)',
+          WebkitMaskImage:
+            'linear-gradient(to bottom, transparent 0%, black 4%, black 90%, rgba(0,0,0,0.45) 96%, transparent 100%)',
+        }}
       >
-        <div className="w-20 sm:w-28 h-[4px] sm:h-[5px] rounded-b-md bg-gradient-to-b from-[#6f6a63] to-[#9b958d]" />
+        <video
+          src="/assets/aistudio/achiev_laptop_animation_16c1f287.webm"
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-full h-auto block bg-transparent mix-blend-lighten"
+          style={{
+            maskImage:
+              'radial-gradient(ellipse 70% 68% at 49% 47%, black 72%, rgba(0,0,0,0.78) 85%, transparent 100%)',
+            WebkitMaskImage:
+              'radial-gradient(ellipse 70% 68% at 49% 47%, black 72%, rgba(0,0,0,0.78) 85%, transparent 100%)',
+          }}
+        />
       </div>
     </div>
   );

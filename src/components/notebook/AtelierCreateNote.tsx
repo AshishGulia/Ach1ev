@@ -607,6 +607,9 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
         title: p.title,
         contentHtml: p.contentHtml,
         updatedAt: new Date().toISOString(),
+        inkStrokes: [],
+        screenshots: [],
+        date: new Date().toISOString().split('T')[0],
       }));
       onUpdateNotebook({
         ...notebook,
@@ -1539,8 +1542,6 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
     quote: null,
   });
 
-  // Editor Refs
-  const editorRef = useRef<HTMLDivElement>(null);
   const sheetTitleRef = useRef<HTMLHeadingElement>(null);
   const savedSelectionRange = useRef<Range | null>(null);
   const isSyncingScrollRef = useRef(false);
