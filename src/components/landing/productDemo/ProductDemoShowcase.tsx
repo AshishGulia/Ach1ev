@@ -229,9 +229,6 @@ export const ProductDemoShowcase: React.FC = () => {
       {/* ═══════════════ 0. CONCISE INTRO IN DEEP COCOA ZONE ═══════════════ */}
       <div className="w-full px-4 sm:px-8 pt-16 sm:pt-24 pb-12 sm:pb-16">
         <div className="max-w-3xl mx-auto text-center px-3 space-y-3">
-          <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-[0.2em] text-[#f5d093] drop-shadow-[0_1px_6px_rgba(6,2,0,0.85)]">
-            Luxury &amp; Customisable Study Sanctuary · ₹0 Free, ₹100 Pro &amp; ₹300 Master
-          </p>
           <h2 className="text-2xl sm:text-4xl font-bold text-[#fffaf0] leading-tight text-balance drop-shadow-[0_2px_12px_rgba(6,2,0,0.85)]">
             High-End Note Maker &amp; Focus Workspace for Global Students
           </h2>
@@ -247,9 +244,6 @@ export const ProductDemoShowcase: React.FC = () => {
       {/* ═══════════════ 1. MACBOOK PRO SHOWCASE (HIGH-CONTRAST IVORY TEXT ON ROASTED COCOA) ═══════════════ */}
       <div>
         <div className="space-y-2 text-center mb-6 sm:mb-8">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#f4cd90] drop-shadow-[0_1px_6px_rgba(10,3,0,0.7)]">
-            Desktop Studio · MacBook View
-          </p>
           <h2
             id="product-demo-heading"
             className="text-xl sm:text-3xl font-bold text-[#fffaf0] leading-[1.25] text-balance drop-shadow-[0_2px_12px_rgba(10,3,0,0.75)]"

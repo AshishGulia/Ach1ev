@@ -968,6 +968,7 @@ export function Room({
   totalAlmirahs,
   onPrevAlmirah,
   onNextAlmirah,
+  almirahsOnly = false,
   children,
 }: {
   night: boolean;
@@ -980,6 +981,7 @@ export function Room({
   totalAlmirahs?: number;
   onPrevAlmirah?: () => void;
   onNextAlmirah?: () => void;
+  almirahsOnly?: boolean;
   children: ReactNode;
 }) {
   const touchStartX = useRef<number>(0);
@@ -1035,6 +1037,27 @@ export function Room({
     if (themeId === '5') return 'linear-gradient(#f7faef, #dce7ca)';
     return 'linear-gradient(#f7f2eb, #d6cbba)';
   })();
+
+  if (almirahsOnly) {
+    return (
+      <div
+        className="shelf-world-root sh-world-shell"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+        style={{
+          position: 'relative',
+          isolation: 'isolate',
+          overflow: 'hidden',
+          paddingTop: 8,
+          paddingBottom: 16,
+          background: 'transparent',
+          touchAction: 'pan-x pan-y pinch-zoom',
+        }}
+      >
+        <div style={{ position: 'relative', zIndex: 10, pointerEvents: 'none' }}>{children}</div>
+      </div>
+    );
+  }
 
   return (
     <div
@@ -5531,6 +5554,7 @@ export interface ShelfRoomProps {
   activeDesign?: DesignId | string;
   notebooks?: Notebook[];
   driveBooks?: MedicalBook[];
+  almirahsOnly?: boolean;
 }
 
 export default function ShelfRoom({
@@ -5539,6 +5563,7 @@ export default function ShelfRoom({
   activeDesign,
   notebooks = [],
   driveBooks = [],
+  almirahsOnly = false,
 }: ShelfRoomProps) {
   const [data, save] = useStored();
   const [internalNight, setInternalNight] = useState<boolean>(() => {
@@ -5593,7 +5618,7 @@ export default function ShelfRoom({
   }, [activeDesign]);
 
   const themeId: ShelfThemeId = resolveShelfThemeId(activeDesign ?? observedDesign);
-  const night = nightMode !== undefined ? nightMode : internalNight;
+  const night = almirahsOnly ? false : (nightMode !== undefined ? nightMode : internalNight);
 
   const [lit, setLit] = useState(false);
   const [pulled, setPulled] = useState(false);
@@ -6060,6 +6085,7 @@ export default function ShelfRoom({
             bayIdx={idx}
             themeId={themeId}
             totalAlmirahs={data.length}
+            almirahsOnly={almirahsOnly}
             onPrevAlmirah={() => {
               const limits = getPlanLimits();
               if (limits.maxAlmirahs <= 1) {

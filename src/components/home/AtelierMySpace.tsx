@@ -44,17 +44,19 @@ import { getPlanLimits, openSubscriptionUpgradeModal } from '../../utils/subscri
 export interface TrackerItem {
   id: string;
   n: string;
-  type: 'arch' | 'ring' | 'bars' | 'dots';
+  type: 'arch' | 'ring' | 'bars' | 'dots' | 'line';
   v: number;
   g: number;
   u: string;
   step: number;
+  xAxisLabel?: string;
+  yAxisLabel?: string;
 }
 
 export interface TrackerPreset {
   name: string;
   category: 'Academics' | 'Clinical' | 'Cognitive' | 'Wellness';
-  type: 'arch' | 'ring' | 'bars' | 'dots';
+  type: 'arch' | 'ring' | 'bars' | 'dots' | 'line';
   goal: number;
   val: number;
   unit: string;
@@ -65,39 +67,41 @@ export interface TrackerPreset {
 
 export const MEDICAL_TRACKER_PRESETS: TrackerPreset[] = [
   // Academics & Exams
-  { name: 'Study Hours', category: 'Academics', type: 'arch', val: 3.5, goal: 8, unit: 'hrs', step: 0.5, icon: '⏱️', desc: 'Active textbook & notes reading' },
-  { name: 'QBank MCQs', category: 'Academics', type: 'ring', val: 42, goal: 100, unit: 'mcqs', step: 5, icon: '❓', desc: 'Daily MCQ question solving' },
-  { name: 'Flashcard Reviews', category: 'Academics', type: 'bars', val: 88, goal: 150, unit: 'cards', step: 10, icon: '🗂️', desc: 'Spaced repetition recall deck' },
-  { name: 'Textbook Pages', category: 'Academics', type: 'bars', val: 18, goal: 40, unit: 'pages', step: 2, icon: '📖', desc: 'Core textbook syllabus coverage' },
-  { name: 'Pharmacology Drug Cards', category: 'Academics', type: 'dots', val: 12, goal: 30, unit: 'drugs', step: 2, icon: '💊', desc: 'Drug mechanism and adverse effects' },
-  { name: 'First Aid Pearls', category: 'Academics', type: 'bars', val: 9, goal: 20, unit: 'pearls', step: 1, icon: '⭐', desc: 'High-yield exam review pearls' },
+  { name: 'Study Hours', category: 'Academics', type: 'arch', val: 0, goal: 8, unit: 'hrs', step: 0.5, icon: '⏱️', desc: 'Active textbook & notes reading' },
+  { name: 'QBank MCQs', category: 'Academics', type: 'ring', val: 0, goal: 100, unit: 'mcqs', step: 5, icon: '❓', desc: 'Daily MCQ question solving' },
+  { name: 'Flashcard Reviews', category: 'Academics', type: 'bars', val: 0, goal: 150, unit: 'cards', step: 10, icon: '🗂️', desc: 'Spaced repetition recall deck' },
+  { name: 'Textbook Pages', category: 'Academics', type: 'bars', val: 0, goal: 40, unit: 'pages', step: 2, icon: '📖', desc: 'Core textbook syllabus coverage' },
+  { name: 'Pharmacology Drug Cards', category: 'Academics', type: 'dots', val: 0, goal: 30, unit: 'drugs', step: 2, icon: '💊', desc: 'Drug mechanism and adverse effects' },
+  { name: 'First Aid Pearls', category: 'Academics', type: 'bars', val: 0, goal: 20, unit: 'pearls', step: 1, icon: '⭐', desc: 'High-yield exam review pearls' },
+  { name: 'Test Score Trend', category: 'Academics', type: 'line', val: 0, goal: 100, unit: 'pts', step: 10, icon: '📈', desc: 'X/Y line graph progression' },
 
   // Clinical Wards & Hospital
-  { name: 'Ward Posting Hours', category: 'Clinical', type: 'arch', val: 2.5, goal: 4, unit: 'hrs', step: 0.5, icon: '🏥', desc: 'Hospital ward & OPD clinical hours' },
-  { name: 'Clinical Cases Logged', category: 'Clinical', type: 'dots', val: 3, goal: 6, unit: 'cases', step: 1, icon: '🩺', desc: 'Patient histories taken & presented' },
-  { name: 'Surgical Scrub-Ins', category: 'Clinical', type: 'dots', val: 1, goal: 3, unit: 'surgeries', step: 1, icon: '✂️', desc: 'OT scrub-in and observation' },
-  { name: 'IV Cannulations & Draws', category: 'Clinical', type: 'bars', val: 4, goal: 10, unit: 'procedures', step: 1, icon: '💉', desc: 'Clinical bedside skills logged' },
-  { name: 'Pathology Slides', category: 'Clinical', type: 'bars', val: 12, goal: 25, unit: 'slides', step: 1, icon: '🔬', desc: 'Microscopic slide analysis' },
-  { name: 'Arterial Blood Gases', category: 'Clinical', type: 'ring', val: 3, goal: 8, unit: 'ABGs', step: 1, icon: '🩸', desc: 'Acid-base clinical analysis' },
+  { name: 'Ward Posting Hours', category: 'Clinical', type: 'arch', val: 0, goal: 4, unit: 'hrs', step: 0.5, icon: '🏥', desc: 'Hospital ward & OPD clinical hours' },
+  { name: 'Clinical Cases Logged', category: 'Clinical', type: 'dots', val: 0, goal: 6, unit: 'cases', step: 1, icon: '🩺', desc: 'Patient histories taken & presented' },
+  { name: 'Surgical Scrub-Ins', category: 'Clinical', type: 'dots', val: 0, goal: 3, unit: 'surgeries', step: 1, icon: '✂️', desc: 'OT scrub-in and observation' },
+  { name: 'IV Cannulations & Draws', category: 'Clinical', type: 'bars', val: 0, goal: 10, unit: 'procedures', step: 1, icon: '💉', desc: 'Clinical bedside skills logged' },
+  { name: 'Pathology Slides', category: 'Clinical', type: 'bars', val: 0, goal: 25, unit: 'slides', step: 1, icon: '🔬', desc: 'Microscopic slide analysis' },
+  { name: 'Arterial Blood Gases', category: 'Clinical', type: 'ring', val: 0, goal: 8, unit: 'ABGs', step: 1, icon: '🩸', desc: 'Acid-base clinical analysis' },
 
   // Cognitive & Atelier Slabs
-  { name: 'Flowchart Lineages Built', category: 'Cognitive', type: 'arch', val: 2, goal: 5, unit: 'charts', step: 1, icon: '🌳', desc: 'Pedigree & diagnosis classification trees' },
-  { name: 'Mnemonics Mastered', category: 'Cognitive', type: 'ring', val: 6, goal: 10, unit: 'mnemonics', step: 1, icon: '💡', desc: 'Memory pegs & visual recall anchors' },
-  { name: 'Anatomy Dissections', category: 'Cognitive', type: 'dots', val: 2, goal: 5, unit: 'regions', step: 1, icon: '🧠', desc: 'Cadaveric dissection & 3D atlas' },
-  { name: 'Peace Sounds Meditation', category: 'Cognitive', type: 'ring', val: 15, goal: 30, unit: 'mins', step: 5, icon: '🎵', desc: 'Ocular reset & pink noise recharge' },
+  { name: 'Flowchart Lineages Built', category: 'Cognitive', type: 'arch', val: 0, goal: 5, unit: 'charts', step: 1, icon: '🌳', desc: 'Pedigree & diagnosis classification trees' },
+  { name: 'Mnemonics Mastered', category: 'Cognitive', type: 'ring', val: 0, goal: 10, unit: 'mnemonics', step: 1, icon: '💡', desc: 'Memory pegs & visual recall anchors' },
+  { name: 'Anatomy Dissections', category: 'Cognitive', type: 'dots', val: 0, goal: 5, unit: 'regions', step: 1, icon: '🧠', desc: 'Cadaveric dissection & 3D atlas' },
+  { name: 'Peace Sounds Meditation', category: 'Cognitive', type: 'ring', val: 0, goal: 30, unit: 'mins', step: 5, icon: '🎵', desc: 'Ocular reset & pink noise recharge' },
 
   // Wellness & Daily Habits
-  { name: 'Daily Water Intake', category: 'Wellness', type: 'ring', val: 1.8, goal: 3.5, unit: 'L', step: 0.25, icon: '💧', desc: 'Hydration during long study shifts' },
-  { name: 'Sleep & Recovery', category: 'Wellness', type: 'arch', val: 6.5, goal: 8, unit: 'hrs', step: 0.5, icon: '🌙', desc: 'Optimal brain consolidation sleep' },
-  { name: '20-20-20 Eye Breaks', category: 'Wellness', type: 'dots', val: 8, goal: 15, unit: 'breaks', step: 1, icon: '👁️', desc: 'Ocular relaxation cycles taken' },
-  { name: 'Pomodoro Focus Blocks', category: 'Wellness', type: 'dots', val: 4, goal: 8, unit: 'blocks', step: 1, icon: '🍅', desc: '25-minute deep focus sprints' },
+  { name: 'Daily Water Intake', category: 'Wellness', type: 'ring', val: 0, goal: 3.5, unit: 'L', step: 0.25, icon: '💧', desc: 'Hydration during long study shifts' },
+  { name: 'Sleep & Recovery', category: 'Wellness', type: 'arch', val: 0, goal: 8, unit: 'hrs', step: 0.5, icon: '🌙', desc: 'Optimal brain consolidation sleep' },
+  { name: '20-20-20 Eye Breaks', category: 'Wellness', type: 'dots', val: 0, goal: 15, unit: 'breaks', step: 1, icon: '👁️', desc: 'Ocular relaxation cycles taken' },
+  { name: 'Pomodoro Focus Blocks', category: 'Wellness', type: 'dots', val: 0, goal: 8, unit: 'blocks', step: 1, icon: '🍅', desc: '25-minute deep focus sprints' },
 ];
 
 const DEFAULT_TRACKERS: TrackerItem[] = [
-  { id: 'tr-default-1', n: 'Study Hours', type: 'arch', v: 3.5, g: 8, u: 'hrs', step: 0.5 },
-  { id: 'tr-default-2', n: 'QBank MCQs', type: 'ring', v: 42, g: 100, u: 'mcqs', step: 5 },
-  { id: 'tr-default-3', n: 'Flashcard Reviews', type: 'bars', v: 88, g: 150, u: 'cards', step: 10 },
-  { id: 'tr-default-4', n: 'Pomodoro Focus Blocks', type: 'dots', v: 4, g: 8, u: 'blocks', step: 1 },
+  { id: 'tr-default-1', n: 'Study Hours', type: 'arch', v: 0, g: 8, u: 'hrs', step: 0.5 },
+  { id: 'tr-default-2', n: 'QBank MCQs', type: 'ring', v: 0, g: 100, u: 'mcqs', step: 5 },
+  { id: 'tr-default-3', n: 'Flashcard Reviews', type: 'bars', v: 0, g: 150, u: 'cards', step: 10 },
+  { id: 'tr-default-4', n: 'Pomodoro Focus Blocks', type: 'dots', v: 0, g: 8, u: 'blocks', step: 1 },
+  { id: 'tr-default-5', n: 'Performance Trend', type: 'line', v: 0, g: 100, u: 'pts', step: 10, xAxisLabel: 'Days', yAxisLabel: 'Score' },
 ];
 
 const ACCENTS_BY_THEME: Record<string, string[]> = {
@@ -551,27 +555,17 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
   // Search input state
   const [searchQuery, setSearchQuery] = useState('');
 
-  // Trackers State (Seeded with 4 starter trackers once)
+  // Trackers State (Seeded with 5 zeroed starter trackers of all 5 types)
   const [trackers, setTrackers] = useState<TrackerItem[]>(() => {
     try {
-      const saved = localStorage.getItem('medden_atelier_trackers');
+      const saved = localStorage.getItem('medden_atelier_trackers_v3');
       if (saved) {
         const parsed = JSON.parse(saved);
-        if (Array.isArray(parsed)) {
-          const cleaned = parsed.filter((tr: any) => {
-            const isSeed =
-              (tr?.id === '1' && tr?.n === 'Daily study') ||
-              (tr?.id === '2' && tr?.n === 'Recall retention') ||
-              (tr?.id === '3' && tr?.n === 'Flashcards reviewed') ||
-              (tr?.id === '4' && tr?.n === 'Study streak');
-            return !isSeed;
-          });
-          if (cleaned.length > 0 || localStorage.getItem('achiev_cockpit_v2_seeded') === '1') {
-            return cleaned;
-          }
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
         }
       }
-      localStorage.setItem('medden_atelier_trackers', JSON.stringify(DEFAULT_TRACKERS));
+      localStorage.setItem('medden_atelier_trackers_v3', JSON.stringify(DEFAULT_TRACKERS));
       return DEFAULT_TRACKERS;
     } catch {}
     return DEFAULT_TRACKERS;
@@ -580,7 +574,7 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
   const saveTrackers = (updated: TrackerItem[]) => {
     setTrackers(updated);
     try {
-      localStorage.setItem('medden_atelier_trackers', JSON.stringify(updated));
+      localStorage.setItem('medden_atelier_trackers_v3', JSON.stringify(updated));
     } catch {}
   };
 
@@ -596,15 +590,44 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
     saveTrackers(updated);
   };
 
-  // Add Tracker Modal Dialog & Customization
+  // Add / Customize Tracker Modal Dialog
   const [isAddTrackerOpen, setIsAddTrackerOpen] = useState(false);
+  const [editingTrackerIndex, setEditingTrackerIndex] = useState<number | null>(null);
   const [selectedPresetCat, setSelectedPresetCat] = useState<'All' | 'Academics' | 'Clinical' | 'Cognitive' | 'Wellness'>('All');
   const [aiPrompt, setAiPrompt] = useState('');
   const [newTrName, setNewTrName] = useState('');
   const [newTrVal, setNewTrVal] = useState('0');
   const [newTrGoal, setNewTrGoal] = useState('10');
   const [newTrUnit, setNewTrUnit] = useState('pages');
-  const [newTrType, setNewTrType] = useState<'arch' | 'ring' | 'bars' | 'dots'>('arch');
+  const [newTrType, setNewTrType] = useState<'arch' | 'ring' | 'bars' | 'dots' | 'line'>('arch');
+  const [newTrXAxis, setNewTrXAxis] = useState('Days');
+  const [newTrYAxis, setNewTrYAxis] = useState('Score');
+
+  const handleOpenNewTrackerModal = () => {
+    setEditingTrackerIndex(null);
+    setNewTrName('');
+    setNewTrVal('0');
+    setNewTrGoal('10');
+    setNewTrUnit('pages');
+    setNewTrType('arch');
+    setNewTrXAxis('Days');
+    setNewTrYAxis('Score');
+    setIsAddTrackerOpen(true);
+  };
+
+  const handleOpenEditTracker = (index: number) => {
+    const tr = trackers[index];
+    if (!tr) return;
+    setEditingTrackerIndex(index);
+    setNewTrName(tr.n);
+    setNewTrVal(String(tr.v));
+    setNewTrGoal(String(tr.g));
+    setNewTrUnit(tr.u);
+    setNewTrType(tr.type);
+    setNewTrXAxis(tr.xAxisLabel || 'Days');
+    setNewTrYAxis(tr.yAxisLabel || 'Score');
+    setIsAddTrackerOpen(true);
+  };
 
   const handleSelectPreset = (p: TrackerPreset) => {
     setNewTrName(p.name);
@@ -622,9 +645,13 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
     
     let name = aiPrompt.trim();
     let unit = 'units';
-    let type: 'arch' | 'ring' | 'bars' | 'dots' = 'ring';
+    let type: 'arch' | 'ring' | 'bars' | 'dots' | 'line' = 'ring';
     
-    if (txt.includes('mcq') || txt.includes('question') || txt.includes('qbank')) {
+    if (txt.includes('line') || txt.includes('graph') || txt.includes('trend') || txt.includes('score')) {
+      name = 'Performance Trend';
+      unit = 'pts';
+      type = 'line';
+    } else if (txt.includes('mcq') || txt.includes('question') || txt.includes('qbank')) {
       name = 'MCQ Practice';
       unit = 'mcqs';
       type = 'bars';
@@ -666,18 +693,43 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
     const v = Math.min(g, Math.max(0, parseFloat(newTrVal) || 0));
     const step = g >= 50 ? 5 : g < 10 ? 0.5 : 1;
 
-    const newTr: TrackerItem = {
-      id: `tr-${Date.now()}`,
-      n: newTrName.trim() || 'Untitled Tracker',
-      type: newTrType,
-      v,
-      g,
-      u: newTrUnit.trim() || 'units',
-      step,
-    };
+    if (editingTrackerIndex !== null && trackers[editingTrackerIndex]) {
+      const existing = trackers[editingTrackerIndex]!;
+      const updatedItem: TrackerItem = {
+        ...existing,
+        n: newTrName.trim() || existing.n,
+        type: newTrType,
+        v,
+        g,
+        u: newTrUnit.trim() || 'units',
+        step,
+        xAxisLabel: newTrType === 'line' ? (newTrXAxis.trim() || 'X-Axis') : existing.xAxisLabel,
+        yAxisLabel: newTrType === 'line' ? (newTrYAxis.trim() || 'Y-Axis') : existing.yAxisLabel,
+      };
+      const next = [...trackers];
+      next[editingTrackerIndex] = updatedItem;
+      saveTrackers(next);
+    } else {
+      const newTr: TrackerItem = {
+        id: `tr-${Date.now()}`,
+        n: newTrName.trim() || 'Untitled Tracker',
+        type: newTrType,
+        v,
+        g,
+        u: newTrUnit.trim() || 'units',
+        step,
+        ...(newTrType === 'line'
+          ? {
+              xAxisLabel: newTrXAxis.trim() || 'X-Axis',
+              yAxisLabel: newTrYAxis.trim() || 'Y-Axis',
+            }
+          : {}),
+      };
+      saveTrackers([...trackers, newTr]);
+    }
 
-    saveTrackers([...trackers, newTr]);
     setIsAddTrackerOpen(false);
+    setEditingTrackerIndex(null);
     setNewTrName('');
     setNewTrVal('0');
     setNewTrGoal('10');
@@ -966,6 +1018,85 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
       );
     }
 
+    if (t.type === 'line') {
+      const xLabel = t.xAxisLabel || 'Days';
+      const yLabel = t.yAxisLabel || 'Score';
+      const norm = Math.max(0, Math.min(1, pct / 100));
+      const pts = [0.15, 0.35, 0.5, 0.72, 0.88, 1].map((factor, idx) => {
+        const x = 28 + idx * 30;
+        const y = 76 - Math.round(norm * factor * 58);
+        return { x, y };
+      });
+      const polyPoints = pts.map((p) => `${p.x},${p.y}`).join(' ');
+      const areaPoints = `28,76 ${polyPoints} 178,76`;
+
+      return (
+        <div className="w-full h-full flex items-center justify-center">
+          <svg viewBox="0 0 200 100" className="w-full h-24 overflow-visible">
+            {/* Y-Axis & X-Axis lines */}
+            <line x1="26" y1="12" x2="26" y2="76" stroke="var(--at-line)" strokeWidth="1.5" />
+            <line x1="26" y1="76" x2="184" y2="76" stroke="var(--at-line)" strokeWidth="1.5" />
+            {/* Horizontal grid guidelines */}
+            <line x1="26" y1="44" x2="184" y2="44" stroke="var(--at-line)" strokeWidth="1" strokeDasharray="2 3" />
+            <line x1="26" y1="16" x2="184" y2="16" stroke="var(--at-line)" strokeWidth="1" strokeDasharray="2 3" />
+
+            {/* Shaded area under curve when value > 0 */}
+            {norm > 0 && (
+              <polygon points={areaPoints} fill="var(--acc)" fillOpacity="0.16" />
+            )}
+
+            {/* Line graph path */}
+            <polyline
+              fill="none"
+              stroke="var(--acc)"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              points={polyPoints}
+            />
+
+            {/* Data nodes */}
+            {pts.map((p, idx) => (
+              <circle
+                key={idx}
+                cx={p.x}
+                cy={p.y}
+                r="3"
+                fill={norm > 0 ? 'var(--acc)' : 'var(--at-bg)'}
+                stroke="var(--acc)"
+                strokeWidth="1.8"
+              />
+            ))}
+
+            {/* Y-Axis label */}
+            <text
+              x="12"
+              y="45"
+              textAnchor="middle"
+              fontSize="8.5"
+              fontFamily="Geist Mono, monospace"
+              fill="var(--at-muted)"
+              transform="rotate(-90 12 45)"
+            >
+              {yLabel}
+            </text>
+
+            {/* X-Axis label */}
+            <text
+              x="105"
+              y="93"
+              textAnchor="middle"
+              fontSize="8.5"
+              fontFamily="Geist Mono, monospace"
+              fill="var(--at-muted)"
+            >
+              {xLabel}
+            </text>
+          </svg>
+        </div>
+      );
+    }
+
     // Dots style
     const totalDots = Math.min(Math.ceil(t.g), 28);
     const onDots = Math.min(Math.floor(t.v), totalDots);
@@ -1002,7 +1133,7 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
             type="button"
             className="atelier-btn"
             style={{ padding: '6px 14px', fontSize: '12px' }}
-            onClick={() => setIsAddTrackerOpen(true)}
+            onClick={handleOpenNewTrackerModal}
           >
             <Plus className="w-3.5 h-3.5" />
             <span>Add</span>
@@ -1019,7 +1150,9 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
             return (
               <article
                 key={t.id || i}
-                className="atelier-card atelier-tracker"
+                onClick={() => handleOpenEditTracker(i)}
+                title="Click to customize tracker"
+                className="atelier-card atelier-tracker cursor-pointer"
                 style={{ ['--acc' as string]: acc }}
                 aria-label={`${t.n}: ${t.v} of ${t.g} ${t.u}`}
               >
@@ -1028,7 +1161,10 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
                   <button
                     type="button"
                     className="atelier-tr-del"
-                    onClick={() => handleDeleteTracker(i)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleDeleteTracker(i);
+                    }}
                     aria-label={`Remove ${t.n} tracker`}
                     title="Remove tracker"
                   >
@@ -1054,7 +1190,10 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
                   <button
                     type="button"
                     className="atelier-log"
-                    onClick={() => handleLogProgress(i)}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleLogProgress(i);
+                    }}
                     aria-label={`Log progress for ${t.n}`}
                     title={`Log +${t.step} ${t.u}`}
                   >
@@ -1064,18 +1203,6 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
               </article>
             );
           })}
-
-          {/* Add Tracker Action Card */}
-          <button
-            type="button"
-            className="atelier-tr-add"
-            onClick={() => setIsAddTrackerOpen(true)}
-          >
-            <span className="plus">
-              <Plus className="w-5 h-5" />
-            </span>
-            <span>Add tracker</span>
-          </button>
         </div>
 
         {/* Section: Today */}
@@ -1917,7 +2044,7 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
                 <legend className="atelier-eyebrow" style={{ marginBottom: '6px' }}>
                   Visualization Style
                 </legend>
-                <div className="atelier-types grid grid-cols-4 gap-2">
+                <div className="atelier-types grid grid-cols-5 gap-2">
                   <label
                     className={`cursor-pointer text-center py-1.5 rounded-lg border text-xs font-semibold ${
                       newTrType === 'arch' ? 'active bg-amber-700 text-white border-amber-700' : 'border-stone-200 dark:border-stone-800'
@@ -1978,8 +2105,53 @@ export const AtelierMySpace: React.FC<AtelierMySpaceProps> = ({
                     />
                     🔥 Streak
                   </label>
+                  <label
+                    className={`cursor-pointer text-center py-1.5 rounded-lg border text-xs font-semibold ${
+                      newTrType === 'line' ? 'active bg-amber-700 text-white border-amber-700' : 'border-stone-200 dark:border-stone-800'
+                    }`}
+                    onClick={() => setNewTrType('line')}
+                  >
+                    <input
+                      type="radio"
+                      name="trType"
+                      checked={newTrType === 'line'}
+                      onChange={() => setNewTrType('line')}
+                      className="sr-only"
+                    />
+                    📈 Line Graph
+                  </label>
                 </div>
               </fieldset>
+
+              {/* Editable X-Axis and Y-Axis Labels when Line Graph is selected */}
+              {newTrType === 'line' && (
+                <div className="grid grid-cols-2 gap-2.5 w-full box-border overflow-hidden">
+                  <div className="atelier-field min-w-0">
+                    <label className="atelier-eyebrow" htmlFor="tr-xaxis">
+                      X-Axis Label
+                    </label>
+                    <input
+                      id="tr-xaxis"
+                      placeholder="e.g. Days, Weeks, Tests"
+                      value={newTrXAxis}
+                      onChange={(e) => setNewTrXAxis(e.target.value)}
+                      className="w-full min-w-0 box-border"
+                    />
+                  </div>
+                  <div className="atelier-field min-w-0">
+                    <label className="atelier-eyebrow" htmlFor="tr-yaxis">
+                      Y-Axis Label
+                    </label>
+                    <input
+                      id="tr-yaxis"
+                      placeholder="e.g. Score, Hours, Accuracy"
+                      value={newTrYAxis}
+                      onChange={(e) => setNewTrYAxis(e.target.value)}
+                      className="w-full min-w-0 box-border"
+                    />
+                  </div>
+                </div>
+              )}
 
               {/* Talk to Developer Banner per User Request */}
               <div className="flex items-center justify-between p-2.5 rounded-xl bg-stone-100 dark:bg-[#140e0a] border border-stone-200 dark:border-[#352317] mt-2">

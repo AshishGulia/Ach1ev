@@ -56,6 +56,7 @@ import {
   getSavedDestinationLabel,
   saveFileToAch1evDeviceFolder,
 } from '../../utils/deviceStorage';
+import ShelfRoom from './ShelfRoom';
 
 interface LibraryWorkspaceViewProps {
   notebooks: Notebook[];
@@ -1821,7 +1822,7 @@ export const LibraryWorkspaceView: React.FC<LibraryWorkspaceViewProps> = ({
           onClick={() => setIsAddNoteModalOpen(false)}
         >
           <div
-            className="w-full max-w-xl max-h-[85vh] rounded-3xl bg-[#faf6ee] dark:bg-[#1a120d] border border-[#d6c7b0] dark:border-[#382518] p-5 sm:p-6 shadow-2xl flex flex-col space-y-4 overflow-hidden"
+            className={`w-full ${addNoteTab === 'shelf' ? 'max-w-4xl' : 'max-w-xl'} max-h-[88vh] rounded-3xl bg-[#faf6ee] dark:bg-[#1a120d] border border-[#d6c7b0] dark:border-[#382518] p-5 sm:p-6 shadow-2xl flex flex-col space-y-4 overflow-hidden transition-all`}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
@@ -1876,69 +1877,40 @@ export const LibraryWorkspaceView: React.FC<LibraryWorkspaceViewProps> = ({
               </button>
             </div>
 
-            {/* Filter Search Input */}
-            <div className="relative shrink-0">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
-              <input
-                type="text"
-                placeholder={addNoteTab === 'shelf' ? 'Filter shelf books & notes...' : 'Filter recent files & documents...'}
-                value={addNoteFilter}
-                onChange={(e) => setAddNoteFilter(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 rounded-xl border border-stone-300 dark:border-[#382518] bg-white dark:bg-[#120c08] text-xs text-stone-900 dark:text-stone-100 outline-none focus:border-[#A47C43]"
-              />
-            </div>
+            {/* Filter Search Input (for Recent Files tab) */}
+            {addNoteTab === 'recent' && (
+              <div className="relative shrink-0">
+                <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+                <input
+                  type="text"
+                  placeholder="Filter recent files & documents..."
+                  value={addNoteFilter}
+                  onChange={(e) => setAddNoteFilter(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 rounded-xl border border-stone-300 dark:border-[#382518] bg-white dark:bg-[#120c08] text-xs text-stone-900 dark:text-stone-100 outline-none focus:border-[#A47C43]"
+                />
+              </div>
+            )}
 
-            {/* List of Items */}
-            <div className="flex-1 min-h-[220px] overflow-y-auto custom-scrollbar space-y-2 pr-1">
+            {/* List of Items or Day-Mode Almirahs Interface */}
+            <div className="flex-1 min-h-[300px] overflow-y-auto custom-scrollbar space-y-2 pr-1">
               {addNoteTab === 'shelf' ? (
-                (() => {
-                  const items = getShelfItems().filter((item) =>
-                    !addNoteFilter || item.title.toLowerCase().includes(addNoteFilter.toLowerCase())
-                  );
-                  if (items.length === 0) {
-                    return (
-                      <div className="py-12 text-center text-xs text-stone-500 dark:text-stone-400 space-y-2">
-                        <BookOpen className="w-8 h-8 mx-auto opacity-40 text-[#A47C43]" />
-                        <p>No matching shelf books or notes found.</p>
-                      </div>
-                    );
-                  }
-                  return items.map((item) => (
-                    <div
-                      key={item.id}
-                      onClick={() => handleAddNoteToFolder(item)}
-                      className="p-3 rounded-2xl border border-stone-200 dark:border-[#332216] bg-white/70 dark:bg-[#160f0b]/80 hover:bg-[#A47C43]/10 dark:hover:bg-[#A47C43]/15 transition-colors flex items-center justify-between gap-3 cursor-pointer group"
-                    >
-                      <div className="flex items-center gap-3 min-w-0">
-                        <div
-                          className="w-9 h-11 rounded-lg shrink-0 flex items-center justify-center text-white text-[10px] font-bold shadow-xs border border-white/20"
-                          style={{ backgroundColor: item.coverColor || '#8f5f2c' }}
-                        >
-                          {item.source === 'notebook' ? <StickyNote className="w-4 h-4" /> : <BookOpen className="w-4 h-4" />}
-                        </div>
-                        <div className="min-w-0">
-                          <h4 className="text-xs font-semibold text-stone-900 dark:text-stone-100 truncate group-hover:text-[#8f5f2c] dark:group-hover:text-amber-300">
-                            {item.title}
-                          </h4>
-                          <p className="text-[11px] text-stone-500 dark:text-stone-400 truncate">
-                            {item.location} · {item.author || ''}
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleAddNoteToFolder(item);
-                        }}
-                        className="shrink-0 px-3 py-1.5 rounded-xl bg-[#8f5f2c] text-white text-[11px] font-semibold cursor-pointer hover:bg-[#734a1f] transition-all flex items-center gap-1 shadow-xs"
-                      >
-                        <Plus className="w-3.5 h-3.5" />
-                        <span>Add</span>
-                      </button>
-                    </div>
-                  ));
-                })()
+                <div className="rounded-2xl bg-[#fdfaf4] text-[#1c140e] p-2">
+                  <ShelfRoom
+                    almirahsOnly
+                    nightMode={false}
+                    notebooks={notebooks}
+                    driveBooks={books}
+                    onSelectBook={(b) =>
+                      handleAddNoteToFolder({
+                        id: `shelf-book-${b.id}`,
+                        refId: b.id,
+                        title: b.title,
+                        source: 'shelf-book',
+                        coverColor: b.thumbnail?.bgColor || '#8f5f2c',
+                      })
+                    }
+                  />
+                </div>
               ) : (
                 (() => {
                   const items = getRecentItems().filter((item) =>

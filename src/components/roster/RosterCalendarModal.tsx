@@ -954,190 +954,14 @@ export const RosterCalendarModal: React.FC<RosterCalendarModalProps> = ({
                   })}
                 </div>
               </div>
-
-              {/* Colour Code Bar (2 default colors, translucent meaning, Add more colors + side scrollbar) */}
-              <div className="mt-3 pt-2.5 border-t border-stone-200/80 dark:border-[#382518]">
-                <div className="flex items-center justify-between gap-2 mb-2">
-                  <div className="text-[11px] font-bold text-stone-800 dark:text-stone-200">
-                    Colour Code
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => setIsAddingColour((v) => !v)}
-                    className="px-2.5 py-1 rounded-lg bg-[#A47C43]/15 hover:bg-[#A47C43]/25 text-[#735222] dark:text-[#d4aa6e] border border-[#A47C43]/30 text-[10.5px] font-semibold flex items-center gap-1 transition-colors cursor-pointer"
-                  >
-                    <Plus className="w-3 h-3" />
-                    <span>Add more colors</span>
-                  </button>
-                </div>
-
-                {isAddingColour && (
-                  <form
-                    onSubmit={handleAddMoreColour}
-                    className="mb-2.5 p-2.5 rounded-xl border border-[#A47C43]/40 bg-white dark:bg-[#1a120d] space-y-2 text-xs"
-                  >
-                    <div className="flex items-start gap-2.5 flex-wrap">
-                      <div className="p-2 rounded-xl bg-stone-100/90 dark:bg-[#120c08] border border-stone-200 dark:border-[#382518]">
-                        <RoundColorColumnsPicker
-                          columns={UNIFIED_COLOR_COLUMNS}
-                          selectedColor={newColourHex}
-                          onSelectColor={(hex) => {
-                            setNewColourHex(hex);
-                            if (!newColourLabel.trim()) setNewColourLabel('Custom');
-                          }}
-                          swatchSizeClass="w-4 h-4"
-                        />
-                      </div>
-
-                      <div className="flex-1 min-w-[180px] flex flex-wrap items-center gap-2 pt-1">
-                        <input
-                          type="text"
-                          value={newColourLabel}
-                          onChange={(e) => setNewColourLabel(e.target.value)}
-                          placeholder="Color name (e.g. Blue)"
-                          className="w-32 px-2 py-1 rounded-lg border border-stone-300 dark:border-[#382518] bg-stone-50 dark:bg-[#120c08] text-[11px] text-stone-900 dark:text-stone-100 outline-none focus:border-[#A47C43]"
-                        />
-                        <input
-                          type="text"
-                          value={newColourMeaning}
-                          onChange={(e) => setNewColourMeaning(e.target.value)}
-                          placeholder="Meaning (e.g. lecture day)"
-                          className="flex-1 min-w-[130px] px-2 py-1 rounded-lg border border-stone-300 dark:border-[#382518] bg-stone-50 dark:bg-[#120c08] text-[11px] text-stone-900 dark:text-stone-100 outline-none focus:border-[#A47C43]"
-                        />
-                        <button
-                          type="submit"
-                          className="px-2.5 py-1 rounded-lg bg-[#A47C43] hover:bg-[#8e6834] text-white text-[10.5px] font-bold cursor-pointer"
-                        >
-                          Save
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setIsAddingColour(false)}
-                          className="px-2 py-1 rounded-lg bg-stone-200 dark:bg-[#251a12] text-stone-700 dark:text-stone-300 text-[10.5px] cursor-pointer"
-                        >
-                          Cancel
-                        </button>
-                      </div>
-                    </div>
-                  </form>
-                )}
-
-                <div className="max-h-32 overflow-y-auto custom-scrollbar pr-1.5 space-y-1.5">
-                  {colourCodes.map((col) => {
-                    const isEditing = editingCodeId === col.id;
-                    return (
-                      <div
-                        key={col.id}
-                        className={`flex items-center gap-2 p-1.5 px-2.5 rounded-xl border transition-all group ${
-                          isEditing
-                            ? 'border-amber-500 bg-amber-500/10 flex-wrap'
-                            : 'border-stone-200/70 dark:border-[#352317] bg-white/70 dark:bg-[#1a120d] hover:border-[#A47C43]/60 shadow-2xs'
-                        }`}
-                      >
-                        <button
-                          type="button"
-                          data-swatch=""
-                          className="w-4 h-4 rounded-full shrink-0 border border-black/15 shadow-2xs cursor-pointer"
-                          style={{ backgroundColor: isEditing ? tempHex : col.hex }}
-                          onClick={() => handleSetDateColor(col.hex)}
-                          title={`Apply colour to ${selectedDate}`}
-                        />
-
-                        {isEditing ? (
-                          <div className="flex flex-col gap-2 flex-1 min-w-[200px]">
-                            <div className="flex items-center gap-1.5">
-                              <input
-                                type="text"
-                                value={tempLabel}
-                                onChange={(e) => setTempLabel(e.target.value)}
-                                placeholder="Color name"
-                                className="w-24 text-[10.5px] font-semibold px-1.5 py-0.5 rounded bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-stone-100"
-                              />
-                              <span className="text-stone-400">-</span>
-                              <input
-                                type="text"
-                                value={tempMeaning}
-                                onChange={(e) => setTempMeaning(e.target.value)}
-                                placeholder="Meaning"
-                                className="flex-1 text-[10.5px] px-1.5 py-0.5 rounded bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-800 dark:text-stone-200"
-                              />
-                              <button
-                                type="button"
-                                onClick={() => handleSaveCode(col.id)}
-                                className="px-2 py-0.5 text-[10px] bg-amber-600 text-white rounded font-bold cursor-pointer"
-                              >
-                                ✓
-                              </button>
-                            </div>
-                            <div className="p-1.5 rounded-lg bg-stone-50 dark:bg-[#120c08] border border-stone-200 dark:border-[#352317]">
-                              <RoundColorColumnsPicker
-                                columns={UNIFIED_COLOR_COLUMNS}
-                                selectedColor={tempHex}
-                                onSelectColor={(hex) => setTempHex(hex)}
-                                swatchSizeClass="w-3.5 h-3.5"
-                              />
-                            </div>
-                          </div>
-                        ) : (
-                          <div
-                            className="flex-1 min-w-0 flex items-center gap-1.5 truncate cursor-pointer"
-                            onClick={() => handleStartEditCode(col)}
-                            title="Click to edit colour name, swatch or note"
-                          >
-                            <span className="text-[11px] font-semibold text-stone-800 dark:text-stone-200 shrink-0">
-                              {col.label}
-                            </span>
-                            <span className="text-stone-400/70 shrink-0">-</span>
-                            <span className="text-[11px] text-stone-600/55 dark:text-stone-300/45 italic truncate">
-                              {col.meaning}
-                            </span>
-                          </div>
-                        )}
-
-                        <button
-                          type="button"
-                          onClick={() => handleSetDateColor(col.hex)}
-                          className="p-1 rounded-md text-[#735222] dark:text-[#d4aa6e] hover:bg-[#A47C43]/15 cursor-pointer shrink-0 transition-colors"
-                          title={`Fill ${selectedDate} with ${col.label}`}
-                          aria-label={`Apply ${col.label} colour`}
-                        >
-                          <Palette className="w-3 h-3" />
-                        </button>
-                        {colourCodes.length > 1 && (
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteColour(col.id)}
-                            className="text-stone-400 hover:text-[#7f1d1d] dark:hover:text-[#d97074] p-0.5 opacity-60 hover:opacity-100 transition-opacity cursor-pointer shrink-0"
-                            title="Remove colour code"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
             </div>
 
-            {/* Right Column: Selected Date Details (Add Task, Reminder, Date Color) */}
-            <div className={`${studioCompact ? 'lg:col-span-3 xl:col-span-2 p-2.5 sm:p-3' : 'lg:col-span-4 xl:col-span-3 p-3.5 sm:p-4'} themed-glass-card bg-white/90 dark:bg-[#18110c]/95 border border-stone-200/90 dark:border-[#382518] rounded-3xl flex flex-col justify-between shadow-xs relative group transition-all`}>
-              {/* Corner Size Adjusting Tool / Handle */}
-              <div className="absolute top-3 right-3 flex items-center gap-1 text-stone-400">
-                <button
-                  type="button"
-                  onClick={() => setStudioCompact((v) => !v)}
-                  title={studioCompact ? 'Expand panel width' : 'Compact panel width'}
-                  className="p-1 rounded-lg bg-stone-100 hover:bg-stone-200 dark:bg-[#231912] dark:hover:bg-[#2f2218] text-stone-500 hover:text-stone-800 dark:hover:text-stone-200 transition-colors cursor-pointer"
-                >
-                  <Sliders className="w-3.5 h-3.5 text-amber-600" />
-                </button>
-              </div>
-
+            {/* Right Column: Selected Date Details (Add Task, Reminder, Date Color & Colour Code Hints at Bottom) */}
+            <div className="lg:col-span-4 xl:col-span-3 p-3.5 sm:p-4 themed-glass-card bg-white/90 dark:bg-[#18110c]/95 border border-stone-200/90 dark:border-[#382518] rounded-3xl flex flex-col justify-between shadow-xs relative group transition-all">
               <div className="space-y-3.5">
                 {/* Date Header & Color Swatches */}
                 <div className="pb-2.5 border-b border-stone-100 dark:border-[#352317]">
-                  <h3 className="font-serif text-base font-bold text-stone-900 dark:text-stone-100 pr-8">
+                  <h3 className="font-serif text-base font-bold text-stone-900 dark:text-stone-100">
                     {formatSelectedDateHeader(selectedDate)}
                   </h3>
 
@@ -1321,6 +1145,172 @@ export const RosterCalendarModal: React.FC<RosterCalendarModalProps> = ({
                       No tasks or sessions on this date. Add one above!
                     </div>
                   )}
+                </div>
+              </div>
+
+              {/* Colour Code Bar shifted to the bottom of the right side column */}
+              <div className="mt-4 pt-3 border-t border-stone-200/80 dark:border-[#382518]">
+                <div className="flex items-center justify-between gap-2 mb-2">
+                  <div className="text-[11px] font-bold text-stone-800 dark:text-stone-200">
+                    Colour Code
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setIsAddingColour((v) => !v)}
+                    className="px-2.5 py-1 rounded-lg bg-[#A47C43]/15 hover:bg-[#A47C43]/25 text-[#735222] dark:text-[#d4aa6e] border border-[#A47C43]/30 text-[10.5px] font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                  >
+                    <Plus className="w-3 h-3" />
+                    <span>Add more colors</span>
+                  </button>
+                </div>
+
+                {isAddingColour && (
+                  <form
+                    onSubmit={handleAddMoreColour}
+                    className="mb-2.5 p-2.5 rounded-xl border border-[#A47C43]/40 bg-white dark:bg-[#1a120d] space-y-2 text-xs"
+                  >
+                    <div className="flex flex-col gap-2">
+                      <div className="p-2 rounded-xl bg-stone-100/90 dark:bg-[#120c08] border border-stone-200 dark:border-[#382518]">
+                        <RoundColorColumnsPicker
+                          columns={UNIFIED_COLOR_COLUMNS}
+                          selectedColor={newColourHex}
+                          onSelectColor={(hex) => {
+                            setNewColourHex(hex);
+                            if (!newColourLabel.trim()) setNewColourLabel('Custom');
+                          }}
+                          swatchSizeClass="w-3.5 h-3.5"
+                        />
+                      </div>
+
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <input
+                          type="text"
+                          value={newColourLabel}
+                          onChange={(e) => setNewColourLabel(e.target.value)}
+                          placeholder="Color name (e.g. Blue)"
+                          className="w-full px-2 py-1 rounded-lg border border-stone-300 dark:border-[#382518] bg-stone-50 dark:bg-[#120c08] text-[11px] text-stone-900 dark:text-stone-100 outline-none focus:border-[#A47C43]"
+                        />
+                        <input
+                          type="text"
+                          value={newColourMeaning}
+                          onChange={(e) => setNewColourMeaning(e.target.value)}
+                          placeholder="Meaning (e.g. lecture day)"
+                          className="w-full px-2 py-1 rounded-lg border border-stone-300 dark:border-[#382518] bg-stone-50 dark:bg-[#120c08] text-[11px] text-stone-900 dark:text-stone-100 outline-none focus:border-[#A47C43]"
+                        />
+                        <div className="flex items-center gap-1.5 w-full justify-end">
+                          <button
+                            type="submit"
+                            className="px-2.5 py-1 rounded-lg bg-[#A47C43] hover:bg-[#8e6834] text-white text-[10.5px] font-bold cursor-pointer"
+                          >
+                            Save
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setIsAddingColour(false)}
+                            className="px-2 py-1 rounded-lg bg-stone-200 dark:bg-[#251a12] text-stone-700 dark:text-stone-300 text-[10.5px] cursor-pointer"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </form>
+                )}
+
+                <div className="max-h-36 overflow-y-auto custom-scrollbar pr-1 space-y-1.5">
+                  {colourCodes.map((col) => {
+                    const isEditing = editingCodeId === col.id;
+                    return (
+                      <div
+                        key={col.id}
+                        className={`flex items-center gap-2 p-1.5 px-2.5 rounded-xl border transition-all group ${
+                          isEditing
+                            ? 'border-amber-500 bg-amber-500/10 flex-wrap'
+                            : 'border-stone-200/70 dark:border-[#352317] bg-white/70 dark:bg-[#1a120d] hover:border-[#A47C43]/60 shadow-2xs'
+                        }`}
+                      >
+                        <button
+                          type="button"
+                          data-swatch=""
+                          className="w-4 h-4 rounded-full shrink-0 border border-black/15 shadow-2xs cursor-pointer"
+                          style={{ backgroundColor: isEditing ? tempHex : col.hex }}
+                          onClick={() => handleSetDateColor(col.hex)}
+                          title={`Apply colour to ${selectedDate}`}
+                        />
+
+                        {isEditing ? (
+                          <div className="flex flex-col gap-2 flex-1 min-w-0">
+                            <div className="flex items-center gap-1">
+                              <input
+                                type="text"
+                                value={tempLabel}
+                                onChange={(e) => setTempLabel(e.target.value)}
+                                placeholder="Color name"
+                                className="w-20 text-[10.5px] font-semibold px-1.5 py-0.5 rounded bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-900 dark:text-stone-100"
+                              />
+                              <span className="text-stone-400">-</span>
+                              <input
+                                type="text"
+                                value={tempMeaning}
+                                onChange={(e) => setTempMeaning(e.target.value)}
+                                placeholder="Meaning"
+                                className="flex-1 min-w-0 text-[10.5px] px-1.5 py-0.5 rounded bg-white dark:bg-stone-800 border border-stone-300 dark:border-stone-700 text-stone-800 dark:text-stone-200"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => handleSaveCode(col.id)}
+                                className="px-2 py-0.5 text-[10px] bg-amber-600 text-white rounded font-bold cursor-pointer"
+                              >
+                                ✓
+                              </button>
+                            </div>
+                            <div className="p-1.5 rounded-lg bg-stone-50 dark:bg-[#120c08] border border-stone-200 dark:border-[#352317]">
+                              <RoundColorColumnsPicker
+                                columns={UNIFIED_COLOR_COLUMNS}
+                                selectedColor={tempHex}
+                                onSelectColor={(hex) => setTempHex(hex)}
+                                swatchSizeClass="w-3.5 h-3.5"
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          <div
+                            className="flex-1 min-w-0 flex items-center gap-1.5 truncate cursor-pointer"
+                            onClick={() => handleStartEditCode(col)}
+                            title="Click to edit colour name, swatch or note"
+                          >
+                            <span className="text-[11px] font-semibold text-stone-800 dark:text-stone-200 shrink-0">
+                              {col.label}
+                            </span>
+                            <span className="text-stone-400/70 shrink-0">-</span>
+                            <span className="text-[11px] text-stone-600/55 dark:text-stone-300/45 italic truncate">
+                              {col.meaning}
+                            </span>
+                          </div>
+                        )}
+
+                        <button
+                          type="button"
+                          onClick={() => handleSetDateColor(col.hex)}
+                          className="p-1 rounded-md text-[#735222] dark:text-[#d4aa6e] hover:bg-[#A47C43]/15 cursor-pointer shrink-0 transition-colors"
+                          title={`Fill ${selectedDate} with ${col.label}`}
+                          aria-label={`Apply ${col.label} colour`}
+                        >
+                          <Palette className="w-3 h-3" />
+                        </button>
+                        {colourCodes.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteColour(col.id)}
+                            className="text-stone-400 hover:text-[#7f1d1d] dark:hover:text-[#d97074] p-0.5 opacity-60 hover:opacity-100 transition-opacity cursor-pointer shrink-0"
+                            title="Remove colour code"
+                          >
+                            <Trash2 className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             </div>

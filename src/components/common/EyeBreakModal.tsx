@@ -140,33 +140,11 @@ export const EyeBreakModal: React.FC<EyeBreakModalProps> = ({
               <X className="w-5 h-5" />
             </button>
 
-            {/* Top Mode Switcher: Live Eye Rest Timer vs Complete Eye Rest Timer Settings */}
+            {/* Top Plain Heading: Eye Rest Timer (not a button) */}
             <div className="flex items-center justify-center mb-5 pr-6">
-              <div className="inline-flex items-center gap-1 p-1 rounded-xl bg-stone-100 dark:bg-[#120c08] border border-stone-200/80 dark:border-[#382518]">
-                <button
-                  type="button"
-                  onClick={() => setActiveView('timer')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
-                    activeView === 'timer'
-                      ? 'themed-tab-active bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 shadow-xs'
-                      : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
-                  }`}
-                >
-                  <Eye className="w-3.5 h-3.5" />
-                  <span>Eye Rest Timer</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setActiveView('settings')}
-                  className={`px-3.5 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer ${
-                    activeView === 'settings'
-                      ? 'themed-tab-active bg-stone-900 text-white dark:bg-stone-100 dark:text-stone-900 shadow-xs'
-                      : 'text-stone-600 dark:text-stone-400 hover:text-stone-900 dark:hover:text-stone-200'
-                  }`}
-                >
-                  <SlidersHorizontal className="w-3.5 h-3.5" />
-                  <span>Timer Settings</span>
-                </button>
+              <div className="inline-flex items-center gap-2 text-sm font-bold text-stone-900 dark:text-stone-100 select-none">
+                <Eye className="w-4 h-4 text-[#A47C43] dark:text-amber-400" />
+                <span>Eye Rest Timer</span>
               </div>
             </div>
 
@@ -223,17 +201,15 @@ export const EyeBreakModal: React.FC<EyeBreakModalProps> = ({
                   </button>
                 </div>
 
-                {/* Quick Footer Summary + Jump to Full Settings */}
+                {/* Quick Footer Summary + Timer Settings Button in bottom-left */}
                 <div className="mt-6 pt-4 border-t border-stone-200/80 dark:border-[#352317] flex flex-wrap items-center justify-between gap-2 text-[11px] text-stone-500 dark:text-stone-400">
                   <button
                     type="button"
                     onClick={() => setActiveView('settings')}
-                    className="flex items-center gap-1.5 text-amber-700 dark:text-amber-300 font-semibold hover:underline cursor-pointer"
+                    className="px-3.5 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 dark:bg-[#120c08] dark:hover:bg-[#231912] border border-stone-200/80 dark:border-[#382518] text-xs font-semibold flex items-center gap-1.5 text-amber-800 dark:text-amber-300 transition-all cursor-pointer"
                   >
                     <SlidersHorizontal className="w-3.5 h-3.5" />
-                    <span>
-                      Configure Interval ({config.intervalMinutes}m) &amp; Duration ({config.breakDurationSeconds}s)
-                    </span>
+                    <span>Timer Settings</span>
                   </button>
 
                   <button

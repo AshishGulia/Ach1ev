@@ -2515,7 +2515,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </h4>
               </div>
 
-              <div className="max-w-xs w-full p-2.5 rounded-2xl bg-stone-50 dark:bg-[#18110c] border border-stone-200 dark:border-[#382518] divide-y divide-stone-200 dark:divide-[#382518]">
+              <div className="w-full max-w-2xl divide-y divide-stone-200/70 dark:divide-[#382518]">
                 {[...ALL_SIDEBAR_BUTTON_ITEMS]
                   .sort((a, b) => {
                     const idxA = sidebarOrder.indexOf(a.id);
@@ -2523,29 +2523,29 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                     return (idxA === -1 ? 99 : idxA) - (idxB === -1 ? 99 : idxB);
                   })
                   .map((item, idx, arr) => (
-                    <div key={item.key} className="py-1.5 px-1 flex items-center justify-between gap-2 first:pt-0 last:pb-0">
-                      <div className="flex items-center gap-1.5 min-w-0">
-                        <div className="flex items-center gap-0.5 shrink-0">
+                    <div key={item.key} className="py-3.5 px-1 sm:px-2 flex items-center justify-between gap-4 first:pt-1 last:pb-1">
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className="flex items-center gap-1 shrink-0">
                           <button
                             type="button"
                             onClick={() => handleShiftSidebarItem(item.id, -1)}
                             disabled={idx === 0}
                             title="Move segment Up in Sidebar"
-                            className="p-0.5 rounded hover:bg-stone-200 dark:hover:bg-[#251a12] disabled:opacity-30 disabled:pointer-events-none text-stone-600 dark:text-stone-300 transition-colors cursor-pointer"
+                            className="p-1.5 rounded-lg hover:bg-stone-200/80 dark:hover:bg-[#251a12] disabled:opacity-30 disabled:pointer-events-none text-stone-600 dark:text-stone-300 transition-colors cursor-pointer"
                           >
-                            <ArrowUp className="w-3 h-3" />
+                            <ArrowUp className="w-5 h-5" />
                           </button>
                           <button
                             type="button"
                             onClick={() => handleShiftSidebarItem(item.id, 1)}
                             disabled={idx === arr.length - 1}
                             title="Move segment Down in Sidebar"
-                            className="p-0.5 rounded hover:bg-stone-200 dark:hover:bg-[#251a12] disabled:opacity-30 disabled:pointer-events-none text-stone-600 dark:text-stone-300 transition-colors cursor-pointer"
+                            className="p-1.5 rounded-lg hover:bg-stone-200/80 dark:hover:bg-[#251a12] disabled:opacity-30 disabled:pointer-events-none text-stone-600 dark:text-stone-300 transition-colors cursor-pointer"
                           >
-                            <ArrowDown className="w-3 h-3" />
+                            <ArrowDown className="w-5 h-5" />
                           </button>
                         </div>
-                        <span className="font-bold text-xs text-stone-900 dark:text-stone-100 truncate">
+                        <span className="font-bold text-base sm:text-lg text-stone-900 dark:text-stone-100 truncate">
                           {item.label}
                         </span>
                       </div>
@@ -2558,7 +2558,7 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                           className="sr-only peer"
                         />
                         <div
-                          className="w-8 h-4 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all"
+                          className="w-14 h-7 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-stone-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all"
                           style={{
                             backgroundColor:
                               sidebarSettings[item.key] !== false
@@ -3080,72 +3080,49 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
                 </div>
               </div>
 
-              {/* Keyboard Shortcuts Cheatsheet */}
-              <div className="p-4 rounded-2xl bg-stone-50/80 dark:bg-[#18110c] border border-stone-200/90 dark:border-[#382518] space-y-3">
-                <div className="flex items-center gap-2">
-                  <Keyboard className="w-4 h-4 text-stone-500" />
-                  <span className="text-xs font-bold text-stone-800 dark:text-stone-200">
-                    High-Yield Keyboard Shortcuts
-                  </span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                  {[
-                    { key: '⌘ / Ctrl + K', action: 'Quick Command Palette / Search' },
-                    { key: '⌘ / Ctrl + S', action: 'Instant Note Save' },
-                    { key: '⌘ / Ctrl + B', action: 'Toggle Slim Sidebar Width' },
-                    { key: '⌘ / Ctrl + F', action: 'Focus / Split Note View Mode' },
-                    { key: '⌘ / Ctrl + E', action: 'Trigger Eye Rest 20-20-20 Timer' },
-                    { key: '⌘ / Ctrl + P', action: 'Launch Peace Audio Synthesizer' },
-                  ].map((sc, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center justify-between p-2 rounded-xl bg-white dark:bg-[#140e0a] border border-stone-200/70 dark:border-[#352317]"
-                    >
-                      <span className="text-[11px] text-stone-600 dark:text-stone-300">{sc.action}</span>
-                      <kbd className="px-2 py-0.5 rounded-md bg-stone-100 dark:bg-[#251a12] border border-stone-300 dark:border-[#4b3322] text-[10px] font-mono text-stone-800 dark:text-stone-200 font-semibold shadow-2xs">
-                        {sc.key}
-                      </kbd>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
               {/* Daily Focus Timer Activity Log List (bottom of Goals segment) */}
               <div className="p-4 rounded-2xl bg-stone-50/80 dark:bg-[#18110c] border border-stone-200/90 dark:border-[#382518] space-y-3">
-                <div className="flex items-center justify-between gap-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   <div className="flex items-center gap-2">
                     <Clock className="w-4 h-4" style={themeAccentIconStyle} />
                     <span className="text-xs font-bold text-stone-800 dark:text-stone-200">
-                      Daily Focus Timer Log
+                      Daily Focus Timer Log (Total Hours Spent on App Day-Wise)
                     </span>
                   </div>
                   <span className="text-[11px] font-mono text-stone-500 dark:text-stone-400">
-                    {Object.keys(focusTimerLogs).filter((k) => (focusTimerLogs[k] || 0) > 0).length} days logged
+                    {Object.keys(focusTimerLogs).filter((k) => (focusTimerLogs[k] || 0) > 0).length} days ·{' '}
+                    {(
+                      Object.values(focusTimerLogs).reduce((acc, s) => acc + (Number(s) || 0), 0) / 3600
+                    ).toFixed(2)}{' '}
+                    total hrs
                   </span>
                 </div>
 
                 <div className="divide-y divide-stone-200/70 dark:divide-[#2e2015] rounded-xl bg-white dark:bg-[#140e0a] border border-stone-200/80 dark:border-[#352317] max-h-60 overflow-y-auto">
                   {Object.entries(focusTimerLogs).filter(([, secs]) => (secs || 0) > 0).length === 0 ? (
                     <div className="px-3.5 py-4 text-xs text-stone-500 dark:text-stone-400 text-center">
-                      Start the Focus Timer from the top dashboard ribbon to record how long the timer runs each day.
+                      Total hours spent on the app are automatically logged day-wise here.
                     </div>
                   ) : (
                     Object.entries(focusTimerLogs)
                       .filter(([, secs]) => (secs || 0) > 0)
                       .sort(([a], [b]) => b.localeCompare(a))
-                      .map(([dateKey, secs]) => (
-                        <div
-                          key={dateKey}
-                          className="px-3.5 py-2.5 flex items-center justify-between gap-3 text-xs"
-                        >
-                          <span className="font-medium text-stone-800 dark:text-stone-200">
-                            {formatLogDateLabel(dateKey)}
-                          </span>
-                          <span className="font-mono font-bold" style={themeAccentIconStyle}>
-                            {formatDurationWords(secs)}
-                          </span>
-                        </div>
-                      ))
+                      .map(([dateKey, secs]) => {
+                        const totalHours = (Math.max(0, Number(secs) || 0) / 3600).toFixed(2);
+                        return (
+                          <div
+                            key={dateKey}
+                            className="px-3.5 py-2.5 flex items-center justify-between gap-3 text-xs"
+                          >
+                            <span className="font-medium text-stone-800 dark:text-stone-200">
+                              {formatLogDateLabel(dateKey)}
+                            </span>
+                            <span className="font-mono font-bold" style={themeAccentIconStyle}>
+                              {totalHours} hrs ({formatDurationWords(secs)})
+                            </span>
+                          </div>
+                        );
+                      })
                   )}
                 </div>
               </div>

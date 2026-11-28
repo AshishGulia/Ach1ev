@@ -65,28 +65,91 @@ export const AchievBrand: React.FC<AchievBrandProps> = ({
   }
 
   if (variant === 'lockup') {
+    const wrapperSizeClass =
+      imgClassName ||
+      'w-[330px] sm:w-[428px] max-w-full h-auto select-none -my-5 sm:-my-7';
+
     return (
       <div
         className={`inline-flex items-center justify-center bg-transparent select-none max-w-full ${className}`}
         title={title}
       >
-        <img
-          src={ACHIEV_LOGIN_LOGO_URL}
-          alt={title}
-          width={1376}
-          height={768}
-          loading="eager"
-          decoding="sync"
-          fetchPriority="high"
-          draggable={false}
-          className={
-            imgClassName ||
-            'w-[330px] sm:w-[428px] max-w-full h-auto object-contain bg-transparent select-none -my-5 sm:-my-7'
+        <style>{`
+          @keyframes achievOneUpwardShine {
+            0% {
+              top: 64%;
+              opacity: 0;
+            }
+            4% {
+              top: 61%;
+              opacity: 0.95;
+            }
+            36% {
+              top: 23%;
+              opacity: 0.95;
+            }
+            42% {
+              top: 19%;
+              opacity: 0;
+            }
+            100% {
+              top: 19%;
+              opacity: 0;
+            }
           }
+        `}</style>
+        <div
+          className={`relative inline-block ${wrapperSizeClass}`}
           style={{
             filter: 'drop-shadow(0 6px 16px rgba(0, 0, 0, 0.45))',
           }}
-        />
+        >
+          <img
+            src={ACHIEV_LOGIN_LOGO_URL}
+            alt={title}
+            width={1376}
+            height={768}
+            loading="eager"
+            decoding="sync"
+            fetchPriority="high"
+            draggable={false}
+            className="w-full h-auto block object-contain bg-transparent select-none"
+          />
+
+          {/* Strictly isolated to the '1' in ACH1EV: masked to the logo alpha + polygon-clipped to '1' only */}
+          <div
+            aria-hidden="true"
+            className="pointer-events-none absolute inset-0 overflow-hidden"
+            style={{
+              clipPath:
+                'polygon(62.8% 24.5%, 72.3% 24.5%, 72.3% 63.2%, 63.7% 63.2%, 63.7% 58%, 64.2% 36.2%, 62.8% 35.5%)',
+              WebkitMaskImage: `url(${ACHIEV_LOGIN_LOGO_URL})`,
+              maskImage: `url(${ACHIEV_LOGIN_LOGO_URL})`,
+              WebkitMaskSize: '100% 100%',
+              maskSize: '100% 100%',
+              WebkitMaskRepeat: 'no-repeat',
+              maskRepeat: 'no-repeat',
+              WebkitMaskPosition: 'center',
+              maskPosition: 'center',
+              mixBlendMode: 'screen',
+            }}
+          >
+            <div
+              style={{
+                position: 'absolute',
+                left: '62.5%',
+                width: '10.2%',
+                height: '13%',
+                transform: 'translateY(-50%)',
+                background:
+                  'radial-gradient(ellipse 85% 60% at 55% 50%, rgba(255, 252, 235, 0.95) 0%, rgba(255, 223, 128, 0.72) 45%, rgba(245, 179, 66, 0.25) 75%, rgba(245, 179, 66, 0) 100%)',
+                filter: 'blur(2px)',
+                animation: 'achievOneUpwardShine 60s linear infinite',
+                willChange: 'top, opacity',
+              }}
+            />
+          </div>
+        </div>
       </div>
     );
   }

@@ -575,7 +575,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       onClick={() => setIsMoreExpanded((prev) => !prev)}
                       aria-expanded={isMoreExpanded}
                       style={getBtnStyle(MORE_BRANCH_IDS.has(activeView) && !isMoreExpanded)}
-                      className={`w-full min-h-[34px] md:min-h-[29px] h-auto flex items-center px-2 md:px-1.5 py-1.5 text-[12px] md:text-[11px] font-medium transition-all hover:brightness-110 cursor-pointer text-left ${leatherBtnCls}`}
+                      className={`w-full min-h-[36px] md:min-h-[30px] h-auto flex items-center px-2 md:px-1.5 py-1.5 text-[12px] md:text-[11px] font-medium transition-all hover:brightness-110 cursor-pointer text-left ${leatherBtnCls}`}
                     >
                       <div className="flex items-center gap-1.5 min-w-0 w-full">
                         <div className="w-4 h-4 flex items-center justify-center shrink-0">
@@ -854,21 +854,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
                   }}
                   title="More (Mnemonics, Leisure, Talk to Developer)"
                   style={getBtnStyle(MORE_BRANCH_IDS.has(activeView))}
-                  className={`w-6 h-6 flex items-center justify-center transition-all hover:brightness-110 cursor-pointer ${leatherBtnCls}`}
+                  className={`w-10 h-10 flex items-center justify-center transition-all hover:brightness-110 cursor-pointer ${leatherBtnCls}`}
                 >
                   <MoreHorizontal
-                    className="w-3.5 h-3.5"
+                    className="w-5 h-5"
                     style={{ color: MORE_BRANCH_IDS.has(activeView) ? sb.activeIconColor : sb.idleIconColor }}
                   />
                 </button>
-              </div>
-
-              <div
-                title={`Active Subject: ${currentSubject}`}
-                style={toggleBtnStyle}
-                className={`mt-1.5 w-6 h-6 flex items-center justify-center text-[8.5px] font-mono font-bold uppercase cursor-default ${leatherBtnCls}`}
-              >
-                {currentSubject.slice(0, 2)}
               </div>
             </div>
 

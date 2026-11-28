@@ -90,6 +90,12 @@ export function getFocusTargetConfig(): { active: boolean; hours: number; minute
   }
 }
 
+export function formatHoursSpentLabel(totalSeconds: number): string {
+  const safe = Math.max(0, Math.floor(totalSeconds));
+  const hours = safe / 3600;
+  return `${hours.toFixed(2)} hrs (${formatDurationWords(safe)})`;
+}
+
 export function getFocusTimerLogs(): Record<string, number> {
   try {
     const raw = localStorage.getItem(FOCUS_LOGS_KEY);
@@ -98,6 +104,26 @@ export function getFocusTimerLogs(): Record<string, number> {
   } catch {
     return {};
   }
+}
+
+export function recordAppUsageSecondTick(): void {
+  try {
+    const todayKey = getLocalDateKey();
+    const logs = getFocusTimerLogs();
+    logs[todayKey] = Math.max(0, Number(logs[todayKey]) || 0) + 1;
+    localStorage.setItem(FOCUS_LOGS_KEY, JSON.stringify(logs));
+  } catch {}
+}
+
+if (typeof window !== 'undefined' && !(window as any).__achievAppUsageTrackerStarted) {
+  (window as any).__achievAppUsageTrackerStarted = true;
+  // Ensure today has an initial entry and increments every second the app is open
+  recordAppUsageSecondTick();
+  window.setInterval(() => {
+    if (typeof document === 'undefined' || document.visibilityState === 'visible') {
+      recordAppUsageSecondTick();
+    }
+  }, 1000);
 }
 
 export function getFocusTimerState(): FocusTimerState {

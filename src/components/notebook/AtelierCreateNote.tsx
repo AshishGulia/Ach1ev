@@ -1808,7 +1808,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
           onUpdateNotebook({
             id: newId,
             title: resolvedTitle,
-            subject: 'Pharmacology',
+            subject: '' as any,
             coverTheme: 'geometric',
             coverTitle: resolvedTitle,
             coverSubtitle: 'Personal Study Notebook',
@@ -4199,9 +4199,6 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
       {/* 1. Shell Top Header Bar */}
       <header className="an-top">
         <div className="an-title-wrap">
-          <div className="an-crumb">
-            <b>{notebook?.subject || 'Clinical Note'}</b>
-          </div>
           <input
             className="an-title-in"
             aria-label="Note title"
