@@ -352,6 +352,7 @@ const TOOL_GROUPS: Array<{
       { id: 'equation', icon: Sigma, label: 'Equation block' },
       { id: 'code', icon: FileText, label: 'Code / formula block' },
       { id: 'divider', icon: Minus, label: 'Divider line' },
+      { id: 'link-page', icon: Link2, label: 'Link current page to another page' },
       { id: 'link', icon: LinkIcon, label: 'Insert link', kbd: 'Ctrl+L' },
       { id: 'date', icon: CalendarClock, label: 'Date & time stamp' },
       { id: 'timestamp', icon: Clock, label: 'Video timestamp' },
@@ -741,6 +742,127 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
     setIsExportModalOpen(false);
   };
 
+  // Page-to-Page Chain Connections within the same Note Document
+  const pageLinksStorageKey = `achiev_note_page_links_v1_${notebook?.id || 'draft'}`;
+  const [pageLinks, setPageLinks] = useState<Record<number, number[]>>(() => {
+    try {
+      const raw = localStorage.getItem(`achiev_note_page_links_v1_${notebook?.id || 'draft'}`);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') return parsed;
+      }
+    } catch {}
+    return {};
+  });
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(pageLinksStorageKey);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object') {
+          setPageLinks(parsed);
+          return;
+        }
+      }
+    } catch {}
+  }, [pageLinksStorageKey]);
+
+  const savePageLinks = (next: Record<number, number[]>) => {
+    setPageLinks(next);
+    try {
+      localStorage.setItem(pageLinksStorageKey, JSON.stringify(next));
+    } catch {}
+  };
+
+  const togglePageLink = (fromIdx: number, toIdx: number) => {
+    if (fromIdx === toIdx) return;
+    const currentFrom = pageLinks[fromIdx] || [];
+    const currentTo = pageLinks[toIdx] || [];
+    const alreadyLinked = currentFrom.includes(toIdx);
+
+    const nextFrom = alreadyLinked
+      ? currentFrom.filter((i) => i !== toIdx)
+      : [...currentFrom, toIdx].sort((a, b) => a - b);
+    const nextTo = alreadyLinked
+      ? currentTo.filter((i) => i !== fromIdx)
+      : [...currentTo.filter((i) => i !== fromIdx), fromIdx].sort((a, b) => a - b);
+
+    const nextMap: Record<number, number[]> = {
+      ...pageLinks,
+      [fromIdx]: nextFrom,
+      [toIdx]: nextTo,
+    };
+    savePageLinks(nextMap);
+    triggerSave();
+    showToast(
+      alreadyLinked
+        ? `Unlinked Page ${fromIdx + 1} and Page ${toIdx + 1}`
+        : `Linked Page ${fromIdx + 1} ↔ Page ${toIdx + 1}`
+    );
+  };
+
+  const jumpToLinkedPage = (targetIdx: number) => {
+    setCurrentActivePageIndex(targetIdx);
+    setTimeout(() => {
+      const el = document.getElementById(`an-page-sheet-${targetIdx}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 40);
+  };
+
+  const renderPageLinkBadges = (pageIdx: number) => {
+    const linked = (pageLinks[pageIdx] || []).filter((idx) => idx >= 0 && idx < notePages.length && idx !== pageIdx);
+    return (
+      <div className="inline-flex flex-wrap items-center gap-1.5" contentEditable={false}>
+        {linked.map((targetIdx) => (
+          <span
+            key={`plink-${pageIdx}-${targetIdx}`}
+            className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10.5px] font-mono font-bold bg-[#A47C43]/15 text-[#8f5f2c] dark:text-amber-300 border border-[#A47C43]/45 shadow-2xs"
+          >
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                jumpToLinkedPage(targetIdx);
+              }}
+              className="inline-flex items-center gap-1 hover:underline cursor-pointer"
+              title={`Connected to Page ${targetIdx + 1} — Click to jump to Page ${targetIdx + 1}`}
+            >
+              <Link2 className="w-3 h-3 text-[#A47C43] shrink-0" />
+              <span>Linked ↔ Page {targetIdx + 1}</span>
+            </button>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                togglePageLink(pageIdx, targetIdx);
+              }}
+              className="ml-0.5 opacity-65 hover:opacity-100 hover:text-red-600 cursor-pointer"
+              title={`Unlink Page ${targetIdx + 1}`}
+            >
+              ×
+            </button>
+          </span>
+        ))}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            setCurrentActivePageIndex(pageIdx);
+            setIsToolsOpen(true);
+          }}
+          className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-mono text-[var(--an-muted)] hover:text-[#A47C43] border border-transparent hover:border-[#A47C43]/35 transition-colors cursor-pointer"
+          title="Link this page to another page in this document (More tools)"
+        >
+          <Link2 className="w-3 h-3 text-[#A47C43]" />
+          <span>Link Page</span>
+        </button>
+      </div>
+    );
+  };
+
   const handleAddPageBreak = () => {
     const newPageId = `pg-${Date.now()}`;
     const newPageNum = notePages.length + 1;
@@ -749,20 +871,24 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
       title: `Page ${newPageNum}`,
       contentHtml: '<p><br></p>',
     };
+    const nextIdx = notePages.length;
     setNotePages((prev) => [...prev, newPage]);
-    setCurrentActivePageIndex(notePages.length);
+    setCurrentActivePageIndex(nextIdx);
     ensureTableDragHandles();
     pushHistorySnapshot();
     triggerSave();
-    showToast(`Added Page ${newPageNum} — see left thumbnail pane & editor`);
+    showToast(`Added Page ${newPageNum}`);
 
     setTimeout(() => {
-      const pageEls = document.querySelectorAll('.an-sheet');
-      const lastPageEl = pageEls[pageEls.length - 1];
-      if (lastPageEl) {
-        lastPageEl.scrollIntoView({ behavior: 'smooth', block: 'end' });
+      const targetEl = document.getElementById(`an-page-sheet-${nextIdx}`);
+      if (targetEl) {
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
       } else {
-        window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        const pageEls = document.querySelectorAll('.an-sheet');
+        const lastPageEl = pageEls[pageEls.length - 1];
+        if (lastPageEl) {
+          lastPageEl.scrollIntoView({ behavior: 'smooth', block: 'end' });
+        }
       }
     }, 60);
   };
@@ -2469,6 +2595,9 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
           break;
         case 'divider':
           insertHtmlAtCursor('<hr><p><br></p>');
+          break;
+        case 'link-page':
+          setIsToolsOpen(true);
           break;
         case 'toggle':
           insertHtmlAtCursor(
@@ -4240,6 +4369,53 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
           </button>
         </div>
 
+        {/* Direct 1-Click Day / Sepia / Night Switcher in Top Ribbon */}
+        <div
+          className="flex items-center gap-0.5 p-0.5 rounded-xl border shrink-0"
+          style={{
+            background: 'var(--an-card)',
+            borderColor: 'var(--an-line)',
+          }}
+          role="group"
+          aria-label="Note paper theme: Day, Sepia, Night"
+        >
+          {[
+            { id: 'white', label: 'Day', activeClass: 'bg-white text-stone-900 shadow-2xs font-bold' },
+            { id: 'sepia', label: 'Sepia', activeClass: 'bg-[#f4ede0] text-[#78350f] shadow-2xs font-bold' },
+            { id: 'dark', label: 'Night', activeClass: 'bg-[#1a120d] text-white shadow-2xs font-bold' },
+          ].map((mode) => {
+            const isSelected =
+              mode.id === 'sepia'
+                ? !paperColor || paperColor === 'sepia' || paperColor === 'beige'
+                : paperColor === mode.id;
+            return (
+              <button
+                key={mode.id}
+                type="button"
+                onClick={() => {
+                  setPaperColor(mode.id);
+                  if (notebook && onUpdateNotebook) {
+                    onUpdateNotebook({
+                      ...notebook,
+                      paperColor: mode.id,
+                      updatedAt: new Date().toISOString(),
+                    });
+                  }
+                  triggerSave();
+                }}
+                className={`px-2.5 py-1 rounded-lg text-[11px] transition-all cursor-pointer ${
+                  isSelected
+                    ? mode.activeClass
+                    : 'text-[var(--an-muted)] hover:text-[var(--an-ink)] font-medium'
+                }`}
+                title={`Switch note page to ${mode.label} mode`}
+              >
+                {mode.label}
+              </button>
+            );
+          })}
+        </div>
+
         {/* Open Book Button in Header */}
         <button
           className="an-btn"
@@ -5327,15 +5503,60 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                   </button>
                 </div>
 
+                {/* Direct 1-Click Day / Sepia / Night Switcher in Formatting Ribbon */}
+                <div
+                  className="flex items-center gap-0.5 p-0.5 rounded-lg border shrink-0"
+                  style={{
+                    background: 'var(--an-card)',
+                    borderColor: 'var(--an-line)',
+                  }}
+                  role="group"
+                  aria-label="Note paper theme: Day, Sepia, Night"
+                >
+                  {[
+                    { id: 'white', label: 'Day', activeClass: 'bg-white text-stone-900 shadow-2xs font-bold' },
+                    { id: 'sepia', label: 'Sepia', activeClass: 'bg-[#f4ede0] text-[#78350f] shadow-2xs font-bold' },
+                    { id: 'dark', label: 'Night', activeClass: 'bg-[#1a120d] text-white shadow-2xs font-bold' },
+                  ].map((mode) => {
+                    const isSelected =
+                      mode.id === 'sepia'
+                        ? !paperColor || paperColor === 'sepia' || paperColor === 'beige'
+                        : paperColor === mode.id;
+                    return (
+                      <button
+                        key={mode.id}
+                        type="button"
+                        onClick={() => {
+                          setPaperColor(mode.id);
+                          if (notebook && onUpdateNotebook) {
+                            onUpdateNotebook({
+                              ...notebook,
+                              paperColor: mode.id,
+                              updatedAt: new Date().toISOString(),
+                            });
+                          }
+                          triggerSave();
+                        }}
+                        className={`px-2 py-0.5 rounded text-[11px] transition-all cursor-pointer ${
+                          isSelected
+                            ? mode.activeClass
+                            : 'text-[var(--an-muted)] hover:text-[var(--an-ink)] font-medium'
+                        }`}
+                        title={`Switch note page to ${mode.label} mode`}
+                      >
+                        {mode.label}
+                      </button>
+                    );
+                  })}
+                </div>
+
                 {/* Paper Color Customization Button (Distinct Paper Logo, Theme-Synced, Default Sepia, Color Columns) */}
                 {(() => {
                   const swatchPreviewBg =
                     !paperColor || paperColor === 'sepia' || paperColor === 'beige'
-                      ? activeSepiaHex
+                      ? sepiaLightMap[docDesignId] || '#F3E5C8'
                       : paperColor === 'white'
-                        ? isDarkThemeDoc
-                          ? '#23211E'
-                          : '#FFFFFF'
+                        ? '#FFFFFF'
                         : paperColor === 'dark'
                           ? '#14110E'
                           : paperColor === 'mint'
@@ -5608,30 +5829,46 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                               : 'border-[var(--an-line)] bg-white/70 dark:bg-black/30 hover:border-amber-500/50'
                           }`}
                         >
-                          <div className="flex items-center justify-between">
+                          <div className="flex items-center justify-between gap-1">
                             <span className="text-[10.5px] font-mono font-bold text-[#A47C43]">
                               Page {idx + 1}
                             </span>
-                            {notePages.length > 1 && (
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  if (confirm(`Delete Page ${idx + 1}?`)) {
-                                    const filtered = notePages.filter((_, i) => i !== idx);
-                                    setNotePages(filtered);
-                                    const nextIdx = Math.max(0, idx - 1);
-                                    setCurrentActivePageIndex(nextIdx);
-                                    triggerSave();
-                                    showToast(`Deleted Page ${idx + 1}`);
-                                  }
-                                }}
-                                className="p-1 rounded text-red-500 hover:bg-red-500/20 opacity-0 group-hover:opacity-100 transition-opacity"
-                                title="Delete page"
-                              >
-                                <Trash2 className="w-3 h-3" />
-                              </button>
-                            )}
+                            <div className="flex items-center gap-1">
+                              {(pageLinks[idx] || []).filter((t) => t >= 0 && t < notePages.length && t !== idx).length > 0 && (
+                                <span
+                                  className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full bg-[#A47C43]/20 text-[#8f5f2c] dark:text-amber-300 text-[9px] font-mono font-bold"
+                                  title={`Linked to Page ${(pageLinks[idx] || []).map((t) => t + 1).join(', ')}`}
+                                >
+                                  <Link2 className="w-2.5 h-2.5 text-[#A47C43]" />
+                                  <span>
+                                    {(pageLinks[idx] || [])
+                                      .filter((t) => t >= 0 && t < notePages.length && t !== idx)
+                                      .map((t) => `P${t + 1}`)
+                                      .join(',')}
+                                  </span>
+                                </span>
+                              )}
+                              {notePages.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    if (confirm(`Delete Page ${idx + 1}?`)) {
+                                      const filtered = notePages.filter((_, i) => i !== idx);
+                                      setNotePages(filtered);
+                                      const nextIdx = Math.max(0, idx - 1);
+                                      setCurrentActivePageIndex(nextIdx);
+                                      triggerSave();
+                                      showToast(`Deleted Page ${idx + 1}`);
+                                    }
+                                  }}
+                                  className="p-1 rounded text-red-500 hover:bg-red-500/20 opacity-0 group-hover:opacity-100 transition-opacity"
+                                  title="Delete page"
+                                >
+                                  <Trash2 className="w-3 h-3" />
+                                </button>
+                              )}
+                            </div>
                           </div>
                           {/* Miniature Page Thumbnail Preview */}
                           <div className="h-24 rounded-lg bg-stone-50 dark:bg-stone-900 border border-stone-200 dark:border-stone-800 p-2 overflow-hidden text-[9px] text-stone-700 dark:text-stone-300 font-serif leading-snug">
@@ -5682,13 +5919,9 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                 };
                 const resolvedSheetBg =
                   !paperColor || paperColor === 'sepia' || paperColor === 'beige'
-                    ? isDarkThemeDoc
-                      ? sepiaDarkPaper[docDesignId] || '#251A10'
-                      : sepiaLightPaper[docDesignId] || '#F3E5C8'
+                    ? sepiaLightPaper[docDesignId] || '#F3E5C8'
                     : paperColor === 'white'
-                      ? isDarkThemeDoc
-                        ? '#23211E'
-                        : '#FFFFFF'
+                      ? '#FFFFFF'
                       : paperColor === 'dark'
                         ? '#14110E'
                         : paperColor === 'mint'
@@ -5743,6 +5976,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                             {/* Left Notebook Page */}
                             {leftPage && (
                               <div
+                                id={`an-page-sheet-${leftIdx}`}
                                 className="flex-1 min-h-[640px] rounded-l-2xl rounded-r-sm shadow-xl border p-8 relative flex flex-col transition-all cursor-text"
                                 style={{
                                   backgroundColor: resolvedSheetBg,
@@ -5756,10 +5990,13 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                                   }
                                 }}
                               >
-                                <div className="flex items-center justify-between pb-3 mb-4 border-b border-[var(--an-line)] shrink-0 select-none">
-                                  <span className="text-xs font-mono font-bold text-[#A47C43]">
-                                    Page {leftIdx + 1} of {notePages.length}
-                                  </span>
+                                <div className="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b border-[var(--an-line)] shrink-0 select-none">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="text-xs font-mono font-bold text-[#A47C43]">
+                                      Page {leftIdx + 1}
+                                    </span>
+                                    {renderPageLinkBadges(leftIdx)}
+                                  </div>
                                   <span className="text-xs font-mono opacity-70">{todayDate}</span>
                                 </div>
                                 <input
@@ -5819,6 +6056,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                             {/* Right Notebook Page (or Blank Page with Add Page Button in Center) */}
                             {rightPage ? (
                               <div
+                                id={`an-page-sheet-${rightIdx}`}
                                 className="flex-1 min-h-[640px] rounded-r-2xl rounded-l-sm shadow-xl border p-8 relative flex flex-col transition-all cursor-text"
                                 style={{
                                   backgroundColor: resolvedSheetBg,
@@ -5832,10 +6070,13 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                                   }
                                 }}
                               >
-                                <div className="flex items-center justify-between pb-3 mb-4 border-b border-[var(--an-line)] shrink-0 select-none">
-                                  <span className="text-xs font-mono font-bold text-[#A47C43]">
-                                    Page {rightIdx + 1} of {notePages.length}
-                                  </span>
+                                <div className="flex flex-wrap items-center justify-between gap-2 pb-3 mb-4 border-b border-[var(--an-line)] shrink-0 select-none">
+                                  <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="text-xs font-mono font-bold text-[#A47C43]">
+                                      Page {rightIdx + 1}
+                                    </span>
+                                    {renderPageLinkBadges(rightIdx)}
+                                  </div>
                                   <span className="text-xs font-mono opacity-70">{todayDate}</span>
                                 </div>
                                 <input
@@ -5927,14 +6168,16 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                 }
 
                 return (
+              <div className="flex flex-col items-center gap-12 w-full">
               <article
                 ref={(el) => {
                   sheetRef.current = el;
                 }}
+                onClick={() => setCurrentActivePageIndex(0)}
                 className={`an-sheet ${isDraggingSheetWidth ? 'is-sheet-resizing' : ''} ${
                   !isPencilDisabled && isPencilManualDraw ? 'pencil-draw-armed' : ''
                 }`}
-                id="sheet"
+                id="an-page-sheet-0"
                 data-paper={paperStyle}
                 data-font={normFontKey}
                 data-hand={activeFontObj.isHandwriting ? 'true' : undefined}
@@ -6063,9 +6306,14 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                   </button>
                 </div>
 
-                {/* Meta row — auto-updates daily, no default proxy tags */}
-                <div className="an-meta-row">
-                  <span>{todayDate}</span>
+                {/* Meta row — Page 1 label + Linked Page Chain Connection Badges + Today Date */}
+                <div className="an-meta-row flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-mono font-bold text-xs text-[#A47C43]">Page 1</span>
+                    <span>·</span>
+                    <span>{todayDate}</span>
+                    {renderPageLinkBadges(0)}
+                  </div>
                 </div>
 
                 {/* Editable Note Title (Uncontrolled DOM so Backspace never snaps caret to index 0) */}
@@ -6210,7 +6458,15 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                   suppressContentEditableWarning
                   spellCheck
                   ref={editorRef}
-                  onInput={() => {
+                  onFocus={() => setCurrentActivePageIndex(0)}
+                  onInput={(e) => {
+                    const nextHtml = (e.currentTarget as HTMLDivElement).innerHTML;
+                    setNotePages((prev) => {
+                      if (!prev[0]) return prev;
+                      const copy = [...prev];
+                      copy[0] = { ...copy[0], contentHtml: nextHtml };
+                      return copy;
+                    });
                     ensureTableDragHandles();
                     pushHistorySnapshot();
                     triggerSave();
@@ -6631,19 +6887,145 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                   );
                 })}
 
-                {/* Add Page Button docked at exact lower boundary of A4 note sheet */}
-                <div className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-1/2 z-30" contentEditable={false}>
-                  <button
-                    type="button"
-                    onClick={handleAddPageBreak}
-                    className="px-4 py-1.5 rounded-full bg-[#A47C43] hover:bg-[#8e6834] text-white font-bold text-xs flex items-center gap-1.5 shadow-lg border border-[#8e6834]/40 transition-colors cursor-pointer"
-                    title="Add a new page / page break at the bottom boundary of the note for PDF & Word export"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Add Page</span>
-                  </button>
+                {/* Bottom-Right Page 1 Footer Label */}
+                <div
+                  className="mt-6 pt-2 flex items-center justify-between text-[11px] font-mono text-[var(--an-muted)] select-none"
+                  contentEditable={false}
+                >
+                  <span>Page 1</span>
+                  {notePages.length > 1 && <span>Page 1 of {notePages.length}</span>}
                 </div>
+
+                {/* Add Page Button docked at lower boundary when only 1 page exists */}
+                {notePages.length === 1 && (
+                  <div className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-1/2 z-30" contentEditable={false}>
+                    <button
+                      type="button"
+                      onClick={handleAddPageBreak}
+                      className="px-4 py-1.5 rounded-full bg-[#A47C43] hover:bg-[#8e6834] text-white font-bold text-xs flex items-center gap-1.5 shadow-lg border border-[#8e6834]/40 transition-colors cursor-pointer"
+                      title="Add Page 2 below"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      <span>Add Page</span>
+                    </button>
+                  </div>
+                )}
               </article>
+
+              {/* Additional Stacked Note Pages (Page 2, Page 3, ...) in Single Page View */}
+              {notePages.slice(1).map((extraPage, extraOffset) => {
+                const pageIdx = extraOffset + 1;
+                const isLastPage = pageIdx === notePages.length - 1;
+                return (
+                  <article
+                    key={extraPage.id}
+                    id={`an-page-sheet-${pageIdx}`}
+                    onClick={() => setCurrentActivePageIndex(pageIdx)}
+                    className={`an-sheet relative ${
+                      !isPencilDisabled && isPencilManualDraw ? 'pencil-draw-armed' : ''
+                    }`}
+                    data-paper={paperStyle}
+                    data-font={normFontKey}
+                    data-hand={activeFontObj.isHandwriting ? 'true' : undefined}
+                    style={{
+                      width: `${sheetWidthPx}px`,
+                      maxWidth: '100%',
+                      minHeight: `${sheetMinHeightPx}px`,
+                      minWidth: '300px',
+                      backgroundColor: resolvedSheetBg,
+                      ['--an-page' as string]: resolvedSheetBg,
+                      ['--an-ink' as string]: isLightSheet ? '#23160C' : '#F3E7D4',
+                      ['--an-muted' as string]: isLightSheet ? '#6B553E' : '#B7A28B',
+                      ['--an-rule' as string]: effectiveRuleColor,
+                      ['--an-margin' as string]: isLightSheet ? 'rgba(180,88,74,0.34)' : 'rgba(196,92,96,0.36)',
+                      ['--an-nf' as string]: activeFontObj.family,
+                      ['--an-ed-size' as string]: `${editorFontSizePx}px`,
+                      ['--lh' as string]: `${h}px`,
+                      ['--an-rule-bg' as string]: ruleBg,
+                      ['--an-rule-size' as string]: ruleSize,
+                    } as React.CSSProperties}
+                  >
+                    <div className="an-meta-row flex flex-wrap items-center justify-between gap-2">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-mono font-bold text-xs text-[#A47C43]">
+                          Page {pageIdx + 1}
+                        </span>
+                        <span>·</span>
+                        <span>{todayDate}</span>
+                        {renderPageLinkBadges(pageIdx)}
+                      </div>
+                    </div>
+
+                    <input
+                      type="text"
+                      value={extraPage.title}
+                      onChange={(e) => {
+                        const nextTitle = e.target.value;
+                        setNotePages((prev) => {
+                          const copy = [...prev];
+                          if (copy[pageIdx]) copy[pageIdx] = { ...copy[pageIdx], title: nextTitle };
+                          return copy;
+                        });
+                        triggerSave();
+                      }}
+                      className="text-xl font-bold bg-transparent outline-none w-full mb-3"
+                      style={{ color: isLightSheet ? '#23160C' : '#F3E7D4' }}
+                      placeholder={`Page ${pageIdx + 1} Title...`}
+                    />
+
+                    <div
+                      ref={(el) => {
+                        pageEditorRefs.current[extraPage.id] = el;
+                        if (currentActivePageIndex === pageIdx && el) {
+                          editorRef.current = el;
+                        }
+                      }}
+                      className="an-ed"
+                      contentEditable
+                      suppressContentEditableWarning
+                      spellCheck
+                      onFocus={(e) => {
+                        setCurrentActivePageIndex(pageIdx);
+                        editorRef.current = e.currentTarget;
+                      }}
+                      onInput={(e) => {
+                        const nextHtml = (e.currentTarget as HTMLDivElement).innerHTML;
+                        setNotePages((prev) => {
+                          const copy = [...prev];
+                          if (copy[pageIdx]) copy[pageIdx] = { ...copy[pageIdx], contentHtml: nextHtml };
+                          return copy;
+                        });
+                        triggerSave();
+                      }}
+                      dangerouslySetInnerHTML={{ __html: extraPage.contentHtml || '<p><br></p>' }}
+                      style={{ fontSize: `${editorFontSizePx}px` }}
+                    />
+
+                    <div
+                      className="mt-6 pt-2 flex items-center justify-between text-[11px] font-mono text-[var(--an-muted)] select-none"
+                      contentEditable={false}
+                    >
+                      <span>Page {pageIdx + 1}</span>
+                      <span>Page {pageIdx + 1} of {notePages.length}</span>
+                    </div>
+
+                    {isLastPage && (
+                      <div className="absolute left-1/2 -translate-x-1/2 bottom-0 translate-y-1/2 z-30" contentEditable={false}>
+                        <button
+                          type="button"
+                          onClick={handleAddPageBreak}
+                          className="px-4 py-1.5 rounded-full bg-[#A47C43] hover:bg-[#8e6834] text-white font-bold text-xs flex items-center gap-1.5 shadow-lg border border-[#8e6834]/40 transition-colors cursor-pointer"
+                          title={`Add Page ${notePages.length + 1} below`}
+                        >
+                          <Plus className="w-3.5 h-3.5" />
+                          <span>Add Page</span>
+                        </button>
+                      </div>
+                    )}
+                  </article>
+                );
+              })}
+              </div>
                 );
               })()}
 
@@ -7230,6 +7612,88 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
         </label>
 
         <div className="an-dr-b">
+          {/* Page-to-Page Chain Linker inside More tools */}
+          <div className="an-grp">
+            <span className="eyebrow flex items-center gap-1.5">
+              <Link2 className="w-3.5 h-3.5 text-[#A47C43]" />
+              <span>Link Current Page (Page {currentActivePageIndex + 1})</span>
+            </span>
+            <div className="p-2.5 rounded-xl border border-[var(--an-line)] bg-[var(--an-card)] space-y-2">
+              <div className="flex items-center justify-between gap-2 text-xs">
+                <span className="font-semibold text-[var(--an-ink)] flex items-center gap-1.5">
+                  <Link2 className="w-3.5 h-3.5 text-[#A47C43]" />
+                  <span>Active: Page {currentActivePageIndex + 1}</span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const fromIdx = currentActivePageIndex;
+                    const newIdx = notePages.length;
+                    const newPageId = `pg-${Date.now()}`;
+                    const newPage = {
+                      id: newPageId,
+                      title: `Page ${newIdx + 1}`,
+                      contentHtml: '<p><br></p>',
+                    };
+                    setNotePages((prev) => [...prev, newPage]);
+                    const curFrom = pageLinks[fromIdx] || [];
+                    const nextMap: Record<number, number[]> = {
+                      ...pageLinks,
+                      [fromIdx]: [...curFrom.filter((i) => i !== newIdx), newIdx].sort((a, b) => a - b),
+                      [newIdx]: [fromIdx],
+                    };
+                    savePageLinks(nextMap);
+                    triggerSave();
+                    showToast(`Created Page ${newIdx + 1} & linked with Page ${fromIdx + 1}`);
+                  }}
+                  className="px-2 py-1 rounded-lg bg-[#A47C43] hover:bg-[#8e6834] text-white text-[10.5px] font-bold flex items-center gap-1 cursor-pointer"
+                  title="Add a new page and link it with the current page"
+                >
+                  <Plus className="w-3 h-3" />
+                  <span>+ Add &amp; Link Page {notePages.length + 1}</span>
+                </button>
+              </div>
+
+              {notePages.length <= 1 ? (
+                <p className="text-[11px] text-[var(--an-muted)]">
+                  Click <b>+ Add &amp; Link Page 2</b> above (or <b>Add Page</b> at the bottom of your note) to link Page 1 with other pages in this document.
+                </p>
+              ) : (
+                <div className="grid grid-cols-2 gap-1.5">
+                  {notePages.map((pg, idx) => {
+                    if (idx === currentActivePageIndex) return null;
+                    const isLinked = (pageLinks[currentActivePageIndex] || []).includes(idx);
+                    return (
+                      <button
+                        key={pg.id}
+                        type="button"
+                        onClick={() => togglePageLink(currentActivePageIndex, idx)}
+                        className={`px-2.5 py-2 rounded-lg border text-left text-xs flex items-center justify-between gap-1.5 transition-all cursor-pointer ${
+                          isLinked
+                            ? 'border-[#A47C43] bg-[#A47C43]/15 text-[#8f5f2c] dark:text-amber-300 font-bold shadow-2xs'
+                            : 'border-[var(--an-line)] hover:border-[#A47C43]/60 text-[var(--an-ink)]'
+                        }`}
+                        title={
+                          isLinked
+                            ? `Unlink Page ${currentActivePageIndex + 1} from Page ${idx + 1}`
+                            : `Link Page ${currentActivePageIndex + 1} ↔ Page ${idx + 1}`
+                        }
+                      >
+                        <span className="flex items-center gap-1.5 truncate">
+                          <Link2 className={`w-3.5 h-3.5 shrink-0 ${isLinked ? 'text-[#A47C43]' : 'opacity-50'}`} />
+                          <span className="truncate">Page {idx + 1}</span>
+                        </span>
+                        <span className="text-[10px] font-mono shrink-0">
+                          {isLinked ? 'Linked ✓' : 'Link'}
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          </div>
+
           {TOOL_GROUPS.map((group) => {
             const filtered = group.items.filter(
               (item) =>
