@@ -489,31 +489,46 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           provider: 'google',
           options,
         });
-        if (error) return { error: error.message };
-        if (inIframe && data?.url && typeof window !== 'undefined') {
-          const popup = window.open(data.url, 'achiev_oauth_popup', 'width=520,height=640,scrollbars=yes');
-          if (!popup) {
-            return {
-              error: `Popup was blocked inside preview iframe for ${window.location.origin}. Allow popups or open the live site directly.`,
-            };
-          }
-          const onMsg = (ev: MessageEvent) => {
-            if (ev.origin === window.location.origin && ev.data?.type === 'achiev-oauth-complete') {
-              window.removeEventListener('message', onMsg);
-              void supabase.auth.getSession().then(({ data: sData }) => {
-                if (sData.session) {
-                  setSession(sData.session);
-                  setUser(sData.session.user);
-                  setIsGuestMode(false);
-                  localStorage.removeItem(LS_GUEST_MODE);
-                  setIsAuthModalOpen(false);
+        if (!error) {
+          if (inIframe && data?.url && typeof window !== 'undefined') {
+            const popup = window.open(data.url, 'achiev_oauth_popup', 'width=520,height=640,scrollbars=yes');
+            if (popup) {
+              const onMsg = (ev: MessageEvent) => {
+                if (ev.origin === window.location.origin && ev.data?.type === 'achiev-oauth-complete') {
+                  window.removeEventListener('message', onMsg);
+                  void supabase.auth.getSession().then(({ data: sData }) => {
+                    if (sData.session) {
+                      setSession(sData.session);
+                      setUser(sData.session.user);
+                      setIsGuestMode(false);
+                      localStorage.removeItem(LS_GUEST_MODE);
+                      setIsAuthModalOpen(false);
+                    }
+                  });
                 }
-              });
+              };
+              window.addEventListener('message', onMsg);
+              return { error: null };
             }
-          };
-          window.addEventListener('message', onMsg);
+          } else {
+            return { error: null };
+          }
         }
+        // If Supabase OAuth returns an error (e.g. invalid_client), fall through to Google Identity Services fallback below
+      }
+
+      try {
+        const res = await signInWithGoogleIdentity(activeUserKey, includeDriveScope);
+        setGoogleUser(res.profile);
+        if (res.driveAccount.connected) {
+          setDriveAccount(res.driveAccount);
+        }
+        setIsGuestMode(false);
+        localStorage.removeItem(LS_GUEST_MODE);
+        setIsAuthModalOpen(false);
         return { error: null };
+      } catch (gisErr: any) {
+        return { error: gisErr?.message || 'Could not complete Google sign-in.' };
       }
     }
 

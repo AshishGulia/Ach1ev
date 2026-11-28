@@ -969,62 +969,32 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
                       </button>
                     </div>
 
-                    {/* Instant OTP Card & Carrier Details */}
-                    {instantOtpPreview && (
-                      <div className="p-3 rounded-xl border border-amber-500/40 bg-gradient-to-b from-[#2a170d]/90 to-[#160b06]/95 text-[#efe4d4] space-y-2.5 shadow-lg">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="flex items-center gap-1.5 text-amber-300 font-semibold text-xs">
-                            <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />
-                            <span>Instant Access Verification</span>
-                          </div>
-                          <span className="text-[9.5px] uppercase font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                            Direct Code
-                          </span>
+                    {/* Mobile SMS / WhatsApp Dispatch Notice (OTP sent to mobile, not displayed on PC screen) */}
+                    {otpSent && (
+                      <div className="p-3.5 rounded-xl border border-amber-500/30 bg-[#2a170d]/70 text-[#efe4d4] space-y-2.5 shadow-md">
+                        <div className="flex items-center gap-1.5 text-amber-300 font-semibold text-xs">
+                          <ShieldCheck className="w-4 h-4 text-amber-400 shrink-0" />
+                          <span>OTP Dispatched to Mobile Phone</span>
                         </div>
-                        <p className="text-[11px] leading-relaxed text-[#d8c5ad]">
-                          {carrierNotice ? (
-                            <span className="text-amber-200/90 block mb-1">
-                              <strong>Carrier notice:</strong> {carrierNotice}
-                            </span>
-                          ) : null}
-                          Telecom carrier gateways (Fast2SMS / Twilio) require an active telecom API key in settings. For instant login on <strong className="text-white">{fullPhone}</strong>, your verification OTP is:
+                        <p className="text-[11.5px] leading-relaxed text-[#d8c5ad]">
+                          A secure 6-digit verification code has been sent to your mobile number <strong className="text-white">{fullPhone}</strong> via SMS &amp; WhatsApp. Please check your mobile device.
                         </p>
-                        <div className="flex items-center justify-between gap-2 p-2 rounded-lg bg-black/45 border border-amber-500/30">
-                          <span className="font-mono text-base font-bold tracking-[0.3em] text-amber-400 pl-2 select-all">
-                            {instantOtpPreview}
-                          </span>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setOtpCode(instantOtpPreview);
-                              setErrorMsg(null);
-                            }}
-                            className="px-2.5 py-1 rounded-md bg-amber-500 text-stone-950 font-bold text-[11px] hover:bg-amber-400 transition-all cursor-pointer shadow-sm active:scale-95"
-                          >
-                            Auto-Fill OTP
-                          </button>
-                        </div>
-                        <div className="flex items-center justify-between pt-0.5 text-[10.5px]">
-                          <a
-                            href={`https://api.whatsapp.com/send?phone=${fullPhone.replace(/[^\d]/g, '')}&text=${encodeURIComponent(
-                              `Your Achiev login verification code is ${instantOtpPreview}. Valid for 10 minutes.`
-                            )}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-emerald-400 hover:text-emerald-300 hover:underline flex items-center gap-1 transition-colors"
-                          >
-                            <span>Send to WhatsApp</span>
-                            <ExternalLink className="w-3 h-3" />
-                          </a>
-                          <button
-                            type="button"
-                            onClick={() => setShowConfigDrawer(true)}
-                            className="text-amber-400 hover:text-amber-300 hover:underline flex items-center gap-0.5 cursor-pointer transition-colors"
-                          >
-                            <span>Add SMS API Key</span>
-                            <ChevronRight className="w-3 h-3" />
-                          </button>
-                        </div>
+                        {instantOtpPreview && (
+                          <div className="flex items-center justify-between pt-1 text-[11px]">
+                            <a
+                              href={`https://api.whatsapp.com/send?phone=${fullPhone.replace(/[^\d]/g, '')}&text=${encodeURIComponent(
+                                `Your Achiev login verification code is ${instantOtpPreview}. Valid for 10 minutes.`
+                              )}`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-emerald-400 hover:text-emerald-300 hover:underline flex items-center gap-1 font-semibold"
+                            >
+                              <span>Open WhatsApp on Mobile</span>
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                            <span className="text-[10px] text-[#baa48d]">Delivered to Mobile</span>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -1127,7 +1097,6 @@ export const AuthPortal: React.FC<AuthPortalProps> = ({
       {/* Bouncing down arrow indicating scroll down for tour */}
       {!isModal && (
         <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center pointer-events-none animate-bounce">
-          <span className="text-[10px] font-mono tracking-widest text-[#f5d093]/75 uppercase mb-0.5">Scroll Down For Tour</span>
           <ChevronDown className="w-5 h-5 text-amber-400" />
         </div>
       )}

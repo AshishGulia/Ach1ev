@@ -899,39 +899,19 @@ export const LaptopFrame: React.FC<{
   onSelectSection?: (idx: number) => void;
 }> = () => {
   return (
-    <div
-      className="w-full max-w-[760px] mx-auto flex flex-col items-center select-none"
-      style={{
-        maskImage:
-          'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.55) 3.5%, black 8.5%, black 92.5%, rgba(0,0,0,0.55) 97%, transparent 100%)',
-        WebkitMaskImage:
-          'linear-gradient(to right, transparent 0%, rgba(0,0,0,0.55) 3.5%, black 8.5%, black 92.5%, rgba(0,0,0,0.55) 97%, transparent 100%)',
-      }}
-    >
-      <div
-        className="w-full"
+    <div className="w-full max-w-[760px] mx-auto flex flex-col items-center select-none bg-transparent overflow-visible">
+      <video
+        src="/assets/aistudio/achiev_laptop_animation_16c1f287.webm"
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="w-full h-auto block bg-transparent mix-blend-screen scale-[1.04]"
         style={{
-          maskImage:
-            'linear-gradient(to bottom, transparent 0%, black 4%, black 90%, rgba(0,0,0,0.45) 96%, transparent 100%)',
-          WebkitMaskImage:
-            'linear-gradient(to bottom, transparent 0%, black 4%, black 90%, rgba(0,0,0,0.45) 96%, transparent 100%)',
+          maskImage: 'radial-gradient(ellipse 68% 68% at 50% 50%, black 60%, rgba(0,0,0,0.75) 78%, transparent 98%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 68% 68% at 50% 50%, black 60%, rgba(0,0,0,0.75) 78%, transparent 98%)',
         }}
-      >
-        <video
-          src="/assets/aistudio/achiev_laptop_animation_16c1f287.webm"
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-full h-auto block bg-transparent mix-blend-lighten"
-          style={{
-            maskImage:
-              'radial-gradient(ellipse 70% 68% at 49% 47%, black 72%, rgba(0,0,0,0.78) 85%, transparent 100%)',
-            WebkitMaskImage:
-              'radial-gradient(ellipse 70% 68% at 49% 47%, black 72%, rgba(0,0,0,0.78) 85%, transparent 100%)',
-          }}
-        />
-      </div>
+      />
     </div>
   );
 };
