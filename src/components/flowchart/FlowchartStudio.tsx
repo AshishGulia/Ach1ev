@@ -400,7 +400,7 @@ export const FlowchartStudio: React.FC<FlowchartStudioProps> = ({
   const addBoxCount = 1;
   // Popover state for level / column color picker on canvas
   const [activeColorPopover, setActiveColorPopover] = useState<{
-    kind: 'level' | 'column';
+    kind: 'level' | 'column' | 'node-inspector';
     level: number;
     colIdx?: number;
   } | null>(null);
@@ -756,16 +756,14 @@ export const FlowchartStudio: React.FC<FlowchartStudioProps> = ({
       {/* ========================================================================= */}
       <header className="px-3 sm:px-4 py-2 border-b border-stone-200/90 dark:border-[#382518] bg-[#f8f6f0] dark:bg-[#140e0a] flex items-center justify-between gap-2 shrink-0 shadow-2xs flex-wrap">
         <div className="flex items-center gap-2 flex-wrap min-w-0">
-          {onBackToLibrary && (
-            <button
-              type="button"
-              onClick={onBackToLibrary}
-              className="p-1.5 rounded-xl bg-stone-200/70 dark:bg-stone-800 hover:bg-stone-300 dark:hover:bg-stone-700 text-stone-700 dark:text-stone-200 text-xs font-semibold flex items-center gap-1 transition-colors cursor-pointer shrink-0"
-            >
-              <ArrowRight className="w-3.5 h-3.5 rotate-180" />
-              <span className="hidden sm:inline">Back to Shelf</span>
-            </button>
-          )}
+          <button
+            type="button"
+            onClick={() => setNewChartModalOpen(true)}
+            className="themed-accent-btn px-3.5 py-1.5 rounded-xl bg-[#A47C43] hover:bg-[#8e6834] text-white text-xs font-semibold flex items-center gap-1.5 shadow-2xs cursor-pointer"
+          >
+            <Plus className="w-3.5 h-3.5" />
+            <span>Create chart</span>
+          </button>
           {activeChart && (
             <span className="font-serif font-bold text-sm sm:text-base text-stone-900 dark:text-[#efe4d4] truncate max-w-[160px] sm:max-w-[220px]" title={activeChart.title}>
               {activeChart.title}
@@ -1288,107 +1286,7 @@ export const FlowchartStudio: React.FC<FlowchartStudioProps> = ({
         {/* ======================================================================= */}
         {/* BOTTOM DRAWERS (Charts Bottom-Left & Inspector Bottom-Right)            */}
         {/* ======================================================================= */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 px-3 sm:px-5 z-30 flex items-end justify-between gap-2 sm:gap-4">
-          {/* LEFT CHATBOX DRAWER: CHARTS */}
-          <div className="pointer-events-auto flex flex-col items-start">
-            {chartsDrawerOpen ? (
-              <div className="fc-drawer-slide-up w-[290px] sm:w-[330px] max-h-[66vh] rounded-t-2xl border border-b-0 border-stone-300 dark:border-[#3d291b] bg-[#f8f6f0] dark:bg-[#160f0b] shadow-2xl flex flex-col overflow-hidden">
-                <div
-                  role="button"
-                  tabIndex={0}
-                  onClick={() => setChartsDrawerOpen(false)}
-                  onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && setChartsDrawerOpen(false)}
-                  className="px-3.5 py-2.5 border-b border-stone-200/80 dark:border-[#352317] bg-[#eee9de] dark:bg-[#1e1510] flex items-center justify-between gap-2 shrink-0 cursor-pointer select-none hover:bg-[#e5dfd2] dark:hover:bg-[#261a13] transition-colors"
-                >
-                  <div className="flex items-center gap-2 min-w-0">
-                    <GitBranch className="w-3.5 h-3.5 text-[#8f5f2c] dark:text-[#d4a373] shrink-0" />
-                    <span className="text-[11px] font-mono uppercase tracking-wider font-bold text-stone-800 dark:text-[#efe4d4]">
-                      Charts
-                    </span>
-                    <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-black/10 dark:bg-white/10 text-stone-700 dark:text-[#d8c7b0]">
-                      {charts.length}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-1 shrink-0">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setNewChartModalOpen(true);
-                      }}
-                      className="px-2 py-0.5 rounded-md bg-white/80 dark:bg-[#2a1d14] hover:bg-white dark:hover:bg-[#382518] text-[10px] font-semibold text-stone-700 dark:text-[#efe4d4] border border-stone-300/70 dark:border-[#4b3322] cursor-pointer"
-                    >
-                      + New
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setChartsDrawerOpen(false);
-                      }}
-                      className="p-1 rounded-md text-stone-500 dark:text-[#a69079] hover:text-stone-900 dark:hover:text-[#efe4d4] cursor-pointer"
-                      aria-label="Minimize Charts"
-                    >
-                      <Minus className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
-
-                <div className="flex-1 overflow-y-auto custom-scrollbar p-2.5 space-y-1.5">
-                  {charts.map((c) => {
-                    const isActive = c.id === activeChartId;
-                    return (
-                      <button
-                        key={c.id}
-                        type="button"
-                        onClick={() => {
-                          setActiveChartId(c.id);
-                          setSelectedNodeId(c.nodes[0]?.id || '');
-                        }}
-                        className={`w-full p-2.5 rounded-xl text-left transition-all cursor-pointer flex items-center justify-between gap-2 border ${
-                          isActive
-                            ? 'themed-accent-btn bg-[#5c351c] text-white dark:bg-[#a47c43] border-transparent shadow-xs font-semibold'
-                            : 'bg-white/90 dark:bg-[#211711] text-stone-700 dark:text-[#d8c7b0] border-stone-200/80 dark:border-[#382518] hover:border-amber-400/50'
-                        }`}
-                      >
-                        <div className="min-w-0 flex-1">
-                          <div className="truncate font-semibold text-xs leading-snug">{c.title}</div>
-                          <div className={`text-[10px] truncate mt-0.5 opacity-80`}>{c.subtitle}</div>
-                        </div>
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded-md shrink-0 flex items-center gap-1 bg-black/10 dark:bg-black/25">
-                          <Users className="w-2.5 h-2.5 opacity-80" />
-                          {c.nodesCount}
-                        </span>
-                      </button>
-                    );
-                  })}
-
-                  <button
-                    type="button"
-                    onClick={() => setNewChartModalOpen(true)}
-                    className="w-full py-2 px-3 rounded-xl border border-dashed border-stone-300 dark:border-[#4b3322] hover:border-amber-500/60 text-xs text-stone-600 dark:text-[#a69079] hover:text-stone-900 dark:hover:text-[#efe4d4] font-semibold flex items-center justify-center gap-1.5 cursor-pointer bg-white/60 dark:bg-[#140e0a]/60"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>New chart</span>
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setChartsDrawerOpen(true)}
-                className="px-3.5 py-2 rounded-t-2xl border border-b-0 border-stone-300 dark:border-[#3d291b] bg-[#eee9de] dark:bg-[#1e1510] hover:bg-[#e5dfd2] dark:hover:bg-[#281c14] text-stone-800 dark:text-[#efe4d4] shadow-xl flex items-center gap-2 text-xs font-semibold cursor-pointer"
-              >
-                <GitBranch className="w-3.5 h-3.5 text-[#8f5f2c] dark:text-[#d4a373]" />
-                <span className="font-mono uppercase tracking-wider text-[11px] font-bold">Charts</span>
-                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded-full bg-black/10 dark:bg-white/10">
-                  {charts.length}
-                </span>
-                <ChevronUp className="w-3.5 h-3.5 opacity-70 ml-1" />
-              </button>
-            )}
-          </div>
-
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 px-3 sm:px-5 z-30 flex items-end justify-end">
           {/* RIGHT CHATBOX DRAWER: INSPECTOR */}
           <div className="pointer-events-auto flex flex-col items-end">
             {inspectorDrawerOpen ? (
@@ -1477,54 +1375,51 @@ export const FlowchartStudio: React.FC<FlowchartStudioProps> = ({
                       </div>
                     </div>
 
-                    {/* Node Colour using Shared Round Color Columns */}
+                    {/* Node Colour minimised into a button */}
                     <div className="p-3.5 rounded-2xl bg-stone-100/70 dark:bg-[#1a120d] border border-stone-200 dark:border-[#382518] space-y-3">
                       <div className="flex items-center justify-between">
                         <span className="text-[11px] font-bold text-stone-800 dark:text-[#efe4d4] flex items-center gap-1.5">
                           <Palette className="w-3.5 h-3.5 text-amber-500" />
                           <span>Node Colour</span>
                         </span>
-                        {activeNode.colorOverride && (
+                        <div className="flex items-center gap-1.5">
+                          {activeNode.colorOverride && (
+                            <button
+                              type="button"
+                              onClick={handleClearNodeColorOverride}
+                              className="text-[10px] font-mono text-[#8f5f2c] dark:text-[#d4a373] hover:underline cursor-pointer"
+                            >
+                              Reset
+                            </button>
+                          )}
                           <button
                             type="button"
-                            onClick={handleClearNodeColorOverride}
-                            className="text-[10px] font-mono text-[#8f5f2c] dark:text-[#d4a373] hover:underline cursor-pointer"
+                            onClick={() => setActiveColorPopover(activeColorPopover?.kind === 'node-inspector' ? null : { kind: 'node-inspector', level: 0 })}
+                            className="px-2.5 py-1 rounded-lg bg-white dark:bg-[#231912] border border-stone-300 dark:border-[#4b3322] text-[11px] font-semibold flex items-center gap-1.5 hover:border-amber-500 cursor-pointer"
                           >
-                            Reset Override
+                            <span
+                              className="w-3 h-3 rounded-full border border-black/20"
+                              style={{ backgroundColor: activeNode.colorOverride ? activeNode.color : '#a47c43' }}
+                            />
+                            <span>Change Color</span>
                           </button>
-                        )}
-                      </div>
-
-                      <RoundColorColumnsPicker
-                        columns={UNIFIED_COLOR_COLUMNS}
-                        selectedColor={activeNode.colorOverride ? activeNode.color : undefined}
-                        onSelectColor={handleUpdateNodeColor}
-                        showStandardRow
-                        swatchSizeClass="w-4 h-4"
-                      />
-
-                      {/* Box Shapes */}
-                      <div className="pt-2 border-t border-stone-200/80 dark:border-[#352317]">
-                        <label className="block text-[10px] font-semibold text-stone-500 dark:text-[#a69079] mb-1.5">
-                          Box Shape:
-                        </label>
-                        <div className="grid grid-cols-3 gap-1.5 text-[11px]">
-                          {SHAPE_OPTIONS.map((sh) => (
-                            <button
-                              key={sh.id}
-                              type="button"
-                              onClick={() => handleUpdateNodeShape(sh.id)}
-                              className={`p-1.5 rounded-lg border text-center transition-all cursor-pointer ${
-                                activeNode.shape === sh.id
-                                  ? 'bg-stone-900 text-white dark:bg-[#efe4d4] dark:text-[#110c09] font-bold border-transparent'
-                                  : 'bg-white dark:bg-[#231912] text-stone-700 dark:text-[#d8c7b0] border-stone-300/80 dark:border-[#382518]'
-                              }`}
-                            >
-                              {sh.label}
-                            </button>
-                          ))}
                         </div>
                       </div>
+
+                      {activeColorPopover?.kind === 'node-inspector' && (
+                        <div className="p-3 rounded-xl bg-white dark:bg-[#110c09] border border-stone-300 dark:border-[#4b3322] shadow-xl space-y-2">
+                          <RoundColorColumnsPicker
+                            columns={UNIFIED_COLOR_COLUMNS}
+                            selectedColor={activeNode.colorOverride ? activeNode.color : undefined}
+                            onSelectColor={(col) => {
+                              handleUpdateNodeColor(col);
+                              setActiveColorPopover(null);
+                            }}
+                            showStandardRow
+                            swatchSizeClass="w-4 h-4"
+                          />
+                        </div>
+                      )}
 
                       {/* Photo & Document Attachments */}
                       <div className="grid grid-cols-2 gap-2 pt-1 border-t border-stone-200/80 dark:border-[#352317]">
@@ -1570,7 +1465,7 @@ export const FlowchartStudio: React.FC<FlowchartStudioProps> = ({
                       )}
                     </div>
 
-                    {/* Body & Editable Flowchart Section Headings */}
+                    {/* Body & Details Section Only */}
                     <div className="space-y-3.5">
                       <div className="space-y-1.5">
                         <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-stone-500 dark:text-[#a69079]">
@@ -1580,109 +1475,11 @@ export const FlowchartStudio: React.FC<FlowchartStudioProps> = ({
                           <span>BODY / DETAILS</span>
                         </div>
                         <textarea
-                          rows={3}
+                          rows={4}
                           value={activeNode.description}
                           onChange={(e) => handleUpdateNodeText('description', e.target.value)}
                           className="w-full p-2.5 rounded-xl bg-white dark:bg-[#1a120d] border border-stone-200 dark:border-[#382518] text-xs text-stone-800 dark:text-[#efe4d4] outline-none focus:border-amber-500 resize-none leading-relaxed"
                         />
-                      </div>
-
-                      {/* Editable Branch Connections Heading */}
-                      <div className="space-y-1.5">
-                        <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-stone-500 dark:text-[#a69079]">
-                          <span className="w-4 h-4 rounded-full bg-stone-200 dark:bg-[#2a1d14] text-center leading-4 text-[10px]">
-                            2
-                          </span>
-                          <input
-                            type="text"
-                            value={activeChart?.childrenHeading || 'Connected Next Steps'}
-                            onChange={(e) => handleUpdateChartHeading('childrenHeading', e.target.value)}
-                            className="flex-1 bg-transparent border-b border-dashed border-stone-300 dark:border-[#382518] focus:border-amber-500 outline-none uppercase font-mono font-bold text-xs"
-                            title="Edit section title"
-                          />
-                        </div>
-                        <div className="flex items-center gap-1.5 flex-wrap">
-                          {(activeChart?.nodes || [])
-                            .filter((n) => n.parentId === activeNode.id)
-                            .map((child) => (
-                              <button
-                                key={child.id}
-                                type="button"
-                                onClick={() => setSelectedNodeId(child.id)}
-                                className="px-2.5 py-1 rounded-lg bg-stone-200/80 dark:bg-[#231912] text-stone-800 dark:text-[#efe4d4] text-xs font-medium hover:bg-amber-500/20 cursor-pointer"
-                              >
-                                {child.title}
-                              </button>
-                            ))}
-                          <button
-                            type="button"
-                            onClick={() => handleAddBoxes(activeNode, 'below', addBoxCount)}
-                            className="px-2 py-1 rounded-lg border border-dashed border-stone-400 dark:border-[#4b3322] text-xs text-stone-500 dark:text-[#a69079] hover:text-amber-500 flex items-center gap-1 cursor-pointer"
-                          >
-                            <Plus className="w-3 h-3" />
-                            <span>Add Below</span>
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Editable Process Notes / Key Points */}
-                      <div className="space-y-2">
-                        <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-stone-500 dark:text-[#a69079]">
-                          <span className="w-4 h-4 rounded-full bg-stone-200 dark:bg-[#2a1d14] text-center leading-4 text-[10px]">
-                            3
-                          </span>
-                          <input
-                            type="text"
-                            value={activeChart?.notesHeading || 'Key Notes & Criteria'}
-                            onChange={(e) => handleUpdateChartHeading('notesHeading', e.target.value)}
-                            className="flex-1 bg-transparent border-b border-dashed border-stone-300 dark:border-[#382518] focus:border-amber-500 outline-none uppercase font-mono font-bold text-xs"
-                            title="Edit section title"
-                          />
-                        </div>
-                        <div className="space-y-1.5">
-                          {activeNode.pearls.map((pearl, pIdx) => (
-                            <div key={pIdx} className="p-2 rounded-xl bg-white dark:bg-[#1a120d] border border-stone-200 dark:border-[#382518] text-xs flex items-center gap-2">
-                              <span className="w-4 h-4 rounded-full bg-amber-500/20 text-amber-700 dark:text-amber-400 font-bold text-[9px] flex items-center justify-center shrink-0">
-                                {pIdx + 1}
-                              </span>
-                              <input
-                                type="text"
-                                value={pearl}
-                                onChange={(e) => handleUpdateNodeNote(pIdx, e.target.value)}
-                                className="flex-1 bg-transparent outline-none text-xs"
-                              />
-                              <button
-                                type="button"
-                                onClick={() => handleDeleteNodeNote(pIdx)}
-                                className="text-stone-400 hover:text-red-500 cursor-pointer"
-                              >
-                                <X className="w-3 h-3" />
-                              </button>
-                            </div>
-                          ))}
-                          <div className="flex gap-1.5">
-                            <input
-                              type="text"
-                              value={newNoteText}
-                              onChange={(e) => setNewNoteText(e.target.value)}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  e.preventDefault();
-                                  handleAddNodeNote();
-                                }
-                              }}
-                              placeholder="Add bullet note..."
-                              className="flex-1 px-2.5 py-1.5 rounded-lg bg-white dark:bg-[#1a120d] border border-stone-200 dark:border-[#382518] text-xs outline-none focus:border-amber-500"
-                            />
-                            <button
-                              type="button"
-                              onClick={handleAddNodeNote}
-                              className="px-2.5 py-1.5 rounded-lg bg-stone-800 dark:bg-[#efe4d4] text-white dark:text-[#110c09] text-xs font-semibold cursor-pointer"
-                            >
-                              Add
-                            </button>
-                          </div>
-                        </div>
                       </div>
                     </div>
                   </div>

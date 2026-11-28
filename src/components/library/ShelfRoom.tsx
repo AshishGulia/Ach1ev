@@ -75,6 +75,7 @@ export type Book = {
   edition?: string;
   pagesCount?: number;
   thumbnail?: BookThumbnailConfig;
+  mimeType?: string;
 };
 
 export type ShelfFolder = {
@@ -3950,7 +3951,7 @@ function ShelfRow({
           {/* Prominent Front-Cover Book Thumbnails (Logo-Only Default or Concise Name) */}
           {shelf.books.map((b, n) => {
             const c = COVER[b.cover] ?? COVER.Amber!;
-            const bookHeight = 82 + ((n + shelfIdx) % 3) * 3;
+            const bookHeight = 86;
             const hasCustomBg = Boolean(b.thumbnail?.bgColor);
             const isPicked = pickedBook?.book.id === b.id && pickedBook?.fromShelfId === shelf.id;
             const initials = (b.title || 'BK')

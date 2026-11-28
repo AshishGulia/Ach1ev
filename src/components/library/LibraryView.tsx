@@ -32,6 +32,7 @@ import {
   UploadedDocumentRecord,
 } from '../../services/uploadedFilesStore';
 import { SmartDocumentFrame } from '../common/SmartDocumentFrame';
+import { WebViewDocumentModal, WebViewDocPayload } from '../common/WebViewDocumentModal';
 import {
   INITIAL_FLOWCHART_DOCS,
   MedicalFlowchartDoc,
@@ -131,6 +132,7 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
   const [selectedImage, setSelectedImage] = useState<MedicalImageItem | null>(null);
   const [selectedFlowchartModal, setSelectedFlowchartModal] = useState<MedicalFlowchartDoc | null>(null);
   const [activeBookModal, setActiveBookModal] = useState<MedicalBook | null>(null);
+  const [selectedWordDoc, setSelectedWordDoc] = useState<WebViewDocPayload | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [snipSuccessId, setSnipSuccessId] = useState<string | null>(null);
 
@@ -846,6 +848,21 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
       subtitle: 'Shelf Book',
       source: 'shelf',
     });
+
+    const lowerTitle = shelfBook.title.toLowerCase();
+    const isWordFile = lowerTitle.endsWith('.docx') || lowerTitle.endsWith('.doc') || shelfBook.mimeType?.includes('word');
+    if (isWordFile) {
+      setSelectedWordDoc({
+        id: shelfBook.id,
+        title: shelfBook.title,
+        fileName: `${shelfBook.title}.docx`,
+        ext: 'docx',
+        mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        subject: 'Internal Medicine',
+        contentHtml: `<div class="space-y-4"><h3>${shelfBook.title}</h3><p>Microsoft Word document viewer active. Rendering full Word document layout, formatting, and annotations.</p></div>`,
+      });
+      return;
+    }
 
     let bookObj: MedicalBook;
 
@@ -1832,6 +1849,12 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
           </div>
         </div>
       )}
+
+      {/* Word / Document Viewer Modal */}
+      <WebViewDocumentModal
+        doc={selectedWordDoc}
+        onClose={() => setSelectedWordDoc(null)}
+      />
 
       {/* Upload Heavy PDF to Personal Google Drive Modal */}
       {isDriveUploadOpen && (

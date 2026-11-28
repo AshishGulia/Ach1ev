@@ -357,16 +357,7 @@ const TOOL_GROUPS: Array<{
       { id: 'timestamp', icon: Clock, label: 'Video timestamp' },
     ],
   },
-  {
-    category: 'Attach Resources',
-    items: [
-      { id: 'attach-yt', icon: CirclePlay, label: 'YouTube video' },
-      { id: 'attach-image', icon: ImageIcon, label: 'Image' },
-      { id: 'attach-web', icon: Globe, label: 'Website' },
-      { id: 'attach-pdf', icon: FileText, label: 'Document / PDF' },
-      { id: 'attach-audio', icon: Music, label: 'Audio' },
-    ],
-  },
+
   {
     category: 'Export & Share',
     items: [
@@ -5616,15 +5607,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                       <span>Pages ({notePages.length})</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={handleAddPageBreak}
-                        className="px-2 py-1 rounded bg-[#A47C43] text-white text-[10px] font-bold flex items-center gap-1 shadow-2xs cursor-pointer hover:bg-[#8e6834]"
-                        title="Add new page"
-                      >
-                        <Plus className="w-3 h-3" />
-                        <span>+ Add</span>
-                      </button>
+                      
                       <button
                         type="button"
                         onClick={() => setIsThumbnailPaneOpen(false)}
@@ -5776,6 +5759,151 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                             : `<line x1='0' y1='${h - 1}' x2='96' y2='${h - 1}' stroke='${encColor}' stroke-width='1' stroke-dasharray='7 5'/>`
                         }</svg>")`;
                 const ruleSize = rulerStyle === 'solid' || rulerStyle === 'double' ? `100% ${h}px` : `96px ${h}px`;
+                if (noteViewMode === 'book') {
+                  return (
+                    <div className="flex flex-col gap-10 w-full max-w-5xl mx-auto py-8 px-4">
+                      {Array.from({ length: Math.ceil(notePages.length / 2) }).map((_, spreadIdx) => {
+                        const leftIdx = spreadIdx * 2;
+                        const rightIdx = spreadIdx * 2 + 1;
+                        const leftPage = notePages[leftIdx];
+                        const rightPage = notePages[rightIdx];
+
+                        return (
+                          <div key={`book-spread-${spreadIdx}`} className="flex flex-col md:flex-row items-stretch gap-8 w-full justify-center">
+                            {/* Left Page */}
+                            {leftPage && (
+                              <div
+                                className="flex-1 min-h-[640px] rounded-2xl shadow-2xl border p-8 relative flex flex-col"
+                                style={{
+                                  backgroundColor: resolvedSheetBg,
+                                  color: isLightSheet ? '#23160C' : '#F3E7D4',
+                                  borderColor: 'var(--an-line)',
+                                }}
+                                onClick={() => setCurrentActivePageIndex(leftIdx)}
+                              >
+                                <div className="flex items-center justify-between pb-3 mb-4 border-b border-[var(--an-line)]">
+                                  <span className="text-xs font-mono font-bold text-[#A47C43]">
+                                    Page {leftIdx + 1} of {notePages.length}
+                                  </span>
+                                  <span className="text-xs font-mono opacity-70">{todayDate}</span>
+                                </div>
+                                <input
+                                  type="text"
+                                  value={leftPage.title}
+                                  onChange={(e) => {
+                                    const nextTitle = e.target.value;
+                                    setNotePages((prev) => {
+                                      const copy = [...prev];
+                                      if (copy[leftIdx]) copy[leftIdx] = { ...copy[leftIdx], title: nextTitle };
+                                      return copy;
+                                    });
+                                    triggerSave();
+                                  }}
+                                  className="text-base font-bold bg-transparent outline-none w-full mb-4"
+                                  placeholder={`Page ${leftIdx + 1} Title...`}
+                                />
+                                <div
+                                  contentEditable
+                                  suppressContentEditableWarning
+                                  onInput={(e) => {
+                                    const nextHtml = (e.currentTarget as HTMLDivElement).innerHTML;
+                                    setNotePages((prev) => {
+                                      const copy = [...prev];
+                                      if (copy[leftIdx]) copy[leftIdx] = { ...copy[leftIdx], contentHtml: nextHtml };
+                                      return copy;
+                                    });
+                                    triggerSave();
+                                  }}
+                                  dangerouslySetInnerHTML={{ __html: leftPage.contentHtml || '<p><br/></p>' }}
+                                  className="outline-none min-h-[480px] prose prose-stone max-w-none text-sm leading-relaxed"
+                                  style={{ fontFamily: activeFontObj.family }}
+                                />
+                              </div>
+                            )}
+
+                            {/* Right Page (or Blank Page with Add Page Button) */}
+                            {rightPage ? (
+                              <div
+                                className="flex-1 min-h-[640px] rounded-2xl shadow-2xl border p-8 relative flex flex-col"
+                                style={{
+                                  backgroundColor: resolvedSheetBg,
+                                  color: isLightSheet ? '#23160C' : '#F3E7D4',
+                                  borderColor: 'var(--an-line)',
+                                }}
+                                onClick={() => setCurrentActivePageIndex(rightIdx)}
+                              >
+                                <div className="flex items-center justify-between pb-3 mb-4 border-b border-[var(--an-line)]">
+                                  <span className="text-xs font-mono font-bold text-[#A47C43]">
+                                    Page {rightIdx + 1} of {notePages.length}
+                                  </span>
+                                  <span className="text-xs font-mono opacity-70">{todayDate}</span>
+                                </div>
+                                <input
+                                  type="text"
+                                  value={rightPage.title}
+                                  onChange={(e) => {
+                                    const nextTitle = e.target.value;
+                                    setNotePages((prev) => {
+                                      const copy = [...prev];
+                                      if (copy[rightIdx]) copy[rightIdx] = { ...copy[rightIdx], title: nextTitle };
+                                      return copy;
+                                    });
+                                    triggerSave();
+                                  }}
+                                  className="text-base font-bold bg-transparent outline-none w-full mb-4"
+                                  placeholder={`Page ${rightIdx + 1} Title...`}
+                                />
+                                <div
+                                  contentEditable
+                                  suppressContentEditableWarning
+                                  onInput={(e) => {
+                                    const nextHtml = (e.currentTarget as HTMLDivElement).innerHTML;
+                                    setNotePages((prev) => {
+                                      const copy = [...prev];
+                                      if (copy[rightIdx]) copy[rightIdx] = { ...copy[rightIdx], contentHtml: nextHtml };
+                                      return copy;
+                                    });
+                                    triggerSave();
+                                  }}
+                                  dangerouslySetInnerHTML={{ __html: rightPage.contentHtml || '<p><br/></p>' }}
+                                  className="outline-none min-h-[480px] prose prose-stone max-w-none text-sm leading-relaxed"
+                                  style={{ fontFamily: activeFontObj.family }}
+                                />
+                              </div>
+                            ) : (
+                              <div
+                                className="flex-1 min-h-[640px] rounded-2xl shadow-2xl border p-12 relative flex flex-col items-center justify-center text-center border-dashed border-[#A47C43]/50"
+                                style={{
+                                  backgroundColor: resolvedSheetBg,
+                                  color: isLightSheet ? '#23160C' : '#F3E7D4',
+                                }}
+                              >
+                                <div className="absolute top-4 left-4 text-xs font-mono text-[var(--an-muted)]">
+                                  Page {leftIdx + 2} (Blank Page)
+                                </div>
+                                <div className="flex flex-col items-center gap-4 max-w-xs">
+                                  <BookOpen className="w-10 h-10 text-[#A47C43] opacity-60" />
+                                  <p className="text-sm font-medium opacity-80">
+                                    End of current notebook spread. Add a new page to continue writing on the right.
+                                  </p>
+                                  <button
+                                    type="button"
+                                    onClick={handleAddPageBreak}
+                                    className="px-5 py-2.5 rounded-xl bg-[#A47C43] hover:bg-[#8e6834] text-white text-xs font-bold shadow-lg flex items-center gap-2 cursor-pointer transition-all hover:scale-105"
+                                  >
+                                    <Plus className="w-4 h-4" />
+                                    <span>+ Add Page</span>
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                }
+
                 return (
               <article
                 ref={(el) => {

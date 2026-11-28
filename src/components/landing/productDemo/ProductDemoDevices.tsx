@@ -899,15 +899,21 @@ export const LaptopFrame: React.FC<{
   onSelectSection?: (idx: number) => void;
 }> = () => {
   return (
-    <div className="w-full max-w-[760px] mx-auto flex flex-col items-center select-none bg-transparent overflow-visible drop-shadow-2xl">
+    <div className="w-full max-w-[760px] mx-auto flex flex-col items-center select-none bg-transparent overflow-hidden relative">
       <video
         src="/assets/aistudio/gemini_generated_video_4940016c_3b98dd55.webm"
         autoPlay
         loop
         muted
         playsInline
-        className="w-full h-auto block bg-transparent rounded-2xl"
+        className="w-full h-auto block bg-transparent mix-blend-screen scale-[1.04]"
+        style={{
+          maskImage: 'radial-gradient(ellipse 70% 65% at 50% 50%, black 50%, rgba(0,0,0,0.6) 72%, transparent 92%)',
+          WebkitMaskImage: 'radial-gradient(ellipse 70% 65% at 50% 50%, black 50%, rgba(0,0,0,0.6) 72%, transparent 92%)',
+        }}
       />
+      {/* Corner Watermark Cover Patch */}
+      <div className="absolute bottom-2 right-6 w-20 h-8 bg-[#140e0a]/40 backdrop-blur-xs rounded-full pointer-events-none" />
     </div>
   );
 };
