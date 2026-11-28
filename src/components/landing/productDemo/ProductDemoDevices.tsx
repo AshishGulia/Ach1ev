@@ -899,18 +899,14 @@ export const LaptopFrame: React.FC<{
   onSelectSection?: (idx: number) => void;
 }> = () => {
   return (
-    <div className="w-full max-w-[760px] mx-auto flex flex-col items-center select-none bg-transparent overflow-visible">
+    <div className="w-full max-w-[760px] mx-auto flex flex-col items-center select-none bg-transparent overflow-visible drop-shadow-2xl">
       <video
-        src="/assets/aistudio/achiev_laptop_animation_16c1f287.webm"
+        src="/assets/aistudio/gemini_generated_video_4940016c_3b98dd55.webm"
         autoPlay
         loop
         muted
         playsInline
-        className="w-full h-auto block bg-transparent mix-blend-screen scale-[1.04]"
-        style={{
-          maskImage: 'radial-gradient(ellipse 68% 68% at 50% 50%, black 60%, rgba(0,0,0,0.75) 78%, transparent 98%)',
-          WebkitMaskImage: 'radial-gradient(ellipse 68% 68% at 50% 50%, black 60%, rgba(0,0,0,0.75) 78%, transparent 98%)',
-        }}
+        className="w-full h-auto block bg-transparent rounded-2xl"
       />
     </div>
   );
