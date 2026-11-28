@@ -80,15 +80,15 @@ export const AchievBrand: React.FC<AchievBrandProps> = ({
               top: 64%;
               opacity: 0;
             }
-            4% {
+            8% {
               top: 61%;
               opacity: 0.95;
             }
-            36% {
+            72% {
               top: 23%;
               opacity: 0.95;
             }
-            42% {
+            84% {
               top: 19%;
               opacity: 0;
             }
@@ -144,7 +144,7 @@ export const AchievBrand: React.FC<AchievBrandProps> = ({
                 background:
                   'radial-gradient(ellipse 85% 60% at 55% 50%, rgba(255, 252, 235, 0.95) 0%, rgba(255, 223, 128, 0.72) 45%, rgba(245, 179, 66, 0.25) 75%, rgba(245, 179, 66, 0) 100%)',
                 filter: 'blur(2px)',
-                animation: 'achievOneUpwardShine 60s linear infinite',
+                animation: 'achievOneUpwardShine 15s linear infinite',
                 willChange: 'top, opacity',
               }}
             />
