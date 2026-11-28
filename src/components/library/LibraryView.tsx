@@ -79,6 +79,12 @@ import {
   Palette,
   FolderPlus,
   Folder,
+  Minus,
+  Maximize2,
+  Minimize2,
+  RotateCw,
+  Columns2,
+  Lock,
 } from 'lucide-react';
 
 export interface MedicalImageItem {
@@ -132,6 +138,11 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
   const [selectedImage, setSelectedImage] = useState<MedicalImageItem | null>(null);
   const [selectedFlowchartModal, setSelectedFlowchartModal] = useState<MedicalFlowchartDoc | null>(null);
   const [activeBookModal, setActiveBookModal] = useState<MedicalBook | null>(null);
+  const [secondaryBookModal, setSecondaryBookModal] = useState<MedicalBook | null>(null);
+  const [dualBookSplitRatio, setDualBookSplitRatio] = useState<number>(50);
+  const [isBookModalMinimized, setIsBookModalMinimized] = useState<boolean>(false);
+  const [isBookModalMaximized, setIsBookModalMaximized] = useState<boolean>(false);
+  const [is2ndBookPickerOpen, setIs2ndBookPickerOpen] = useState<boolean>(false);
   const [selectedWordDoc, setSelectedWordDoc] = useState<WebViewDocPayload | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [snipSuccessId, setSnipSuccessId] = useState<string | null>(null);
@@ -931,15 +942,33 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
       }
     }
 
+    // Check device uploaded documents store to retrieve original blob/url if uploaded from device
+    const uploadedDocs = getUploadedDocuments();
+    const matchingDoc = uploadedDocs.find(
+      (d) =>
+        d.id === shelfBook.id ||
+        d.title.toLowerCase() === shelfBook.title.toLowerCase() ||
+        (shelfBook.driveFileId && d.driveFileId === shelfBook.driveFileId)
+    );
+    if (matchingDoc) {
+      bookObj.pdfFileUrl = matchingDoc.dataUrl || matchingDoc.pdfFileUrl || shelfBook.fileUrl || shelfBook.dataUrl || bookObj.pdfFileUrl;
+      bookObj.mimeType = matchingDoc.mimeType || bookObj.mimeType;
+      if (matchingDoc.driveFileId) bookObj.driveFileId = matchingDoc.driveFileId;
+    }
+
     try {
       localStorage.setItem('medden_pending_read_book_v1', JSON.stringify(bookObj));
     } catch {}
 
-    if (onNavigate) {
-      onNavigate('read');
+    // Open book viewer right on the shelf in browser window format
+    if (activeBookModal && activeBookModal.id !== bookObj.id) {
+      // If a book is already open, open as second book side-by-side
+      setSecondaryBookModal(bookObj);
     } else {
       setActiveBookModal(bookObj);
     }
+    setIsBookModalMinimized(false);
+    setShowInlineDriveReader(true);
   };
 
   const handleOpenRecentFile = (item: RecentOpenedFileRecord) => {
@@ -1139,22 +1168,22 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
 
         {/* Main View Area */}
         <main className="shelfwise-main">
-          {/* Top Window Bar */}
-          <header className="shelfwise-header justify-start">
-            <div className="flex flex-wrap items-center gap-2">
-              {/* Flowcharts Button */}
-              <button
-                type="button"
-                onClick={() => setActiveTab(activeTab === 'flowcharts' ? 'books' : 'flowcharts')}
-                className={`shelfwise-btn ${
-                  activeTab === 'flowcharts' ? 'shelfwise-btn-primary' : 'shelfwise-btn-ghost'
-                }`}
-              >
-                <GitBranch className="w-4 h-4" />
-                <span>{activeTab === 'flowcharts' ? 'Back to Shelf' : 'Flowcharts'}</span>
-              </button>
-            </div>
-          </header>
+          {/* Top Window Bar - Hidden in flowcharts view to avoid redundant dark ribbon button */}
+          {activeTab !== 'flowcharts' && (
+            <header className="shelfwise-header justify-start">
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Flowcharts Button */}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('flowcharts')}
+                  className="shelfwise-btn shelfwise-btn-ghost"
+                >
+                  <GitBranch className="w-4 h-4" />
+                  <span>Flowcharts</span>
+                </button>
+              </div>
+            </header>
+          )}
 
           {/* TAB 1: PRIMARY BOOKSHELF (Exact Room + Almirah from user code) */}
           {activeTab === 'books' && (
@@ -1707,37 +1736,200 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
         </div>
       )}
 
-      {/* Quick Book Reader Modal */}
+      {/* Chrome Browser Window for Shelf / Library Books (Single or Dual Book Comparison) */}
       {activeBookModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-1 sm:p-2 bg-black/75 backdrop-blur-sm">
-          <div className="themed-glass-card relative w-full max-w-none max-h-[96vh] bg-white dark:bg-[#18110c] rounded-2xl border border-stone-200 dark:border-[#382518] shadow-2xl flex flex-col overflow-hidden">
-            <div className="themed-glass-bar p-4 border-b border-stone-200 dark:border-[#382518] flex items-center justify-between bg-stone-50 dark:bg-[#140e0a]">
-              <div className="flex items-center gap-2.5 min-w-0">
-                <BookLogoBadge
-                  compact
+        <div
+          className={`fixed inset-y-0 right-0 ${
+            isBookModalMaximized ? 'z-[100]' : 'z-50'
+          } flex flex-col p-1 sm:p-2 ${
+            isBookModalMinimized ? 'bg-transparent pointer-events-none' : 'bg-black/60 backdrop-blur-xs'
+          } transition-all duration-200`}
+          style={{
+            left: isBookModalMaximized ? '0rem' : (typeof window !== 'undefined' && window.innerWidth >= 768 && isAsideOpen ? '16rem' : '0rem'),
+            width: isBookModalMaximized ? '100%' : (typeof window !== 'undefined' && window.innerWidth >= 768 && isAsideOpen ? 'calc(100% - 16rem)' : '100%'),
+            height: isBookModalMinimized ? 'auto' : '100%',
+            top: isBookModalMinimized ? 'auto' : '0px',
+            bottom: '0px',
+          }}
+        >
+          <div className="themed-glass-card relative w-full h-full bg-white dark:bg-[#140e0a] rounded-t-2xl sm:rounded-2xl border border-stone-300 dark:border-[#3d2a1c] shadow-2xl flex flex-col overflow-hidden pointer-events-auto">
+            {/* Chrome-Style Window Header & Tabs Bar */}
+            <div
+              className="px-2 pt-2 bg-[#e9e4d8] dark:bg-[#1c130d] border-b border-stone-300 dark:border-[#382518] flex items-center justify-between gap-2 shrink-0 select-none cursor-pointer"
+              onClick={() => {
+                if (isBookModalMinimized) setIsBookModalMinimized(false);
+              }}
+            >
+              {/* Chrome Tabs */}
+              <div className="flex items-center gap-1 overflow-x-auto custom-scrollbar flex-1 min-w-0 pr-2">
+                {/* Tab 1: Primary Book */}
+                <div
+                  className="px-3 py-1.5 rounded-t-xl bg-white dark:bg-[#140e0a] border-t border-x border-stone-300 dark:border-[#382518] flex items-center gap-2 max-w-[240px] shrink-0 shadow-xs cursor-pointer"
                   title={activeBookModal.title}
-                  thumbnail={getResolvedBookThumb(activeBookModal)}
-                  fallbackBg={activeBookModal.coverColor || '#7c4521'}
-                />
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <h3 className="text-lg font-bold text-slate-900 dark:text-[#efe4d4] truncate">
-                      {activeBookModal.title}
-                    </h3>
-                    {(activeBookModal.driveFileId || activeBookModal.storageProvider === 'google_drive') && (
-                      <span className="themed-soft-pill text-[10px] font-mono px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/35 font-semibold shrink-0">
-                        Google Drive Vault
-                      </span>
+                >
+                  <BookLogoBadge
+                    compact
+                    title={activeBookModal.title}
+                    thumbnail={getResolvedBookThumb(activeBookModal)}
+                    fallbackBg={activeBookModal.coverColor || '#7c4521'}
+                  />
+                  <span className="text-xs font-bold truncate text-stone-900 dark:text-[#efe4d4]">
+                    {activeBookModal.title}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (secondaryBookModal) {
+                        setActiveBookModal(secondaryBookModal);
+                        setSecondaryBookModal(null);
+                      } else {
+                        setActiveBookModal(null);
+                      }
+                    }}
+                    className="p-0.5 rounded hover:bg-stone-200 dark:hover:bg-white/10 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 cursor-pointer"
+                    title="Close tab"
+                  >
+                    <X className="w-3 h-3" />
+                  </button>
+                </div>
+
+                {/* Tab 2: Secondary Book (Dual Comparison) */}
+                {secondaryBookModal && (
+                  <div
+                    className="px-3 py-1.5 rounded-t-xl bg-white dark:bg-[#140e0a] border-t border-x border-stone-300 dark:border-[#382518] flex items-center gap-2 max-w-[240px] shrink-0 shadow-xs cursor-pointer"
+                    title={secondaryBookModal.title}
+                  >
+                    <BookLogoBadge
+                      compact
+                      title={secondaryBookModal.title}
+                      thumbnail={getResolvedBookThumb(secondaryBookModal)}
+                      fallbackBg={secondaryBookModal.coverColor || '#2e5f5a'}
+                    />
+                    <span className="text-xs font-bold truncate text-stone-900 dark:text-[#efe4d4]">
+                      {secondaryBookModal.title}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSecondaryBookModal(null);
+                      }}
+                      className="p-0.5 rounded hover:bg-stone-200 dark:hover:bg-white/10 text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 cursor-pointer"
+                      title="Close secondary book"
+                    >
+                      <X className="w-3 h-3" />
+                    </button>
+                  </div>
+                )}
+
+                {/* Open 2nd Book Button */}
+                {!secondaryBookModal && (
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setIs2ndBookPickerOpen((v) => !v)}
+                      className="px-2.5 py-1 rounded-lg text-[11px] font-semibold text-stone-600 dark:text-[#bda48f] hover:bg-black/5 dark:hover:bg-white/5 flex items-center gap-1 cursor-pointer transition-colors"
+                      title="Open a second book side-by-side"
+                    >
+                      <Plus className="w-3.5 h-3.5 text-[#A47C43]" />
+                      <span className="hidden sm:inline">+ Open 2nd Book</span>
+                    </button>
+
+                    {is2ndBookPickerOpen && (
+                      <div className="absolute left-0 top-full mt-1 z-50 w-72 bg-white dark:bg-[#19110b] border border-stone-300 dark:border-[#382518] rounded-2xl shadow-2xl p-2.5 space-y-1.5 max-h-80 overflow-y-auto custom-scrollbar">
+                        <div className="flex items-center justify-between pb-1.5 border-b border-stone-200 dark:border-[#382518] text-xs font-bold px-1">
+                          <span>Select 2nd Book to Compare</span>
+                          <button onClick={() => setIs2ndBookPickerOpen(false)} className="text-stone-400 hover:text-stone-700">
+                            <X className="w-3 h-3" />
+                          </button>
+                        </div>
+                        {books.filter((b) => b.id !== activeBookModal.id).slice(0, 16).map((b) => (
+                          <div
+                            key={b.id}
+                            onClick={() => {
+                              setSecondaryBookModal(b);
+                              setIs2ndBookPickerOpen(false);
+                            }}
+                            className="p-2 rounded-xl hover:bg-amber-500/10 cursor-pointer flex items-center gap-2 text-xs transition-colors"
+                          >
+                            <BookLogoBadge compact title={b.title} thumbnail={getResolvedBookThumb(b)} fallbackBg={b.coverColor || '#7c4521'} />
+                            <div className="min-w-0">
+                              <p className="font-bold truncate text-stone-900 dark:text-[#efe4d4]">{b.title}</p>
+                              <p className="text-[10px] text-stone-500 font-mono truncate">{b.subject || b.author}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     )}
                   </div>
-                  <p className="text-[10px] text-slate-500 dark:text-[#a69079] font-mono truncate">
-                    {activeBookModal.author} · {activeBookModal.edition}
-                    {activeBookModal.fileSizeBytes
-                      ? ` · ${(activeBookModal.fileSizeBytes / (1024 * 1024)).toFixed(2)} MB`
-                      : ''}
-                  </p>
-                </div>
+                )}
               </div>
+
+              {/* Window Controls: Minimize, Maximize, Close */}
+              <div className="flex items-center gap-1 shrink-0 pb-1.5">
+                <button
+                  type="button"
+                  onClick={() => setIsBookModalMinimized(!isBookModalMinimized)}
+                  className="p-1.5 rounded-lg hover:bg-stone-300 dark:hover:bg-[#281b13] text-stone-600 dark:text-[#a69079] cursor-pointer"
+                  title={isBookModalMinimized ? 'Restore window' : 'Minimize window'}
+                >
+                  <Minus className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setIsBookModalMaximized(!isBookModalMaximized)}
+                  className="p-1.5 rounded-lg hover:bg-stone-300 dark:hover:bg-[#281b13] text-stone-600 dark:text-[#a69079] cursor-pointer"
+                  title={isBookModalMaximized ? 'Restore size' : 'Maximize window'}
+                >
+                  {isBookModalMaximized ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setActiveBookModal(null);
+                    setSecondaryBookModal(null);
+                  }}
+                  className="p-1.5 rounded-lg hover:bg-red-500 hover:text-white text-stone-600 dark:text-[#a69079] cursor-pointer transition-colors"
+                  title="Close browser window"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            {!isBookModalMinimized && (
+              <>
+                {/* Chrome-Style Address Bar / Toolbar */}
+                <div className="px-3 py-1.5 bg-[#f6f3eb] dark:bg-[#18100b] border-b border-stone-200 dark:border-[#382518] flex items-center justify-between gap-2 shrink-0 flex-wrap">
+              <div className="flex items-center gap-1.5 min-w-0 flex-1">
+                <button type="button" className="p-1 rounded text-stone-400 hover:text-stone-700 dark:hover:text-stone-200" title="Back">
+                  <ArrowLeft className="w-3.5 h-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowInlineDriveReader((p) => !p)}
+                  className="p-1 rounded text-stone-400 hover:text-stone-700 dark:hover:text-stone-200 cursor-pointer"
+                  title="Reload document frame"
+                >
+                  <RotateCw className="w-3.5 h-3.5" />
+                </button>
+
+                {/* Omnibar */}
+                <div className="flex-1 max-w-xl flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white dark:bg-[#100b08] border border-stone-300 dark:border-[#352317] text-xs shadow-2xs">
+                  <Lock className="w-3 h-3 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                  <span className="font-mono text-[11px] text-stone-700 dark:text-[#bda48f] truncate">
+                    ach1ev://shelf/books/{activeBookModal.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')}.pdf
+                  </span>
+                </div>
+
+                {secondaryBookModal && (
+                  <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-800 dark:text-amber-200 border border-amber-500/30 shrink-0">
+                    Dual Independent View ({dualBookSplitRatio}% / {100 - dualBookSplitRatio}%)
+                  </span>
+                )}
+              </div>
+
               <div className="flex items-center gap-2 shrink-0">
                 <button
                   type="button"
@@ -1747,105 +1939,194 @@ export const LibraryView: React.FC<LibraryViewProps> = ({
                   <Palette className="w-3 h-3" />
                   <span>Edit Cover</span>
                 </button>
-                {(activeBookModal.driveFileId || extractDriveFileId(activeBookModal.pdfFileUrl)) && (
-                  <a
-                    href={
-                      activeBookModal.pdfFileUrl && activeBookModal.pdfFileUrl.startsWith('http')
-                        ? activeBookModal.pdfFileUrl
-                        : `https://drive.google.com/file/d/${activeBookModal.driveFileId || extractDriveFileId(activeBookModal.pdfFileUrl)}/view`
-                    }
-                    target="_blank"
-                    rel="noreferrer"
-                    className="themed-soft-pill px-2.5 py-1 rounded-lg bg-amber-600/15 hover:bg-amber-600/25 border border-amber-600/35 text-amber-800 dark:text-amber-300 text-[11px] font-semibold flex items-center gap-1"
+                {onSnipToNote && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onSnipToNote({
+                        id: `snip-${Date.now()}`,
+                        dataUrl: activeBookModal.pdfFileUrl || '',
+                        sourceBookTitle: activeBookModal.title,
+                        pageNumber: 1,
+                        timestamp: new Date().toLocaleTimeString(),
+                      });
+                      setSnipSuccessId(activeBookModal.id);
+                      setTimeout(() => setSnipSuccessId(null), 2000);
+                    }}
+                    className="themed-soft-pill px-2.5 py-1 rounded-lg bg-blue-600/15 hover:bg-blue-600/25 border border-blue-600/35 text-blue-700 dark:text-blue-300 text-[11px] font-semibold flex items-center gap-1 cursor-pointer"
                   >
-                    <ExternalLink className="w-3 h-3" />
-                    <span>Open in Drive</span>
-                  </a>
+                    {snipSuccessId === activeBookModal.id ? (
+                      <>
+                        <Check className="w-3 h-3 text-emerald-600 dark:text-emerald-400" />
+                        <span className="text-emerald-700 dark:text-emerald-300">Snipped!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Camera className="w-3 h-3" />
+                        <span>Snip to Note</span>
+                      </>
+                    )}
+                  </button>
                 )}
-                <button
-                  onClick={() => setActiveBookModal(null)}
-                  className="p-1 rounded-lg text-slate-400 hover:text-slate-800 dark:hover:text-[#efe4d4]"
-                >
-                  <X className="w-4 h-4" />
-                </button>
               </div>
             </div>
 
-            <div className="p-3 sm:p-4 overflow-y-auto space-y-4">
-              {(activeBookModal.driveFileId || activeBookModal.pdfFileUrl) && (
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-bold font-mono text-amber-700 dark:text-amber-400 flex items-center gap-1.5">
-                      <HardDrive className="w-3.5 h-3.5" />
-                      <span>
-                        {activeBookModal.driveFileId || extractDriveFileId(activeBookModal.pdfFileUrl)
-                          ? 'Google Drive PDF Stream'
-                          : 'Document Stream'}
-                      </span>
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setShowInlineDriveReader((p) => !p)}
-                      className="text-[11px] font-semibold text-amber-700 dark:text-amber-400 underline cursor-pointer"
-                    >
-                      {showInlineDriveReader ? 'Collapse Document Viewer' : 'Expand Document Viewer'}
-                    </button>
-                  </div>
-                  {showInlineDriveReader && (
-                    <div className="rounded-xl overflow-hidden border border-stone-200 dark:border-[#382518] bg-black/90 h-[72vh]">
+            {/* Document Content View: Single or Side-by-Side Dual Books with Independent Scroll Containers */}
+            <div className="flex-1 flex overflow-hidden relative">
+              {/* Left / Primary Book Pane (Isolated Scroll Container) */}
+              <div
+                className="flex flex-col h-full overflow-hidden"
+                style={{ width: secondaryBookModal ? `${dualBookSplitRatio}%` : '100%' }}
+              >
+                <div
+                  className="flex-1 overflow-y-auto custom-scrollbar p-2 sm:p-3 space-y-3"
+                  onWheel={(e) => e.stopPropagation()}
+                >
+                  {/* SmartDocumentFrame or Word document */}
+                  {(activeBookModal.mimeType?.includes('word') || activeBookModal.title.toLowerCase().endsWith('.docx') || activeBookModal.title.toLowerCase().endsWith('.doc')) ? (
+                    <div className="max-w-3xl mx-auto bg-white dark:bg-[#1a120d] border border-stone-300 dark:border-[#382518] rounded-xl p-6 shadow-sm space-y-4">
+                      <div className="border-b border-stone-200 dark:border-[#382518] pb-3">
+                        <span className="text-[10px] font-mono text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider">Word Document (.docx)</span>
+                        <h2 className="text-xl font-bold font-serif text-slate-900 dark:text-[#efe4d4] mt-1">{activeBookModal.title}</h2>
+                      </div>
+                      <div className="prose dark:prose-invert max-w-none text-xs leading-relaxed text-slate-800 dark:text-[#dfd0be]">
+                        <p>Document viewer opened directly from your library shelf with independent scrolling.</p>
+                        {(activeBookModal.pages || []).map((p, idx) => (
+                          <div key={idx} className="my-4 pt-3 border-t border-stone-200 dark:border-[#382518]">
+                            <h3 className="font-bold text-sm text-amber-800 dark:text-amber-300 mb-1">{p.title}</h3>
+                            <div dangerouslySetInnerHTML={{ __html: p.contentHtml || '' }} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (activeBookModal.driveFileId || activeBookModal.pdfFileUrl) ? (
+                    <div className="w-full h-full min-h-[580px] rounded-xl overflow-hidden border border-stone-300 dark:border-[#382518] bg-black/95">
                       <SmartDocumentFrame
                         docId={activeBookModal.id}
                         driveFileId={activeBookModal.driveFileId}
                         srcUrl={activeBookModal.pdfFileUrl}
                         title={activeBookModal.title}
-                        className="w-full h-full border-0"
+                        className="w-full h-full border-0 min-h-[580px]"
                         allow="autoplay"
                       />
                     </div>
+                  ) : (
+                    <div className="max-w-3xl mx-auto space-y-3">
+                      <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-[#221811] border border-amber-200 dark:border-[#4b3322] text-xs text-amber-950 dark:text-[#efe4d4]">
+                        <span className="font-bold">Overview: </span>
+                        {activeBookModal.pages?.[0]?.summaryPearl || 'Comprehensive high-yield medical textbook and clinical reference.'}
+                      </div>
+                      <div className="space-y-1.5">
+                        {(activeBookModal.pages || []).map((pg, idx) => (
+                          <div
+                            key={idx}
+                            className="p-3 rounded-xl border border-stone-200 dark:border-[#352317] bg-white dark:bg-[#1e150f] space-y-1 text-xs"
+                          >
+                            <div className="flex items-center justify-between font-bold">
+                              <span>{pg.title}</span>
+                              <span className="text-[10px] font-mono text-amber-700">Page {pg.pageNumber || idx + 1}</span>
+                            </div>
+                            <div className="text-slate-600 dark:text-[#c4b39e]" dangerouslySetInnerHTML={{ __html: pg.contentHtml || '' }} />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   )}
+                </div>
+              </div>
+
+              {/* Draggable Resizing Splitter between 2 Books */}
+              {secondaryBookModal && (
+                <div
+                  onPointerDown={(e) => {
+                    e.preventDefault();
+                    const startX = e.clientX;
+                    const startRatio = dualBookSplitRatio;
+                    const wsWidth = window.innerWidth - (isAsideOpen ? 256 : 0);
+                    const onMove = (ev: PointerEvent) => {
+                      const delta = ev.clientX - startX;
+                      const deltaPct = (delta / wsWidth) * 100;
+                      setDualBookSplitRatio(Math.max(20, Math.min(80, Math.round(startRatio + deltaPct))));
+                    };
+                    const onUp = () => {
+                      window.removeEventListener('pointermove', onMove);
+                      window.removeEventListener('pointerup', onUp);
+                    };
+                    window.addEventListener('pointermove', onMove);
+                    window.addEventListener('pointerup', onUp);
+                  }}
+                  className="w-2.5 hover:w-3.5 bg-stone-300 dark:bg-[#352418] hover:bg-amber-500 cursor-col-resize transition-all shrink-0 flex items-center justify-center select-none z-20 group"
+                  title="Drag to resize between Book 1 and Book 2"
+                >
+                  <GripVertical className="w-3 h-3 text-stone-500 group-hover:text-white" />
                 </div>
               )}
 
-              <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-[#221811] border border-amber-200 dark:border-[#4b3322] text-xs text-amber-950 dark:text-[#efe4d4]">
-                <span className="font-bold">Overview: </span>
-                {activeBookModal.pages[0]?.summaryPearl || 'Comprehensive high-yield medical textbook and clinical reference.'}
-              </div>
-
-              <div>
-                <h4 className="text-xs font-bold font-mono uppercase text-slate-500 dark:text-[#a69079] mb-2">
-                  Table of Contents & Core Chapters ({activeBookModal.pages.length})
-                </h4>
-                <div className="space-y-1.5">
-                  {activeBookModal.pages.map((pg, idx) => (
-                    <div
-                      key={idx}
-                      className="p-2.5 rounded-xl border border-stone-200 dark:border-[#352317] bg-white dark:bg-[#1e150f] flex items-center justify-between text-xs hover:border-amber-500 transition-colors"
-                    >
-                      <div className="flex items-center gap-2">
-                        <span className="w-5 h-5 rounded-md bg-stone-100 dark:bg-[#2a1d14] flex items-center justify-center font-mono font-bold text-[10px] text-slate-600 dark:text-[#d8c7b0]">
-                          {pg.pageNumber || idx + 1}
-                        </span>
-                        <span className="font-semibold text-slate-800 dark:text-[#efe4d4]">
-                          {pg.title}
-                        </span>
+              {/* Right / Secondary Book Pane (Isolated Independent Scroll Container) */}
+              {secondaryBookModal && (
+                <div
+                  className="flex flex-col h-full overflow-hidden"
+                  style={{ width: `${100 - dualBookSplitRatio}%` }}
+                >
+                  <div
+                    className="flex-1 overflow-y-auto custom-scrollbar p-2 sm:p-3 space-y-3"
+                    onWheel={(e) => e.stopPropagation()}
+                  >
+                    {(secondaryBookModal.mimeType?.includes('word') || secondaryBookModal.title.toLowerCase().endsWith('.docx') || secondaryBookModal.title.toLowerCase().endsWith('.doc')) ? (
+                      <div className="max-w-3xl mx-auto bg-white dark:bg-[#1a120d] border border-stone-300 dark:border-[#382518] rounded-xl p-6 shadow-sm space-y-4">
+                        <div className="border-b border-stone-200 dark:border-[#382518] pb-3">
+                          <span className="text-[10px] font-mono text-blue-600 dark:text-blue-400 font-bold uppercase tracking-wider">Word Document (.docx)</span>
+                          <h2 className="text-xl font-bold font-serif text-slate-900 dark:text-[#efe4d4] mt-1">{secondaryBookModal.title}</h2>
+                        </div>
+                        <div className="prose dark:prose-invert max-w-none text-xs leading-relaxed text-slate-800 dark:text-[#dfd0be]">
+                          <p>Document viewer opened directly from your library shelf with independent scrolling.</p>
+                          {(secondaryBookModal.pages || []).map((p, idx) => (
+                            <div key={idx} className="my-4 pt-3 border-t border-stone-200 dark:border-[#382518]">
+                              <h3 className="font-bold text-sm text-amber-800 dark:text-amber-300 mb-1">{p.title}</h3>
+                              <div dangerouslySetInnerHTML={{ __html: p.contentHtml || '' }} />
+                            </div>
+                          ))}
+                        </div>
                       </div>
-                      <span className="text-[10px] font-mono text-slate-400 dark:text-[#a69079]">
-                        {pg.keyTopic}
-                      </span>
-                    </div>
-                  ))}
+                    ) : (secondaryBookModal.driveFileId || secondaryBookModal.pdfFileUrl) ? (
+                      <div className="w-full h-full min-h-[580px] rounded-xl overflow-hidden border border-stone-300 dark:border-[#382518] bg-black/95">
+                        <SmartDocumentFrame
+                          docId={secondaryBookModal.id}
+                          driveFileId={secondaryBookModal.driveFileId}
+                          srcUrl={secondaryBookModal.pdfFileUrl}
+                          title={secondaryBookModal.title}
+                          className="w-full h-full border-0 min-h-[580px]"
+                          allow="autoplay"
+                        />
+                      </div>
+                    ) : (
+                      <div className="max-w-3xl mx-auto space-y-3">
+                        <div className="p-3.5 rounded-xl bg-amber-50 dark:bg-[#221811] border border-amber-200 dark:border-[#4b3322] text-xs text-amber-950 dark:text-[#efe4d4]">
+                          <span className="font-bold">Overview: </span>
+                          {secondaryBookModal.pages?.[0]?.summaryPearl || 'Comparative clinical reference volume.'}
+                        </div>
+                        <div className="space-y-1.5">
+                          {(secondaryBookModal.pages || []).map((pg, idx) => (
+                            <div
+                              key={idx}
+                              className="p-3 rounded-xl border border-stone-200 dark:border-[#352317] bg-white dark:bg-[#1e150f] space-y-1 text-xs"
+                            >
+                              <div className="flex items-center justify-between font-bold">
+                                <span>{pg.title}</span>
+                                <span className="text-[10px] font-mono text-amber-700">Page {pg.pageNumber || idx + 1}</span>
+                              </div>
+                              <div className="text-slate-600 dark:text-[#c4b39e]" dangerouslySetInnerHTML={{ __html: pg.contentHtml || '' }} />
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
-
-            <div className="themed-glass-bar p-3 border-t border-stone-200 dark:border-[#382518] flex justify-end gap-2 bg-stone-50 dark:bg-[#140e0a]">
-              <button
-                onClick={() => setActiveBookModal(null)}
-                className="px-4 py-1.5 rounded-xl bg-stone-200 dark:bg-[#2b1e15] text-slate-800 dark:text-[#efe4d4] text-xs font-semibold hover:bg-stone-300 dark:hover:bg-[#38261a] cursor-pointer"
-              >
-                Close
-              </button>
-            </div>
+              </>
+            )}
           </div>
         </div>
       )}

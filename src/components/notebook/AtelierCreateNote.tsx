@@ -1192,14 +1192,15 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
   }
 
   const MAX_VOICE_SECONDS = 900; // 15 min max voice note
-  const [isPencilDisabled, setIsPencilDisabled] = useState<boolean>(() => {
+  const [isPencilDisabled, setIsPencilDisabled] = useState<boolean>(false);
+  const [isPencilManualDraw, setIsPencilManualDraw] = useState<boolean>(() => {
     try {
-      return localStorage.getItem('achiev_note_pencil_disabled_v1') === '1';
-    } catch {
-      return false;
-    }
+      const stored = localStorage.getItem('achiev_note_draw_mode_v2');
+      if (stored !== null) return stored === 'true';
+    } catch {}
+    return true; // Default Draw button ON
   });
-  const [isPencilManualDraw, setIsPencilManualDraw] = useState<boolean>(false);
+  const [isEraserActive, setIsEraserActive] = useState<boolean>(false);
   const [activeInkColor, setActiveInkColor] = useState<string>('#23160C');
   const inkStorageKey = `achiev_note_ink_v1_${notebook?.id || 'draft'}::${activePageIndex}`;
   const snapsStorageKey = `achiev_note_snaps_v1_${notebook?.id || 'draft'}::${activePageIndex}`;
@@ -3538,13 +3539,36 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
     }
   };
 
-  // Sheet & Screenshot SVG Stylus / Pencil Stroke Capture
+  // Sheet & Screenshot SVG Stylus / Pencil Stroke Capture & Eraser
   const startSheetInkDraw = (e: React.PointerEvent<Element>) => {
+    const sheetEl = sheetRef.current;
+    if (!sheetEl) return;
+
+    if (isEraserActive) {
+      e.preventDefault();
+      e.stopPropagation();
+      const rect = sheetEl.getBoundingClientRect();
+      const eraseAt = (ev: PointerEvent) => {
+        const ex = ev.clientX - rect.left;
+        const ey = ev.clientY - rect.top;
+        setSheetInkStrokes((prev) =>
+          prev.filter((st) => !st.points.some(([px, py]) => Math.hypot(px - ex, py - ey) < 28))
+        );
+      };
+      eraseAt(e.nativeEvent);
+      const onMove = (ev: PointerEvent) => eraseAt(ev);
+      const onUp = () => {
+        window.removeEventListener('pointermove', onMove);
+        window.removeEventListener('pointerup', onUp);
+      };
+      window.addEventListener('pointermove', onMove);
+      window.addEventListener('pointerup', onUp);
+      return;
+    }
+
     if (isPencilDisabled) return;
     const isStylus = e.pointerType === 'pen';
     if (!isStylus && !isPencilManualDraw) return;
-    const sheetEl = sheetRef.current;
-    if (!sheetEl) return;
     e.preventDefault();
     e.stopPropagation();
     const rect = sheetEl.getBoundingClientRect();
@@ -4950,45 +4974,53 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                   <GripVertical className="w-3.5 h-3.5" />
                 </span>
               )}
-              {/* Left-most Turn Off Pencil button (typing only when turned off; stylus auto-detected when on) */}
+              {/* Draw / Type Mode Toggle Button (Default Draw ON; shows Type so user can switch to Type) */}
               <button
                 type="button"
-                className={`an-pencil-toggle-btn ${isPencilDisabled ? 'is-off' : isPencilManualDraw ? 'is-drawing' : ''}`}
+                className={`an-pencil-toggle-btn ${isPencilManualDraw ? 'is-drawing' : ''}`}
                 onClick={() => {
-                  const nextDisabled = !isPencilDisabled;
-                  setIsPencilDisabled(nextDisabled);
-                  if (nextDisabled) {
-                    setIsPencilManualDraw(false);
-                    showToast('Pencil turned off — typing only mode active');
-                  } else {
-                    showToast('Pencil enabled — stylus writes automatically on paper & screenshots');
-                  }
+                  const nextDrawing = !isPencilManualDraw;
+                  setIsPencilManualDraw(nextDrawing);
+                  setIsPencilDisabled(!nextDrawing);
+                  if (isEraserActive) setIsEraserActive(false);
+                  try {
+                    localStorage.setItem('achiev_note_draw_mode_v2', String(nextDrawing));
+                  } catch {}
+                  showToast(nextDrawing ? 'Draw mode active — sketching enabled' : 'Type mode active — click anywhere to type');
                 }}
                 title={
-                  isPencilDisabled
-                    ? 'Pencil is off (typing only). Click to turn Pencil back on.'
-                    : 'Turn off pencil & stylus detection for pure typing only'
+                  isPencilManualDraw
+                    ? 'Draw mode is active — click here to switch to Type mode'
+                    : 'Type mode is active — click here to switch to Draw mode'
                 }
               >
-                <PenTool className="w-3.5 h-3.5 shrink-0" />
-                <span>{isPencilDisabled ? 'Turn On Pencil' : 'Turn Off Pencil'}</span>
+                {isPencilManualDraw ? (
+                  <>
+                    <Type className="w-3.5 h-3.5 shrink-0" />
+                    <span>Type</span>
+                  </>
+                ) : (
+                  <>
+                    <SquarePen className="w-3.5 h-3.5 shrink-0" />
+                    <span>Draw</span>
+                  </>
+                )}
               </button>
 
-              {!isPencilDisabled && (
-                <button
-                  type="button"
-                  className={`an-pencil-toggle-btn ${isPencilManualDraw ? 'is-drawing' : ''}`}
-                  onClick={() => {
-                    const next = !isPencilManualDraw;
-                    setIsPencilManualDraw(next);
-                    showToast(next ? 'Draw mode active (mouse/touch & stylus)' : 'Auto stylus-only ink (mouse/finger types normally)');
-                  }}
-                  title="Draw with mouse/touch or let tablet stylus auto-detect"
-                >
-                  <SquarePen className="w-3.5 h-3.5 shrink-0" />
-                  <span>{isPencilManualDraw ? 'Drawing' : 'Draw'}</span>
-                </button>
-              )}
+              {/* Rubber (Eraser) Feature directly next to Draw/Type button */}
+              <button
+                type="button"
+                className={`an-pencil-toggle-btn ${isEraserActive ? 'is-drawing bg-amber-500/20 text-[#A47C43]' : ''}`}
+                onClick={() => {
+                  const next = !isEraserActive;
+                  setIsEraserActive(next);
+                  showToast(next ? 'Rubber (Eraser) active — drag or click on strokes to erase' : 'Rubber off');
+                }}
+                title="Rubber (Eraser) — Erase ink strokes or drawings"
+              >
+                <Eraser className="w-3.5 h-3.5 shrink-0 text-amber-700 dark:text-amber-400" />
+                <span>Rubber</span>
+              </button>
 
               <button
                 type="button"
@@ -5447,65 +5479,6 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
               </button>
 
               <div className="an-ribbon-pin-right">
-                <div className="relative">
-                  <button
-                    type="button"
-                    className="an-btn"
-                    style={{ padding: '4px 9px', fontSize: 11.5 }}
-                    onClick={() => setIsAddToolsOpen((p) => !p)}
-                    title="Customize ribbon tools"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    <span>Add tools</span>
-                  </button>
-
-                  {isAddToolsOpen && (
-                    <div
-                      className="fixed sm:absolute right-2 sm:right-0 top-12 sm:top-full sm:mt-2 z-[90] w-64 max-h-80 overflow-y-auto custom-scrollbar rounded-2xl border p-3 shadow-2xl"
-                      style={{
-                        background: 'var(--an-paper)',
-                        borderColor: 'var(--an-line)',
-                        color: 'var(--an-ink)',
-                      }}
-                    >
-                      <div className="flex items-center justify-between pb-2 mb-2 border-b" style={{ borderColor: 'var(--an-line)' }}>
-                        <span className="text-xs font-bold">Customize Ribbon Tools</span>
-                        <button
-                          type="button"
-                          onClick={() => setIsAddToolsOpen(false)}
-                          className="p-1 rounded-full hover:bg-black/5 dark:hover:bg-white/10"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                      <div className="grid grid-cols-1 gap-1">
-                        {CUSTOMIZABLE_RIBBON_TOOLS.map((tool) => {
-                          const TIcon = tool.icon;
-                          const isChecked = pinnedRibbonTools.includes(tool.id);
-                          return (
-                            <button
-                              key={tool.id}
-                              type="button"
-                              onClick={() => togglePinnedTool(tool.id)}
-                              className={`w-full flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-lg text-xs text-left transition-colors ${
-                                isChecked
-                                  ? 'bg-[#A47C43]/15 font-semibold'
-                                  : 'hover:bg-black/5 dark:hover:bg-white/5'
-                              }`}
-                            >
-                              <span className="flex items-center gap-2 min-w-0">
-                                <TIcon className="w-3.5 h-3.5 shrink-0 text-[#A47C43]" />
-                                <span className="truncate">{tool.label}</span>
-                              </span>
-                              {isChecked && <Check className="w-3.5 h-3.5 text-[#A47C43] shrink-0" />}
-                            </button>
-                          );
-                        })}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
                 <button
                   type="button"
                   className="an-btn"
@@ -5761,7 +5734,7 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                 const ruleSize = rulerStyle === 'solid' || rulerStyle === 'double' ? `100% ${h}px` : `96px ${h}px`;
                 if (noteViewMode === 'book') {
                   return (
-                    <div className="flex flex-col gap-10 w-full max-w-5xl mx-auto py-8 px-4">
+                    <div className="flex flex-col gap-10 w-full max-w-5xl mx-auto py-8 px-4 select-text">
                       {Array.from({ length: Math.ceil(notePages.length / 2) }).map((_, spreadIdx) => {
                         const leftIdx = spreadIdx * 2;
                         const rightIdx = spreadIdx * 2 + 1;
@@ -5769,19 +5742,24 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                         const rightPage = notePages[rightIdx];
 
                         return (
-                          <div key={`book-spread-${spreadIdx}`} className="flex flex-col md:flex-row items-stretch gap-8 w-full justify-center">
-                            {/* Left Page */}
+                          <div key={`book-spread-${spreadIdx}`} className="flex flex-col md:flex-row items-stretch gap-4 md:gap-0 w-full justify-center">
+                            {/* Left Notebook Page */}
                             {leftPage && (
                               <div
-                                className="flex-1 min-h-[640px] rounded-2xl shadow-2xl border p-8 relative flex flex-col"
+                                className="flex-1 min-h-[640px] rounded-l-2xl rounded-r-sm shadow-xl border p-8 relative flex flex-col transition-all cursor-text"
                                 style={{
                                   backgroundColor: resolvedSheetBg,
                                   color: isLightSheet ? '#23160C' : '#F3E7D4',
                                   borderColor: 'var(--an-line)',
                                 }}
-                                onClick={() => setCurrentActivePageIndex(leftIdx)}
+                                onClick={() => {
+                                  setCurrentActivePageIndex(leftIdx);
+                                  if (pageEditorRefs.current[leftPage.id]) {
+                                    editorRef.current = pageEditorRefs.current[leftPage.id];
+                                  }
+                                }}
                               >
-                                <div className="flex items-center justify-between pb-3 mb-4 border-b border-[var(--an-line)]">
+                                <div className="flex items-center justify-between pb-3 mb-4 border-b border-[var(--an-line)] shrink-0 select-none">
                                   <span className="text-xs font-mono font-bold text-[#A47C43]">
                                     Page {leftIdx + 1} of {notePages.length}
                                   </span>
@@ -5799,12 +5777,24 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                                     });
                                     triggerSave();
                                   }}
-                                  className="text-base font-bold bg-transparent outline-none w-full mb-4"
+                                  className="text-base font-bold bg-transparent outline-none w-full mb-3 shrink-0"
                                   placeholder={`Page ${leftIdx + 1} Title...`}
                                 />
                                 <div
+                                  ref={(el) => {
+                                    pageEditorRefs.current[leftPage.id] = el;
+                                    if (currentActivePageIndex === leftIdx) {
+                                      editorRef.current = el;
+                                    }
+                                  }}
                                   contentEditable
                                   suppressContentEditableWarning
+                                  onFocus={() => {
+                                    setCurrentActivePageIndex(leftIdx);
+                                    if (pageEditorRefs.current[leftPage.id]) {
+                                      editorRef.current = pageEditorRefs.current[leftPage.id];
+                                    }
+                                  }}
                                   onInput={(e) => {
                                     const nextHtml = (e.currentTarget as HTMLDivElement).innerHTML;
                                     setNotePages((prev) => {
@@ -5815,24 +5805,37 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                                     triggerSave();
                                   }}
                                   dangerouslySetInnerHTML={{ __html: leftPage.contentHtml || '<p><br/></p>' }}
-                                  className="outline-none min-h-[480px] prose prose-stone max-w-none text-sm leading-relaxed"
-                                  style={{ fontFamily: activeFontObj.family }}
+                                  className="outline-none min-h-[480px] prose prose-stone max-w-none text-sm leading-relaxed flex-1"
+                                  style={{
+                                    fontFamily: activeFontObj.family,
+                                    backgroundImage: ruleBg,
+                                    backgroundSize: ruleSize,
+                                    lineHeight: `${h}px`,
+                                  }}
                                 />
                               </div>
                             )}
 
-                            {/* Right Page (or Blank Page with Add Page Button) */}
+                            {/* Center Notebook Spine Crease / Fold Shadow */}
+                            <div className="hidden md:block w-3 bg-gradient-to-r from-black/10 via-black/25 to-black/10 shadow-inner shrink-0 rounded-full my-6 opacity-75" />
+
+                            {/* Right Notebook Page (or Blank Page with Add Page Button in Center) */}
                             {rightPage ? (
                               <div
-                                className="flex-1 min-h-[640px] rounded-2xl shadow-2xl border p-8 relative flex flex-col"
+                                className="flex-1 min-h-[640px] rounded-r-2xl rounded-l-sm shadow-xl border p-8 relative flex flex-col transition-all cursor-text"
                                 style={{
                                   backgroundColor: resolvedSheetBg,
                                   color: isLightSheet ? '#23160C' : '#F3E7D4',
                                   borderColor: 'var(--an-line)',
                                 }}
-                                onClick={() => setCurrentActivePageIndex(rightIdx)}
+                                onClick={() => {
+                                  setCurrentActivePageIndex(rightIdx);
+                                  if (pageEditorRefs.current[rightPage.id]) {
+                                    editorRef.current = pageEditorRefs.current[rightPage.id];
+                                  }
+                                }}
                               >
-                                <div className="flex items-center justify-between pb-3 mb-4 border-b border-[var(--an-line)]">
+                                <div className="flex items-center justify-between pb-3 mb-4 border-b border-[var(--an-line)] shrink-0 select-none">
                                   <span className="text-xs font-mono font-bold text-[#A47C43]">
                                     Page {rightIdx + 1} of {notePages.length}
                                   </span>
@@ -5850,12 +5853,24 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                                     });
                                     triggerSave();
                                   }}
-                                  className="text-base font-bold bg-transparent outline-none w-full mb-4"
+                                  className="text-base font-bold bg-transparent outline-none w-full mb-3 shrink-0"
                                   placeholder={`Page ${rightIdx + 1} Title...`}
                                 />
                                 <div
+                                  ref={(el) => {
+                                    pageEditorRefs.current[rightPage.id] = el;
+                                    if (currentActivePageIndex === rightIdx) {
+                                      editorRef.current = el;
+                                    }
+                                  }}
                                   contentEditable
                                   suppressContentEditableWarning
+                                  onFocus={() => {
+                                    setCurrentActivePageIndex(rightIdx);
+                                    if (pageEditorRefs.current[rightPage.id]) {
+                                      editorRef.current = pageEditorRefs.current[rightPage.id];
+                                    }
+                                  }}
                                   onInput={(e) => {
                                     const nextHtml = (e.currentTarget as HTMLDivElement).innerHTML;
                                     setNotePages((prev) => {
@@ -5866,13 +5881,18 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                                     triggerSave();
                                   }}
                                   dangerouslySetInnerHTML={{ __html: rightPage.contentHtml || '<p><br/></p>' }}
-                                  className="outline-none min-h-[480px] prose prose-stone max-w-none text-sm leading-relaxed"
-                                  style={{ fontFamily: activeFontObj.family }}
+                                  className="outline-none min-h-[480px] prose prose-stone max-w-none text-sm leading-relaxed flex-1"
+                                  style={{
+                                    fontFamily: activeFontObj.family,
+                                    backgroundImage: ruleBg,
+                                    backgroundSize: ruleSize,
+                                    lineHeight: `${h}px`,
+                                  }}
                                 />
                               </div>
                             ) : (
                               <div
-                                className="flex-1 min-h-[640px] rounded-2xl shadow-2xl border p-12 relative flex flex-col items-center justify-center text-center border-dashed border-[#A47C43]/50"
+                                className="flex-1 min-h-[640px] rounded-r-2xl rounded-l-sm shadow-xl border-2 border-dashed border-[#A47C43]/50 p-10 relative flex flex-col items-center justify-center text-center select-none"
                                 style={{
                                   backgroundColor: resolvedSheetBg,
                                   color: isLightSheet ? '#23160C' : '#F3E7D4',
@@ -5882,14 +5902,19 @@ export const AtelierCreateNote: React.FC<AtelierCreateNoteProps> = ({
                                   Page {leftIdx + 2} (Blank Page)
                                 </div>
                                 <div className="flex flex-col items-center gap-4 max-w-xs">
-                                  <BookOpen className="w-10 h-10 text-[#A47C43] opacity-60" />
-                                  <p className="text-sm font-medium opacity-80">
-                                    End of current notebook spread. Add a new page to continue writing on the right.
-                                  </p>
+                                  <div className="w-16 h-16 rounded-full bg-[#A47C43]/15 flex items-center justify-center text-[#A47C43]">
+                                    <BookOpen className="w-8 h-8 opacity-80" />
+                                  </div>
+                                  <div>
+                                    <h4 className="text-sm font-bold text-stone-900 dark:text-[#efe4d4] mb-1">Spread Page Blank</h4>
+                                    <p className="text-xs text-stone-500 dark:text-[#bca894] leading-relaxed">
+                                      End of current notebook spread. Add a new page to write on the right side.
+                                    </p>
+                                  </div>
                                   <button
                                     type="button"
                                     onClick={handleAddPageBreak}
-                                    className="px-5 py-2.5 rounded-xl bg-[#A47C43] hover:bg-[#8e6834] text-white text-xs font-bold shadow-lg flex items-center gap-2 cursor-pointer transition-all hover:scale-105"
+                                    className="px-6 py-2.5 rounded-full bg-[#A47C43] hover:bg-[#8e6834] text-white text-xs font-bold shadow-lg flex items-center gap-2 cursor-pointer transition-transform hover:scale-105"
                                   >
                                     <Plus className="w-4 h-4" />
                                     <span>+ Add Page</span>

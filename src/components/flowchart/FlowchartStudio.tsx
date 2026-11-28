@@ -16,6 +16,7 @@ import {
   Eye,
   Sliders,
   ChevronUp,
+  ChevronLeft,
   BookOpen,
   ArrowRight,
   ArrowDown,
@@ -762,6 +763,17 @@ export const FlowchartStudio: React.FC<FlowchartStudioProps> = ({
       {/* ========================================================================= */}
       <header className="px-3 sm:px-4 py-2 border-b border-stone-200/90 dark:border-[#382518] bg-[#f8f6f0] dark:bg-[#140e0a] flex items-center justify-between gap-2 shrink-0 shadow-2xs flex-wrap">
         <div className="flex items-center gap-2 flex-wrap min-w-0">
+          {onBackToLibrary && (
+            <button
+              type="button"
+              onClick={onBackToLibrary}
+              className="px-2.5 py-1.5 rounded-xl border border-stone-300 dark:border-[#382518] hover:bg-stone-200 dark:hover:bg-[#211711] text-stone-700 dark:text-[#efe4d4] text-xs font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+              title="Back to Shelf"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              <span>Back to Shelf</span>
+            </button>
+          )}
           <button
             type="button"
             onClick={() => setNewChartModalOpen(true)}
@@ -1990,30 +2002,32 @@ const NodeBox: React.FC<{
         </div>
       </div>
 
-      {/* Right-Edge Corner Control: Add N boxes Sideways (same level) */}
+      {/* Right-Edge Corner Control: Add box Sideways (same level) */}
       <button
         type="button"
         onClick={(e) => {
           e.stopPropagation();
           onAddSideways();
         }}
-        title={`Add ${addBoxCount} box(es) sideways on Level ${node.level}`}
-        className="themed-accent-btn absolute right-0 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#A47C43] hover:bg-[#8e6834] text-white shadow-md flex items-center justify-center text-[10px] font-bold cursor-pointer transition-transform hover:scale-110 z-20"
+        title={`Add box sideways on Level ${node.level}`}
+        className="themed-accent-btn absolute right-0 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#A47C43] hover:bg-[#8e6834] text-white shadow-md flex items-center justify-center cursor-pointer transition-transform hover:scale-110 z-20"
+        aria-label="Add box sideways"
       >
-        <span>+{addBoxCount}→</span>
+        <Plus className="w-4 h-4" />
       </button>
 
-      {/* Bottom Corner Control: Add N boxes Below (next level) */}
+      {/* Bottom Corner Control: Add box Below (next level) */}
       <button
         type="button"
         onClick={(e) => {
           e.stopPropagation();
           onAddBelow();
         }}
-        title={`Add ${addBoxCount} box(es) below on Level ${node.level + 1}`}
-        className="themed-accent-btn absolute bottom-0 left-1/2 -translate-x-1/2 h-7 px-2.5 rounded-full bg-[#A47C43] hover:bg-[#8e6834] text-white shadow-md flex items-center justify-center text-[10px] font-bold cursor-pointer transition-transform hover:scale-110 z-20"
+        title={`Add box below on Level ${node.level + 1}`}
+        className="themed-accent-btn absolute bottom-0 left-1/2 -translate-x-1/2 w-7 h-7 rounded-full bg-[#A47C43] hover:bg-[#8e6834] text-white shadow-md flex items-center justify-center cursor-pointer transition-transform hover:scale-110 z-20"
+        aria-label="Add box below"
       >
-        <span>+{addBoxCount} ↓ Below</span>
+        <Plus className="w-4 h-4" />
       </button>
     </div>
   );

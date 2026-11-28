@@ -76,6 +76,10 @@ export type Book = {
   pagesCount?: number;
   thumbnail?: BookThumbnailConfig;
   mimeType?: string;
+  driveFileId?: string;
+  fileUrl?: string;
+  dataUrl?: string;
+  pdfFileUrl?: string;
 };
 
 export type ShelfFolder = {
